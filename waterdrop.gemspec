@@ -13,8 +13,8 @@ Gem::Specification.new do |spec|
   spec.summary       = %q{ }
   spec.description   = %q{ }
 
-  spec.add_development_dependency 'bundler'
-  spec.add_development_dependency 'rake'
+  spec.add_dependency 'bundler'
+  spec.add_dependency 'rake'
   spec.add_dependency 'aspector'
   spec.add_dependency 'poseidon'
 
