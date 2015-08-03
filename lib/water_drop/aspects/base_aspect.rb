@@ -1,4 +1,5 @@
 module WaterDrop
+  # Aspects module which include all available aspects
   module Aspects
     # Base class for all aspects
     class BaseAspect < ::Aspector::Base
@@ -6,7 +7,7 @@ module WaterDrop
 
       # @param this is an instance on which we execute aspect (original method caller)
       # @param [Hash] aspect options
-      # @param [Array] originam method arguments
+      # @param [Array] original method arguments
       # @param [Block] block which we evaluate to get a message that we will send
       # @param original method result
       def handle(this, options, args, message, *result)

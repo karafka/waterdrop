@@ -5,7 +5,14 @@ module WaterDrop
       attr_accessor :config
     end
 
-    # Available config options
+    # Available options
+    # @option connection_pool_size [Fixnum] The number of connections to pool.
+    # @option connection_pool_timeout [Fixnum] Amount of time in seconds to wait for a connection
+    #         if none currently available.
+    # @option kafka_ports [Array] the ports of kafka brokers
+    # @option kafka_host [String] the host of kafka server
+    # @option send_events [Boolean] boolean value to define whether events should be sent
+    #
     OPTIONS = %i(
       connection_pool_size
       connection_pool_timeout

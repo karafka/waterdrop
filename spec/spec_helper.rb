@@ -6,7 +6,7 @@ require 'simplecov'
 require 'rake'
 require 'logger'
 
-ENV['ASPECTOR_LOG_LEVEL'] = ::Logger::WARN.to_s
+# ENV['ASPECTOR_LOG_LEVEL'] = ::Logger::WARN.to_s
 ENV['RACK_ENV'] ||= 'test'
 
 # Don't include unnecessary stuff into rcov
