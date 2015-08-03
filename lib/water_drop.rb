@@ -35,7 +35,7 @@ module WaterDrop
     end
 
     # Sets up the whole configuration
-    # @param [Block] configuration block
+    # @param [Block] block configuration block
     def setup(&block)
       Config.setup(&block)
     end
