@@ -54,4 +54,4 @@ WaterDrop.setup do |config|
   config.send_events = true
 end
 
-WaterDrop::Event.new('topic', 'message').send!
+# WaterDrop::Event.new('topic', 'message').send!
