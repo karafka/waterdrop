@@ -7,6 +7,7 @@
   pathname
   poseidon
   aspector
+  forwardable
   connection_pool
 ).each { |lib| require lib }
 
@@ -30,11 +31,11 @@ module WaterDrop
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger || ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
+      @logger ||= ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
     end
 
     # Sets up the whole configuration
-    # @param [Block] configuration block
+    # @param [Block] block configuration block
     def setup(&block)
       Config.setup(&block)
     end
@@ -45,13 +46,3 @@ module WaterDrop
     end
   end
 end
-
-WaterDrop.setup do |config|
-  config.connection_pool_size = 20
-  config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = '172.17.0.4'
-  config.send_events = true
-end
-
-WaterDrop::Event.new('topic', 'message').send!
