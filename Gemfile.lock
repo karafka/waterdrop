@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/polishgeeks/polishgeeks-dev-tools.git
-  revision: 0ecf33a8cee0a056b1468d6b030a423546dc2794
+  revision: 255f2777e3a140c077b323270530f8725a30ff90
   specs:
     polishgeeks-dev-tools (1.0.0)
       brakeman
@@ -194,3 +194,6 @@ DEPENDENCIES
   aspector
   polishgeeks-dev-tools!
   poseidon
+
+BUNDLED WITH
+   1.10.6

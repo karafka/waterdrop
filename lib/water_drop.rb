@@ -31,7 +31,7 @@ module WaterDrop
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger || ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
+      @logger ||= ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
     end
 
     # Sets up the whole configuration
