@@ -83,7 +83,7 @@ All the WaterDrop aspects accept following parameters:
 | method: :method_name    | Symbol, Array<Symbol> | Method (or methods) to which we want to hook |
 | topic: 'karafka_topic'  | String, Symbol        | Kafka topic to which we will send the event  |
 
-There also a *message*, *after_message* and *before_message* proc parameter that will be avaluated in the methods object context.
+There also a *message*, *after_message* and *before_message* proc parameter that will be evaluated in the methods object context.
 
 #### Before aspects hookup
 

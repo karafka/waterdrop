@@ -7,6 +7,7 @@
   pathname
   poseidon
   aspector
+  forwardable
   connection_pool
 ).each { |lib| require lib }
 
