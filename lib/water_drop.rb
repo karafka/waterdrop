@@ -3,6 +3,7 @@
   rake
   rubygems
   bundler
+  logger
   pathname
   poseidon
   aspector
@@ -24,28 +25,24 @@
 
 # WaterDrop library
 module WaterDrop
-  # @param [Logger] logger that we want to use
-  # @return [Logger] assigned logger
-  # Assignes new logger
-  # @note We don't have any logger by default
-  def self.logger=(logger)
-    @logger = logger
-  end
+  class << self
+    attr_writter :logger
 
-  # @return [Logger] logger that we want to use
-  def self.logger
-    @logger
-  end
+    # @return [Logger] logger that we want to use
+    def logger
+      @logger || ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
+    end
 
-  # Sets up the whole configuration
-  # @param [Block] configuration block
-  def self.setup(&block)
-    Config.setup(&block)
-  end
+    # Sets up the whole configuration
+    # @param [Block] configuration block
+    def setup(&block)
+      Config.setup(&block)
+    end
 
-  # @return [WaterDrop::Config] config instance
-  def self.config
-    Config.config
+    # @return [WaterDrop::Config] config instance
+    def config
+      Config.config
+    end
   end
 end
 
