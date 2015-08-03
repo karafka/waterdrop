@@ -46,13 +46,3 @@ module WaterDrop
     end
   end
 end
-
-WaterDrop.setup do |config|
-  config.connection_pool_size = 20
-  config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = '172.17.0.4'
-  config.send_events = true
-end
-
-# WaterDrop::Event.new('topic', 'message').send!
