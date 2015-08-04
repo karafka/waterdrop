@@ -17,6 +17,7 @@
   pool
   config
   event
+  null_logger
   aspects/base_aspect
   aspects/formatter
   aspects/after_aspect
@@ -31,7 +32,7 @@ module WaterDrop
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger ||= ::Logger.new(STDOUT).tap { |log| log.level = Logger::FATAL }
+      @logger ||= NullLogger
     end
 
     # Sets up the whole configuration
