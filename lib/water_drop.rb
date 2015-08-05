@@ -12,18 +12,21 @@
 ).each { |lib| require lib }
 
 # Internal components
+
+base_path = File.dirname(__FILE__) + '/water_drop'
+
 %w(
   version
   pool
   config
   event
-  null_logger
+  logger
   aspects/base_aspect
   aspects/formatter
   aspects/after_aspect
   aspects/around_aspect
   aspects/before_aspect
-).each { |lib| require "water_drop/#{lib}" }
+).each { |lib| require "#{base_path}/#{lib}" }
 
 # WaterDrop library
 module WaterDrop
@@ -32,7 +35,7 @@ module WaterDrop
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger ||= NullLogger
+      @logger ||= Logger.new
     end
 
     # Sets up the whole configuration

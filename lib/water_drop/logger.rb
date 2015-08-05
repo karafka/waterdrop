@@ -1,9 +1,9 @@
 module WaterDrop
-  # Null object for logger
+  # Null logger for karafka
   # Is used when logger is not defined
-  class NullLogger
+  class Logger
     # Returns nil for any method call
-    def self.method_missing(*_args, &_block)
+    def method_missing(*_args, &_block)
       nil
     end
   end
