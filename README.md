@@ -90,7 +90,7 @@ There also a *message*, *after_message* and *before_message* proc parameter that
 #### Before aspects hookup
 
 ```ruby
-WaterDrop::Aspects::AfterAspect.apply(
+WaterDrop::Aspects::BeforeAspect.apply(
   ClassName,
   method: :run,
   topic: 'karafka_topic',
@@ -128,7 +128,7 @@ an event with the given message will be send to Kafka.
 #### Around aspects hookup
 
 ```ruby
-WaterDrop::Aspects::BeforeAspect.apply(
+WaterDrop::Aspects::AroundAspect.apply(
   ClassName,
   method: :run,
   topic: 'karafka_topic',
