@@ -5,6 +5,7 @@
   bundler
   logger
   pathname
+  json
   poseidon
   aspector
   forwardable
