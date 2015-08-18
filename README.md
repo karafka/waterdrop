@@ -1,6 +1,7 @@
 # WaterDrop
 
 [![Build Status](https://travis-ci.org/karafka/waterdrop.png)](https://travis-ci.org/karafka/waterdrop)
+[![Code Climate](https://codeclimate.com/github/karafka/waterdrop/badges/gpa.svg)](https://codeclimate.com/github/karafka/waterdrop)
 
 Gem used to send events to Kafka in a standard and in an aspect way.
 
