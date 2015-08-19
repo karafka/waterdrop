@@ -5,8 +5,7 @@ RSpec.describe WaterDrop::Aspects::AroundAspect do
 
   describe 'aspect hook' do
     let(:klass) do
-      # Test class to hook aspect
-      class AroundTest
+      ClassBuilder.build do
         attr_accessor :instance_variable
         def run(*_args)
           @instance_variable = 5
@@ -17,8 +16,6 @@ RSpec.describe WaterDrop::Aspects::AroundAspect do
           puts 'method_call'
           2390
         end
-
-        self
       end
     end
 
