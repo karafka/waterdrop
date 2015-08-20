@@ -2,7 +2,7 @@ module WaterDrop
   module Aspects
     # Around method execution aspect
     # @example Apply around aspect to a method
-    #   WaterDrop::Aspects::BeforeAspect.apply(
+    #   WaterDrop::Aspects::AroundAspect.apply(
     #     ClassName,
     #     method: :run,
     #     topic: 'karafka_topic',
