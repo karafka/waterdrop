@@ -7,19 +7,16 @@ RSpec.describe WaterDrop::Aspects::AfterAspect do
     let(:delegate) { double }
     let(:formatter) { double }
     let(:klass) do
-      # Test class to hook aspect
-      class Test
+      ClassBuilder.build do
         attr_accessor :instance_variable
         def run(*_args)
           @instance_variable = 5
         end
 
-        def run2(*_args)
+        def call(*_args)
           @instance_variable = 5
           5780
         end
-
-        self
       end
     end
 
@@ -58,14 +55,14 @@ RSpec.describe WaterDrop::Aspects::AfterAspect do
       let(:message_with_parameter) do
         ->(result) { puts result.inspect }
       end
-      let(:options) { { method: :run2, topic: 'topic4', message: message_with_parameter } }
+      let(:options) { { method: :call, topic: 'topic4', message: message_with_parameter } }
 
       it 'hooks to given klass and get result of function execution' do
-        described_class.apply(klass, method: :run2,
+        described_class.apply(klass, method: :call,
                                      topic: 'topic4',
                                      message: message_with_parameter)
         expect(message_with_parameter).to receive(:call).with(5780)
-        @instance.run2('arg')
+        @instance.call('arg')
       end
     end
   end

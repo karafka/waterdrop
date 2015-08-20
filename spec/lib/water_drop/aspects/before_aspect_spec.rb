@@ -5,14 +5,11 @@ RSpec.describe WaterDrop::Aspects::BeforeAspect do
 
   describe 'aspect hook' do
     let(:klass) do
-      # Test class to hook aspect
-      class BeforeTest
+      ClassBuilder.build do
         attr_accessor :instance_variable
         def run(*_args)
           @instance_variable = 5
         end
-
-        self
       end
     end
 
@@ -25,6 +22,7 @@ RSpec.describe WaterDrop::Aspects::BeforeAspect do
     let(:delegate) { double }
     let(:options) { { method: :run, topic: 'before_topic', message: message } }
     let(:formatter) { double }
+
     it 'hooks to a given klass' do
       described_class.apply(klass, method: :run,
                                    topic: 'before_topic',
