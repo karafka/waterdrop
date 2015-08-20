@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
   spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com )
-  spec.homepage      = ''
+  spec.homepage      = 'https://github.com/karafka/waterdrop'
   spec.summary       = %q{ Kafka events with aspects made easy! }
   spec.description   = spec.summary
   spec.license       = 'MIT'
