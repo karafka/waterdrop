@@ -27,4 +27,4 @@ RSpec.configure do |config|
   end
 end
 
-require 'water_drop'
+require 'waterdrop'
