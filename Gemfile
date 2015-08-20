@@ -1,4 +1,7 @@
 source 'https://rubygems.org'
-gem 'poseidon'
-gem 'aspector'
-gem 'polishgeeks-dev-tools'
+
+gemspec
+
+group :development, :test do
+  gem 'polishgeeks-dev-tools'
+end

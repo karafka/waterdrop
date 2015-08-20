@@ -18,6 +18,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rake', '>= 0'
   spec.add_dependency 'aspector', '>= 0'
   spec.add_dependency 'poseidon', '>= 0'
+  spec.add_dependency 'connection_pool', '>= 0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
