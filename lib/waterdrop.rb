@@ -13,7 +13,6 @@
 ).each { |lib| require lib }
 
 # Internal components
-
 base_path = File.dirname(__FILE__) + '/water_drop'
 
 %w(
