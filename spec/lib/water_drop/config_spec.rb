@@ -15,13 +15,13 @@ RSpec.describe WaterDrop::Config do
   end
 
   describe '#send_messages?' do
-    context 'when we dont want to send events' do
+    context 'when we dont want to send messages' do
       before { subject.send_messages = false }
 
       it { expect(subject.send_messages?).to eq false }
     end
 
-    context 'whe we want to send events' do
+    context 'whe we want to send messages' do
       before { subject.send_messages = true }
 
       it { expect(subject.send_messages?).to eq true }
