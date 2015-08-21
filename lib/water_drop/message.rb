@@ -1,25 +1,25 @@
 module WaterDrop
-  # Event module which encapsulate single Kafka event logic and its delivery
-  class Event
+  # Message class which encapsulate single Kafka message logic and its delivery
+  class Message
     attr_reader :topic, :message
 
     # @param topic [String, Symbol] a topic to which we want to send a message
     # @param message [Object] any object that can be serialized to a JSON string or
     #   that can be casted to a string
-    # @return [WaterDrop::Event] WaterDrop event instance
-    # @example Creating a new event
-    #   WaterDrop::Event.new(topic, message)
+    # @return [WaterDrop::Message] WaterDrop message instance
+    # @example Creating a new message
+    #   WaterDrop::Message.new(topic, message)
     def initialize(topic, message)
       @topic = topic.to_s
       @message = message.respond_to?(:to_json) ? message.to_json : message.to_s
     end
 
-    # Sents a current event to Kafka
-    # @note Won't send any events if send_events config flag is set to false
+    # Sents a current message to Kafka
+    # @note Won't send any messages if send_messages config flag is set to false
     # @example Set a message
-    #   WaterDrop::Event.new(topic, message).send!
+    #   WaterDrop::Message.new(topic, message).send!
     def send!
-      return true unless ::WaterDrop.config.send_events?
+      return true unless ::WaterDrop.config.send_messages?
 
       Pool.with do |producer|
         producer.send_messages([

@@ -22,12 +22,12 @@ RSpec.describe WaterDrop do
   describe '#setup' do
     before do
       WaterDrop.setup do |config|
-        config.send_events = true
+        config.send_messages = true
       end
     end
 
     it 'sets up the configuration' do
-      expect(WaterDrop.config.send_events).to eq(true)
+      expect(WaterDrop.config.send_messages).to eq(true)
     end
   end
 end

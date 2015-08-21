@@ -33,7 +33,7 @@ RSpec.describe WaterDrop::Aspects::BeforeAspect do
         .and_return(formatter)
 
       allow(formatter).to receive(:message) { 'msg' }
-      expect(WaterDrop::Event)
+      expect(WaterDrop::Message)
         .to receive(:new).with(options[:topic], formatter.message).and_return(delegate)
       expect(delegate).to receive(:send!)
       expect(instance).to receive(:puts).with('98')

@@ -11,14 +11,14 @@ module WaterDrop
     #         if none currently available.
     # @option kafka_ports [Array] the ports of kafka brokers
     # @option kafka_host [String] the host of kafka server
-    # @option send_events [Boolean] boolean value to define whether events should be sent
+    # @option send_messages [Boolean] boolean value to define whether messages should be sent
     #
     OPTIONS = %i(
       connection_pool_size
       connection_pool_timeout
       kafka_ports
       kafka_host
-      send_events
+      send_messages
     )
 
     OPTIONS.each do |attr_name|

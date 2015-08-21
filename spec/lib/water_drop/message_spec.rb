@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe WaterDrop::Event do
+RSpec.describe WaterDrop::Message do
   let(:topic) { double }
   let(:message) { [] }
   let(:producer) { double }
@@ -13,7 +13,7 @@ RSpec.describe WaterDrop::Event do
 
     before do
       allow(WaterDrop)
-        .to receive_message_chain(:config, :send_events?)
+        .to receive_message_chain(:config, :send_messages?)
         .and_return(true)
 
       expect(WaterDrop::Pool).to receive(:with).and_yield(producer)

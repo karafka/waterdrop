@@ -17,7 +17,7 @@ module WaterDrop
           instance_run(this, result, message)
         )
 
-        Event.new(options[:topic], formatter.message).send!
+        Message.new(options[:topic], formatter.message).send!
       end
 
       private

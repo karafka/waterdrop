@@ -19,8 +19,8 @@ base_path = File.dirname(__FILE__) + '/water_drop'
   version
   pool
   config
-  event
   logger
+  message
   aspects/base_aspect
   aspects/formatter
   aspects/after_aspect
