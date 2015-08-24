@@ -15,6 +15,7 @@ module WaterDrop
         interception.aspect.handle(self, options, args, options[:before_message])
         result = proxy.call(*args, &block)
         interception.aspect.handle(self, options, args, options[:after_message], result)
+        result
       end
     end
   end

@@ -8,8 +8,8 @@ RSpec.describe WaterDrop::Aspects::AroundAspect do
       ClassBuilder.build do
         attr_accessor :instance_variable
         def run(*_args)
-          @instance_variable = 5
           puts 'method_call'
+          @instance_variable = 5
         end
 
         def run_another(*_args)
@@ -67,7 +67,7 @@ RSpec.describe WaterDrop::Aspects::AroundAspect do
                              )
 
         expect(@instance).to receive(:puts).with('5').ordered
-        @instance.run('arg')
+        expect(@instance.run('arg')).to eq(5)
       end
     end
 
@@ -90,7 +90,7 @@ RSpec.describe WaterDrop::Aspects::AroundAspect do
                                      after_message: message_with_parameter
                              )
         expect(message_with_parameter).to receive(:call).with(2390).ordered
-        @instance.run_another('arg')
+        expect(@instance.run_another('arg')).to eq(2390)
       end
     end
   end
