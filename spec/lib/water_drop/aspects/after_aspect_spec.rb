@@ -47,7 +47,7 @@ RSpec.describe WaterDrop::Aspects::AfterAspect do
                                      topic: 'topic',
                                      message: message)
         expect(@instance).to receive(:puts).with('5')
-        @instance.run('arg')
+        expect(@instance.run('arg')).to eq(5)
       end
     end
 
@@ -62,7 +62,7 @@ RSpec.describe WaterDrop::Aspects::AfterAspect do
                                      topic: 'topic4',
                                      message: message_with_parameter)
         expect(message_with_parameter).to receive(:call).with(5780)
-        @instance.call('arg')
+        expect(@instance.call('arg')).to eq(5780)
       end
     end
   end
