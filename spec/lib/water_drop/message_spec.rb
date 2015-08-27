@@ -11,18 +11,54 @@ RSpec.describe WaterDrop::Message do
     let(:message_producer) { double }
     let(:messages) { double }
 
-    before do
-      allow(WaterDrop)
-        .to receive_message_chain(:config, :send_messages?)
-        .and_return(true)
+    context 'when everything is ok' do
+      before do
+        allow(WaterDrop)
+          .to receive_message_chain(:config, :send_messages?)
+          .and_return(true)
 
-      expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
-      expect(producer).to receive(:send_messages)
-        .with(any_args)
+        expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
+        expect(producer).to receive(:send_messages)
+          .with(any_args)
+      end
+
+      it 'sends message with topic and message' do
+        subject.send!
+      end
     end
 
-    it 'sends message with topic and message' do
-      subject.send!
+    described_class::CATCHED_ERRORS.each do |error|
+      let(:config) do
+        double(
+          raise_on_failure?: raise_on_failure,
+          send_messages?: true
+        )
+      end
+
+      context "when #{error} happens" do
+        before do
+          expect(::WaterDrop)
+            .to receive(:config)
+            .and_return(config)
+            .exactly(2).times
+
+          expect(::WaterDrop::Pool)
+            .to receive(:with)
+            .and_raise(error)
+        end
+
+        context 'and raise_on_failure is set to false' do
+          let(:raise_on_failure) { false }
+
+          it { expect { subject.send! }.not_to raise_error }
+        end
+
+        context 'and raise_on_failure is set to true' do
+          let(:raise_on_failure) { true }
+
+          it { expect { subject.send! }.to raise_error(error) }
+        end
+      end
     end
   end
 end

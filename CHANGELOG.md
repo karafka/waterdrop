@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.1.5
+- raise_on_failure flag to ignore (if false) that message was not sent
+
 ## 0.1.4
 - Renamed WaterDrop::Event to WaterDrop::Message to follow Apache Kafka naming convention
 
