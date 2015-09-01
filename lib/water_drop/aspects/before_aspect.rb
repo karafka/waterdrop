@@ -11,7 +11,7 @@ module WaterDrop
     class BeforeAspect < BaseAspect
       before options[:method], interception_arg: true do |interception, *args|
         options = interception.options
-        ::WaterDrop.logger.debug("BeforeAspect message was applied before #{self.class.name} class")
+        interception.aspect.log(self, options)
         interception.aspect.handle(self, options, args, options[:message])
       end
     end

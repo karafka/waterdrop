@@ -20,6 +20,25 @@ module WaterDrop
         Message.new(options[:topic], formatter.message).send!
       end
 
+      # @param this is an instance on which we execute aspect (original method caller)
+      # @param [Hash] options aspect options
+      # @param [String, Symbol] position where aspect was applied (before, after)
+      # @example
+      #   If we apply aspect to Calculator.sum method in different ways(AroundAspect, BeforeAspect)
+      #
+      #   interception.aspect.log(self, options) will print
+      #   WaterDrop::Aspects::BeforeAspect message was applied to Calculator.sum method
+      #
+      #   interception.aspect.log(self, options, :before) will print
+      #   WaterDrop::Aspects::AroundAspect before_message was applied to Calculator.sum method
+      def log(this, options, *position)
+        method = "#{this.class.name}.#{options[:method]}"
+        prefix = "#{position.first}_" unless position.empty?
+        aspect = self.class.name
+
+        ::WaterDrop.logger.debug("#{aspect} #{prefix}message was applied to #{method} method")
+      end
+
       private
 
       # Method used to change message block binding, so it will be evaluated
