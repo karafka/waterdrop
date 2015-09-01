@@ -12,6 +12,7 @@ module WaterDrop
       after options[:method], interception_arg: true do |interception, result, *args|
         options = interception.options
         interception.aspect.handle(self, options, args, options[:message], result)
+        ::WaterDrop.logger.debug("AfterAspect message was applied after #{self.class.name} class")
         result
       end
     end
