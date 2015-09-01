@@ -12,10 +12,8 @@ module WaterDrop
     class AroundAspect < BaseAspect
       around options[:method], interception_arg: true do |interception, proxy, *args, &block|
         options = interception.options
-        interception.aspect.log(self, options, :before)
         interception.aspect.handle(self, options, args, options[:before_message])
         result = proxy.call(*args, &block)
-        interception.aspect.log(self, options, :after)
         interception.aspect.handle(self, options, args, options[:after_message], result)
         result
       end
