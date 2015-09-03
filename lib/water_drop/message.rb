@@ -32,10 +32,13 @@ module WaterDrop
           Poseidon::MessageToSend.new(topic, message)
         ])
       end
+      ::WaterDrop.logger.info("Message #{message} was sent to topic '#{topic}'")
     rescue *CATCHED_ERRORS => e
       # Reraise if we want to raise on failure
       # Ignore if we dont want to know that something went wrong
-      raise(e) if ::WaterDrop.config.raise_on_failure?
+      return unless ::WaterDrop.config.raise_on_failure?
+      ::WaterDrop.logger.fatal(e)
+      raise(e)
     end
   end
 end
