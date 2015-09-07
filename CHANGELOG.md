@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.1.6
+- Added null-logger gem
+
 ## 0.1.5
 - raise_on_failure flag to ignore (if false) that message was not sent
 

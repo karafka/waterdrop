@@ -10,6 +10,7 @@
   aspector
   forwardable
   connection_pool
+  null_logger
 ).each { |lib| require lib }
 
 # Internal components
@@ -19,7 +20,6 @@ base_path = File.dirname(__FILE__) + '/water_drop'
   version
   pool
   config
-  logger
   message
   aspects/base_aspect
   aspects/formatter
@@ -35,7 +35,7 @@ module WaterDrop
 
     # @return [Logger] logger that we want to use
     def logger
-      @logger ||= Logger.new
+      @logger ||= NullLogger.new
     end
 
     # Sets up the whole configuration
