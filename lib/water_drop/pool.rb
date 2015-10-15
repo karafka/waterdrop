@@ -12,11 +12,10 @@ module WaterDrop
           size: ::WaterDrop.config.connection_pool_size,
           timeout: ::WaterDrop.config.connection_pool_timeout
         ) do
-          addresses = ::WaterDrop.config.kafka_ports.map do |port|
-            "#{::WaterDrop.config.kafka_host}:#{port}"
-          end
-
-          Poseidon::Producer.new(addresses, object_id.to_s)
+          Poseidon::Producer.new(
+            ::WaterDrop.config.kafka_hosts,
+            object_id.to_s
+          )
         end
       end
     end
