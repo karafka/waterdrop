@@ -30,8 +30,7 @@ RSpec.describe WaterDrop::Pool do
     let(:config) { double }
     let(:connection_pool_size) { double }
     let(:connection_pool_timeout) { double }
-    let(:host) { double }
-    let(:ports) { double }
+    let(:hosts) { ["#{double}:#{double}"] }
     let(:port) { double }
     let(:application) { double }
     let(:addresses) { double }
@@ -40,19 +39,11 @@ RSpec.describe WaterDrop::Pool do
       expect(::WaterDrop::Config)
         .to receive(:config)
         .and_return(config)
-        .exactly(4).times
+        .exactly(3).times
 
       expect(config)
-        .to receive(:kafka_ports)
-        .and_return(ports)
-
-      expect(ports)
-        .to receive(:map)
-        .and_yield(port)
-
-      expect(config)
-        .to receive(:kafka_host)
-        .and_return(host)
+        .to receive(:kafka_hosts)
+        .and_return(hosts)
 
       expect(config)
         .to receive(:connection_pool_timeout)

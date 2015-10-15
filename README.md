@@ -31,8 +31,7 @@ WaterDrop has following configuration options:
 | Option                  | Value type    | Description                      |
 |-------------------------|---------------|----------------------------------|
 | send_messages           | Boolean       | Should we send messages to Kafka |
-| kafka_host              | String        | Kafka server host                |
-| kafka_ports             | Array<String> | Kafka server ports               |
+| kafka_hosts             | Array<String> | Kafka servers hosts with ports   |
 | connection_pool_size    | Integer       | Kafka connection pool size       |
 | connection_pool_timeout | Integer       | Kafka connection pool timeout    |
 | raise_on_failure        | Boolean       | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures (will just ignore them) |
@@ -44,8 +43,7 @@ WaterDrop.setup do |config|
   config.send_messages = true
   config.connection_pool_size = 20
   config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = 'localhost'
+  config.kafka_hosts = ['localhost:9092']
   config.raise_on_failure = true
 end
 ```
@@ -57,8 +55,7 @@ WaterDrop.setup do |config|
   config.send_messages = Rails.env.production?
   config.connection_pool_size = 20
   config.connection_pool_timeout = 1
-  config.kafka_ports = %w( 9092 )
-  config.kafka_host = Rails.env.production? ? 'prod-host' : 'localhost'
+  config.kafka_hosts = [Rails.env.production? ? 'prod-host:9091' : 'localhost:9092']
   config.raise_on_failure = Rails.env.production?
 end
 ```

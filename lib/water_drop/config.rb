@@ -9,15 +9,13 @@ module WaterDrop
     # @option connection_pool_size [Fixnum] The number of connections to pool.
     # @option connection_pool_timeout [Fixnum] Amount of time in seconds to wait for a connection
     #         if none currently available.
-    # @option kafka_ports [Array] the ports of kafka brokers
-    # @option kafka_host [String] the host of kafka server
+    # @option kafka_hosts [Array<String>] Array that contains Kafka hosts with ports
     # @option send_messages [Boolean] boolean value to define whether messages should be sent
     # @option raise_on_failure [Boolean] Should raise error when failed to deliver a message
     OPTIONS = %i(
       connection_pool_size
       connection_pool_timeout
-      kafka_ports
-      kafka_host
+      kafka_hosts
       send_messages
       raise_on_failure
     )
