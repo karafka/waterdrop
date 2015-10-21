@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.1.8
+- proper poseidon clients names (not duplicated)
+
 ## 0.1.7
 - kafka_host, kafka_hosts and kafka_ports settings consistency fix
 

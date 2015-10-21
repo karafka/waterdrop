@@ -14,7 +14,7 @@ module WaterDrop
         ) do
           Poseidon::Producer.new(
             ::WaterDrop.config.kafka_hosts,
-            object_id.to_s
+            object_id.to_s + rand.to_s + Time.now.to_f.to_s
           )
         end
       end

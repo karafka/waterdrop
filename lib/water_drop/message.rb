@@ -34,10 +34,11 @@ module WaterDrop
       end
       ::WaterDrop.logger.info("Message #{message} was sent to topic '#{topic}'")
     rescue *CATCHED_ERRORS => e
+      # Even if we dont reraise this exception, it should log that it happened
+      ::WaterDrop.logger.fatal(e)
       # Reraise if we want to raise on failure
       # Ignore if we dont want to know that something went wrong
       return unless ::WaterDrop.config.raise_on_failure?
-      ::WaterDrop.logger.fatal(e)
       raise(e)
     end
   end
