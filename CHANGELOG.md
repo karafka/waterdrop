@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+## 0.1.9
+- Required acks and set to - (most secure but slower)
+- Added a proxu layer to to producer so we could replate Kafka with other messaging systems
+- Gem dump
+
 ## 0.1.8
 - proper poseidon clients names (not duplicated)
 

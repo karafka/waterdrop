@@ -12,10 +12,7 @@ module WaterDrop
           size: ::WaterDrop.config.connection_pool_size,
           timeout: ::WaterDrop.config.connection_pool_timeout
         ) do
-          Poseidon::Producer.new(
-            ::WaterDrop.config.kafka_hosts,
-            object_id.to_s + rand.to_s + Time.now.to_f.to_s
-          )
+          WaterDrop::ProducerProxy.new
         end
       end
     end

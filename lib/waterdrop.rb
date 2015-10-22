@@ -18,6 +18,7 @@ base_path = File.dirname(__FILE__) + '/water_drop'
 
 %w(
   version
+  producer_proxy
   pool
   config
   message
