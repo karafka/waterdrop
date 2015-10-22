@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## 0.1.9
-- Required acks and set to - (most secure but slower)
+- Required acks and set to -1 (most secure but slower)
 - Added a proxu layer to to producer so we could replate Kafka with other messaging systems
 - Gem dump
 
