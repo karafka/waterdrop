@@ -27,11 +27,16 @@ module WaterDrop
     # @param messages [Array<Poseidon::MessageToSend>] array with messages that we want to send
     # @return [Boolean] were the messages send
     # @note Even if you send one message - it still needs to be in an array
+    # @note If something goes wrong it will assume that producer is corrupted and will try to
+    #   create a new one
     # @example Send 1 message
     #   ProducerProxy.new.send_messages([Poseidon::MessageToSend.new(topic, message)])
     def send_messages(messages)
       touch
       producer.send_messages(messages)
+    rescue StandardError => e
+      reload!
+      raise(e)
     end
 
     private

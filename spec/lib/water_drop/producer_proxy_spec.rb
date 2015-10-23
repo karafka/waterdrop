@@ -20,19 +20,41 @@ RSpec.describe WaterDrop::ProducerProxy do
     let(:producer) { double }
     let(:messages) { double }
 
-    it 'should touch and forward to producer' do
-      expect(subject)
-        .to receive(:touch)
-
+    before do
       expect(subject)
         .to receive(:producer)
         .and_return(producer)
 
-      expect(producer)
-        .to receive(:send_messages)
-        .with(messages)
+      expect(subject)
+        .to receive(:touch)
+    end
 
-      subject.send_messages(messages)
+    context 'when sending was successful (no errors)' do
+      it 'should touch and forward to producer' do
+        expect(producer)
+          .to receive(:send_messages)
+          .with(messages)
+
+        subject.send_messages(messages)
+      end
+    end
+
+    context 'when something went wrong' do
+      let(:error) { StandardError }
+
+      before do
+        expect(producer)
+          .to receive(:send_messages)
+          .with(messages)
+          .and_raise(error)
+      end
+
+      it 'should reload producer and reraise error' do
+        expect(subject)
+          .to receive(:reload!)
+
+        expect { subject.send_messages(messages) }.to raise_error(error)
+      end
     end
   end
 

@@ -1,7 +1,8 @@
 # WaterDrop changelog
 
-## Current master
+## 0.1.10
 - Switched raise_on_failure to ignore all StandardError failures (or not to), not just specific once
+- Reloading inside connection pool connection that seems to be broken (one that failed) - this should prevent from multiple issues (but not from single one) that are related to the connection
 
 ## 0.1.9
 - Required acks and set to -1 (most secure but slower)
