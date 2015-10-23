@@ -154,6 +154,8 @@ a message with the given message will be send before and after the method execut
 * [Sidekiq Glass](https://github.com/karafka/sidekiq-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Null Logger](https://github.com/karafka/null-logger)
+* [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
+* [WaterDrop Code Climate](https://codeclimate.com/github/karafka/waterdrop)
 
 ## Note on Patches/Pull Requests
 
