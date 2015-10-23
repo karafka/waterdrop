@@ -27,7 +27,7 @@ RSpec.describe WaterDrop::Message do
       end
     end
 
-    described_class::CATCHED_ERRORS.each do |error|
+    [StandardError].each do |error|
       let(:config) do
         double(
           raise_on_failure?: raise_on_failure,

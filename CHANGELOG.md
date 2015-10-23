@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Current master
+- Switched raise_on_failure to ignore all StandardError failures (or not to), not just specific once
+
 ## 0.1.9
 - Required acks and set to -1 (most secure but slower)
 - Added a proxu layer to to producer so we could replate Kafka with other messaging systems
