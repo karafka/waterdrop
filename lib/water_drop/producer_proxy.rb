@@ -9,6 +9,9 @@ module WaterDrop
     # send using it. After that time, we will recreate the connection
     LIFE_TIME = 5 * 60 #  5 minute
 
+    # If sending fails - how many times we should try with a new connection
+    MAX_SEND_RETRIES = 1
+
     # All default poseidon parameters that we want to use
     POSEIDON_PARAMS = {
       metadata_refresh_interval_ms: 5 * 60 * 1000, # 5 minutes
@@ -17,7 +20,7 @@ module WaterDrop
       required_acks: -1,
       # @see https://issues.apache.org/jira/browse/KAFKA-1494
       retry_backoff_ms: 1000,
-      max_send_retries: 5
+      max_send_retries: 3
     }
 
     # @return [WaterDrop::ProducerProxy] proxy object to Poseidon::Producer
@@ -25,6 +28,7 @@ module WaterDrop
     #   first used when we create it
     def initialize
       touch
+      @attempts = 0
     end
 
     # Sends messages to Kafka
@@ -40,7 +44,12 @@ module WaterDrop
       producer.send_messages(messages)
     rescue StandardError => e
       reload!
+
+      retry if (@attempts += 1) <= MAX_SEND_RETRIES
+
       raise(e)
+    ensure
+      @attempts = 0
     end
 
     private
