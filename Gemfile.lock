@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (0.1.10)
+    waterdrop (0.1.11)
       aspector
       bundler
       connection_pool

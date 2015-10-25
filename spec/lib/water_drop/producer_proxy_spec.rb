@@ -100,8 +100,7 @@ RSpec.describe WaterDrop::ProducerProxy do
           .with(
             ::WaterDrop.config.kafka_hosts,
             producer_id,
-            metadata_refresh_interval_ms: described_class::METADATA_REFRESH_INTERVAL * 1000,
-            required_acks: described_class::REQUIRED_ACKS
+            described_class::POSEIDON_PARAMS
           )
 
         subject.send :producer
@@ -124,8 +123,7 @@ RSpec.describe WaterDrop::ProducerProxy do
           .with(
             ::WaterDrop.config.kafka_hosts,
             producer_id,
-            metadata_refresh_interval_ms: described_class::METADATA_REFRESH_INTERVAL * 1000,
-            required_acks: described_class::REQUIRED_ACKS
+            described_class::POSEIDON_PARAMS
           )
 
         subject.send :producer

@@ -9,12 +9,16 @@ module WaterDrop
     # send using it. After that time, we will recreate the connection
     LIFE_TIME = 5 * 60 #  5 minute
 
-    # How often should we refresh meta data from Kafka
-    METADATA_REFRESH_INTERVAL = 5 * 60 # 5 minute
-
-    # @see https://kafka.apache.org/08/configuration.html
-    # Security level for producer
-    REQUIRED_ACKS = -1
+    # All default poseidon parameters that we want to use
+    POSEIDON_PARAMS = {
+      metadata_refresh_interval_ms: 5 * 60 * 1000, # 5 minutes
+      # @see https://kafka.apache.org/08/configuration.html
+      # Security level for producer
+      required_acks: -1,
+      # @see https://issues.apache.org/jira/browse/KAFKA-1494
+      retry_backoff_ms: 1000,
+      max_send_retries: 5
+    }
 
     # @return [WaterDrop::ProducerProxy] proxy object to Poseidon::Producer
     # @note To ignore @last_usage nil case - we just assume that it is being
@@ -53,8 +57,7 @@ module WaterDrop
       @producer ||= Poseidon::Producer.new(
         ::WaterDrop.config.kafka_hosts,
         producer_id,
-        metadata_refresh_interval_ms: METADATA_REFRESH_INTERVAL * 1000,
-        required_acks: REQUIRED_ACKS
+        POSEIDON_PARAMS
       )
     end
 
