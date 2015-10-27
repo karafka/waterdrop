@@ -10,6 +10,8 @@ module WaterDrop
     LIFE_TIME = 5 * 60 #  5 minute
 
     # If sending fails - how many times we should try with a new connection
+    # @note It works in a similar way to Poseidon internal max_send_retries option, but it will
+    #   create a new connection after failure (Poseidon tries to use the same one)
     MAX_SEND_RETRIES = 1
 
     # All default poseidon parameters that we want to use
@@ -20,7 +22,7 @@ module WaterDrop
       required_acks: -1,
       # @see https://issues.apache.org/jira/browse/KAFKA-1494
       retry_backoff_ms: 1000,
-      max_send_retries: 3
+      max_send_retries: 1
     }
 
     # @return [WaterDrop::ProducerProxy] proxy object to Poseidon::Producer
