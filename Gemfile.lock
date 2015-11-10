@@ -33,7 +33,7 @@ GEM
       descendants_tracker (~> 0.0.4)
       ice_nine (~> 0.11.0)
       thread_safe (~> 0.3, >= 0.3.1)
-    brakeman (3.1.1)
+    brakeman (3.1.2)
       erubis (~> 2.6)
       fastercsv (~> 1.5)
       haml (>= 3.0, < 5.0)
@@ -41,6 +41,7 @@ GEM
       multi_json (~> 1.2)
       ruby2ruby (>= 2.1.1, < 2.3.0)
       ruby_parser (~> 3.7.0)
+      safe_yaml
       sass (~> 3.0)
       slim (>= 1.3.6, < 4.0)
       terminal-table (~> 1.4)
@@ -81,10 +82,10 @@ GEM
     memoizable (0.4.2)
       thread_safe (~> 0.3, >= 0.3.1)
     method_source (0.8.2)
-    minitest (5.8.1)
+    minitest (5.8.2)
     mongo (2.1.2)
       bson (~> 3.0)
-    mongoid (5.0.0)
+    mongoid (5.0.1)
       activemodel (~> 4.0)
       mongo (~> 2.1)
       origin (~> 2.1)
@@ -98,7 +99,7 @@ GEM
     origin (2.1.1)
     parser (2.2.3.0)
       ast (>= 1.1, < 3.0)
-    polishgeeks-dev-tools (1.2.0)
+    polishgeeks-dev-tools (1.2.1)
       brakeman
       faker
       haml-lint
@@ -106,7 +107,7 @@ GEM
       pry
       rspec
       rubocop
-      rubycritic (= 1.2.1)
+      rubycritic
       shoulda
       simplecov
       timecop
@@ -120,7 +121,7 @@ GEM
       slop (~> 3.4)
     rainbow (2.0.0)
     rake (10.4.2)
-    reek (1.6.3)
+    reek (1.6.5)
       parser (~> 2.2.0.pre.7)
       rainbow (>= 1.99, < 3.0)
       unparser (~> 0.2.2)
@@ -137,25 +138,25 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.3.0)
     rspec-support (3.3.0)
-    rubocop (0.34.2)
+    rubocop (0.35.0)
       astrolabe (~> 1.3)
-      parser (>= 2.2.2.5, < 3.0)
+      parser (>= 2.2.3.0, < 3.0)
       powerpack (~> 0.1)
       rainbow (>= 1.99.1, < 3.0)
-      ruby-progressbar (~> 1.4)
+      ruby-progressbar (~> 1.7)
     ruby-progressbar (1.7.5)
     ruby2ruby (2.2.0)
       ruby_parser (~> 3.1)
       sexp_processor (~> 4.0)
-    ruby_parser (3.7.1)
+    ruby_parser (3.7.2)
       sexp_processor (~> 4.1)
-    rubycritic (1.2.1)
+    rubycritic (1.4.0)
       flay (= 2.4.0)
       flog (= 4.2.1)
       parser (>= 2.2.0, < 3.0)
-      reek (= 1.6.3)
-      ruby2ruby (>= 2.1.1, < 3.0)
+      reek (= 1.6.5)
       virtus (~> 1.0)
+    safe_yaml (1.0.4)
     sass (3.4.19)
     sexp_processor (4.6.0)
     shoulda (3.5.0)
