@@ -11,7 +11,7 @@ module WaterDrop
     #   WaterDrop::Message.new(topic, message)
     def initialize(topic, message)
       @topic = topic.to_s
-      @message = message.respond_to?(:to_json) ? message.to_json : message.to_s
+      @message = message
     end
 
     # Sents a current message to Kafka

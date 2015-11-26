@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 0.1.12
+- Removed default to_json casting because of binary/other data types incompatibility. This is an incompatibility. If you use WaterDrop, please add a proper casting method to places where you use it.
+- Gem dump
+
 ## 0.1.11
 - Poseidon options extractions and tweaks
 

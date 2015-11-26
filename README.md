@@ -69,9 +69,12 @@ To send Kafka messages, you don't need to use aspects, you can create and send m
 ```ruby
 message = WaterDrop::Message.new('topic', 'message')
 message.send!
+
+message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
+message.send!
 ```
 
-message that you want to send should be either castable to string or to json. If it can be casted to both, it will be casted to json.
+message that you want to send should be either binary or stringified (to_s, to_json, etc).
 
 ### Using aspects to handle messages
 
