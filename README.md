@@ -92,6 +92,7 @@ All the WaterDrop aspects accept following parameters:
 
 There also a *message*, *after_message* and *before_message* proc parameter that will be evaluated in the methods object context.
 
+**Note**: If you use waterdrop in aspect way, the message will be parsed to JSON as default. If you want to change this behaviour, you must override WaterDrop::Aspects::Formatter class.
 #### Before aspects hookup
 
 ```ruby
