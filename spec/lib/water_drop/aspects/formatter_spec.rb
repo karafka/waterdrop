@@ -12,10 +12,12 @@ RSpec.describe WaterDrop::Aspects::Formatter do
     it 'formats message to send' do
       expect(subject.message)
         .to eq(
-          topic: options[:topic],
-          method: options[:method],
-          message: result,
-          args: args
+          {
+            topic: options[:topic],
+            method: options[:method],
+            message: result,
+            args: args
+          }.to_json
         )
     end
   end

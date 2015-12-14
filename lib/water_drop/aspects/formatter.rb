@@ -11,14 +11,14 @@ module WaterDrop
         @result = result
       end
 
-      # @return [Hash] hash with formatted message that can be send
+      # @return [JSON] with formatted message that can be send
       def message
         {
           topic:  @options[:topic],
           method: @options[:method],
           message: @result,
           args: @args
-        }
+        }.to_json
       end
     end
   end

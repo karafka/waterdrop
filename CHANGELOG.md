@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.1.13
+- Resolved bug #15. When you use waterdrop in aspect way, message will be automatically parse to JSON.
+
 ## 0.1.12
 - Removed default to_json casting because of binary/other data types incompatibility. This is an incompatibility. If you use WaterDrop, please add a proper casting method to places where you use it.
 - Gem dump
