@@ -155,7 +155,7 @@ a message with the given message will be send before and after the method execut
 
 * [Karafka framework](https://github.com/karafka/karafka)
 * [Waterdrop](https://github.com/karafka/waterdrop)
-* [Sidekiq Glass](https://github.com/karafka/sidekiq-glass)
+* [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Null Logger](https://github.com/karafka/null-logger)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
