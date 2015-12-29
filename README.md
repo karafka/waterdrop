@@ -4,7 +4,7 @@
 [![Code Climate](https://codeclimate.com/github/karafka/waterdrop/badges/gpa.svg)](https://codeclimate.com/github/karafka/waterdrop)
 [![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
 
-Gem used to send messages to Kafka in a standard and in an aspect way.
+Gem used to send messages to Kafka in an easy way.
 
 ## Installation
 
@@ -64,7 +64,7 @@ end
 
 ### Creating and sending standard messages
 
-To send Kafka messages, you don't need to use aspects, you can create and send messages directly:
+To send Kafka messages, just create and send messages directly:
 
 ```ruby
 message = WaterDrop::Message.new('topic', 'message')
@@ -78,78 +78,7 @@ message that you want to send should be either binary or stringified (to_s, to_j
 
 ### Using aspects to handle messages
 
-WaterDrop uses [Aspector](https://github.com/gcao/aspector) to allow aspect oriented messages hookup. If you need extensive details about aspector usage, please refer to the [examples](https://github.com/gcao/aspector/tree/master/examples) directory of this project.
-
-In general aspects allows adding additional behavior to existing code without modifying the code itself. This way we can create and send messages, without "polluting" the business logic with it.
-
-All the WaterDrop aspects accept following parameters:
-
-| Option                  | Value type            | Description                                    |
-|-------------------------|-----------------------|------------------------------------------------|
-| ClassName               | Class                 | Class to which we want to hook                 |
-| method: :method_name    | Symbol, Array<Symbol> | Method (or methods) to which we want to hook   |
-| topic: 'karafka_topic'  | String, Symbol        | Kafka topic to which we will send the message  |
-
-There also a *message*, *after_message* and *before_message* proc parameter that will be evaluated in the methods object context.
-
-**Note**: If you use waterdrop in aspect way, the message will be parsed to JSON as default. If you want to change this behaviour, you must override WaterDrop::Aspects::Formatter class.
-#### Before aspects hookup
-
-```ruby
-WaterDrop::Aspects::BeforeAspect.apply(
-  ClassName,
-  method: :run,
-  topic: 'karafka_topic',
-  message: -> { any_class_name_instance_method }
-)
-```
-
-now each time before you run:
-
-```ruby
-ClassName.new.run
-```
-
-a message with the given message will be send to Kafka.
-
-#### After aspects hookup
-
-```ruby
-WaterDrop::Aspects::AfterAspect.apply(
-  ClassName,
-  method: :run,
-  topic: 'karafka_topic',
-  message: ->(result) { "This is result of method run: #{result}" }
-)
-```
-
-now each time after you run:
-
-```ruby
-ClassName.new.run
-```
-
-a message with the given message will be send to Kafka.
-
-#### Around aspects hookup
-
-```ruby
-WaterDrop::Aspects::AroundAspect.apply(
-  ClassName,
-  method: :run,
-  topic: 'karafka_topic',
-  before_message: -> { any_class_name_instance_method },
-  after_message: ->(result) { "This is result of method run: #{result}" }
-)
-```
-
-now each time you run:
-
-```ruby
-ClassName.new.run
-```
-
-a message with the given message will be send before and after the method execution.
+WaterDrop no longer depends on [Aspector](https://github.com/gcao/aspector). Please refer to [Aspector](https://github.com/gcao/aspector) documentation if you want to handle messaging in an aspect way.
 
 ## References
 
@@ -158,6 +87,7 @@ a message with the given message will be send before and after the method execut
 * [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Null Logger](https://github.com/karafka/null-logger)
+* [Aspector](https://github.com/gcao/aspector)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
 * [WaterDrop Code Climate](https://codeclimate.com/github/karafka/waterdrop)
 

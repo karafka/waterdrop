@@ -7,7 +7,6 @@
   pathname
   json
   poseidon
-  aspector
   forwardable
   connection_pool
   null_logger
@@ -22,11 +21,6 @@ base_path = File.dirname(__FILE__) + '/water_drop'
   pool
   config
   message
-  aspects/base_aspect
-  aspects/formatter
-  aspects/after_aspect
-  aspects/around_aspect
-  aspects/before_aspect
 ).each { |lib| require "#{base_path}/#{lib}" }
 
 # WaterDrop library

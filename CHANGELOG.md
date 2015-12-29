@@ -1,5 +1,11 @@
 # WaterDrop changelog
 
+## 0.2.0
+- Version dump - this WaterDrop version no longer relies on Aspector to work
+- #17 - Logger for Aspector - WaterDrop no longer depends on Aspector
+- #8 - add send date as a default value added to a message - wontfix. Should be implemented on a message level since WaterDrop just transports messages without adding additional stuff.
+- #11 - same as above
+
 ## 0.1.13
 - Resolved bug #15. When you use waterdrop in aspect way, message will be automatically parse to JSON.
 

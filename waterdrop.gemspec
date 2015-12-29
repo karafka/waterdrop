@@ -10,13 +10,12 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
   spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com )
   spec.homepage      = 'https://github.com/karafka/waterdrop'
-  spec.summary       = %q{ Kafka messages with aspects made easy! }
+  spec.summary       = %q{ Kafka messaging made easy! }
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
   spec.add_dependency 'bundler', '>= 0'
   spec.add_dependency 'rake', '>= 0'
-  spec.add_dependency 'aspector', '>= 0'
   spec.add_dependency 'poseidon', '>= 0'
   spec.add_dependency 'connection_pool', '>= 0'
   spec.add_dependency 'null-logger'
