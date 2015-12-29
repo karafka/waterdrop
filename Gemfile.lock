@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (0.1.13)
+    waterdrop (0.2.0)
       bundler
       connection_pool
       null-logger
