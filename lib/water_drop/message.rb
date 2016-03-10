@@ -22,9 +22,11 @@ module WaterDrop
       return true unless ::WaterDrop.config.send_messages?
 
       Pool.with do |producer|
-        producer.send_messages([
-          Poseidon::MessageToSend.new(topic, message)
-        ])
+        producer.send_messages(
+          [
+            Poseidon::MessageToSend.new(topic, message)
+          ]
+        )
       end
       ::WaterDrop.logger.info("Message #{message} was sent to topic '#{topic}'")
     rescue StandardError => e

@@ -23,7 +23,7 @@ module WaterDrop
       # @see https://issues.apache.org/jira/browse/KAFKA-1494
       retry_backoff_ms: 1000,
       max_send_retries: 1
-    }
+    }.freeze
 
     # @return [WaterDrop::ProducerProxy] proxy object to Poseidon::Producer
     # @note To ignore @last_usage nil case - we just assume that it is being

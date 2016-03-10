@@ -18,7 +18,7 @@ module WaterDrop
       kafka_hosts
       send_messages
       raise_on_failure
-    )
+    ).freeze
 
     OPTIONS.each do |attr_name|
       attr_accessor attr_name
