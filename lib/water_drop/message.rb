@@ -21,9 +21,7 @@ module WaterDrop
     def send!
       return true unless ::WaterDrop.config.send_messages?
 
-      Pool.with do |producer|
-        producer.send_message(self)
-      end
+      Pool.with { |producer| producer.send_message(self) }
 
       ::WaterDrop.logger.info("Message #{message} was sent to topic '#{topic}'")
     rescue StandardError => e
