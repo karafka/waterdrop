@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.3.0
+- Driver change from Poseidon (not maintained) to Ruby-Kafka
+
 ## 0.2.0
 - Version dump - this WaterDrop version no longer relies on Aspector to work
 - #17 - Logger for Aspector - WaterDrop no longer depends on Aspector

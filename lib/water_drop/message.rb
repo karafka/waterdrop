@@ -21,13 +21,8 @@ module WaterDrop
     def send!
       return true unless ::WaterDrop.config.send_messages?
 
-      Pool.with do |producer|
-        producer.send_messages(
-          [
-            Poseidon::MessageToSend.new(topic, message)
-          ]
-        )
-      end
+      Pool.with { |producer| producer.send_message(self) }
+
       ::WaterDrop.logger.info("Message #{message} was sent to topic '#{topic}'")
     rescue StandardError => e
       # Even if we dont reraise this exception, it should log that it happened
