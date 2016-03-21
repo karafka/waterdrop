@@ -18,7 +18,7 @@ RSpec.describe WaterDrop::Message do
           .and_return(true)
 
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
-        expect(producer).to receive(:send_messages)
+        expect(producer).to receive(:send_message)
           .with(any_args)
       end
 

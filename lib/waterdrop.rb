@@ -6,7 +6,7 @@
   logger
   pathname
   json
-  poseidon
+  kafka
   forwardable
   connection_pool
   null_logger

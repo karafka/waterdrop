@@ -1,5 +1,5 @@
 module WaterDrop
-  # Raw poseidon connection pool for WaterDrop messages delivery
+  # Raw Kafka producers connection pool for WaterDrop messages delivery
   module Pool
     extend SingleForwardable
     # Delegate directly to pool
