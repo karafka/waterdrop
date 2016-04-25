@@ -1,5 +1,11 @@
 # WaterDrop changelog
 
+## 0.3.1
+- Dev tools update
+- Gem update
+- Specs updates
+- File namming convention fix from waterdrop to water_drop + compatibility file
+
 ## 0.3.0
 - Driver change from Poseidon (not maintained) to Ruby-Kafka
 
