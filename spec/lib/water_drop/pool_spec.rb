@@ -10,17 +10,9 @@ RSpec.describe WaterDrop::Pool do
     let(:key) { rand }
 
     it 'delegates it to pool' do
-      expect(subject)
-        .to receive(:pool)
-        .and_return(pool)
-
-      expect(pool)
-        .to receive(:with)
-        .and_yield(producer)
-
-      expect(producer)
-        .to receive(:get)
-        .with(key)
+      expect(subject).to receive(:pool).and_return(pool)
+      expect(pool).to receive(:with).and_yield(producer)
+      expect(producer).to receive(:get).with(key)
 
       subject.with { |statsd| statsd.get(key) }
     end

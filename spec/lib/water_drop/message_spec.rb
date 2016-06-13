@@ -29,7 +29,8 @@ RSpec.describe WaterDrop::Message do
 
     [StandardError].each do |error|
       let(:config) do
-        double(
+        instance_double(
+          WaterDrop::Config,
           raise_on_failure?: raise_on_failure,
           send_messages?: true
         )

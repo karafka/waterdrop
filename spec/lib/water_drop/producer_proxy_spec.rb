@@ -15,7 +15,7 @@ RSpec.describe WaterDrop::ProducerProxy do
 
     describe '#send_message' do
       let(:producer) { double }
-      let(:message) { double(message: rand, topic: rand) }
+      let(:message) { instance_double(WaterDrop::Message, message: rand, topic: rand) }
 
       context 'when sending was successful (no errors)' do
         before do
@@ -33,8 +33,7 @@ RSpec.describe WaterDrop::ProducerProxy do
             .to receive(:produce)
             .with(message.message, topic: message.topic)
 
-          expect(producer)
-            .to receive(:deliver_messages)
+          expect(producer).to receive(:deliver_messages)
 
           subject.send_message(message)
         end
@@ -52,15 +51,15 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(subject)
             .to receive(:touch)
             .exactly(2).times
-        end
 
-        it 'expect to reload producer retry once and if fails again reraise error' do
           expect(producer)
             .to receive(:produce)
             .with(message.message, topic: message.topic)
             .and_raise(error)
             .exactly(2).times
+        end
 
+        it 'expect to reload producer retry once and if fails again reraise error' do
           expect(subject)
             .to receive(:reload!)
             .exactly(2).times
@@ -99,19 +98,18 @@ RSpec.describe WaterDrop::ProducerProxy do
       context 'when producer is dead' do
         let(:dead) { true }
 
-        it 'expect to reload and create producer' do
-          expect(subject)
-            .to receive(:reload!)
+        before do
+          expect(subject).to receive(:reload!)
 
           expect(Kafka)
             .to receive(:new)
             .with(
               seed_brokers: ::WaterDrop.config.kafka_hosts
             ).and_return(kafka)
+        end
 
-          expect(kafka)
-            .to receive(:producer)
-
+        it 'expect to reload and create producer' do
+          expect(kafka).to receive(:producer)
           subject.send :producer
         end
       end
@@ -119,7 +117,7 @@ RSpec.describe WaterDrop::ProducerProxy do
       context 'when producer is not dead' do
         let(:dead) { false }
 
-        it 'expect not to reload and create producer' do
+        before do
           expect(subject)
             .not_to receive(:reload!)
 
@@ -129,9 +127,10 @@ RSpec.describe WaterDrop::ProducerProxy do
               seed_brokers: ::WaterDrop.config.kafka_hosts
             )
             .and_return(kafka)
+        end
 
-          expect(kafka)
-            .to receive(:producer)
+        it 'expect not to reload and create producer' do
+          expect(kafka).to receive(:producer)
 
           subject.send :producer
         end
