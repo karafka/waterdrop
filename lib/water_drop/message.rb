@@ -6,6 +6,7 @@ module WaterDrop
     # @param topic [String, Symbol] a topic to which we want to send a message
     # @param message [Object] any object that can be serialized to a JSON string or
     #   that can be casted to a string
+    # @param options [Hash] (optional) additonal options to pass to the Kafka producer
     # @return [WaterDrop::Message] WaterDrop message instance
     # @example Creating a new message
     #   WaterDrop::Message.new(topic, message)
