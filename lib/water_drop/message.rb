@@ -1,17 +1,19 @@
 module WaterDrop
   # Message class which encapsulate single Kafka message logic and its delivery
   class Message
-    attr_reader :topic, :message
+    attr_reader :topic, :message, :options
 
     # @param topic [String, Symbol] a topic to which we want to send a message
     # @param message [Object] any object that can be serialized to a JSON string or
     #   that can be casted to a string
+    # @param options [Hash] (optional) additonal options to pass to the Kafka producer
     # @return [WaterDrop::Message] WaterDrop message instance
     # @example Creating a new message
     #   WaterDrop::Message.new(topic, message)
-    def initialize(topic, message)
+    def initialize(topic, message, options = {})
       @topic = topic.to_s
       @message = message
+      @options = options
     end
 
     # Sents a current message to Kafka
