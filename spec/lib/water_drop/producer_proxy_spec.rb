@@ -15,12 +15,12 @@ RSpec.describe WaterDrop::ProducerProxy do
 
     describe '#send_message' do
       let(:producer) { double }
-      let(:message_options) { { partition: nil, partition_key: nil } }
+      let(:message_options) { {} }
       let(:message) do
-        instance_double(WaterDrop::Message, {
+        instance_double(WaterDrop::Message,
           message: rand,
-          topic: rand
-        }.merge(message_options))
+          topic: rand,
+          options: message_options)
       end
 
       context 'when sending was successful (no errors)' do

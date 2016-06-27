@@ -31,10 +31,8 @@ module WaterDrop
     def send_message(message)
       touch
       producer.produce(message.message, {
-        topic: message.topic,
-        partition: message.partition,
-        partition_key: message.partition_key
-      }.reject { |_, v| v.nil? })
+        topic: message.topic
+      }.merge(message.options))
       producer.deliver_messages
     rescue StandardError => e
       reload!
