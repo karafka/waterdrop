@@ -1,5 +1,4 @@
 require 'bundler'
-require 'bundler/gem_tasks'
 require 'rake'
 require 'polishgeeks-dev-tools'
 
@@ -8,7 +7,7 @@ PolishGeeks::DevTools.setup do |config|
   config.haml_lint = false
 end
 
-desc 'Self check using strike-dev-tools'
+desc 'Self check using polishgeeks-dev-tools'
 task :check do
   PolishGeeks::DevTools::Runner.new.execute(
     PolishGeeks::DevTools::Logger.new
