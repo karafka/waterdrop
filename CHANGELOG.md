@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+## 0.3.2
+- Removed support for Ruby 2.1.*
+- Ruby 2.3.1 as default
+- Gem dump
+
 ## 0.3.1
 - Dev tools update
 - Gem update
