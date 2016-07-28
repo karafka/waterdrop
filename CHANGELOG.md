@@ -10,6 +10,7 @@
 - Gem update
 - Specs updates
 - File namming convention fix from waterdrop to water_drop + compatibility file
+- Additional params (partition, etc) that can be passed into producer
 
 ## 0.3.0
 - Driver change from Poseidon (not maintained) to Ruby-Kafka

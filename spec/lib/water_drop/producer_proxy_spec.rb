@@ -15,7 +15,13 @@ RSpec.describe WaterDrop::ProducerProxy do
 
     describe '#send_message' do
       let(:producer) { double }
-      let(:message) { instance_double(WaterDrop::Message, message: rand, topic: rand) }
+      let(:message_options) { {} }
+      let(:message) do
+        instance_double(WaterDrop::Message,
+          message: rand,
+          topic: rand,
+          options: message_options)
+      end
 
       context 'when sending was successful (no errors)' do
         before do
@@ -36,6 +42,20 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(producer).to receive(:deliver_messages)
 
           subject.send_message(message)
+        end
+
+        context 'with optional producer arguments' do
+          let(:message_options) { { partition: rand, partition_key: rand } }
+
+          it 'expect to forward to producer' do
+            expect(producer)
+              .to receive(:produce)
+              .with(message.message, { topic: message.topic }.merge(message_options))
+
+            expect(producer).to receive(:deliver_messages)
+
+            subject.send_message(message)
+          end
         end
       end
 

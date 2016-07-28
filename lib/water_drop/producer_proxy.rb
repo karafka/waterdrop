@@ -30,7 +30,9 @@ module WaterDrop
     #   ProducerProxy.new.send_message(WaterDrop::Message.new(topic, message))
     def send_message(message)
       touch
-      producer.produce(message.message, topic: message.topic)
+      producer.produce(message.message, {
+        topic: message.topic
+      }.merge(message.options))
       producer.deliver_messages
     rescue StandardError => e
       reload!
