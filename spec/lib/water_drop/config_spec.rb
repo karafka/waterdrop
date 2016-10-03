@@ -1,9 +1,14 @@
 require 'spec_helper'
 
 RSpec.describe WaterDrop::Config do
-  subject { described_class.new }
+  subject { described_class.config }
 
-  described_class::OPTIONS.each do |attribute|
+  %i(
+    connection_pool_timeout
+    send_messages
+    raise_on_failure
+    connection_pool_size
+  ).each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
       before { subject.public_send(:"#{attribute}=", value) }
@@ -14,40 +19,16 @@ RSpec.describe WaterDrop::Config do
     end
   end
 
-  describe '#send_messages?' do
-    context 'when we dont want to send messages' do
-      before { subject.send_messages = false }
+  describe 'kafka.hosts=' do
+    let(:value) { rand }
+    before { subject.kafka.hosts = value }
 
-      it { expect(subject.send_messages?).to eq false }
-    end
-
-    context 'whe we want to send messages' do
-      before { subject.send_messages = true }
-
-      it { expect(subject.send_messages?).to eq true }
+    it 'assigns a given value' do
+      expect(subject.kafka.hosts).to eq value
     end
   end
 
   describe '.setup' do
-    subject { described_class }
-    let(:instance) { described_class.new }
-    let(:block) { -> {} }
-
-    before do
-      instance
-
-      expect(subject)
-        .to receive(:new)
-        .and_return(instance)
-
-      expect(block)
-        .to receive(:call)
-        .with(instance)
-
-      expect(instance)
-        .to receive(:freeze)
-    end
-
-    it { subject.setup(&block) }
+    it { expect { |block| described_class.setup(&block) }.to yield_with_args }
   end
 end

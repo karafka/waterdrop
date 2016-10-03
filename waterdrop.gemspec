@@ -19,6 +19,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ruby-kafka', '>= 0'
   spec.add_dependency 'connection_pool', '>= 0'
   spec.add_dependency 'null-logger'
+  spec.add_dependency 'dry-configurable', '~> 0.1.7'
   spec.required_ruby_version = '>= 2.2.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }

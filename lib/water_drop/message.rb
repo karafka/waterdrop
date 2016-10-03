@@ -21,7 +21,7 @@ module WaterDrop
     # @example Set a message
     #   WaterDrop::Message.new(topic, message).send!
     def send!
-      return true unless ::WaterDrop.config.send_messages?
+      return true unless ::WaterDrop.config.send_messages
 
       Pool.with { |producer| producer.send_message(self) }
 
@@ -31,7 +31,7 @@ module WaterDrop
       ::WaterDrop.logger.error(e)
       # Reraise if we want to raise on failure
       # Ignore if we dont want to know that something went wrong
-      return unless ::WaterDrop.config.raise_on_failure?
+      return unless ::WaterDrop.config.raise_on_failure
       raise(e)
     end
   end

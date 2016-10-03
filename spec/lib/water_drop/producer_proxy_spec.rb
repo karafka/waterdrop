@@ -110,6 +110,8 @@ RSpec.describe WaterDrop::ProducerProxy do
       let(:kafka) { double }
 
       before do
+        WaterDrop.config.kafka.hosts = kafka
+
         expect(subject)
           .to receive(:dead?)
           .and_return(dead)
@@ -124,7 +126,7 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(Kafka)
             .to receive(:new)
             .with(
-              seed_brokers: ::WaterDrop.config.kafka_hosts
+              seed_brokers: ::WaterDrop.config.kafka.hosts
             ).and_return(kafka)
         end
 
@@ -144,7 +146,7 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(Kafka)
             .to receive(:new)
             .with(
-              seed_brokers: ::WaterDrop.config.kafka_hosts
+              seed_brokers: ::WaterDrop.config.kafka.hosts
             )
             .and_return(kafka)
         end

@@ -14,7 +14,7 @@ RSpec.describe WaterDrop::Message do
     context 'when everything is ok' do
       before do
         allow(WaterDrop)
-          .to receive_message_chain(:config, :send_messages?)
+          .to receive_message_chain(:config, :send_messages)
           .and_return(true)
 
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
@@ -29,11 +29,10 @@ RSpec.describe WaterDrop::Message do
 
     [StandardError].each do |error|
       let(:config) do
-        instance_double(
-          WaterDrop::Config,
-          raise_on_failure?: raise_on_failure,
-          send_messages?: true
-        )
+        WaterDrop::Config.config.tap do |config|
+          config.raise_on_failure = raise_on_failure
+          config.send_messages = true
+        end
       end
 
       context "when #{error} happens" do

@@ -10,6 +10,7 @@
   forwardable
   connection_pool
   null_logger
+  dry-configurable
 ).each { |lib| require lib }
 
 # Internal components
