@@ -34,7 +34,7 @@ GEM
       descendants_tracker (~> 0.0.1)
     colorize (0.8.1)
     concurrent-ruby (1.0.2)
-    connection_pool (2.2.0)
+    connection_pool (2.2.1)
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     diff-lcs (1.2.5)
@@ -92,7 +92,7 @@ GEM
       method_source (~> 0.8.1)
       slop (~> 3.4)
     rainbow (2.1.0)
-    rake (11.2.2)
+    rake (11.3.0)
     reek (4.1.0)
       codeclimate-engine-rb (~> 0.3.1)
       parser (~> 2.3.1, >= 2.3.1.2)
@@ -167,4 +167,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   1.12.5
+   1.13.6

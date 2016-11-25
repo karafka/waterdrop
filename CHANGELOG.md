@@ -2,7 +2,7 @@
 
 ## 0.3.2
 - Removed support for Ruby 2.1.*
-- Ruby 2.3.1 as default
+- Ruby 2.3.3 as default
 - Gem dump
 - Dry configurable config (#20)
 
