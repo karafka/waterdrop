@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe WaterDrop::ProducerProxy do
   subject { described_class }
 

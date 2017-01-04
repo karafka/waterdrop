@@ -2,9 +2,12 @@
 
 ## 0.3.2
 - Removed support for Ruby 2.1.*
-- Ruby 2.3.3 as default
-- Gem dump
+- ~~Ruby 2.3.3 as default~~
+- Ruby 2.4.0 as default
+- Gem dump x2
 - Dry configurable config (#20)
+- added .rspec for default spec helper require
+
 
 ## 0.3.1
 - Dev tools update

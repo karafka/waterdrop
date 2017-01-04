@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe WaterDrop::Message do
   let(:topic) { double }
   let(:message) { [] }

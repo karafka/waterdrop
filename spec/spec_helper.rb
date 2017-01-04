@@ -21,6 +21,7 @@ Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
+  config.order = :random
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
@@ -28,3 +29,12 @@ RSpec.configure do |config|
 end
 
 require 'water_drop'
+
+# Configure for test setup
+WaterDrop.setup do |config|
+  config.send_messages = false
+  config.connection_pool_size = 1
+  config.connection_pool_timeout = 1
+  config.kafka.hosts = ['localhost:9092']
+  config.raise_on_failure = true
+end

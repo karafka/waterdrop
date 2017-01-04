@@ -1,5 +1,3 @@
-require 'spec_helper'
-
 RSpec.describe WaterDrop::Pool do
   subject { described_class }
 

@@ -1,4 +1,3 @@
-require 'spec_helper'
 require 'logger'
 
 RSpec.describe WaterDrop do
