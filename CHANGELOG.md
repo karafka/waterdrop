@@ -8,7 +8,6 @@
 - Dry configurable config (#20)
 - added .rspec for default spec helper require
 
-
 ## 0.3.1
 - Dev tools update
 - Gem update
