@@ -54,7 +54,7 @@ module WaterDrop
     # @return [Kafka::Producer] producer instance to which we can forward method requests
     def producer
       reload! if dead?
-      @producer ||= Kafka.new(seed_brokers: ::WaterDrop.config.kafka.hosts).producer
+      @producer ||= Kafka.new(seed_brokers: ::WaterDrop.config.kafka.hosts).async_producer
     end
 
     # @return [Boolean] true if we cannot use producer anymore because it was not used for a
