@@ -129,7 +129,7 @@ RSpec.describe WaterDrop::ProducerProxy do
         end
 
         it 'expect to reload and create producer' do
-          expect(kafka).to receive(:producer)
+          expect(kafka).to receive(:async_producer)
           subject.send :producer
         end
       end
@@ -150,7 +150,7 @@ RSpec.describe WaterDrop::ProducerProxy do
         end
 
         it 'expect not to reload and create producer' do
-          expect(kafka).to receive(:producer)
+          expect(kafka).to receive(:async_producer)
 
           subject.send :producer
         end
