@@ -17,6 +17,15 @@ module WaterDrop
     setting :kafka do
       # @option hosts [Array<String>] Array that contains Kafka hosts with ports
       setting :hosts
+      # SSL authentication related settings
+      setting :ssl do
+        # option ca_cert [String] SSL CA certificate
+        setting :ca_cert, nil
+        # option client_cert [String] SSL client certificate
+        setting :client_cert, nil
+        # option client_cert_key [String] SSL client certificate password
+        setting :client_cert_key, nil
+      end
     end
 
     class << self

@@ -4,7 +4,7 @@ module WaterDrop
   # There used to be an issue with Poseidon (previous engine for this lib)
   # usage of sockets that are old and not used - that's why we just
   # reinitialize connection if the connection layer is not being used for too long
-  # We keep this logic to avoid problems just in case. If those problems won't occure
+  # We keep this logic to avoid problems just in case. If those problems won't occur
   # with Ruby-Kafka, we will drop it
   class ProducerProxy
     # How long should be object considered alive if nothing is being
@@ -54,7 +54,12 @@ module WaterDrop
     # @return [Kafka::Producer] producer instance to which we can forward method requests
     def producer
       reload! if dead?
-      @producer ||= Kafka.new(seed_brokers: ::WaterDrop.config.kafka.hosts).producer
+      @producer ||= Kafka.new(
+        seed_brokers: ::WaterDrop.config.kafka.hosts,
+        ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
+        ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
+        ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key
+      ).producer
     end
 
     # @return [Boolean] true if we cannot use producer anymore because it was not used for a

@@ -17,6 +17,21 @@ RSpec.describe WaterDrop::Config do
     end
   end
 
+  %i(
+    ca_cert
+    client_cert
+    client_cert_key
+  ).each do |attribute|
+    describe "#{attribute}=" do
+      let(:value) { rand }
+      before { subject.kafka.ssl[attribute] = value }
+
+      it 'assigns a given value' do
+        expect(subject.kafka.ssl[attribute]).to eq value
+      end
+    end
+  end
+
   describe 'kafka.hosts=' do
     let(:value) { rand }
     before { subject.kafka.hosts = value }
