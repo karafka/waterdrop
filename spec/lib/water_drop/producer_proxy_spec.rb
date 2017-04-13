@@ -124,7 +124,10 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(Kafka)
             .to receive(:new)
             .with(
-              seed_brokers: ::WaterDrop.config.kafka.hosts
+              seed_brokers: ::WaterDrop.config.kafka.hosts,
+              ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
+              ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
+              ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key
             ).and_return(kafka)
         end
 
@@ -144,7 +147,10 @@ RSpec.describe WaterDrop::ProducerProxy do
           expect(Kafka)
             .to receive(:new)
             .with(
-              seed_brokers: ::WaterDrop.config.kafka.hosts
+              seed_brokers: ::WaterDrop.config.kafka.hosts,
+              ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
+              ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
+              ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key
             )
             .and_return(kafka)
         end
@@ -170,7 +176,7 @@ RSpec.describe WaterDrop::ProducerProxy do
         end
       end
 
-      context 'when we did excee life time' do
+      context 'when we did exceed life time' do
         let(:last_usage) { Time.now - described_class::LIFE_TIME - 1 }
 
         it 'expect to be dead' do

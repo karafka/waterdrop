@@ -29,13 +29,16 @@ bundle install
 
 WaterDrop has following configuration options:
 
-| Option                  | Value type    | Description                      |
-|-------------------------|---------------|----------------------------------|
-| send_messages           | Boolean       | Should we send messages to Kafka |
-| kafka.hosts             | Array<String> | Kafka servers hosts with ports   |
-| connection_pool_size    | Integer       | Kafka connection pool size       |
-| connection_pool_timeout | Integer       | Kafka connection pool timeout    |
-| raise_on_failure        | Boolean       | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures (will just ignore them) |
+| Option                    | Required   | Value type    | Description                      |
+|---------------------------|------------|---------------|----------------------------------|
+| send_messages             | true       | Boolean       | Should we send messages to Kafka |
+| kafka.hosts               | true       | Array<String> | Kafka servers hosts with ports   |
+| connection_pool_size      | true       | Integer       | Kafka connection pool size       |
+| connection_pool_timeout   | true       | Integer       | Kafka connection pool timeout    |
+| raise_on_failure          | true       | Boolean       | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures (will just ignore them) |
+| kafka.ssl.ca_cert         | false      | String        | SSL CA certificate               |
+| kafka.ssl.client_cert     | false      | String        | SSL client certificate           |
+| kafka.ssl.client_cert_key | false      | String        | SSL client certificate password  |
 
 To apply this configuration, you need to use a *setup* method:
 
