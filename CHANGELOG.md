@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 0.3.3
+- Added `topic_prefix` config flag
+
 ## 0.3.2
 - Removed support for Ruby 2.1.*
 - ~~Ruby 2.3.3 as default~~
