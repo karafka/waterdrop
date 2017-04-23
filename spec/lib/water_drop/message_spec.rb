@@ -15,13 +15,13 @@ RSpec.describe WaterDrop::Message do
           .to receive_message_chain(:config, :send_messages)
           .and_return(true)
 
+        allow(WaterDrop)
+          .to receive_message_chain(:config, :kafka, :topic_prefix)
+          .and_return(nil)
+
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
         expect(producer).to receive(:send_message)
           .with(any_args)
-      end
-
-      it 'sends message with topic and message' do
-        subject.send!
       end
     end
 
@@ -56,6 +56,30 @@ RSpec.describe WaterDrop::Message do
 
           it { expect { subject.send! }.to raise_error(error) }
         end
+      end
+    end
+  end
+
+  describe '#topic' do
+    let(:prefix) { nil }
+
+    before do
+      allow(WaterDrop)
+        .to receive_message_chain(:config, :kafka, :topic_prefix)
+        .and_return(prefix)
+    end
+
+    context 'with a topic prefix' do
+      let(:prefix) { 'cat' }
+      
+      it 'adds the prefix to the topic' do
+        expect(subject.topic).to eql("#{prefix}#{topic}")
+      end
+    end
+
+    context 'without a topic prefix' do
+      it 'does not change the topic' do
+        expect(subject.topic).to eql(topic.to_s)
       end
     end
   end
