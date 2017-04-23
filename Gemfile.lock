@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (0.3.2.3)
+    waterdrop (0.3.2.4)
       bundler
       connection_pool
       dry-configurable (~> 0.6)
@@ -167,4 +167,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   1.13.7
+   1.14.6

@@ -39,7 +39,7 @@ module WaterDrop
     # @note Appends kafka.topic_prefix config flag if set
     def topic
       prefix = ::WaterDrop.config.kafka.topic_prefix
-      !!prefix ? "#{prefix}#{@topic}" : @topic
+      !prefix.nil? ? "#{prefix}#{@topic}" : @topic
     end
   end
 end

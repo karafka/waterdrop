@@ -23,6 +23,10 @@ RSpec.describe WaterDrop::Message do
         expect(producer).to receive(:send_message)
           .with(any_args)
       end
+
+      it 'sends message with topic and message' do
+        subject.send!
+      end
     end
 
     [StandardError].each do |error|
@@ -71,7 +75,7 @@ RSpec.describe WaterDrop::Message do
 
     context 'with a topic prefix' do
       let(:prefix) { 'cat' }
-      
+
       it 'adds the prefix to the topic' do
         expect(subject.topic).to eql("#{prefix}#{topic}")
       end
