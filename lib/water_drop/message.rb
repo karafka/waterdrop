@@ -1,7 +1,7 @@
 module WaterDrop
   # Message class which encapsulate single Kafka message logic and its delivery
   class Message
-    attr_reader :topic, :message, :options
+    attr_reader :message, :options
 
     # @param topic [String, Symbol] a topic to which we want to send a message
     # @param message [Object] any object that can be serialized to a JSON string or
@@ -33,6 +33,13 @@ module WaterDrop
       # Ignore if we dont want to know that something went wrong
       return unless ::WaterDrop.config.raise_on_failure
       raise(e)
+    end
+
+    # Returns topic name
+    # @note If kafka.topic_mapper is set, the topic will be set to the return
+    #       value of that block
+    def topic(mapper = WaterDrop.config.kafka.topic_mapper)
+      mapper.is_a?(Proc) ? mapper.call(@topic).to_s : @topic
     end
   end
 end

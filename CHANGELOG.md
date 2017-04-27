@@ -8,6 +8,7 @@
 - Dry configurable config (#20)
 - added .rspec for default spec helper require
 - Added SSL capabilities
+- Added `topic_prefix` config flag
 
 ## 0.3.1
 - Dev tools update

@@ -2,10 +2,10 @@ RSpec.describe WaterDrop::Config do
   subject { described_class.config }
 
   %i(
-    connection_pool_timeout
-    send_messages
-    raise_on_failure
     connection_pool_size
+    connection_pool_timeout
+    raise_on_failure
+    send_messages
   ).each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }

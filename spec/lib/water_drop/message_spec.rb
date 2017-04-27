@@ -15,6 +15,10 @@ RSpec.describe WaterDrop::Message do
           .to receive_message_chain(:config, :send_messages)
           .and_return(true)
 
+        allow(WaterDrop)
+          .to receive_message_chain(:config, :kafka, :topic_mapper)
+          .and_return(nil)
+
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
         expect(producer).to receive(:send_message)
           .with(any_args)
@@ -56,6 +60,39 @@ RSpec.describe WaterDrop::Message do
 
           it { expect { subject.send! }.to raise_error(error) }
         end
+      end
+    end
+  end
+
+  describe '#topic' do
+    let(:mapper) { nil }
+
+    before do
+      allow(WaterDrop)
+        .to receive_message_chain(:config, :kafka, :topic_mapper)
+        .and_return(mapper)
+    end
+
+    context 'with a topic mapper' do
+      let(:mapper) { ->(topic_in) { "#{topic_in}cat" } }
+
+      it 'adds the mapper to the topic' do
+        expect(mapper).to receive(:call).with(topic.to_s).and_call_original
+        expect(subject.topic).to include('cat')
+      end
+    end
+
+    context 'without a topic mapper' do
+      it 'does not change the topic' do
+        expect(subject.topic).to eql(topic.to_s)
+      end
+    end
+
+    context 'with a different type' do
+      let(:mapper) { 'foobar' }
+
+      it 'does not change the topic' do
+        expect(subject.topic).to eql(topic.to_s)
       end
     end
   end
