@@ -39,7 +39,7 @@ WaterDrop has following configuration options:
 | kafka.ssl.ca_cert         | false      | String        | SSL CA certificate               |
 | kafka.ssl.client_cert     | false      | String        | SSL client certificate           |
 | kafka.ssl.client_cert_key | false      | String        | SSL client certificate password  |
-| kafka.topic_prefix        | false      | String        | Prefix to concatenate to topic   |
+| kafka.topic_mapper        | false      | Proc          | Proc that maps topic string (e.g prepending a topic prefix) |
 
 To apply this configuration, you need to use a *setup* method:
 
