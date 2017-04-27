@@ -16,7 +16,7 @@ RSpec.describe WaterDrop::Message do
           .and_return(true)
 
         allow(WaterDrop)
-          .to receive_message_chain(:config, :kafka, :topic_prefix)
+          .to receive_message_chain(:config, :kafka, :topic_mapper)
           .and_return(nil)
 
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
@@ -65,23 +65,32 @@ RSpec.describe WaterDrop::Message do
   end
 
   describe '#topic' do
-    let(:prefix) { nil }
+    let(:mapper) { nil }
 
     before do
       allow(WaterDrop)
-        .to receive_message_chain(:config, :kafka, :topic_prefix)
-        .and_return(prefix)
+        .to receive_message_chain(:config, :kafka, :topic_mapper)
+        .and_return(mapper)
     end
 
-    context 'with a topic prefix' do
-      let(:prefix) { 'cat' }
+    context 'with a topic mapper' do
+      let(:mapper) { ->(topic_in) { "#{topic_in}cat" } }
 
-      it 'adds the prefix to the topic' do
-        expect(subject.topic).to eql("#{prefix}#{topic}")
+      it 'adds the mapper to the topic' do
+        expect(mapper).to receive(:call).with(topic.to_s).and_call_original
+        expect(subject.topic).to include('cat')
       end
     end
 
-    context 'without a topic prefix' do
+    context 'without a topic mapper' do
+      it 'does not change the topic' do
+        expect(subject.topic).to eql(topic.to_s)
+      end
+    end
+
+    context 'with a different type' do
+      let(:mapper) { 'foobar' }
+
       it 'does not change the topic' do
         expect(subject.topic).to eql(topic.to_s)
       end

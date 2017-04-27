@@ -17,8 +17,8 @@ module WaterDrop
     setting :kafka do
       # @option hosts [Array<String>] Array that contains Kafka hosts with ports
       setting :hosts
-      # Kafka topic prefix
-      setting :topic_prefix
+      # Kafka topic mapper [Proc [String->String]]
+      setting :topic_mapper
       # SSL authentication related settings
       setting :ssl do
         # option ca_cert [String] SSL CA certificate
