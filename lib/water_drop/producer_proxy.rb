@@ -72,7 +72,7 @@ module WaterDrop
 
     # Resets a producer so a new one will be created once requested
     def reload!
-      @producer.shutdown if @producer
+      @producer&.shutdown
       @producer = nil
     end
   end
