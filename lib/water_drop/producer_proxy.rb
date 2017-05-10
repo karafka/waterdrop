@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module WaterDrop
   # Proxy object for a producer (sender) objects that are inside pool
   # We use it to provide additional timeout monitoring layer

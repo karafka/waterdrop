@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -8,9 +9,9 @@ Gem::Specification.new do |spec|
   spec.version       = ::WaterDrop::VERSION
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
-  spec.email         = %w( maciej@mensfeld.pl pavlo.vavruk@gmail.com )
+  spec.email         = %w(maciej@mensfeld.pl pavlo.vavruk@gmail.com)
   spec.homepage      = 'https://github.com/karafka/waterdrop'
-  spec.summary       = %q{ Kafka messaging made easy! }
+  spec.summary       = ' Kafka messaging made easy! '
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
@@ -24,5 +25,5 @@ Gem::Specification.new do |spec|
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.require_paths = %w( lib )
+  spec.require_paths = %w(lib)
 end

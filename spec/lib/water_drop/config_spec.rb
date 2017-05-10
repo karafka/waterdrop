@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe WaterDrop::Config do
   subject(:config) { described_class.config }
 
@@ -36,7 +37,7 @@ RSpec.describe WaterDrop::Config do
 
   describe 'kafka.hosts=' do
     let(:value) { rand }
-    
+
     before { config.kafka.hosts = value }
 
     it 'assigns a given value' do

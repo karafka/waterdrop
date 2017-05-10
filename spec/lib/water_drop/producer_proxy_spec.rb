@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 RSpec.describe WaterDrop::ProducerProxy do
   subject { described_class }
 
@@ -16,9 +17,9 @@ RSpec.describe WaterDrop::ProducerProxy do
       let(:message_options) { {} }
       let(:message) do
         instance_double(WaterDrop::Message,
-          message: rand,
-          topic: rand,
-          options: message_options)
+                        message: rand,
+                        topic: rand,
+                        options: message_options)
       end
 
       context 'when sending was successful (no errors)' do

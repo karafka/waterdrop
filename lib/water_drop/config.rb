@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module WaterDrop
   # Configurator for setting up all options required by WaterDrop
   class Config

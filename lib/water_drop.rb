@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 # External components
 %w(
   rake

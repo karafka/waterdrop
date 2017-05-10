@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module WaterDrop
   # Raw Kafka producers connection pool for WaterDrop messages delivery
   module Pool
