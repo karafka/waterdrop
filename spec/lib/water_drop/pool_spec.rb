@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe WaterDrop::Pool do
-  subject { described_class }
+  subject(:waterdrop_pool) { described_class }
 
   let(:pool) { double }
   let(:producer) { double }
@@ -10,11 +10,11 @@ RSpec.describe WaterDrop::Pool do
     let(:key) { rand }
 
     it 'delegates it to pool' do
-      expect(subject).to receive(:pool).and_return(pool)
+      expect(waterdrop_pool).to receive(:pool).and_return(pool)
       expect(pool).to receive(:with).and_yield(producer)
       expect(producer).to receive(:get).with(key)
 
-      subject.with { |statsd| statsd.get(key) }
+      waterdrop_pool.with { |statsd| statsd.get(key) }
     end
   end
 
@@ -50,6 +50,6 @@ RSpec.describe WaterDrop::Pool do
         .and_return(producer)
     end
 
-    it { subject.pool }
+    it { waterdrop_pool.pool }
   end
 end

@@ -3,12 +3,12 @@
 RSpec.describe WaterDrop::Config do
   subject(:config) { described_class.config }
 
-  %i(
+  %i[
     connection_pool_timeout
     send_messages
     raise_on_failure
     connection_pool_size
-  ).each do |attribute|
+  ].each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
 
@@ -20,11 +20,11 @@ RSpec.describe WaterDrop::Config do
     end
   end
 
-  %i(
+  %i[
     ca_cert
     client_cert
     client_cert_key
-  ).each do |attribute|
+  ].each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
 

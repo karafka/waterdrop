@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # External components
-%w(
+%w[
   rake
   rubygems
   bundler
@@ -13,18 +13,18 @@
   connection_pool
   null_logger
   dry-configurable
-).each { |lib| require lib }
+].each { |lib| require lib }
 
 # Internal components
 base_path = File.dirname(__FILE__) + '/water_drop'
 
-%w(
+%w[
   version
   producer_proxy
   pool
   config
   message
-).each { |lib| require "#{base_path}/#{lib}" }
+].each { |lib| require "#{base_path}/#{lib}" }
 
 # WaterDrop library
 module WaterDrop
