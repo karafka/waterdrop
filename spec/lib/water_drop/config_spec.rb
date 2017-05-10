@@ -1,5 +1,5 @@
 RSpec.describe WaterDrop::Config do
-  subject { described_class.config }
+  subject(:config) { described_class.config }
 
   %i(
     connection_pool_timeout
@@ -9,10 +9,11 @@ RSpec.describe WaterDrop::Config do
   ).each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
-      before { subject.public_send(:"#{attribute}=", value) }
+
+      before { config.public_send(:"#{attribute}=", value) }
 
       it 'assigns a given value' do
-        expect(subject.public_send(attribute)).to eq value
+        expect(config.public_send(attribute)).to eq value
       end
     end
   end
@@ -24,20 +25,22 @@ RSpec.describe WaterDrop::Config do
   ).each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
-      before { subject.kafka.ssl[attribute] = value }
+
+      before { config.kafka.ssl[attribute] = value }
 
       it 'assigns a given value' do
-        expect(subject.kafka.ssl[attribute]).to eq value
+        expect(config.kafka.ssl[attribute]).to eq value
       end
     end
   end
 
   describe 'kafka.hosts=' do
     let(:value) { rand }
-    before { subject.kafka.hosts = value }
+    
+    before { config.kafka.hosts = value }
 
     it 'assigns a given value' do
-      expect(subject.kafka.hosts).to eq value
+      expect(config.kafka.hosts).to eq value
     end
   end
 
