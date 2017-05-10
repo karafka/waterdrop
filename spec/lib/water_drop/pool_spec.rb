@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe WaterDrop::Pool do
   subject { described_class }
 

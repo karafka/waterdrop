@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 RSpec.describe WaterDrop::Message do
   subject(:waterdrop_message) { described_class.new(topic, message) }
 

@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 module WaterDrop
   # Message class which encapsulate single Kafka message logic and its delivery
   class Message
