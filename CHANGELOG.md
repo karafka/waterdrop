@@ -8,6 +8,7 @@
 - Dry configurable config (#20)
 - added .rspec for default spec helper require
 - Added SSL capabilities
+- Coditsu instead of PG dev tools for quality control
 
 ## 0.3.1
 - Dev tools update
