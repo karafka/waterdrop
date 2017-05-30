@@ -1,19 +1,22 @@
+# frozen_string_literal: true
+
 RSpec.describe WaterDrop::Message do
+  subject(:waterdrop_message) { described_class.new(topic, message) }
+
   let(:topic) { double }
   let(:message) { [] }
   let(:producer) { double }
-
-  subject { described_class.new(topic, message) }
 
   describe '#send!' do
     let(:message_producer) { double }
     let(:messages) { double }
 
     context 'when everything is ok' do
+      let(:config) { double }
+
       before do
-        allow(WaterDrop)
-          .to receive_message_chain(:config, :send_messages)
-          .and_return(true)
+        allow(WaterDrop).to receive(:config).and_return(config)
+        allow(config).to receive(:send_messages).and_return(true)
 
         expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
         expect(producer).to receive(:send_message)
@@ -21,7 +24,7 @@ RSpec.describe WaterDrop::Message do
       end
 
       it 'sends message with topic and message' do
-        subject.send!
+        waterdrop_message.send!
       end
     end
 
@@ -48,13 +51,13 @@ RSpec.describe WaterDrop::Message do
         context 'and raise_on_failure is set to false' do
           let(:raise_on_failure) { false }
 
-          it { expect { subject.send! }.not_to raise_error }
+          it { expect { waterdrop_message.send! }.not_to raise_error }
         end
 
         context 'and raise_on_failure is set to true' do
           let(:raise_on_failure) { true }
 
-          it { expect { subject.send! }.to raise_error(error) }
+          it { expect { waterdrop_message.send! }.to raise_error(error) }
         end
       end
     end

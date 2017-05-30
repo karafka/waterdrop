@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WaterDrop
   # Proxy object for a producer (sender) objects that are inside pool
   # We use it to provide additional timeout monitoring layer
@@ -70,7 +72,7 @@ module WaterDrop
 
     # Resets a producer so a new one will be created once requested
     def reload!
-      @producer.shutdown if @producer
+      @producer&.shutdown
       @producer = nil
     end
   end
