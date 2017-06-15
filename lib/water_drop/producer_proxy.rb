@@ -56,12 +56,31 @@ module WaterDrop
     # @return [Kafka::Producer] producer instance to which we can forward method requests
     def producer
       reload! if dead?
-      @producer ||= Kafka.new(
+      @kafka ||= Kafka.new(
+        logger: ::WaterDrop.logger,
         seed_brokers: ::WaterDrop.config.kafka.hosts,
         ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
         ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
         ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key
-      ).producer
+      )
+
+      if ::WaterDrop.config.kafka.producer.use_async_producer
+        @producer ||= kafka.async_producer(
+          sync_producer: kafka.producer(
+            max_buffer_size: ::WaterDrop.config.kafka.producer.max_buffer_size,
+            max_buffer_bytesize: ::WaterDrop.config.kafka.producer.max_buffer_bytesize
+          ),
+          max_queue_size: ::WaterDrop.config.kafka.producer.max_queue_size,
+          delivery_threshold: ::WaterDrop.config.kafka.producer.delivery_threshold,
+          delivery_interval: ::WaterDrop.config.kafka.producer.delivery_threshold,
+          logger: ::WaterDrop.logger
+        )
+      else
+        @producer ||= kafka.producer(
+          max_buffer_size: ::WaterDrop.config.kafka.producer.max_buffer_size,
+          max_buffer_bytesize: ::WaterDrop.config.kafka.producer.max_buffer_bytesize
+        )
+      end
     end
 
     # @return [Boolean] true if we cannot use producer anymore because it was not used for a

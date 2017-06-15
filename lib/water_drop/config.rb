@@ -28,6 +28,21 @@ module WaterDrop
         # option client_cert_key [String] SSL client certificate password
         setting :client_cert_key, nil
       end
+      # Kafka Producer related settings
+      setting :producer do
+        # @option delivery_threshold [] TODO (Only applies when using async_producer)
+        setting :delivery_threshold
+        # @option delivery_interval [] TODO (Only applies when using async_producer)
+        setting :delivery_interval
+        # @option max_buffer_size [] TODO (Only applies when using async_producer)
+        setting :max_buffer_size, 0
+        # @option max_buffer_bytesize [] TODO
+        setting :max_buffer_bytesize, 0
+        # @option max_queue_size
+        setting :max_queue_size, 1000
+        # @option use_async_producer [] TODO
+        setting :use_async_producer, false
+      end
     end
 
     class << self
