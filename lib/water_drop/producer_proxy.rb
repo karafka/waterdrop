@@ -47,6 +47,11 @@ module WaterDrop
       @attempts = 0
     end
 
+    def shutdown
+      @producer.shutdown if @producer
+      @producer = nil
+    end
+
     private
 
     # Refreshes last usage value with current time
