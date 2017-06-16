@@ -31,9 +31,9 @@ module WaterDrop
       # Kafka Producer related settings
       setting :producer do
         # @option delivery_threshold [] TODO (Only applies when using async_producer)
-        setting :delivery_threshold
+        setting :delivery_threshold, 0
         # @option delivery_interval [] TODO (Only applies when using async_producer)
-        setting :delivery_interval
+        setting :delivery_interval, 0
         # @option max_buffer_size [] TODO (Only applies when using async_producer)
         setting :max_buffer_size, 0
         # @option max_buffer_bytesize [] TODO
