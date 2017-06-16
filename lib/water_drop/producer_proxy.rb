@@ -22,6 +22,7 @@ module WaterDrop
     def initialize
       touch
       @attempts = 0
+      @is_sync = !::WaterDrop.config.kafka.producer.use_async_producer
     end
 
     # Sends message to Kafka
@@ -35,7 +36,7 @@ module WaterDrop
       producer.produce(message.message, {
         topic: message.topic
       }.merge(message.options))
-      producer.deliver_messages
+      producer.deliver_messages if @is_sync
     rescue StandardError => e
       reload!
 
