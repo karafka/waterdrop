@@ -73,7 +73,7 @@ module WaterDrop
           # ),
           max_queue_size: ::WaterDrop.config.kafka.producer.max_queue_size,
           delivery_threshold: ::WaterDrop.config.kafka.producer.delivery_threshold,
-          delivery_interval: ::WaterDrop.config.kafka.producer.delivery_threshold,
+          delivery_interval: ::WaterDrop.config.kafka.producer.delivery_interval,
           #logger: ::WaterDrop.logger
         )
       else
