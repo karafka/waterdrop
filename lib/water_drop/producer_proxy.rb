@@ -67,14 +67,14 @@ module WaterDrop
 
       if ::WaterDrop.config.kafka.producer.use_async_producer
         @producer ||= @kafka.async_producer(
-          sync_producer: @kafka.producer(
-            max_buffer_size: ::WaterDrop.config.kafka.producer.max_buffer_size,
-            max_buffer_bytesize: ::WaterDrop.config.kafka.producer.max_buffer_bytesize
-          ),
+          # sync_producer: @kafka.producer(
+          #   max_buffer_size: ::WaterDrop.config.kafka.producer.max_buffer_size,
+          #   max_buffer_bytesize: ::WaterDrop.config.kafka.producer.max_buffer_bytesize
+          # ),
           max_queue_size: ::WaterDrop.config.kafka.producer.max_queue_size,
           delivery_threshold: ::WaterDrop.config.kafka.producer.delivery_threshold,
           delivery_interval: ::WaterDrop.config.kafka.producer.delivery_threshold,
-          logger: ::WaterDrop.logger
+          #logger: ::WaterDrop.logger
         )
       else
         @producer ||= @kafka.producer(
