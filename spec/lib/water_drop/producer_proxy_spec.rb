@@ -116,6 +116,7 @@ RSpec.describe WaterDrop::ProducerProxy do
         expect(Kafka)
           .to receive(:new)
           .with(
+            logger: ::WaterDrop.logger,
             seed_brokers: ::WaterDrop.config.kafka.hosts,
             ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
             ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
@@ -139,6 +140,7 @@ RSpec.describe WaterDrop::ProducerProxy do
         expect(Kafka)
           .to receive(:new)
           .with(
+            logger: ::WaterDrop.logger,
             seed_brokers: ::WaterDrop.config.kafka.hosts,
             ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
             ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,

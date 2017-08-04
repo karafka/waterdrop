@@ -29,7 +29,7 @@ base_path = File.dirname(__FILE__) + '/water_drop'
 # WaterDrop library
 module WaterDrop
   class << self
-    attr_writer :logger
+    attr_accessor :logger
 
     # @return [Logger] logger that we want to use
     def logger

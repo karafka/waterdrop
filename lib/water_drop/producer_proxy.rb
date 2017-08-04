@@ -22,6 +22,7 @@ module WaterDrop
     def initialize
       touch
       @attempts = 0
+      @is_sync = !::WaterDrop.config.kafka.producer.use_async_producer
     end
 
     # Sends message to Kafka
@@ -35,7 +36,7 @@ module WaterDrop
       producer.produce(message.message, {
         topic: message.topic
       }.merge(message.options))
-      producer.deliver_messages
+      producer.deliver_messages if @is_sync
     rescue StandardError => e
       reload!
 
@@ -44,6 +45,11 @@ module WaterDrop
       raise(e)
     ensure
       @attempts = 0
+    end
+
+    def shutdown
+      @producer.shutdown if @producer
+      @producer = nil
     end
 
     private
@@ -56,12 +62,26 @@ module WaterDrop
     # @return [Kafka::Producer] producer instance to which we can forward method requests
     def producer
       reload! if dead?
-      @producer ||= Kafka.new(
+      @kafka ||= Kafka.new(
+        logger: ::WaterDrop.logger,
         seed_brokers: ::WaterDrop.config.kafka.hosts,
         ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
         ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
         ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key
-      ).producer
+      )
+
+      if ::WaterDrop.config.kafka.producer.use_async_producer
+        @producer ||= @kafka.async_producer(
+          max_queue_size: ::WaterDrop.config.kafka.producer.max_queue_size,
+          delivery_threshold: ::WaterDrop.config.kafka.producer.delivery_threshold,
+          delivery_interval: ::WaterDrop.config.kafka.producer.delivery_interval,
+        )
+      else
+        @producer ||= @kafka.producer(
+          max_buffer_size: ::WaterDrop.config.kafka.producer.max_buffer_size,
+          max_buffer_bytesize: ::WaterDrop.config.kafka.producer.max_buffer_bytesize
+        )
+      end
     end
 
     # @return [Boolean] true if we cannot use producer anymore because it was not used for a
