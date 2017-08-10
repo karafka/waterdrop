@@ -32,9 +32,10 @@ module WaterDrop
     #   ProducerProxy.new.send_message(WaterDrop::Message.new(topic, message))
     def send_message(message)
       touch
-      producer.produce(message.message, {
-        topic: message.topic
-      }.merge(message.options))
+      producer.produce(
+        message.message,
+        { topic: message.topic }.merge(message.options)
+      )
       producer.deliver_messages
     rescue StandardError => e
       reload!
@@ -57,11 +58,7 @@ module WaterDrop
     def producer
       reload! if dead?
       @producer ||= Kafka.new(
-        seed_brokers: ::WaterDrop.config.kafka.hosts,
-        ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
-        ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
-        ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key,
-        ssl_ca_cert_file_path: ::WaterDrop.config.kafka.ssl.ca_cert_file_path
+        ::WaterDrop.config.kafka.to_h
       ).producer
     end
 

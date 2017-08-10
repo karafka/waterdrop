@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'bundler', '>= 0'
   spec.add_dependency 'rake', '>= 0'
-  spec.add_dependency 'ruby-kafka', '~> 0.4.0'
+  spec.add_dependency 'ruby-kafka', '>= 0.4.0'
   spec.add_dependency 'connection_pool', '>= 0'
   spec.add_dependency 'null-logger'
   spec.add_dependency 'dry-configurable', '~> 0.6'

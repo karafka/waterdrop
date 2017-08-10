@@ -3,6 +3,14 @@
 RSpec.describe WaterDrop::ProducerProxy do
   subject(:producer_proxy) { described_class.new }
 
+  describe 'ruby-kafka parameters integration' do
+    let(:parameters) { Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort }
+
+    it 'expect to match ruby-kafka client requirements' do
+      expect(WaterDrop.config.kafka.to_h.keys.sort).to eq parameters
+    end
+  end
+
   describe '#send_message' do
     let(:producer) { double }
     let(:message_options) { {} }
@@ -100,7 +108,7 @@ RSpec.describe WaterDrop::ProducerProxy do
     let(:kafka) { double }
 
     before do
-      WaterDrop.config.kafka.hosts = kafka
+      WaterDrop.config.kafka.seed_brokers = kafka
 
       expect(producer_proxy)
         .to receive(:dead?)
@@ -115,13 +123,7 @@ RSpec.describe WaterDrop::ProducerProxy do
 
         expect(Kafka)
           .to receive(:new)
-          .with(
-            seed_brokers: ::WaterDrop.config.kafka.hosts,
-            ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
-            ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
-            ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key,
-            ssl_ca_cert_file_path: ::WaterDrop.config.kafka.ssl.ca_cert_file_path
-          ).and_return(kafka)
+          .with(::WaterDrop.config.kafka.to_h).and_return(kafka)
       end
 
       it 'expect to reload and create producer' do
@@ -139,13 +141,7 @@ RSpec.describe WaterDrop::ProducerProxy do
 
         expect(Kafka)
           .to receive(:new)
-          .with(
-            seed_brokers: ::WaterDrop.config.kafka.hosts,
-            ssl_ca_cert: ::WaterDrop.config.kafka.ssl.ca_cert,
-            ssl_client_cert: ::WaterDrop.config.kafka.ssl.client_cert,
-            ssl_client_cert_key: ::WaterDrop.config.kafka.ssl.client_cert_key,
-            ssl_ca_cert_file_path: ::WaterDrop.config.kafka.ssl.ca_cert_file_path
-          )
+          .with(::WaterDrop.config.kafka.to_h)
           .and_return(kafka)
       end
 

@@ -1,5 +1,13 @@
 # WaterDrop changelog
 
+## 0.4 unreleased
+- Bump to match Karafka
+- Renamed ```hosts``` to ```seed_brokers```
+- Removed the ```ssl``` scoping for ```kafka``` config namespace to better match Karafka conventions
+- Added ```client_id``` option
+- Added ```logger``` option
+- Auto Propagation of config down to ruby-kafka
+
 ## 0.3.2
 - Removed support for Ruby 2.1.*
 - ~~Ruby 2.3.3 as default~~

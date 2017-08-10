@@ -6,30 +6,57 @@ module WaterDrop
     extend Dry::Configurable
 
     # Available options
-    # @option connection_pool_timeout [Fixnum] Amount of time in seconds to wait for a connection
-    #         if none currently available.
-    setting :connection_pool_timeout
-    # @option send_messages [Boolean] boolean value to define whether messages should be sent
     setting :send_messages
     # @option raise_on_failure [Boolean] Should raise error when failed to deliver a message
     setting :raise_on_failure
-    # @option connection_pool_size [Fixnum] The number of connections to pool.
-    setting :connection_pool_size
+
+    # Connection pool options
+    setting :connection_pool do
+      # Connection pool size for producers. Note that we take a bigger number because there
+      # are cases when we might have more sidekiq threads than Karafka consumers (small app)
+      # or the opposite for bigger systems
+      setting :size, 2
+      # How long should we wait for a working resource from the pool before rising timeout
+      # With a proper connection pool size, this should never happen
+      setting :timeout, 5
+    end
+
     # option kafka [Hash] - optional - kafka configuration options (hosts)
     setting :kafka do
-      # @option hosts [Array<String>] Array that contains Kafka hosts with ports
-      setting :hosts
+      setting :client_id, 'waterdrop'
+      # @option seed_brokers [Array<String>] Array that contains Kafka seed broker hosts with ports
+      setting :seed_brokers
+      # option logger [Instance, nil] logger that we want to use or nil to
+      #   fallback to ruby-kafka logger
+      setting :logger, nil
+      # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
+      # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
+      # least one host.
+      setting :connect_timeout, 10
+      # option socket_timeout [Integer] Sets the number of seconds to wait when reading from or
+      # writing to a socket connection to a broker. After this timeout expires the connection
+      # will be killed. Note that some Kafka operations are by definition long-running, such as
+      # waiting for new messages to arrive in a partition, so don't set this value too low
+      setting :socket_timeout, 10
       # SSL authentication related settings
-      setting :ssl do
-        # option ca_cert [String] SSL CA certificate
-        setting :ca_cert, nil
-        # option ssl_ca_cert_file_path [String] SSL CA certificate
-        setting :ca_cert_file_path, nil
-        # option client_cert [String] SSL client certificate
-        setting :client_cert, nil
-        # option client_cert_key [String] SSL client certificate password
-        setting :client_cert_key, nil
-      end
+      # option ca_cert [String] SSL CA certificate
+      setting :ssl_ca_cert, nil
+      # option ssl_ca_cert_file_path [String] SSL CA certificate file path
+      setting :ssl_ca_cert_file_path, nil
+      # option client_cert [String] SSL client certificate
+      setting :ssl_client_cert, nil
+      # option client_cert_key [String] SSL client certificate password
+      setting :ssl_client_cert_key, nil
+      # option sasl_gssapi_principal [String] sasl principal
+      setting :sasl_gssapi_principal, nil
+      # option sasl_gssapi_keytab [String] sasl keytab
+      setting :sasl_gssapi_keytab, nil
+      # option sasl_plain_authzid [String] The authorization identity to use
+      setting :sasl_plain_authzid, ''
+      # option sasl_plain_username [String] The username used to authenticate
+      setting :sasl_plain_username, nil
+      # option sasl_plain_password [String] The password used to authenticate
+      setting :sasl_plain_password, nil
     end
 
     class << self

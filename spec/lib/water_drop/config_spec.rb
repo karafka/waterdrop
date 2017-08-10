@@ -4,10 +4,8 @@ RSpec.describe WaterDrop::Config do
   subject(:config) { described_class.config }
 
   %i[
-    connection_pool_timeout
     send_messages
     raise_on_failure
-    connection_pool_size
   ].each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
@@ -21,29 +19,50 @@ RSpec.describe WaterDrop::Config do
   end
 
   %i[
-    ca_cert
-    ca_cert_file_path
-    client_cert
-    client_cert_key
+    size
+    timeout
   ].each do |attribute|
     describe "#{attribute}=" do
       let(:value) { rand }
 
-      before { config.kafka.ssl[attribute] = value }
+      before { config.connection_pool[attribute] = value }
 
       it 'assigns a given value' do
-        expect(config.kafka.ssl[attribute]).to eq value
+        expect(config.connection_pool[attribute]).to eq value
       end
     end
   end
 
-  describe 'kafka.hosts=' do
+  %i[
+    logger
+    ssl_ca_cert
+    ssl_ca_cert_file_path
+    ssl_client_cert
+    ssl_client_cert_key
+    sasl_gssapi_principal
+    sasl_gssapi_keytab
+    sasl_plain_authzid
+    sasl_plain_username
+    sasl_plain_password
+  ].each do |attribute|
+    describe "#{attribute}=" do
+      let(:value) { rand }
+
+      before { config.kafka[attribute] = value }
+
+      it 'assigns a given value' do
+        expect(config.kafka[attribute]).to eq value
+      end
+    end
+  end
+
+  describe 'kafka.seed_brokers=' do
     let(:value) { rand }
 
-    before { config.kafka.hosts = value }
+    before { config.kafka.seed_brokers = value }
 
     it 'assigns a given value' do
-      expect(config.kafka.hosts).to eq value
+      expect(config.kafka.seed_brokers).to eq value
     end
   end
 
