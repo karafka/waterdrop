@@ -23,6 +23,8 @@ module WaterDrop
       setting :ssl do
         # option ca_cert [String] SSL CA certificate
         setting :ca_cert, nil
+        # option ssl_ca_cert_file_path [String] SSL CA certificate
+        setting :ca_cert_file_path, nil
         # option client_cert [String] SSL client certificate
         setting :client_cert, nil
         # option client_cert_key [String] SSL client certificate password

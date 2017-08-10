@@ -22,6 +22,7 @@ RSpec.describe WaterDrop::Config do
 
   %i[
     ca_cert
+    ca_cert_file_path
     client_cert
     client_cert_key
   ].each do |attribute|
