@@ -7,7 +7,7 @@ PATH
       dry-configurable (~> 0.6)
       null-logger
       rake
-      ruby-kafka
+      ruby-kafka (~> 0.4.0)
 
 GEM
   remote: https://rubygems.org/
@@ -54,4 +54,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   1.13.7
+   1.15.0
