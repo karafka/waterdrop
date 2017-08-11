@@ -4,6 +4,8 @@ RSpec.describe WaterDrop::Config do
   subject(:config) { described_class.config }
 
   %i[
+    client_id
+    logger
     send_messages
     raise_on_failure
   ].each do |attribute|
@@ -34,7 +36,6 @@ RSpec.describe WaterDrop::Config do
   end
 
   %i[
-    logger
     ssl_ca_cert
     ssl_ca_cert_file_path
     ssl_client_cert

@@ -4,8 +4,8 @@
 - Bump to match Karafka
 - Renamed ```hosts``` to ```seed_brokers```
 - Removed the ```ssl``` scoping for ```kafka``` config namespace to better match Karafka conventions
-- Added ```client_id``` option
-- Added ```logger``` option
+- Added ```client_id``` option on a root config level
+- Added ```logger``` option on a root config level
 - Auto Propagation of config down to ruby-kafka
 
 ## 0.3.2

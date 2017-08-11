@@ -58,7 +58,10 @@ module WaterDrop
     def producer
       reload! if dead?
       @producer ||= Kafka.new(
-        ::WaterDrop.config.kafka.to_h
+        {
+          client_id: ::WaterDrop.config.client_id,
+          logger: ::WaterDrop.config.logger
+        }.merge(::WaterDrop.config.kafka.to_h)
       ).producer
     end
 

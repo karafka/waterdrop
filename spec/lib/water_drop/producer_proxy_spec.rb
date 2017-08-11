@@ -7,7 +7,8 @@ RSpec.describe WaterDrop::ProducerProxy do
     let(:parameters) { Kafka::Client.instance_method(:initialize).parameters.map(&:last).sort }
 
     it 'expect to match ruby-kafka client requirements' do
-      expect(WaterDrop.config.kafka.to_h.keys.sort).to eq parameters
+      # Client id and logger are taken from the main config scope
+      expect(WaterDrop.config.kafka.to_h.keys.sort).to eq(parameters - %i[client_id logger])
     end
   end
 
@@ -106,6 +107,12 @@ RSpec.describe WaterDrop::ProducerProxy do
 
   describe '#producer' do
     let(:kafka) { double }
+    let(:kafka_init_parameters) do
+      {
+        client_id: ::WaterDrop.config.client_id,
+        logger: ::WaterDrop.config.logger
+      }.merge(::WaterDrop.config.kafka.to_h)
+    end
 
     before do
       WaterDrop.config.kafka.seed_brokers = kafka
@@ -123,7 +130,7 @@ RSpec.describe WaterDrop::ProducerProxy do
 
         expect(Kafka)
           .to receive(:new)
-          .with(::WaterDrop.config.kafka.to_h).and_return(kafka)
+          .with(kafka_init_parameters).and_return(kafka)
       end
 
       it 'expect to reload and create producer' do
@@ -141,7 +148,7 @@ RSpec.describe WaterDrop::ProducerProxy do
 
         expect(Kafka)
           .to receive(:new)
-          .with(::WaterDrop.config.kafka.to_h)
+          .with(kafka_init_parameters)
           .and_return(kafka)
       end
 

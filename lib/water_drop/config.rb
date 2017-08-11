@@ -5,6 +5,11 @@ module WaterDrop
   class Config
     extend Dry::Configurable
 
+    # option client_id [String] identifier of this producer
+    setting :client_id, 'waterdrop'
+    # option logger [Instance, nil] logger that we want to use or nil to
+    #   fallback to ruby-kafka logger
+    setting :logger, nil
     # Available options
     setting :send_messages
     # @option raise_on_failure [Boolean] Should raise error when failed to deliver a message
@@ -23,12 +28,8 @@ module WaterDrop
 
     # option kafka [Hash] - optional - kafka configuration options (hosts)
     setting :kafka do
-      setting :client_id, 'waterdrop'
       # @option seed_brokers [Array<String>] Array that contains Kafka seed broker hosts with ports
       setting :seed_brokers
-      # option logger [Instance, nil] logger that we want to use or nil to
-      #   fallback to ruby-kafka logger
-      setting :logger, nil
       # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
       # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
       # least one host.
