@@ -11,8 +11,8 @@ module WaterDrop
       # @return [::ConnectionPool] connection pool instance that we can then use
       def pool
         @pool ||= ConnectionPool.new(
-          size: ::WaterDrop.config.connection_pool_size,
-          timeout: ::WaterDrop.config.connection_pool_timeout
+          size: ::WaterDrop.config.connection_pool.size,
+          timeout: ::WaterDrop.config.connection_pool.timeout
         ) do
           WaterDrop::ProducerProxy.new
         end

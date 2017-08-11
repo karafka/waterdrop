@@ -20,8 +20,7 @@ RSpec.describe WaterDrop::Pool do
 
   describe '.pool' do
     let(:config) { double }
-    let(:connection_pool_size) { double }
-    let(:connection_pool_timeout) { double }
+    let(:connection_pool) { OpenStruct.new(size: double, timeout: double) }
 
     before do
       expect(::WaterDrop::Config)
@@ -30,18 +29,15 @@ RSpec.describe WaterDrop::Pool do
         .exactly(2).times
 
       expect(config)
-        .to receive(:connection_pool_timeout)
-        .and_return(connection_pool_timeout)
-
-      expect(config)
-        .to receive(:connection_pool_size)
-        .and_return(connection_pool_size)
+        .to receive(:connection_pool)
+        .and_return(connection_pool)
+        .exactly(2).times
 
       expect(ConnectionPool)
         .to receive(:new)
         .with(
-          size: connection_pool_size,
-          timeout: connection_pool_timeout
+          size: connection_pool.size,
+          timeout: connection_pool.timeout
         )
         .and_yield
 
