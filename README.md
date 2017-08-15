@@ -92,12 +92,9 @@ message that you want to send should be either binary or stringified (to_s, to_j
 
 * [Karafka framework](https://github.com/karafka/karafka)
 * [Waterdrop](https://github.com/karafka/waterdrop)
-* [Worker Glass](https://github.com/karafka/worker-glass)
 * [Envlogic](https://github.com/karafka/envlogic)
 * [Null Logger](https://github.com/karafka/null-logger)
-* [Aspector](https://github.com/gcao/aspector)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
-* [WaterDrop Code Climate](https://codeclimate.com/github/karafka/waterdrop)
 
 ## Note on Patches/Pull Requests
 
