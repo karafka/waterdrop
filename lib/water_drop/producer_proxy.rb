@@ -62,7 +62,9 @@ module WaterDrop
           client_id: ::WaterDrop.config.client_id,
           logger: ::WaterDrop.config.logger
         }.merge(::WaterDrop.config.kafka.to_h)
-      ).producer
+      ).producer(
+        required_acks: ::WaterDrop.config.required_acks
+      )
     end
 
     # @return [Boolean] true if we cannot use producer anymore because it was not used for a

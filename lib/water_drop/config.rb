@@ -14,6 +14,8 @@ module WaterDrop
     setting :send_messages
     # @option raise_on_failure [Boolean] Should raise error when failed to deliver a message
     setting :raise_on_failure
+    # @option required_acks [:all, 0, 1] acknowledgement level ()
+    setting :required_acks, :all
 
     # Connection pool options
     setting :connection_pool do

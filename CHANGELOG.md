@@ -1,6 +1,11 @@
 # WaterDrop changelog
 
-## 0.4 unreleased
+## 0.4.0.1 - Unreleased
+
+- #37 - ack level for producer
+- Gem bump
+
+## 0.4
 - Bump to match Karafka
 - Renamed ```hosts``` to ```seed_brokers```
 - Removed the ```ssl``` scoping for ```kafka``` config namespace to better match Karafka conventions
