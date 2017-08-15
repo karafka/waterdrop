@@ -88,10 +88,6 @@ message.send!
 
 message that you want to send should be either binary or stringified (to_s, to_json, etc).
 
-### Using aspects to handle messages
-
-WaterDrop no longer depends on [Aspector](https://github.com/gcao/aspector). Please refer to [Aspector](https://github.com/gcao/aspector) documentation if you want to handle messaging in an aspect way.
-
 ## References
 
 * [Karafka framework](https://github.com/karafka/karafka)
