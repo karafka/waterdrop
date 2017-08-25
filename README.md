@@ -29,24 +29,25 @@ bundle install
 
 WaterDrop has following configuration options:
 
-| Option                      | Required   | Value type    | Description                                                                        |
-|-----------------------------|------------|---------------|------------------------------------------------------------------------------------|
-| send_messages               | true       | Boolean       | Should we send messages to Kafka                                                   |
-| connect_timeout             | false      | Integer       | Number of seconds to wait while connecting to a broker for the first time          |
-| socket_timeout              | false      | Integer       | Number of seconds to wait when reading from or writing to a socket                 |
-| connection_pool.size        | true       | Integer       | Kafka connection pool size                                                         |
-| connection_pool.timeout     | true       | Integer       | Kafka connection pool timeout                                                      |
-| kafka.seed_brokers          | true       | Array<String> | Kafka servers hosts with ports                                                     |
-| raise_on_failure            | true       | Boolean       | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures |
-| kafka.ssl_ca_cert           | false      | String        | SSL CA certificate                                                                 |
-| kafka.ssl_ca_cert_file_path | false      | String        | SSL CA certificate file path                                                       |
-| kafka.ssl_client_cert       | false      | String        | SSL client certificate                                                             |
-| kafka.ssl_client_cert_key   | false      | String        | SSL client certificate password                                                    |
-| kafka.sasl_gssapi_principal | false      | String        | SASL principal                                                                     |
-| kafka.sasl_gssapi_keytab    | false      | String        | SASL keytab                                                                        |
-| kafka.sasl_plain_authzid    | false      | String        | The authorization identity to use                                                  |
-| kafka.sasl_plain_username   | false      | String        | The username used to authenticate                                                  |
-| kafka.sasl_plain_password   | false      | String        | The password used to authenticate                                                  |
+| Option                      | Required   | Value type      | Description                                                                        |
+|-----------------------------|------------|-----------------|------------------------------------------------------------------------------------|
+| send_messages               | true       | Boolean         | Should we send messages to Kafka                                                   |
+| connect_timeout             | false      | Integer         | Number of seconds to wait while connecting to a broker for the first time          |
+| required_acks               | false      | Symbol, Integer | [:all, 0, 1] acknowledgement level for Kafka                                       |
+| socket_timeout              | false      | Integer         | Number of seconds to wait when reading from or writing to a socket                 |
+| connection_pool.size        | true       | Integer         | Kafka connection pool size                                                         |
+| connection_pool.timeout     | true       | Integer         | Kafka connection pool timeout                                                      |
+| kafka.seed_brokers          | true       | Array<String>   | Kafka servers hosts with ports                                                     |
+| raise_on_failure            | true       | Boolean         | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures |
+| kafka.ssl_ca_cert           | false      | String          | SSL CA certificate                                                                 |
+| kafka.ssl_ca_cert_file_path | false      | String          | SSL CA certificate file path                                                       |
+| kafka.ssl_client_cert       | false      | String          | SSL client certificate                                                             |
+| kafka.ssl_client_cert_key   | false      | String          | SSL client certificate password                                                    |
+| kafka.sasl_gssapi_principal | false      | String          | SASL principal                                                                     |
+| kafka.sasl_gssapi_keytab    | false      | String          | SASL keytab                                                                        |
+| kafka.sasl_plain_authzid    | false      | String          | The authorization identity to use                                                  |
+| kafka.sasl_plain_username   | false      | String          | The username used to authenticate                                                  |
+| kafka.sasl_plain_password   | false      | String          | The password used to authenticate                                                  |
 
 To apply this configuration, you need to use a *setup* method:
 
