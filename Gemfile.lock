@@ -35,7 +35,7 @@ GEM
       rspec-support (~> 3.6.0)
     rspec-support (3.6.0)
     ruby-kafka (0.4.1)
-    simplecov (0.14.1)
+    simplecov (0.15.0)
       docile (~> 1.1.0)
       json (>= 1.8, < 3)
       simplecov-html (~> 0.10.0)
@@ -45,8 +45,8 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rspec (~> 3.6.0)
-  simplecov (~> 0.14.1)
+  rspec
+  simplecov
   waterdrop!
 
 BUNDLED WITH
