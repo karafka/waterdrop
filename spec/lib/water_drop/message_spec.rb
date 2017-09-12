@@ -17,13 +17,11 @@ RSpec.describe WaterDrop::Message do
       before do
         allow(WaterDrop).to receive(:config).and_return(config)
         allow(config).to receive(:send_messages).and_return(true)
-
-        expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
-        expect(producer).to receive(:send_message)
-          .with(any_args)
       end
 
       it 'sends message with topic and message' do
+        expect(WaterDrop::Pool).to receive(:with).and_yield(producer)
+        expect(producer).to receive(:send_message).with(any_args)
         waterdrop_message.send!
       end
     end

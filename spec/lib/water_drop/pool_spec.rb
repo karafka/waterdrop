@@ -21,31 +21,27 @@ RSpec.describe WaterDrop::Pool do
   describe '.pool' do
     let(:config) { double }
     let(:connection_pool) { OpenStruct.new(size: double, timeout: double) }
-
-    before do
-      expect(::WaterDrop::Config)
-        .to receive(:config)
-        .and_return(config)
-        .exactly(2).times
-
-      expect(config)
-        .to receive(:connection_pool)
-        .and_return(connection_pool)
-        .exactly(2).times
-
-      expect(ConnectionPool)
-        .to receive(:new)
-        .with(
-          size: connection_pool.size,
-          timeout: connection_pool.timeout
-        )
-        .and_yield
-
-      expect(WaterDrop::ProducerProxy)
-        .to receive(:new)
-        .and_return(producer)
+    let(:config_details) do
+      {
+        size: connection_pool.size,
+        timeout: connection_pool.timeout
+      }
     end
 
-    it { waterdrop_pool.pool }
+    before do
+      allow(::WaterDrop::Config)
+        .to receive(:config)
+        .and_return(config)
+
+      allow(config)
+        .to receive(:connection_pool)
+        .and_return(connection_pool)
+    end
+
+    it 'expect to build up a pool' do
+      expect(ConnectionPool).to receive(:new).with(config_details).and_yield
+      expect(WaterDrop::ProducerProxy).to receive(:new).and_return(producer)
+      waterdrop_pool.pool
+    end
   end
 end
