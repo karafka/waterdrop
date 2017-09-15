@@ -4,6 +4,7 @@
 
 - #37 - ack level for producer
 - Gem bump
+- Ruby 2.4.2 support
 
 ## 0.4
 - Bump to match Karafka
