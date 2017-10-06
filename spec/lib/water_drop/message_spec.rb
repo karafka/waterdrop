@@ -35,27 +35,24 @@ RSpec.describe WaterDrop::Message do
       end
 
       context "when #{error} happens" do
-        before do
-          expect(::WaterDrop)
-            .to receive(:config)
-            .and_return(config)
-            .exactly(2).times
-
-          expect(::WaterDrop::Pool)
-            .to receive(:with)
-            .and_raise(error)
-        end
-
         context 'and raise_on_failure is set to false' do
           let(:raise_on_failure) { false }
 
-          it { expect { waterdrop_message.send! }.not_to raise_error }
+          it 'expect not to raise error' do
+            expect(::WaterDrop).to receive(:config).and_return(config).exactly(2).times
+            expect(::WaterDrop::Pool).to receive(:with).and_raise(error)
+            expect { waterdrop_message.send! }.not_to raise_error
+          end
         end
 
         context 'and raise_on_failure is set to true' do
           let(:raise_on_failure) { true }
 
-          it { expect { waterdrop_message.send! }.to raise_error(error) }
+          it 'expect not to raise error' do
+            expect(::WaterDrop).to receive(:config).and_return(config).exactly(2).times
+            expect(::WaterDrop::Pool).to receive(:with).and_raise(error)
+            expect { waterdrop_message.send! }.to raise_error
+          end
         end
       end
     end

@@ -24,12 +24,12 @@ RSpec.describe WaterDrop::ProducerProxy do
 
     context 'when sending was successful (no errors)' do
       before do
-        expect(producer_proxy)
+        allow(producer_proxy)
           .to receive(:producer)
           .and_return(producer)
           .exactly(2).times
 
-        expect(producer_proxy)
+        allow(producer_proxy)
           .to receive(:touch)
       end
 
