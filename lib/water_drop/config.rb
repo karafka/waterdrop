@@ -68,7 +68,7 @@ module WaterDrop
       # More: https://github.com/zendesk/ruby-kafka#compression
       # More: https://github.com/zendesk/ruby-kafka/blob/master/lib/kafka/compression.rb
       setting :compression_codec, nil
-      # option compression_codec [Integer] Sets producerc compression threshold
+      # option compression_codec [Integer] Sets producer compression threshold
       # More: https://github.com/zendesk/ruby-kafka#compression
       setting :compression_threshold, 1
     end
