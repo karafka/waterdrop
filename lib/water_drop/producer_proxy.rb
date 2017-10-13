@@ -63,6 +63,8 @@ module WaterDrop
           logger: ::WaterDrop.config.logger
         }.merge(::WaterDrop.config.kafka.to_h)
       ).producer(
+        compression_codec: ::WaterDrop.config.producer.compression_codec,
+        compression_threshold: ::WaterDrop.config.producer.compression_threshold,
         required_acks: ::WaterDrop.config.required_acks
       )
     end

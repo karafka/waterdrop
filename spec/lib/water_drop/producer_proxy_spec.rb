@@ -113,6 +113,13 @@ RSpec.describe WaterDrop::ProducerProxy do
         logger: ::WaterDrop.config.logger
       }.merge(::WaterDrop.config.kafka.to_h)
     end
+    let(:producer_init_parameters) do
+      {
+        compression_codec: ::WaterDrop.config.producer.compression_codec,
+        compression_threshold: ::WaterDrop.config.producer.compression_threshold,
+        required_acks: ::WaterDrop.config.required_acks
+      }
+    end
 
     before do
       WaterDrop.config.kafka.seed_brokers = kafka
@@ -134,7 +141,7 @@ RSpec.describe WaterDrop::ProducerProxy do
       end
 
       it 'expect to reload and create producer' do
-        expect(kafka).to receive(:producer)
+        expect(kafka).to receive(:producer).with(producer_init_parameters)
         producer_proxy.send :producer
       end
     end

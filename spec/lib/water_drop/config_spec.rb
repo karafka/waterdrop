@@ -57,6 +57,21 @@ RSpec.describe WaterDrop::Config do
     end
   end
 
+  %i[
+    compression_codec
+    compression_threshold
+  ].each do |attribute|
+    describe "producer.#{attribute}=" do
+      let(:value) { rand }
+
+      before { config.producer[attribute] = value }
+
+      it 'assigns a given value' do
+        expect(config.producer[attribute]).to eq value
+      end
+    end
+  end
+
   describe 'kafka.seed_brokers=' do
     let(:value) { rand }
 
