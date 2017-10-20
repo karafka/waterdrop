@@ -104,7 +104,7 @@ Commit, do not mess with Rakefile, version, or history. (if you want to have you
 
 [![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/repositories/waterdrop)
 
-Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combinse multiple linters and code analyzers for both code and documentation.
+Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation.
 
 Unfortunately, it does not yet support independent forks, however you should be fine by looking at what we require.
 
