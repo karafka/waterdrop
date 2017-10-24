@@ -35,11 +35,12 @@ module WaterDrop
 
       DeliveryBoy.logger = self.logger = config.logger
 
-      applier = lambda { |db, h|
+      # Recursive lambda for mapping config down to delivery boy
+      applier = lambda { |db_config, h|
         h.each do |k, v|
-          applier.call(db, v) && next if v.is_a?(Hash)
-          next unless db.respond_to?(:"#{k}=")
-          db.public_send(:"#{k}=", v)
+          applier.call(db_config, v) && next if v.is_a?(Hash)
+          next unless db_config.respond_to?(:"#{k}=")
+          db_config.public_send(:"#{k}=", v)
         end
       }
 

@@ -1,5 +1,5 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Schemas::Config do
+RSpec.describe WaterDrop::BaseProducer do
   pending
 end

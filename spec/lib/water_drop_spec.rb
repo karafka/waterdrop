@@ -28,5 +28,9 @@ RSpec.describe WaterDrop do
     it 'sets up the configuration' do
       expect(described_class.config.send_messages).to eq(true)
     end
+
+    context 'when the config is invalid' do
+      pending
+    end
   end
 end
