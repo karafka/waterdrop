@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module WaterDrop
   # Base messages producer that contains all the logic that is exactly the same for both
   # sync and async producers

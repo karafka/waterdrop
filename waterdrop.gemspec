@@ -16,10 +16,10 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'null-logger'
   spec.add_dependency 'delivery_boy', '>= 0.2.1'
   spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.add_dependency 'dry-validation', '~> 0.11'
+  spec.add_dependency 'null-logger'
 
   spec.required_ruby_version = '>= 2.2.0'
 
