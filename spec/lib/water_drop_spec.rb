@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'logger'
-
 RSpec.describe WaterDrop do
   describe '#logger' do
     let(:logger) { double }

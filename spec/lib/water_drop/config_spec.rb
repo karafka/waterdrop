@@ -7,30 +7,14 @@ RSpec.describe WaterDrop::Config do
     client_id
     logger
     send_messages
-    raise_on_failure
   ].each do |attribute|
     describe "#{attribute}=" do
-      let(:value) { rand }
+      let(:value) { rand.to_s }
 
       before { config.public_send(:"#{attribute}=", value) }
 
       it 'assigns a given value' do
         expect(config.public_send(attribute)).to eq value
-      end
-    end
-  end
-
-  %i[
-    size
-    timeout
-  ].each do |attribute|
-    describe "#{attribute}=" do
-      let(:value) { rand }
-
-      before { config.connection_pool[attribute] = value }
-
-      it 'assigns a given value' do
-        expect(config.connection_pool[attribute]).to eq value
       end
     end
   end
@@ -47,7 +31,7 @@ RSpec.describe WaterDrop::Config do
     sasl_plain_password
   ].each do |attribute|
     describe "#{attribute}=" do
-      let(:value) { rand }
+      let(:value) { rand.to_s }
 
       before { config.kafka[attribute] = value }
 
@@ -58,7 +42,7 @@ RSpec.describe WaterDrop::Config do
   end
 
   describe 'kafka.seed_brokers=' do
-    let(:value) { rand }
+    let(:value) { %w[kafka://127.0.0.1:9092] }
 
     before { config.kafka.seed_brokers = value }
 

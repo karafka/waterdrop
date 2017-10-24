@@ -2,17 +2,11 @@
 
 # External components
 %w[
-  rake
-  rubygems
-  bundler
-  logger
-  pathname
   json
-  kafka
-  forwardable
-  connection_pool
+  delivery_boy
   null_logger
   dry-configurable
+  dry-validation
 ].each { |lib| require lib }
 
 # Internal components
@@ -20,26 +14,39 @@ base_path = File.dirname(__FILE__) + '/water_drop'
 
 %w[
   version
-  producer_proxy
-  pool
+  schemas/message_options
+  schemas/config
   config
-  message
+  errors
+  base_producer
+  sync_producer
+  async_producer
 ].each { |lib| require "#{base_path}/#{lib}" }
 
 # WaterDrop library
 module WaterDrop
   class << self
-    attr_writer :logger
-
-    # @return [Logger] logger that we want to use
-    def logger
-      @logger ||= NullLogger.new
-    end
+    attr_accessor :logger
 
     # Sets up the whole configuration
     # @param [Block] block configuration block
     def setup(&block)
       Config.setup(&block)
+
+      DeliveryBoy.logger = self.logger = config.logger
+
+      applier = lambda { |db, h|
+        h.each do |k, v|
+          applier.call(db, v) && next if v.is_a?(Hash)
+          next unless db.respond_to?(:"#{k}=")
+          db.public_send(:"#{k}=", v)
+        end
+      }
+
+      DeliveryBoy.config.tap do |config|
+        config.brokers = Config.config.kafka.seed_brokers
+        applier.call(config, Config.config.to_h)
+      end
     end
 
     # @return [WaterDrop::Config] config instance
@@ -48,3 +55,9 @@ module WaterDrop
     end
   end
 end
+
+WaterDrop.setup do |c|
+  c.kafka.seed_brokers = %w[kafka://127.0.0.1:9092]
+end
+
+WaterDrop::Producer.call 'a', topic: 'a'

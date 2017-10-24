@@ -1,37 +1,28 @@
 # frozen_string_literal: true
 
+# Configuration and descriptions are based on the delivery boy zendesk gem
+# @see https://github.com/zendesk/delivery_boy
 module WaterDrop
   # Configurator for setting up all options required by WaterDrop
   class Config
     extend Dry::Configurable
 
+    # WaterDrop options
     # option client_id [String] identifier of this producer
     setting :client_id, 'waterdrop'
-    # option logger [Instance, nil] logger that we want to use or nil to
+    # option [Instance, nil] logger that we want to use or nil to
     #   fallback to ruby-kafka logger
-    setting :logger, nil
-    # Available options
-    setting :send_messages
-    # @option raise_on_failure [Boolean] Should raise error when failed to deliver a message
-    setting :raise_on_failure
-    # @option required_acks [:all, 0, 1] acknowledgement level ()
-    setting :required_acks, :all
+    setting :logger, NullLogger.new
+    # option [Boolean] should we send messages. Setting this to false can be really useful when
+    #   testing and or developing because when set to false, won't actually ping Kafka
+    setting :send_messages, true
 
-    # Connection pool options
-    setting :connection_pool do
-      # Connection pool size for producers. Note that we take a bigger number because there
-      # are cases when we might have more sidekiq threads than Karafka consumers (small app)
-      # or the opposite for bigger systems
-      setting :size, 2
-      # How long should we wait for a working resource from the pool before rising timeout
-      # With a proper connection pool size, this should never happen
-      setting :timeout, 5
-    end
-
-    # option kafka [Hash] - optional - kafka configuration options (hosts)
+    # Settings directly related to the Kafka driver
     setting :kafka do
-      # @option seed_brokers [Array<String>] Array that contains Kafka seed broker hosts with ports
+      # option [Array<String>] Array that contains Kafka seed broker hosts with ports
       setting :seed_brokers
+
+      # Network timeouts
       # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
       # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
       # least one host.
@@ -40,15 +31,56 @@ module WaterDrop
       # writing to a socket connection to a broker. After this timeout expires the connection
       # will be killed. Note that some Kafka operations are by definition long-running, such as
       # waiting for new messages to arrive in a partition, so don't set this value too low
-      setting :socket_timeout, 10
+      setting :socket_timeout, 30
+
+      # Buffering for async producer
+      # @option [Integer] The maximum number of bytes allowed in the buffer before new messages
+      #   are rejected.
+      setting :max_buffer_bytesize, 10_000_000
+      # @option [Integer] The maximum number of messages allowed in the buffer before new messages
+      #   are rejected.
+      setting :max_buffer_size, 1000
+      # @option [Integer] The maximum number of messages allowed in the queue before new messages
+      #   are rejected. The queue is used to ferry messages from the foreground threads of your
+      #   application to the background thread that buffers and delivers messages.
+      setting :max_queue_size, 1000
+
+      # option [Integer] A timeout executed by a broker when the client is sending messages to it.
+      #   It defines the number of seconds the broker should wait for replicas to acknowledge the
+      #   write before responding to the client with an error. As such, it relates to the
+      #   required_acks setting. It should be set lower than socket_timeout.
+      setting :ack_timeout, 5
+      # option [Integer] The number of seconds between background message
+      #   deliveries. Default is 10 seconds. Disable timer-based background deliveries by
+      #   setting this to 0.
+      setting :delivery_interval, 10
+      # option [Integer] The number of buffered messages that will trigger a background message
+      #   delivery. Default is 100 messages. Disable buffer size based background deliveries by
+      #   setting this to 0.
+      setting :delivery_threshold, 100
+
+      # option [Integer] The number of retries when attempting to deliver messages.
+      setting :max_retries, 2
+      # option [Integer]
+      setting :required_acks, -1
+      # option [Integer]
+      setting :retry_backoff, 1
+
+      # option [Integer] The minimum number of messages that must be buffered before compression is
+      #   attempted. By default only one message is required. Only relevant if compression_codec
+      #   is set.
+      setting :compression_threshold, 1
+      # option [Symbol] The codec used to compress messages. Must be either snappy or gzip.
+      setting :compression_codec, nil
+
       # SSL authentication related settings
       # option ca_cert [String] SSL CA certificate
       setting :ssl_ca_cert, nil
       # option ssl_ca_cert_file_path [String] SSL CA certificate file path
       setting :ssl_ca_cert_file_path, nil
-      # option client_cert [String] SSL client certificate
+      # option ssl_client_cert [String] SSL client certificate
       setting :ssl_client_cert, nil
-      # option client_cert_key [String] SSL client certificate password
+      # option ssl_client_cert_key [String] SSL client certificate password
       setting :ssl_client_cert_key, nil
       # option sasl_gssapi_principal [String] sasl principal
       setting :sasl_gssapi_principal, nil
@@ -69,7 +101,20 @@ module WaterDrop
       def setup
         configure do |config|
           yield(config)
+          validate!(config.to_h)
         end
+      end
+
+      private
+
+      # Validates the configuration and if anything is wrong, will raise an exception
+      # @param config_hash [Hash] config hash with setup details
+      # @raise [WaterDrop::Errors::InvalidConfiguration] raised when something is wrong with
+      #   the configuration
+      def validate!(config_hash)
+        validation_result = Schemas::Config.call(config_hash)
+        return true if validation_result.success?
+        raise Errors::InvalidConfiguration, validation_result.errors
       end
     end
   end
