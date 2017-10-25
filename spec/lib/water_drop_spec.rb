@@ -19,18 +19,32 @@ RSpec.describe WaterDrop do
   end
 
   describe '#setup' do
-    before do
-      described_class.setup do |config|
-        config.send_messages = true
+    context 'when config is valid' do
+      let(:setup_process) do
+        described_class.setup do |config|
+          config.send_messages = true
+        end
+      end
+
+      it 'sets up the configuration' do
+        expect(described_class.config.send_messages).to eq(true)
       end
     end
 
-    it 'sets up the configuration' do
-      expect(described_class.config.send_messages).to eq(true)
-    end
-
     context 'when the config is invalid' do
-      pending
+      let(:setup_process) do
+        described_class.setup do |config|
+          config.client_id = nil
+        end
+      end
+
+      after do
+        described_class.setup do |config|
+          config.client_id = 'waterdrop'
+        end
+      end
+
+      it { expect { setup_process }.to raise_error(WaterDrop::Errors::InvalidConfiguration) }
     end
   end
 end

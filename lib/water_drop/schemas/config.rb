@@ -21,7 +21,7 @@ module WaterDrop
       end
 
       required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
-      required(:logger)
+      required(:logger).filled
       required(:send_messages).filled(:bool?)
 
       required(:kafka).schema do
@@ -40,8 +40,8 @@ module WaterDrop
         required(:delivery_threshold).filled(:int?, gteq?: 0)
 
         required(:max_retries).filled(:int?, gteq?: 0)
-        required(:required_acks).filled(included_in?: [1, 0, -1, :all])
         required(:retry_backoff).filled(:int?, gteq?: 0)
+        required(:required_acks).filled(included_in?: [1, 0, -1, :all])
 
         %i[
           ssl_ca_cert

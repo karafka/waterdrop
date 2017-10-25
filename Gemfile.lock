@@ -47,7 +47,6 @@ GEM
     json (2.1.0)
     king_konf (0.1.8)
     null-logger (0.1.4)
-    rake (12.1.0)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
       rspec-expectations (~> 3.7.0)
@@ -72,7 +71,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  rake
   rspec
   simplecov
   waterdrop!

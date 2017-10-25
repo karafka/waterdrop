@@ -10,9 +10,9 @@ module WaterDrop
     # @note Does not validate message itself as it is not our concern
     MessageOptions = Dry::Validation.Schema do
       required(:topic).filled(:str?, format?: TOPIC_REGEXP)
-      optional(:key).maybe(:str?)
-      optional(:partition).maybe(:int?, gteq?: 0)
-      optional(:partition_key).maybe(:str?)
+      optional(:key).maybe(:str?, :filled?)
+      optional(:partition).filled(:int?, gteq?: 0)
+      optional(:partition_key).maybe(:str?, :filled?)
     end
   end
 end
