@@ -6,9 +6,29 @@ module WaterDrop
     # Schema with validation rules for WaterDrop configuration details
     Config = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
-      URI_SCHEMES = %w[kafka kafka+ssl].freeze
+      URI_SCHEMES = %w[
+        kafka
+        kafka+ssl
+      ].freeze
+
+      # All encryption related options keys
+      ENCRYPTION_OPTIONS_KEYS = %i[
+        ssl_ca_cert
+        ssl_ca_cert_file_path
+        ssl_client_cert
+        ssl_client_cert_key
+        sasl_plain_authzid
+        sasl_plain_username
+        sasl_plain_password
+        sasl_gssapi_principal
+        sasl_gssapi_keytab
+      ].freeze
 
       configure do
+        config.messages_file = File.join(
+          WaterDrop.gem_root, 'config', 'errors.yml'
+        )
+
         # Uri validator to check if uri is in a Kafka acceptable format
         # @param uri [String] uri we want to validate
         # @return [Boolean] true if it is a valid uri, otherwise false
@@ -16,7 +36,7 @@ module WaterDrop
           uri = URI.parse(uri)
           URI_SCHEMES.include?(uri.scheme) && uri.port
         rescue URI::InvalidURIError
-          return false
+          false
         end
       end
 
@@ -43,17 +63,7 @@ module WaterDrop
         required(:retry_backoff).filled(:int?, gteq?: 0)
         required(:required_acks).filled(included_in?: [1, 0, -1, :all])
 
-        %i[
-          ssl_ca_cert
-          ssl_ca_cert_file_path
-          ssl_client_cert
-          ssl_client_cert_key
-          sasl_plain_authzid
-          sasl_plain_username
-          sasl_plain_password
-          sasl_gssapi_principal
-          sasl_gssapi_keytab
-        ].each do |encryption_attribute|
+        ENCRYPTION_OPTIONS_KEYS.each do |encryption_attribute|
           optional(encryption_attribute).maybe(:str?)
         end
       end

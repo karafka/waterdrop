@@ -12,17 +12,6 @@
 # Internal components
 base_path = File.dirname(__FILE__) + '/water_drop'
 
-%w[
-  version
-  schemas/message_options
-  schemas/config
-  config
-  errors
-  base_producer
-  sync_producer
-  async_producer
-].each { |lib| require "#{base_path}/#{lib}" }
-
 # WaterDrop library
 module WaterDrop
   class << self
@@ -54,5 +43,21 @@ module WaterDrop
     def config
       Config.config
     end
+
+    # @return [String] root path of this gem
+    def gem_root
+      Pathname.new(File.expand_path('../..', __FILE__))
+    end
   end
 end
+
+%w[
+  version
+  schemas/message_options
+  schemas/config
+  config
+  errors
+  base_producer
+  sync_producer
+  async_producer
+].each { |lib| require "#{base_path}/#{lib}" }

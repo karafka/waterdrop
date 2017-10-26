@@ -114,6 +114,13 @@ RSpec.describe WaterDrop::Schemas::Config do
 
       it { expect(schema.call(config)).to be_success }
     end
+
+    context 'when all the seed brokers are not uris' do
+      before { config[:kafka][:seed_brokers] = %w[#$%^&* ^&*()] }
+
+      it { expect(schema.call(config)).to be_failure }
+      it { expect { schema.call(config).errors }.not_to raise_error }
+    end
   end
 
   context 'kafka.connect_timeout validations' do
