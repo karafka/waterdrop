@@ -10,6 +10,7 @@
 - Complete update of the API
 - Much better validations for config details
 - Complete API remodel - please read the new README
+- Renamed send_messages to deliver
 
 ## 0.4
 - Bump to match Karafka

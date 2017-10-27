@@ -6,7 +6,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     {
       client_id: 'id',
       logger: NullLogger.new,
-      send_messages: false,
+      deliver: false,
       kafka: {
         seed_brokers: %w[kafka://127.0.0.1:9092],
         connect_timeout: 10,
@@ -64,21 +64,21 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'send_messages validations' do
-    context 'when send_messages is nil but present in options' do
-      before { config[:send_messages] = nil }
+  context 'deliver validations' do
+    context 'when deliver is nil but present in options' do
+      before { config[:deliver] = nil }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context 'when send_messages is not present' do
-      before { config.delete(:send_messages) }
+    context 'when deliver is not present' do
+      before { config.delete(:deliver) }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
-    context 'when send_messages is not boolean' do
-      before { config[:send_messages] = rand }
+    context 'when deliver is not boolean' do
+      before { config[:deliver] = rand }
 
       it { expect(schema.call(config)).not_to be_success }
     end

@@ -10,12 +10,11 @@ module WaterDrop
     # WaterDrop options
     # option client_id [String] identifier of this producer
     setting :client_id, 'waterdrop'
-    # option [Instance, nil] logger that we want to use or nil to
-    #   fallback to ruby-kafka logger
+    # option [Instance, nil] logger that we want to use or nil to fallback to ruby-kafka logger
     setting :logger, NullLogger.new
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka
-    setting :send_messages, true
+    setting :deliver, true
 
     # Settings directly related to the Kafka driver
     setting :kafka do

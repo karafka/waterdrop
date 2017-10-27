@@ -42,7 +42,7 @@ module WaterDrop
 
       required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
       required(:logger).filled
-      required(:send_messages).filled(:bool?)
+      required(:deliver).filled(:bool?)
 
       required(:kafka).schema do
         required(:seed_brokers).filled { each(:broker_schema?) }

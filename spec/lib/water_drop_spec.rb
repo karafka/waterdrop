@@ -22,12 +22,12 @@ RSpec.describe WaterDrop do
     context 'when config is valid' do
       let(:setup_process) do
         described_class.setup do |config|
-          config.send_messages = true
+          config.deliver = true
         end
       end
 
       it 'sets up the configuration' do
-        expect(described_class.config.send_messages).to eq(true)
+        expect(described_class.config.deliver).to eq(true)
       end
     end
 

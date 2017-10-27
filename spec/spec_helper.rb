@@ -35,6 +35,6 @@ require 'water_drop'
 
 # Configure for test setup
 WaterDrop.setup do |config|
-  config.send_messages = true
+  config.deliver = true
   config.kafka.seed_brokers = %w[kafka://localhost:9092]
 end

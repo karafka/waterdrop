@@ -15,7 +15,7 @@ module WaterDrop
       #   somehow invalid and we cannot perform delivery because of that
       def call(message, options)
         validate!(options)
-        return unless WaterDrop.config.send_messages
+        return unless WaterDrop.config.deliver
         DeliveryBoy.public_send(method_name, message, options)
       end
 
