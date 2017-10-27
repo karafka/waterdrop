@@ -93,6 +93,17 @@ module WaterDrop
       setting :sasl_plain_password, nil
     end
 
+    # option producer [Hash] - optional - producer configuration options
+    setting :producer do
+      # option compression_codec [Symbol] Sets producer compression codec
+      # More: https://github.com/zendesk/ruby-kafka#compression
+      # More: https://github.com/zendesk/ruby-kafka/blob/master/lib/kafka/compression.rb
+      setting :compression_codec, nil
+      # option compression_codec [Integer] Sets producer compression threshold
+      # More: https://github.com/zendesk/ruby-kafka#compression
+      setting :compression_threshold, 1
+    end
+
     class << self
       # Configurating method
       # @yield Runs a block of code providing a config singleton instance to it
