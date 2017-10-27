@@ -20,9 +20,8 @@ RSpec.describe WaterDrop::SyncProducer do
     end
 
     context 'when we send message with valid options' do
-
       context 'but the deliver flag is set to false' do
-        before { expect(WaterDrop.config).to receive(:deliver).and_return(false) }
+        before { allow(WaterDrop.config).to receive(:deliver).and_return(false) }
 
         it 'expect not to pass to ruby-kafka' do
           expect(DeliveryBoy).not_to receive(:deliver)
@@ -31,8 +30,7 @@ RSpec.describe WaterDrop::SyncProducer do
       end
 
       context 'but the deliver flag is set to true' do
-
-        before { expect(WaterDrop.config).to receive(:deliver).and_return(true) }
+        before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
           expect(DeliveryBoy).to receive(:deliver).with(message, topic: topic)
