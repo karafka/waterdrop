@@ -5,7 +5,7 @@
 - #37 - ack level for producer
 - Gem bump
 - Ruby 2.4.2 support
-- Raw ruby-kafka driver is not replaced with delivery_boy
+- Raw ruby-kafka driver is now replaced with delivery_boy
 - Sync and async producers
 - Complete update of the API
 - Much better validations for config details

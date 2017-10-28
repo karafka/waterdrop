@@ -10,8 +10,7 @@ WaterDrop is based on Zendesks [delivery_boy](https://github.com/zendesk/deliver
 It is:
 
  - Thread safe
- - Supports sync producer
- - Supports async producer
+ - Supports sync and async producers
 
 ## Installation
 
@@ -43,7 +42,7 @@ To apply all those configuration options, you need to use the ```#setup``` metho
 ```ruby
 WaterDrop.setup do |config|
   config.deliver = true
-  config.kafka.seed_brokers = ['kafka://localhost:9092']
+  config.kafka.seed_brokers = %w[kafka://localhost:9092]
 end
 ```
 
@@ -122,14 +121,14 @@ Commit, do not mess with version, or history. (if you want to have your own vers
 
 [![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/repositories/waterdrop)
 
-Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combinse multiple linters and code analyzers for both code and documentation.
+Each pull request must pass our quality requirements. To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation.
 
 Unfortunately, it does not yet support independent forks, however you should be fine by looking at what we require.
 
 Please run:
 
 ```bash
-bundle exec rspec spec
+bundle exec rspec
 ```
 
 to check if everything is in order. After that you can submit a pull request.
