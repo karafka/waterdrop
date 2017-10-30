@@ -17,6 +17,7 @@ Gem::Specification.new do |spec|
   spec.license       = 'MIT'
 
   spec.add_dependency 'delivery_boy', '>= 0.2.2'
+  spec.add_dependency 'ruby-kafka', '>= 0.5'
   spec.add_dependency 'dry-configurable', '~> 0.7'
   spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'null-logger'
