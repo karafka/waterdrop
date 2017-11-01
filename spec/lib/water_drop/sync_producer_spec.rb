@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 RSpec.describe WaterDrop::SyncProducer do
-  specify { expect(described_class).to eq WaterDrop::Producer }
-
   describe '#call' do
     subject(:delivery) { described_class.call(message, topic: topic) }
 
