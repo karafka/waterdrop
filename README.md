@@ -89,9 +89,7 @@ To send Kafka messages, just use one of the producers:
 
 ```ruby
 WaterDrop::SyncProducer.call('message', topic: 'my-topic')
-
 # or for async
-
 WaterDrop::AsyncProducer.call('message', topic: 'my-topic')
 ```
 
@@ -99,7 +97,7 @@ Both ```SyncProducer``` and ```AsyncProducer``` accept following options:
 
 | Option              | Required | Value type     | Description                                                         |
 |-------------------- |----------|----------------|---------------------------------------------------------------------|
-| ```topic```         | true     | String, Symbol | The Kafka topic that should be written to                           |
+| ```topic```         | true     | String         | The Kafka topic that should be written to                           |
 | ```key```           | false    | String         | The key that should be set on the Kafka message                     |
 | ```partition```     | false    | Integer        | A specific partition number that should be written to               |
 | ```partition_key``` | false    | String         | A string that can be used to deterministically select the partition |

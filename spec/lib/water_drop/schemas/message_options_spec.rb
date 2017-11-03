@@ -29,6 +29,12 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
       it { expect(schema.call(message_options)).not_to be_success }
     end
 
+    context 'when topic is a symbol' do
+      before { message_options[:topic] = :symbol }
+
+      it { expect(schema.call(message_options)).not_to be_success }
+    end
+
     context 'when topic has an invalid format' do
       before { message_options[:topic] = '%^&*(' }
 
