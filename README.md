@@ -3,7 +3,14 @@
 [![Build Status](https://travis-ci.org/karafka/waterdrop.png)](https://travis-ci.org/karafka/waterdrop)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-Gem used to send messages to Kafka in an easy way.
+Gem used to send messages to Kafka in an easy way with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
+
+WaterDrop is based on Zendesks [delivery_boy](https://github.com/zendesk/delivery_boy) gem.
+
+It is:
+
+ - Thread safe
+ - Supports sync and async producers
 
 ## Installation
 
@@ -25,69 +32,79 @@ bundle install
 
 ## Setup
 
-WaterDrop has following configuration options:
+WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
 
-| Option                         | Required   | Value type      | Description                                                                        |
-|--------------------------------|------------|-----------------|------------------------------------------------------------------------------------|
-| send_messages                  | true       | Boolean         | Should we send messages to Kafka                                                   |
-| connect_timeout                | false      | Integer         | Number of seconds to wait while connecting to a broker for the first time          |
-| required_acks                  | false      | Symbol, Integer | [:all, 0, 1] acknowledgement level for Kafka                                       |
-| socket_timeout                 | false      | Integer         | Number of seconds to wait when reading from or writing to a socket                 |
-| connection_pool.size           | true       | Integer         | Kafka connection pool size                                                         |
-| connection_pool.timeout        | true       | Integer         | Kafka connection pool timeout                                                      |
-| kafka.seed_brokers             | true       | Array<String>   | Kafka servers hosts with ports                                                     |
-| raise_on_failure               | true       | Boolean         | Should we raise an exception when we cannot send message to Kafka - if false will silently ignore failures |
-| kafka.ssl_ca_cert              | false      | String          | SSL CA certificate                                                                 |
-| kafka.ssl_ca_cert_file_path    | false      | String          | SSL CA certificate file path                                                       |
-| kafka.ssl_client_cert          | false      | String          | SSL client certificate                                                             |
-| kafka.ssl_client_cert_key      | false      | String          | SSL client certificate password                                                    |
-| kafka.sasl_gssapi_principal    | false      | String          | SASL principal                                                                     |
-| kafka.sasl_gssapi_keytab       | false      | String          | SASL keytab                                                                        |
-| kafka.sasl_plain_authzid       | false      | String          | The authorization identity to use                                                  |
-| kafka.sasl_plain_username      | false      | String          | The username used to authenticate                                                  |
-| kafka.sasl_plain_password      | false      | String          | The password used to authenticate                                                  |
-| producer.compression_codec     | false      | Symbol          | Producer compression codec                                                         |
-| producer.compression_threshold | false      | Integer         | Producer compression threshold                                                     |
+- WaterDrop options - options directly related to Karafka framework and it's components
+- Ruby-Kafka driver options - options related to Ruby-Kafka/Delivery boy
 
-To apply this configuration, you need to use a *setup* method:
+To apply all those configuration options, you need to use the ```#setup``` method:
 
 ```ruby
 WaterDrop.setup do |config|
-  config.send_messages = true
-  config.connection_pool.size = 20
-  config.connection_pool.timeout = 1
-  config.kafka.seed_brokers = ['localhost:9092']
-  config.raise_on_failure = true
+  config.deliver = true
+  config.kafka.seed_brokers = %w[kafka://localhost:9092]
 end
 ```
 
-This configuration can be placed in *config/initializers* and can vary based on the environment:
+### WaterDrop configuration options
+
+| Option                      | Description                                                      |
+|-----------------------------|------------------------------------------------------------------|
+| client_id                   | This is how the client will identify itself to the Kafka brokers |
+| logger                      | Logger that we want to use                                       |
+| deliver                     | Should we send messages to Kafka                                 |
+
+### Ruby-Kafka driver and Delivery boy configuration options
+
+**Note:** We've listed here only **the most important** configuration options. If you're interested in all the options, please go to the [config.rb](https://github.com/karafka/waterdrop/blob/master/lib/water_drop/config.rb) file for more details.
+
+**Note:** All the options are subject to validations. In order to check what is and what is not acceptable, please go to the [config.rb validation schema](https://github.com/karafka/waterdrop/blob/master/lib/water_drop/schemas/config.rb) file.
+
+| Option              | Description                                                                                                                                           |
+|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| delivery_interval   | The number of seconds between background message deliveries. Disable timer-based background deliveries by setting this to 0.                          |
+| delivery_threshold  | The number of buffered messages that will trigger a background message delivery. Disable buffer size based background deliveries by setting this to 0.|
+| required_acks       | The number of Kafka replicas that must acknowledge messages before they're considered as successfully written.                                        |
+| ack_timeout         | A timeout executed by a broker when the client is sending messages to it.                                                                             |
+| max_retries         | The number of retries when attempting to deliver messages.                                                                                            |
+| retry_backoff       | The number of seconds to wait after a failed attempt to send messages to a Kafka broker before retrying.                                              |
+| max_buffer_bytesize | The maximum number of bytes allowed in the buffer before new messages are rejected.                                                                   |
+| max_buffer_size     | The maximum number of messages allowed in the buffer before new messages are rejected.                                                                |
+| max_queue_size      | The maximum number of messages allowed in the queue before new messages are rejected.                                                                 |
+| sasl_plain_username | The username used to authenticate.                                                                                                                    |
+| sasl_plain_password | The password used to authenticate.                                                                                                                    |
+
+This configuration can be also placed in *config/initializers* and can vary based on the environment:
 
 ```ruby
 WaterDrop.setup do |config|
-  config.send_messages = Rails.env.production?
-  config.connection_pool.size = 20
-  config.connection_pool.timeout = 1
-  config.kafka.seed_brokers = [Rails.env.production? ? 'prod-host:9091' : 'localhost:9092']
-  config.raise_on_failure = Rails.env.production?
+  config.deliver = Rails.env.production?
+  config.kafka.seed_brokers = [Rails.env.production? ? 'kafka://prod-host:9091' : 'kafka://localhost:9092']
 end
 ```
 
 ## Usage
 
-### Creating and sending standard messages
-
-To send Kafka messages, just create and send messages directly:
+To send Kafka messages, just use one of the producers:
 
 ```ruby
-message = WaterDrop::Message.new('topic', 'message')
-message.send!
+WaterDrop::SyncProducer.call('message', topic: 'my-topic')
 
-message = WaterDrop::Message.new('topic', { user_id: 1 }.to_json)
-message.send!
+# or for async
+
+WaterDrop::AsyncProducer.call('message', topic: 'my-topic')
 ```
 
-message that you want to send should be either binary or stringified (to_s, to_json, etc).
+Both ```SyncProducer``` and ```AsyncProducer``` accept following options:
+
+| Option              | Required | Value type     | Description                                                         |
+|-------------------- |----------|----------------|---------------------------------------------------------------------|
+| ```topic```         | true     | String, Symbol | The Kafka topic that should be written to                           |
+| ```key```           | false    | String         | The key that should be set on the Kafka message                     |
+| ```partition```     | false    | Integer        | A specific partition number that should be written to               |
+| ```partition_key``` | false    | String         | A string that can be used to deterministically select the partition |
+
+Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
 
 ## References
 
@@ -100,7 +117,7 @@ message that you want to send should be either binary or stringified (to_s, to_j
 Fork the project.
 Make your feature addition or bug fix.
 Add tests for it. This is important so we don't break it in a future versions unintentionally.
-Commit, do not mess with Rakefile, version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull). Send me a pull request. Bonus points for topic branches.
+Commit, do not mess with version, or history. (if you want to have your own version, that is fine but bump version in a commit by itself I can ignore when I pull). Send me a pull request. Bonus points for topic branches.
 
 [![coditsu](https://coditsu.io/assets/quality_bar.svg)](https://app.coditsu.io/karafka/repositories/waterdrop)
 
@@ -111,7 +128,7 @@ Unfortunately, it does not yet support independent forks, however you should be 
 Please run:
 
 ```bash
-bundle exec rake
+bundle exec rspec
 ```
 
 to check if everything is in order. After that you can submit a pull request.

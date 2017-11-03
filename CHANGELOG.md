@@ -1,10 +1,16 @@
 # WaterDrop changelog
 
-## 0.4.0.1 - Unreleased
+## 1.0.0 unreleased
 
 - #37 - ack level for producer
 - Gem bump
 - Ruby 2.4.2 support
+- Raw ruby-kafka driver is now replaced with delivery_boy
+- Sync and async producers
+- Complete update of the API
+- Much better validations for config details
+- Complete API remodel - please read the new README
+- Renamed send_messages to deliver
 
 ## 0.4
 - Bump to match Karafka

@@ -3,23 +3,24 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'rubygems'
-require 'simplecov'
-require 'rake'
-require 'logger'
+%w[
+  rubygems
+  simplecov
+].each(&method(:require))
 
 # Don't include unnecessary stuff into rcov
 SimpleCov.start do
-  add_filter '/vendor/'
-  add_filter '/gems/'
-  add_filter '/.bundle/'
-  add_filter '/doc/'
-  add_filter '/spec/'
-  add_filter '/config/'
+  %w[
+    .bundle
+    config
+    doc
+    gems
+    spec
+    vendor
+  ].each { |dir| add_filter "/#{dir}/" }
+
   merge_timeout 600
 end
-
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
@@ -34,9 +35,6 @@ require 'water_drop'
 
 # Configure for test setup
 WaterDrop.setup do |config|
-  config.send_messages = false
-  config.connection_pool.size = 1
-  config.connection_pool.timeout = 1
-  config.kafka.seed_brokers = ['localhost:9092']
-  config.raise_on_failure = true
+  config.deliver = true
+  config.kafka.seed_brokers = %w[kafka://localhost:9092]
 end

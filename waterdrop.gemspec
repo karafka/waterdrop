@@ -9,19 +9,18 @@ Gem::Specification.new do |spec|
   spec.name          = 'waterdrop'
   spec.version       = ::WaterDrop::VERSION
   spec.platform      = Gem::Platform::RUBY
-  spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
-  spec.email         = %w[maciej@mensfeld.pl pavlo.vavruk@gmail.com]
+  spec.authors       = ['Maciej Mensfeld']
+  spec.email         = %w[maciej@mensfeld.pl]
   spec.homepage      = 'https://github.com/karafka/waterdrop'
   spec.summary       = ' Kafka messaging made easy! '
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'bundler', '>= 0'
-  spec.add_dependency 'rake', '>= 0'
-  spec.add_dependency 'ruby-kafka', '~> 0.4'
-  spec.add_dependency 'connection_pool', '>= 0'
+  spec.add_dependency 'delivery_boy', '>= 0.2.2'
+  spec.add_dependency 'dry-configurable', '~> 0.7'
+  spec.add_dependency 'dry-validation', '~> 0.11'
   spec.add_dependency 'null-logger'
-  spec.add_dependency 'dry-configurable', '~> 0.6'
+  spec.add_dependency 'ruby-kafka', '>= 0.5'
 
   spec.required_ruby_version = '>= 2.2.0'
 
