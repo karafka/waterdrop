@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 1.0.0 unreleased
+## 1.0.0
 
 - #37 - ack level for producer
 - Gem bump
