@@ -36,5 +36,25 @@ RSpec.describe WaterDrop::SyncProducer do
         end
       end
     end
+
+    context 'when there was a kafka error' do
+      context 'and it happened only once' do
+        before do
+          call_count = 0
+          allow(DeliveryBoy).to receive(:deliver) do
+            call_count += 1
+            call_count == 1 ? raise(Kafka::Error) : nil
+          end
+        end
+
+        it { expect { delivery }.not_to raise_error }
+      end
+
+      context 'and it happened more times than max_retries' do
+        before { allow(DeliveryBoy).to receive(:deliver).and_raise(Kafka::Error) }
+
+        it { expect { delivery }.to raise_error(Kafka::Error) }
+      end
+    end
   end
 end

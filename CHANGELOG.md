@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.0.1
+- Added high level retry on connection problems
+
 ## 1.0.0
 
 - #37 - ack level for producer

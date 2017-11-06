@@ -5,20 +5,6 @@ module WaterDrop
   # sync and async producers
   class BaseProducer
     class << self
-      # Delivery boy method name that we use to invoke producer action
-      attr_accessor :method_name
-
-      # Performs message delivery using method_name method
-      # @param message [String] message that we want to send to Kafka
-      # @param options [Hash] options (including topic) for producer
-      # @raise [WaterDrop::Errors::InvalidMessageOptions] raised when message options are
-      #   somehow invalid and we cannot perform delivery because of that
-      def call(message, options)
-        validate!(options)
-        return unless WaterDrop.config.deliver
-        DeliveryBoy.public_send(method_name, message, options)
-      end
-
       private
 
       # Runs the message options validations and raises an error if anything is invalid
