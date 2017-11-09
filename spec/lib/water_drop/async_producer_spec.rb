@@ -18,7 +18,7 @@ RSpec.describe WaterDrop::AsyncProducer do
     end
 
     context 'when we send message with valid options' do
-      context 'but the deliver flag is set to false' do
+      context 'when the deliver flag is set to false' do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(false) }
 
         it 'expect not to pass to ruby-kafka' do
@@ -27,7 +27,7 @@ RSpec.describe WaterDrop::AsyncProducer do
         end
       end
 
-      context 'but the deliver flag is set to true' do
+      context 'when the deliver flag is set to true' do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
@@ -38,7 +38,7 @@ RSpec.describe WaterDrop::AsyncProducer do
     end
 
     context 'when there was a kafka error' do
-      context 'and it happened only once' do
+      context 'when it happened only once' do
         before do
           call_count = 0
           allow(DeliveryBoy).to receive(:deliver_async) do
@@ -50,7 +50,7 @@ RSpec.describe WaterDrop::AsyncProducer do
         it { expect { delivery }.not_to raise_error }
       end
 
-      context 'and it happened more times than max_retries' do
+      context 'when it happened more times than max_retries' do
         before { allow(DeliveryBoy).to receive(:deliver_async).and_raise(Kafka::Error) }
 
         it { expect { delivery }.to raise_error(Kafka::Error) }
