@@ -16,7 +16,7 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
     it { expect(schema.call(message_options)).to be_success }
   end
 
-  context 'topic validations' do
+  context 'when we run topic validations' do
     context 'when topic is nil but present in options' do
       before { message_options[:topic] = nil }
 
@@ -48,7 +48,7 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
     end
   end
 
-  context 'key validations' do
+  context 'when we run key validations' do
     context 'when key is nil but present in options' do
       before { message_options[:key] = nil }
 
@@ -80,7 +80,7 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
     end
   end
 
-  context 'partition validations' do
+  context 'when we run partition validations' do
     context 'when partition is nil but present in options' do
       before { message_options[:partition] = nil }
 
@@ -118,7 +118,7 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
     end
   end
 
-  context 'partition_key validations' do
+  context 'when we run partition_key validations' do
     context 'when partition_key is nil but present in options' do
       before { message_options[:partition_key] = nil }
 

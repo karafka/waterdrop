@@ -26,11 +26,11 @@ RSpec.describe WaterDrop::Schemas::Config do
     }
   end
 
-  context 'config is valid' do
+  context 'when config is valid' do
     it { expect(schema.call(config)).to be_success }
   end
 
-  context 'client_id validations' do
+  context 'when we run client_id validations' do
     context 'when client_id is nil but present in options' do
       before { config[:client_id] = nil }
 
@@ -56,7 +56,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'logger validations' do
+  context 'when we run logger validations' do
     context 'when logger is nil but present in options' do
       before { config[:logger] = nil }
 
@@ -64,7 +64,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'deliver validations' do
+  context 'when we run deliver validations' do
     context 'when deliver is nil but present in options' do
       before { config[:deliver] = nil }
 
@@ -84,7 +84,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.seed_brokers validations' do
+  context 'when we run kafka.seed_brokers validations' do
     context 'when seed_brokers are missing' do
       before { config[:kafka][:seed_brokers] = nil }
 
@@ -123,7 +123,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.connect_timeout validations' do
+  context 'when we run kafka.connect_timeout validations' do
     context 'when connect_timeout is nil' do
       before { config[:kafka][:connect_timeout] = nil }
 
@@ -161,7 +161,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.socket_timeout validations' do
+  context 'when we run kafka.socket_timeout validations' do
     context 'when socket_timeout is nil' do
       before { config[:kafka][:socket_timeout] = nil }
 
@@ -199,7 +199,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.compression_threshold validations' do
+  context 'when we run kafka.compression_threshold validations' do
     context 'when compression_threshold is nil' do
       before { config[:kafka][:compression_threshold] = nil }
 
@@ -243,7 +243,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.compression_codec validations' do
+  context 'when we run kafka.compression_codec validations' do
     context 'when compression_codec is nil' do
       before { config[:kafka][:compression_codec] = nil }
 
@@ -275,7 +275,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.max_buffer_bytesize validations' do
+  context 'when we run kafka.max_buffer_bytesize validations' do
     context 'when max_buffer_bytesize is nil' do
       before { config[:kafka][:max_buffer_bytesize] = nil }
 
@@ -325,7 +325,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.max_buffer_size validations' do
+  context 'when we run kafka.max_buffer_size validations' do
     context 'when max_buffer_size is nil' do
       before { config[:kafka][:max_buffer_size] = nil }
 
@@ -375,7 +375,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.max_queue_size validations' do
+  context 'when we run kafka.max_queue_size validations' do
     context 'when max_queue_size is nil' do
       before { config[:kafka][:max_queue_size] = nil }
 
@@ -425,7 +425,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.ack_timeout validations' do
+  context 'when we run kafka.ack_timeout validations' do
     context 'when ack_timeout is nil' do
       before { config[:kafka][:ack_timeout] = nil }
 
@@ -475,7 +475,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.delivery_interval validations' do
+  context 'when we run kafka.delivery_interval validations' do
     context 'when delivery_interval is nil' do
       before { config[:kafka][:delivery_interval] = nil }
 
@@ -525,7 +525,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.delivery_threshold validations' do
+  context 'when we run kafka.delivery_threshold validations' do
     context 'when delivery_threshold is nil' do
       before { config[:kafka][:delivery_threshold] = nil }
 
@@ -575,7 +575,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.max_retries validations' do
+  context 'when we run kafka.max_retries validations' do
     context 'when max_retries is nil' do
       before { config[:kafka][:max_retries] = nil }
 
@@ -625,7 +625,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.retry_backoff validations' do
+  context 'when we run kafka.retry_backoff validations' do
     context 'when retry_backoff is nil' do
       before { config[:kafka][:retry_backoff] = nil }
 
@@ -675,7 +675,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
-  context 'kafka.required_acks validations' do
+  context 'when we run kafka.required_acks validations' do
     context 'when required_acks is nil' do
       before { config[:kafka][:required_acks] = nil }
 
@@ -714,7 +714,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     sasl_gssapi_principal
     sasl_gssapi_keytab
   ].each do |encryption_attribute|
-    context "#{encryption_attribute} validator" do
+    context "when we run #{encryption_attribute} validator" do
       it "#{encryption_attribute} is nil" do
         config[:kafka][encryption_attribute] = nil
         expect(schema.call(config)).to be_success
