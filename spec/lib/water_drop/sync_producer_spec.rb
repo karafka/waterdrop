@@ -27,7 +27,7 @@ RSpec.describe WaterDrop::SyncProducer do
         end
       end
 
-      context 'but the deliver flag is set to true' do
+      context 'when the deliver flag is set to true' do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
