@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.0.2 - Unreleased
+- #45 - Allow specifying a create time for messages
+
 ## 1.0.1
 - Added high level retry on connection problems
 

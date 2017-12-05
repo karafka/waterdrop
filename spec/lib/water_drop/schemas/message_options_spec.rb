@@ -8,7 +8,8 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
       topic: 'name',
       key: rand.to_s,
       partition: 0,
-      partition_key: rand.to_s
+      partition_key: rand.to_s,
+      create_time: Time.now
     }
   end
 
@@ -145,6 +146,38 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
 
     context 'when partition_key is not present in options' do
       before { message_options.delete(:partition_key) }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+  end
+
+  context 'when we run create_time validations' do
+    context 'when create_time is nil but present in options' do
+      before { message_options[:create_time] = nil }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+
+    context 'when create_time is not a time' do
+      before { message_options[:create_time] = rand }
+
+      it { expect(schema.call(message_options)).not_to be_success }
+    end
+
+    context 'when create_time is empty' do
+      before { message_options[:create_time] = '' }
+
+      it { expect(schema.call(message_options)).not_to be_success }
+    end
+
+    context 'when create_time is valid' do
+      before { message_options[:create_time] = Time.now }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+
+    context 'when create_time is not present in options' do
+      before { message_options.delete(:create_time) }
 
       it { expect(schema.call(message_options)).to be_success }
     end
