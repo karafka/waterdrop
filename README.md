@@ -96,12 +96,13 @@ WaterDrop::AsyncProducer.call('message', topic: 'my-topic')
 
 Both ```SyncProducer``` and ```AsyncProducer``` accept following options:
 
-| Option              | Required | Value type     | Description                                                         |
-|-------------------- |----------|----------------|---------------------------------------------------------------------|
-| ```topic```         | true     | String         | The Kafka topic that should be written to                           |
-| ```key```           | false    | String         | The key that should be set on the Kafka message                     |
-| ```partition```     | false    | Integer        | A specific partition number that should be written to               |
-| ```partition_key``` | false    | String         | A string that can be used to deterministically select the partition |
+| Option              | Required | Value type | Description                                                         |
+|-------------------- |----------|------------|---------------------------------------------------------------------|
+| ```topic```         | true     | String     | The Kafka topic that should be written to                           |
+| ```key```           | false    | String     | The key that should be set on the Kafka message                     |
+| ```partition```     | false    | Integer    | A specific partition number that should be written to               |
+| ```partition_key``` | false    | String     | A string that can be used to deterministically select the partition |
+| ```create_time```   | false    | Time       | The timestamp that should be set on the message                     |
 
 Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
 
