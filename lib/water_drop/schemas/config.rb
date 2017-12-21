@@ -11,18 +11,8 @@ module WaterDrop
         kafka+ssl
       ].freeze
 
-      # All encryption related options keys
-      ENCRYPTION_OPTIONS_KEYS = %i[
-        ssl_ca_cert
-        ssl_ca_cert_file_path
-        ssl_client_cert
-        ssl_client_cert_key
-        sasl_plain_authzid
-        sasl_plain_username
-        sasl_plain_password
-        sasl_gssapi_principal
-        sasl_gssapi_keytab
-      ].freeze
+      # Available sasl scram mechanism of authentication (plus nil)
+      SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
       configure do
         config.messages_file = File.join(
@@ -63,9 +53,25 @@ module WaterDrop
         required(:retry_backoff).filled(:int?, gteq?: 0)
         required(:required_acks).filled(included_in?: [1, 0, -1, :all])
 
-        ENCRYPTION_OPTIONS_KEYS.each do |encryption_attribute|
+        %i[
+          ssl_ca_cert
+          ssl_ca_cert_file_path
+          ssl_client_cert
+          ssl_client_cert_key
+          sasl_gssapi_principal
+          sasl_gssapi_keytab
+          sasl_plain_authzid
+          sasl_plain_username
+          sasl_plain_password
+          sasl_scram_username
+          sasl_scram_password
+        ].each do |encryption_attribute|
           optional(encryption_attribute).maybe(:str?)
         end
+
+        # It's not with other encryptions as it has some more rules
+        optional(:sasl_scram_mechanism)
+          .maybe(:str?, included_in?: WaterDrop::Schemas::SASL_SCRAM_MECHANISMS)
       end
     end
   end
