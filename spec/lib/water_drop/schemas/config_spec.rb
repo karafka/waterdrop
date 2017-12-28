@@ -116,7 +116,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when all the seed brokers are not uris' do
-      before { config[:kafka][:seed_brokers] = %w[#$%^&* ^&*()] }
+      before { config[:kafka][:seed_brokers] = %w[#$^&* ^&*()] }
 
       it { expect(schema.call(config)).to be_failure }
       it { expect { schema.call(config).errors }.not_to raise_error }
@@ -319,7 +319,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when max_buffer_bytesize is gt then 1' do
-      before { config[:kafka][:max_buffer_bytesize] = rand(100) + 2 }
+      before { config[:kafka][:max_buffer_bytesize] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -369,7 +369,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when max_buffer_size is gt then 1' do
-      before { config[:kafka][:max_buffer_size] = rand(100) + 2 }
+      before { config[:kafka][:max_buffer_size] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -419,7 +419,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when max_queue_size is gt then 1' do
-      before { config[:kafka][:max_queue_size] = rand(100) + 2 }
+      before { config[:kafka][:max_queue_size] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -469,7 +469,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when ack_timeout is gt then 1' do
-      before { config[:kafka][:ack_timeout] = rand(100) + 2 }
+      before { config[:kafka][:ack_timeout] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -519,7 +519,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when delivery_interval is gt then 1' do
-      before { config[:kafka][:delivery_interval] = rand(100) + 2 }
+      before { config[:kafka][:delivery_interval] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -569,7 +569,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when delivery_threshold is gt then 1' do
-      before { config[:kafka][:delivery_threshold] = rand(100) + 2 }
+      before { config[:kafka][:delivery_threshold] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -619,7 +619,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when max_retries is gt then 1' do
-      before { config[:kafka][:max_retries] = rand(100) + 2 }
+      before { config[:kafka][:max_retries] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
@@ -669,7 +669,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when retry_backoff is gt then 1' do
-      before { config[:kafka][:retry_backoff] = rand(100) + 2 }
+      before { config[:kafka][:retry_backoff] = rand(2..100) }
 
       it { expect(schema.call(config)).to be_success }
     end
