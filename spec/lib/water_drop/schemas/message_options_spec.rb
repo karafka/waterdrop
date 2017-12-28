@@ -113,7 +113,7 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
     end
 
     context 'when partition is less than 0' do
-      before { message_options[:partition] = (rand(1..100)) * -1 }
+      before { message_options[:partition] = rand(1..100) * -1 }
 
       it { expect(schema.call(message_options)).not_to be_success }
     end
