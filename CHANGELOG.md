@@ -4,6 +4,7 @@
 - #45 - Allow specifying a create time for messages
 - #47 - Support SCRAM once released
 - Ruby 2.5.0 support
+- #49 - Add lz4 support once merged and released
 
 ## 1.0.1
 - Added high level retry on connection problems
