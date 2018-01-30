@@ -60,7 +60,7 @@ GEM
     rspec-mocks (3.7.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.7.0)
-    rspec-support (3.7.0)
+    rspec-support (3.7.1)
     ruby-kafka (0.5.2)
     simplecov (0.15.1)
       docile (~> 1.1.0)
