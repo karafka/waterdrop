@@ -15,6 +15,11 @@ module WaterDrop
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka
     setting :deliver, true
+    # option [Boolean] if you're producing messages faster than the framework or the network can
+    #   send them off, ruby-kafka might reject them. If that happens, WaterDrop will either raise
+    #   or ignore - this setting manages that behavior. This only applies to async producer as
+    #   sync producer will always raise upon problems
+    setting :raise_on_buffer_overflow, true
 
     # Settings directly related to the Kafka driver
     setting :kafka do
