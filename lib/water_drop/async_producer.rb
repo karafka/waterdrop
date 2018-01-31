@@ -16,13 +16,9 @@ module WaterDrop
       validate!(options)
 
       return unless WaterDrop.config.deliver
+      d_method = WaterDrop.config.raise_on_buffer_overflow ? :deliver_async! : :deliver_async
 
-      DeliveryBoy
-      .send(
-        WaterDrop.config.raise_on_buffer_overflow ? :deliver_async! : :deliver_async,
-        message,
-        options
-      )
+      DeliveryBoy.send(d_method, message, options)
     rescue Kafka::Error => e
       if attempts > WaterDrop.config.kafka.max_retries
         WaterDrop.logger.error e
