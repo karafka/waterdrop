@@ -61,19 +61,20 @@ end
 
 **Note:** All the options are subject to validations. In order to check what is and what is not acceptable, please go to the [config.rb validation schema](https://github.com/karafka/waterdrop/blob/master/lib/water_drop/schemas/config.rb) file.
 
-| Option              | Description                                                                                                                                           |
-|---------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| delivery_interval   | The number of seconds between background message deliveries. Disable timer-based background deliveries by setting this to 0.                          |
-| delivery_threshold  | The number of buffered messages that will trigger a background message delivery. Disable buffer size based background deliveries by setting this to 0.|
-| required_acks       | The number of Kafka replicas that must acknowledge messages before they're considered as successfully written.                                        |
-| ack_timeout         | A timeout executed by a broker when the client is sending messages to it.                                                                             |
-| max_retries         | The number of retries when attempting to deliver messages.                                                                                            |
-| retry_backoff       | The number of seconds to wait after a failed attempt to send messages to a Kafka broker before retrying.                                              |
-| max_buffer_bytesize | The maximum number of bytes allowed in the buffer before new messages are rejected.                                                                   |
-| max_buffer_size     | The maximum number of messages allowed in the buffer before new messages are rejected.                                                                |
-| max_queue_size      | The maximum number of messages allowed in the queue before new messages are rejected.                                                                 |
-| sasl_plain_username | The username used to authenticate.                                                                                                                    |
-| sasl_plain_password | The password used to authenticate.                                                                                                                    |
+| Option                   | Description                                                                                                                                           |
+|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
+| raise_on_buffer_overflow | Should we raise an exception, when messages can't be sent in an async way due to the message buffer overflow or should we just drop them              |
+| delivery_interval        | The number of seconds between background message deliveries. Disable timer-based background deliveries by setting this to 0.                          |
+| delivery_threshold       | The number of buffered messages that will trigger a background message delivery. Disable buffer size based background deliveries by setting this to 0.|
+| required_acks            | The number of Kafka replicas that must acknowledge messages before they're considered as successfully written.                                        |
+| ack_timeout              | A timeout executed by a broker when the client is sending messages to it.                                                                             |
+| max_retries              | The number of retries when attempting to deliver messages.                                                                                            |
+| retry_backoff            | The number of seconds to wait after a failed attempt to send messages to a Kafka broker before retrying.                                              |
+| max_buffer_bytesize      | The maximum number of bytes allowed in the buffer before new messages are rejected.                                                                   |
+| max_buffer_size          | The maximum number of messages allowed in the buffer before new messages are rejected.                                                                |
+| max_queue_size           | The maximum number of messages allowed in the queue before new messages are rejected.                                                                 |
+| sasl_plain_username      | The username used to authenticate.                                                                                                                    |
+| sasl_plain_password      | The password used to authenticate.                                                                                                                    |
 
 This configuration can be also placed in *config/initializers* and can vary based on the environment:
 
