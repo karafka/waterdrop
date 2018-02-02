@@ -33,6 +33,7 @@ module WaterDrop
       required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
       required(:logger).filled
       required(:deliver).filled(:bool?)
+      required(:raise_on_buffer_overflow).filled(:bool?)
 
       required(:kafka).schema do
         required(:seed_brokers).filled { each(:broker_schema?) }

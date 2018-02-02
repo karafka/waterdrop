@@ -1,10 +1,12 @@
 # WaterDrop changelog
 
-## 1.0.2 - Unreleased
+## 1.2.0 - Unreleased
 - #45 - Allow specifying a create time for messages
 - #47 - Support SCRAM once released
-- Ruby 2.5.0 support
 - #49 - Add lz4 support once merged and released
+- #50 - Potential message loss in async mode
+- Ruby 2.5.0 support
+- Gem bump to match Karafka framework versioning
 
 ## 1.0.1
 - Added high level retry on connection problems

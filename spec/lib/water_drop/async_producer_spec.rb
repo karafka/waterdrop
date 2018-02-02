@@ -22,7 +22,7 @@ RSpec.describe WaterDrop::AsyncProducer do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(false) }
 
         it 'expect not to pass to ruby-kafka' do
-          expect(DeliveryBoy).not_to receive(:deliver_async)
+          expect(DeliveryBoy).not_to receive(:deliver_async!)
           expect { delivery }.not_to raise_error
         end
       end
@@ -31,6 +31,18 @@ RSpec.describe WaterDrop::AsyncProducer do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
+          expect(DeliveryBoy).to receive(:deliver_async!).with(message, topic: topic)
+          expect { delivery }.not_to raise_error
+        end
+      end
+
+      context 'when the raise_on_buffer_overflow is set to false' do
+        before do
+          allow(WaterDrop.config).to receive(:deliver).and_return(true)
+          allow(WaterDrop.config).to receive(:raise_on_buffer_overflow).and_return(false)
+        end
+
+        it 'expect to run with a silent delivery method on ruby-kafka' do
           expect(DeliveryBoy).to receive(:deliver_async).with(message, topic: topic)
           expect { delivery }.not_to raise_error
         end
@@ -51,7 +63,7 @@ RSpec.describe WaterDrop::AsyncProducer do
       end
 
       context 'when it happened more times than max_retries' do
-        before { allow(DeliveryBoy).to receive(:deliver_async).and_raise(Kafka::Error) }
+        before { allow(DeliveryBoy).to receive(:deliver_async!).and_raise(Kafka::Error) }
 
         it { expect { delivery }.to raise_error(Kafka::Error) }
       end

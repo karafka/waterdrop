@@ -7,6 +7,7 @@ RSpec.describe WaterDrop::Schemas::Config do
       client_id: 'id',
       logger: NullLogger.new,
       deliver: false,
+      raise_on_buffer_overflow: true,
       kafka: {
         seed_brokers: %w[kafka://127.0.0.1:9092],
         connect_timeout: 10,
@@ -79,6 +80,26 @@ RSpec.describe WaterDrop::Schemas::Config do
 
     context 'when deliver is not boolean' do
       before { config[:deliver] = rand }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we run raise_on_buffer_overflow validations' do
+    context 'when raise_on_buffer_overflow is nil but present in options' do
+      before { config[:raise_on_buffer_overflow] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when raise_on_buffer_overflow is not present' do
+      before { config.delete(:raise_on_buffer_overflow) }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when raise_on_buffer_overflow is not boolean' do
+      before { config[:raise_on_buffer_overflow] = rand }
 
       it { expect(schema.call(config)).not_to be_success }
     end
