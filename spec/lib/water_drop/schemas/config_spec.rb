@@ -751,6 +751,14 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
   end
 
+  context 'when we validate ssl_ca_certs_from_system' do
+    context 'when ssl_ca_certs_from_system is not a boolean' do
+      before { config[:kafka][:ssl_ca_certs_from_system] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate sasl_scram_mechanism' do
     context 'when sasl_scram_mechanism is nil' do
       before { config[:kafka][:sasl_scram_mechanism] = nil }

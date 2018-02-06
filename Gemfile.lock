@@ -6,7 +6,7 @@ PATH
       dry-configurable (~> 0.7)
       dry-validation (~> 0.11)
       null-logger
-      ruby-kafka (>= 0.5)
+      ruby-kafka (>= 0.5.3)
 
 GEM
   remote: https://rubygems.org/
