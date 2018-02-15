@@ -11,5 +11,8 @@ module WaterDrop
 
     # Raised when we try to send message with invalid optionss
     InvalidMessageOptions = Class.new(BaseError)
+
+    # Raised when want to hook up to an event that is not registered and supported
+    UnregisteredMonitorEvent = Class.new(BaseError)
   end
 end

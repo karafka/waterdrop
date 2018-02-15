@@ -16,6 +16,35 @@ module WaterDrop
         return true if validation_result.success?
         raise Errors::InvalidMessageOptions, validation_result.errors
       end
+
+      # Upon failed delivery, we may try to resend a message depending on the attempt number
+      #   or reraise an error if we're unable to do that after given number of retries
+      #   This method checks that and also instruments errors and retries for the delivery
+      # @param attempts_count [Integer] number of attempt (starting from 1) for the delivery
+      # @param message [String] message that we want to send to Kafka
+      # @param options [Hash] options (including topic) for producer
+      # @param error [Kafka::Error] error that occured
+      # @return [Boolean] true if this is a graceful attempt and we can retry or false it this
+      #   was the final one and we should deal with the fact, that we cannot deliver a given
+      #   message
+      def graceful_attempt?(attempts_count, message, options, error)
+        scope = "#{to_s.split('::').last.sub('Producer', '_producer').downcase}.call"
+        payload = {
+          caller: self,
+          message: message,
+          options: options,
+          error: error,
+          attempts_count: attempts_count
+        }
+
+        if attempts_count > WaterDrop.config.kafka.max_retries
+          WaterDrop.monitor.instrument("#{scope}.error", payload)
+          false
+        else
+          WaterDrop.monitor.instrument("#{scope}.retry", payload)
+          true
+        end
+      end
     end
   end
 end

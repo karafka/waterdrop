@@ -5,7 +5,9 @@
   json
   delivery_boy
   null_logger
+  singleton
   dry-configurable
+  dry/monitor/notifications
   dry-validation
 ].each { |lib| require lib }
 
@@ -44,6 +46,11 @@ module WaterDrop
       Config.config
     end
 
+    # @return [::WaterDrop::Monitor] monitor that we want to use
+    def monitor
+      config.monitor
+    end
+
     # @return [String] root path of this gem
     def gem_root
       Pathname.new(File.expand_path('../..', __FILE__))
@@ -53,6 +60,8 @@ end
 
 %w[
   version
+  instrumentation/monitor
+  instrumentation/listener
   schemas/message_options
   schemas/config
   config

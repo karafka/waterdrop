@@ -10,23 +10,17 @@ module WaterDrop
     # @raise [WaterDrop::Errors::InvalidMessageOptions] raised when message options are
     #   somehow invalid and we cannot perform delivery because of that
     def self.call(message, options)
-      attempts ||= 0
-      attempts += 1
+      attempts_count ||= 0
+      attempts_count += 1
 
       validate!(options)
-
       return unless WaterDrop.config.deliver
+
       d_method = WaterDrop.config.raise_on_buffer_overflow ? :deliver_async! : :deliver_async
 
       DeliveryBoy.send(d_method, message, options)
-    rescue Kafka::Error => e
-      if attempts > WaterDrop.config.kafka.max_retries
-        WaterDrop.logger.error e
-        raise e
-      else
-        WaterDrop.logger.warn "Retrying delivery after: #{e}"
-        retry
-      end
+    rescue Kafka::Error => error
+      graceful_attempt?(attempts_count, message, options, error) ? retry : raise(error)
     end
   end
 end

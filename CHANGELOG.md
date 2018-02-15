@@ -7,7 +7,8 @@
 - #50 - Potential message loss in async mode
 - Ruby 2.5.0 support
 - Gem bump to match Karafka framework versioning
- - #48 - ssl_ca_certs_from_system
+- #48 - ssl_ca_certs_from_system
+- #52 - Use instrumentation compatible with Karafka 1.2
 
 ## 1.0.1
 - Added high level retry on connection problems
