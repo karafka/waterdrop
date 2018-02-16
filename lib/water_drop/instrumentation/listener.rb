@@ -17,32 +17,35 @@ module WaterDrop
         sync_producer
         async_producer
       ].each do |producer_type|
-        define_method :"on_#{producer_type}_call_error" do |event|
+        error_name = :"on_#{producer_type}_call_error"
+        retry_name = :"on_#{producer_type}_call_retry"
+
+        define_method error_name do |event|
           options = event[:options]
           error = event[:error]
-          attempts_count = event[:attempts_count]
-
           error "Delivery failure to: #{options} because of #{error}"
         end
 
-        define_method :"on_#{producer_type}_call_retry" do |event|
+        define_method retry_name do |event|
           attempts_count = event[:attempts_count]
           options = event[:options]
           error = event[:error]
 
           info "Attempt #{attempts_count} of delivery to: #{options} because of #{error}"
         end
+
+        module_function error_name
+        module_function retry_name
       end
 
       USED_LOG_LEVELS.each do |log_level|
         define_method log_level do |*args|
           WaterDrop.logger.send(log_level, *args)
         end
+
+        module_function log_level
+        private_class_method log_level
       end
-
-      extend self
-
-      USED_LOG_LEVELS.each(&method(:private_class_method))
     end
   end
 end
