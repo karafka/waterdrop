@@ -36,6 +36,8 @@ module WaterDrop
 
         module_function error_name
         module_function retry_name
+        public error_name
+        public retry_name
       end
 
       USED_LOG_LEVELS.each do |log_level|
