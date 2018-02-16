@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 1.2.0 - Unreleased
+## 1.2.0.beta1
 - #45 - Allow specifying a create time for messages
 - #47 - Support SCRAM once released
 - #49 - Add lz4 support once merged and released
