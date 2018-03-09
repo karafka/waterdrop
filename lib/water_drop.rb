@@ -53,7 +53,7 @@ module WaterDrop
 
     # @return [String] root path of this gem
     def gem_root
-      Pathname.new(File.expand_path('../..', __FILE__))
+      Pathname.new(File.expand_path('..', __dir__))
     end
   end
 end
