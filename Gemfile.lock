@@ -6,7 +6,7 @@ PATH
       dry-configurable (~> 0.7)
       dry-monitor (~> 0.1)
       dry-validation (~> 0.11)
-      null-logger
+      null-logger (~> 0.1)
 
 GEM
   remote: https://rubygems.org/
@@ -56,7 +56,7 @@ GEM
     inflecto (0.0.2)
     json (2.1.0)
     king_konf (0.1.10)
-    null-logger (0.1.4)
+    null-logger (0.1.5)
     rouge (2.2.1)
     rspec (3.7.0)
       rspec-core (~> 3.7.0)
