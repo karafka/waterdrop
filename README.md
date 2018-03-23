@@ -100,7 +100,7 @@ Both ```SyncProducer``` and ```AsyncProducer``` accept following options:
 | Option              | Required | Value type | Description                                                         |
 |-------------------- |----------|------------|---------------------------------------------------------------------|
 | ```topic```         | true     | String     | The Kafka topic that should be written to                           |
-| ```key```           | false    | String     | The key that should be set on the Kafka message                     |
+| ```key```           | false    | String     | The key that should be set in the Kafka message                     |
 | ```partition```     | false    | Integer    | A specific partition number that should be written to               |
 | ```partition_key``` | false    | String     | A string that can be used to deterministically select the partition |
 | ```create_time```   | false    | Time       | The timestamp that should be set on the message                     |
@@ -117,7 +117,7 @@ Keep in mind, that message you want to send should be either binary or stringifi
 
 First, thank you for considering contributing to WaterDrop! It's people like you that make the open source community such a great community!
 
-Each pull request must pass all the rspec specs and meet our quality requirements.
+Each pull request must pass all the RSpec specs and meet our quality requirements.
 
 To check if everything is as it should be, we use [Coditsu](https://coditsu.io) that combines multiple linters and code analyzers for both code and documentation. Once you're done with your changes, submit a pull request.
 
