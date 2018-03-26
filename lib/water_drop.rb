@@ -24,7 +24,7 @@ module WaterDrop
     def setup(&block)
       Config.setup(&block)
       DeliveryBoy.logger = self.logger = config.logger
-      ConfigApplier.call(DeliveryBoy.config,Config.config.to_h)
+      ConfigApplier.call(DeliveryBoy.config, Config.config.to_h)
     end
 
     # @return [WaterDrop::Config] config instance

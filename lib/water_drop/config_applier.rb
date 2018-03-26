@@ -6,19 +6,19 @@ module WaterDrop
     class << self
       # @param delivery_boy_config [DeliveryBoy::Config] delivery boy config instance
       # @param settings [Hash] hash with WaterDrop settings
-      def call(deliver_boy_config, settings)
+      def call(delivery_boy_config, settings)
         # Recursive lambda for mapping config down to delivery boy
         settings.each do |key, value|
-          call(deliver_boy_config, value) && next if value.is_a?(Hash)
+          call(delivery_boy_config, value) && next if value.is_a?(Hash)
 
           # If this is a special case that needs manual setup instead of a direct reassignment
           if respond_to?(key, true)
-            send(key, deliver_boy_config, value)
+            send(key, delivery_boy_config, value)
           else
             # If this setting is our internal one, we should not sync it with the delivery boy
-            next unless deliver_boy_config.respond_to?(:"#{key}=")
+            next unless delivery_boy_config.respond_to?(:"#{key}=")
 
-            deliver_boy_config.public_send(:"#{key}=", value)
+            delivery_boy_config.public_send(:"#{key}=", value)
           end
         end
       end
@@ -33,18 +33,18 @@ module WaterDrop
       # by delivery boy
       # @param delivery_boy_config [DeliveryBoy::Config] delivery boy config instance
       # @param codec_name [Symbol] codec name as a symbol
-      def compression_codec(deliver_boy_config, codec_name)
+      def compression_codec(delivery_boy_config, codec_name)
         # If there is no compression codec, we don't apply anything
         return unless codec_name
-        deliver_boy_config.compression_codec = codec_name.to_s
+        delivery_boy_config.compression_codec = codec_name.to_s
       end
 
       # We use the "seed_brokers" name and DeliveryBoy uses "brokers" so we pass the values
       #   manually
       # @param delivery_boy_config [DeliveryBoy::Config] delivery boy config instance
       # @param seed_brokers [Array<String>] kafka seed brokers
-      def seed_brokers(deliver_boy_config, seed_brokers)
-        deliver_boy_config.brokers = seed_brokers
+      def seed_brokers(delivery_boy_config, seed_brokers)
+        delivery_boy_config.brokers = seed_brokers
       end
     end
   end

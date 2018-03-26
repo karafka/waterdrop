@@ -15,12 +15,12 @@ RSpec.describe WaterDrop::ConfigApplier do
         it { expect(delivery_boy_config.client_id).to eq settings[:client_id] }
       end
 
-      context 'valid sasl_scram_mechanism string' do
+      context 'when we have valid sasl_scram_mechanism string' do
         before { sync }
 
         let(:settings) { { sasl_scram_mechanism: 'sha512' } }
 
-        it { expect(delivery_boy_config.sasl_scram_mechanism).to eq settings[:sasl_scram_mechanism] }
+        it { expect(delivery_boy_config.sasl_scram_mechanism).to eq settings.values.first }
       end
 
       # Typical int cases
@@ -39,7 +39,7 @@ RSpec.describe WaterDrop::ConfigApplier do
         before { sync }
 
         context "when we sync #{key} with int value" do
-          let(:settings) { { key => rand(1000..10000) } }
+          let(:settings) { { key => rand(1000..10_000) } }
 
           it { expect(delivery_boy_config.public_send(key)).to eq settings[key] }
         end
