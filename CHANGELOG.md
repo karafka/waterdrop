@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.2.2
+- #55 - Codec settings unification and config applier
+
 ## 1.2.1
 - #54 - compression_codec api sync with king-konf requirements
 
