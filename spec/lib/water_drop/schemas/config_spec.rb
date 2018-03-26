@@ -178,7 +178,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     context 'when connect_timeout is float' do
       before { config[:kafka][:connect_timeout] = rand + 1 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
@@ -216,7 +216,7 @@ RSpec.describe WaterDrop::Schemas::Config do
     context 'when socket_timeout is float' do
       before { config[:kafka][:socket_timeout] = rand + 1 }
 
-      it { expect(schema.call(config)).to be_success }
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 
@@ -284,13 +284,19 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when compression_codec is snappy' do
-      before { config[:kafka][:compression_codec] = 'snappy' }
+      before { config[:kafka][:compression_codec] = :snappy }
 
       it { expect(schema.call(config)).to be_success }
     end
 
     context 'when compression_codec is gzip' do
-      before { config[:kafka][:compression_codec] = 'gzip' }
+      before { config[:kafka][:compression_codec] = :gzip }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when compression_codec is lz4' do
+      before { config[:kafka][:compression_codec] = :lz4 }
 
       it { expect(schema.call(config)).to be_success }
     end

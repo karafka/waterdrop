@@ -37,10 +37,10 @@ module WaterDrop
 
       required(:kafka).schema do
         required(:seed_brokers).filled { each(:broker_schema?) }
-        required(:connect_timeout).filled { (int? | float?) & gt?(0) }
-        required(:socket_timeout).filled { (int? | float?) & gt?(0) }
+        required(:connect_timeout).filled(:int?, gt?: 0)
+        required(:socket_timeout).filled(:int?, gt?: 0)
         required(:compression_threshold).filled(:int?, gteq?: 1)
-        optional(:compression_codec).maybe(included_in?: %w[snappy gzip lz4])
+        optional(:compression_codec).maybe(included_in?: %i[snappy gzip lz4])
 
         required(:max_buffer_bytesize).filled(:int?, gt?: 0)
         required(:max_buffer_size).filled(:int?, gt?: 0)
