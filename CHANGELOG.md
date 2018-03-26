@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.2.1
+- #54 - compression_codec api sync with king-konf requirements
+
 ## 1.2.0
 - #45 - Allow specifying a create time for messages
 - #47 - Support SCRAM once released

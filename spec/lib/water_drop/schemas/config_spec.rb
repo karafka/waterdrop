@@ -278,19 +278,19 @@ RSpec.describe WaterDrop::Schemas::Config do
     end
 
     context 'when compression_codec is not snappy nor gzip' do
-      before { config[:kafka][:compression_codec] = rand }
+      before { config[:kafka][:compression_codec] = rand.to_s }
 
       it { expect(schema.call(config)).not_to be_success }
     end
 
     context 'when compression_codec is snappy' do
-      before { config[:kafka][:compression_codec] = :snappy }
+      before { config[:kafka][:compression_codec] = 'snappy' }
 
       it { expect(schema.call(config)).to be_success }
     end
 
     context 'when compression_codec is gzip' do
-      before { config[:kafka][:compression_codec] = :gzip }
+      before { config[:kafka][:compression_codec] = 'gzip' }
 
       it { expect(schema.call(config)).to be_success }
     end
