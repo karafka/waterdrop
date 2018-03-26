@@ -19,6 +19,13 @@ RSpec.describe WaterDrop do
   end
 
   describe '#setup' do
+    # We nullify the compression so we won't have to require snappy when testing
+    # other parts of WaterDrop
+    after do
+      DeliveryBoy.config.compression_codec = nil
+      WaterDrop::Config.config.kafka.compression_codec = nil
+    end
+
     context 'when config is valid' do
       let(:setup_process) do
         described_class.setup do |config|
@@ -27,7 +34,21 @@ RSpec.describe WaterDrop do
       end
 
       it 'sets up the configuration' do
+        setup_process
         expect(described_class.config.deliver).to eq(true)
+      end
+    end
+
+    context 'when we use symbolized compression codec' do
+      let(:setup_process) do
+        described_class.setup do |config|
+          config.kafka.compression_codec = :snappy
+        end
+      end
+
+      it 'sets up the configuration' do
+        setup_process
+        expect(DeliveryBoy.config.compression_codec).to eq 'snappy'
       end
     end
 
