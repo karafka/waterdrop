@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.3-wip
+- #60 - Rename listener to StdoutListener
+
 ## 1.2.2
 - #55 - Codec settings unification and config applier
 
