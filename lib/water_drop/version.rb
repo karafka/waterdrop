@@ -3,5 +3,5 @@
 # WaterDrop library
 module WaterDrop
   # Current WaterDrop version
-  VERSION = '1.2.3'
+  VERSION = '1.3.0'
 end

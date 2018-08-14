@@ -6,7 +6,7 @@ module WaterDrop
     # It can be removed/replaced or anything without any harm to the Waterdrop flow
     # @note It is a module as we can use it then as a part of the Karafka framework listener
     #   as well as we can use it standalone
-    module Listener
+    module StdoutListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
         info

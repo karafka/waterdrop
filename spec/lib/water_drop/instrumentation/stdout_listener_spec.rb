@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Instrumentation::Listener do
+RSpec.describe WaterDrop::Instrumentation::StdoutListener do
   let(:event) { Dry::Events::Event.new(rand, payload) }
   let(:attempts_count) { rand(10) }
   let(:error) { Kafka::Error }
