@@ -2,6 +2,8 @@
 
 ## 1.3-wip
 - #60 - Rename listener to StdoutListener
+- Support ruby-kafka 0.7
+- Support message headers
 
 ## 1.2.2
 - #55 - Codec settings unification and config applier
