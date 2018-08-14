@@ -14,6 +14,7 @@ module WaterDrop
       optional(:partition).filled(:int?, gteq?: 0)
       optional(:partition_key).maybe(:str?, :filled?)
       optional(:create_time).maybe(:time?)
+      optional(:headers).maybe(:hash?)
     end
   end
 end

@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 1.2.3
+- Support ruby-kafka 0.7
+- Support message headers
+
 ## 1.2.2
 - #55 - Codec settings unification and config applier
 
