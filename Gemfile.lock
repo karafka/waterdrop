@@ -7,6 +7,7 @@ PATH
       dry-monitor (~> 0.1)
       dry-validation (~> 0.11)
       null-logger (~> 0.1)
+      ruby-kafka (>= 0.7)
 
 GEM
   remote: https://rubygems.org/
