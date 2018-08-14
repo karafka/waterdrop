@@ -4,6 +4,7 @@
 - #60 - Rename listener to StdoutListener
 - Support ruby-kafka 0.7
 - Support message headers
+- `sasl_over_ssl` support
 
 ## 1.2.2
 - #55 - Codec settings unification and config applier
