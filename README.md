@@ -11,7 +11,7 @@ It is:
 
  - Thread safe
  - Supports sync and async producers
- - Working with 0.10.1+ Kafka
+ - Working with 0.11+ Kafka
 
 ## Installation
 
