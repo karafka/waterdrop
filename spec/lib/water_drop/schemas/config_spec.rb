@@ -22,7 +22,8 @@ RSpec.describe WaterDrop::Schemas::Config do
         required_acks: 1,
         retry_backoff: 1,
         compression_threshold: 1,
-        compression_codec: nil
+        compression_codec: nil,
+        sasl_over_ssl: true
       }
     }
   end
@@ -794,6 +795,14 @@ RSpec.describe WaterDrop::Schemas::Config do
       before { config[:kafka][:sasl_scram_mechanism] = 'sha512' }
 
       it { expect(schema.call(config)).to be_success }
+    end
+  end
+
+  context 'when we validate sasl_over_ssl' do
+    context 'when sasl_over_ssl is not a boolean' do
+      before { config[:kafka][:sasl_over_ssl] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 end

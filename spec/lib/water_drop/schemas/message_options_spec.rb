@@ -9,7 +9,8 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
       key: rand.to_s,
       partition: 0,
       partition_key: rand.to_s,
-      create_time: Time.now
+      create_time: Time.now,
+      headers: {}
     }
   end
 
@@ -178,6 +179,38 @@ RSpec.describe WaterDrop::Schemas::MessageOptions do
 
     context 'when create_time is not present in options' do
       before { message_options.delete(:create_time) }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+  end
+
+  context 'when we run headers validations' do
+    context 'when headers is nil but present in options' do
+      before { message_options[:headers] = nil }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+
+    context 'when headers is not a hash' do
+      before { message_options[:headers] = rand }
+
+      it { expect(schema.call(message_options)).not_to be_success }
+    end
+
+    context 'when headers is an empty hash' do
+      before { message_options[:headers] = {} }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+
+    context 'when headers is valid hash with data' do
+      before { message_options[:headers] = { rand.to_s => rand.to_s } }
+
+      it { expect(schema.call(message_options)).to be_success }
+    end
+
+    context 'when headers is not present in options' do
+      before { message_options.delete(:headers) }
 
       it { expect(schema.call(message_options)).to be_success }
     end
