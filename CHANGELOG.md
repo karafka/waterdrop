@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.2.3
+- Lock ruby-kafka to 0.6 (0.7 support targeted for WaterDrop 1.3)
+
 ## 1.2.2
 - #55 - Codec settings unification and config applier
 
