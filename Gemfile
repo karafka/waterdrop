@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-group :development, :test do
+group :test do
   gem 'rspec'
   gem 'simplecov'
 end

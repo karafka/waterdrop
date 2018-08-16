@@ -2,10 +2,13 @@
 
 ## 1.3-wip
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
-- Support ruby-kafka 0.7
 - Support message headers
 - `sasl_over_ssl` support
+- Unlock Ruby Kafka + provide support for 0.7 only
 - #60 - Rename listener to StdoutListener
+
+## 1.2.3
+- Lock ruby-kafka to 0.6 (0.7 support targeted for WaterDrop 1.3)
 
 ## 1.2.2
 - #55 - Codec settings unification and config applier
