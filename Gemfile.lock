@@ -12,7 +12,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    concurrent-ruby (1.0.5)
+    concurrent-ruby (1.0.5-java)
     delivery_boy (0.2.7)
       king_konf (~> 0.2)
       ruby-kafka (~> 0.5)
@@ -54,7 +54,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-logic (~> 0.4, >= 0.4.0)
       dry-types (~> 0.13.1)
-    json (2.1.0)
+    json (2.1.0-java)
     king_konf (0.3.6)
     null-logger (0.1.5)
     rouge (2.2.1)
@@ -79,7 +79,7 @@ GEM
     simplecov-html (0.10.2)
 
 PLATFORMS
-  ruby
+  java
 
 DEPENDENCIES
   rspec
