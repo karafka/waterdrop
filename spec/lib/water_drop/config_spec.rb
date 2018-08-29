@@ -19,18 +19,18 @@ RSpec.describe WaterDrop::Config do
         end
       end
 
-      it 'raise InvalidConfiguration exception' do
-        expect { setup }.to raise_error do |error|
-          expect(error).to be_a(error_class)
-          expect(error.message).to eq(error_message)
-        end
-      end
-
       after do
         module WaterDrop
           setup do |config|
             config.client_id = rand(100).to_s
           end
+        end
+      end
+
+      it 'raise InvalidConfiguration exception' do
+        expect { setup }.to raise_error do |error|
+          expect(error).to be_a(error_class)
+          expect(error.message).to eq(error_message)
         end
       end
     end
