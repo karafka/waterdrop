@@ -14,6 +14,7 @@ module WaterDrop
       def validate!(options)
         validation_result = Schemas::MessageOptions.call(options)
         return true if validation_result.success?
+
         raise Errors::InvalidMessageOptions, validation_result.errors
       end
 

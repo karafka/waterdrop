@@ -132,6 +132,7 @@ module WaterDrop
       def validate!(config_hash)
         validation_result = Schemas::Config.call(config_hash)
         return true if validation_result.success?
+
         raise Errors::InvalidConfiguration, validation_result.errors
       end
     end
