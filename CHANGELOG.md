@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.2.4
+- Due to multiple requests, unlock of 0.7 with an additional post-install message
+
 ## 1.2.3
 - Lock ruby-kafka to 0.6 (0.7 support targeted for WaterDrop 1.3)
 
