@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'ruby-kafka', '>= 0.6'
 
   spec.post_install_message = <<~MSG
-    Notice: If you're using Kafka 0.10 please lock ruby-kafka in your Gemfile to version '0.6':
+    Notice: If you're using Kafka 0.10, please lock ruby-kafka in your Gemfile to version '0.6':
     gem 'ruby-kafka', '~> 0.6'
   MSG
 
