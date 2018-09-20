@@ -33,7 +33,7 @@ bundle install
 
 ## Kafka 0.10 or prior
 
-If you're using Kafka 0.10, please lock `ruby-kafka` gem in your Gemfile to version '0.6.8':
+If you're using Kafka 0.10, please lock `ruby-kafka` gem in your Gemfile to version `0.6.8`:
 
 ```ruby
 gem 'waterdrop'
