@@ -12,7 +12,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    concurrent-ruby (1.0.5)
+    concurrent-ruby (1.0.5-java)
     delivery_boy (0.2.7)
       king_konf (~> 0.2)
       ruby-kafka (~> 0.5)
@@ -73,7 +73,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    ruby-kafka (0.7.1)
+    ruby-kafka (0.7.2)
       digest-crc
     simplecov (0.16.1)
       docile (~> 1.1)
