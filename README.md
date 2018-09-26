@@ -31,6 +31,15 @@ and run
 bundle install
 ```
 
+## Kafka 0.10 or prior
+
+If you're using Kafka 0.10, please lock `ruby-kafka` gem in your Gemfile to version `0.6.8`:
+
+```ruby
+gem 'waterdrop'
+gem 'ruby-kafka', '~> 0.6.8'
+```
+
 ## Setup
 
 WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
