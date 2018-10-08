@@ -13,6 +13,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     concurrent-ruby (1.0.5)
+    concurrent-ruby (1.0.5-java)
     delivery_boy (0.2.7)
       king_konf (~> 0.2)
       ruby-kafka (~> 0.5)
