@@ -110,6 +110,10 @@ module WaterDrop
       setting :sasl_scram_mechanism, nil
       # option sasl_over_ssl [Boolean] whether to enforce SSL with SASL
       setting :sasl_over_ssl, true
+      # option sasl_over_ssl [Boolean] whether to enforce SSL with SASL
+      setting :sasl_over_ssl, true
+      # option ssl_client_cert_chain [String, nil] client cert chain or nil if not used
+      setting :ssl_client_cert_chain, nil
     end
 
     class << self
