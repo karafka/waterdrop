@@ -46,24 +46,6 @@ RSpec.describe WaterDrop::ConfigApplier do
       end
     end
 
-    describe 'when we have standard, invalid cases' do
-      # Float invalid cases
-      %i[
-        connect_timeout
-        socket_timeout
-      ].each do |key|
-        context "when we sync #{key} with float value" do
-          subject(:sync) { described_class.call(delivery_boy_config, settings) }
-
-          let(:settings) { { key => 0.1 } }
-
-          it 'expects to raise king-konf error' do
-            expect { sync }.to raise_error(KingKonf::ConfigError)
-          end
-        end
-      end
-    end
-
     describe 'when we handle ignored internal settings' do
       context 'when we sync logger' do
         let(:settings) { { logger: [rand.to_s] } }
