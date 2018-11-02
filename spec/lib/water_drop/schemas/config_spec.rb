@@ -739,6 +739,7 @@ RSpec.describe WaterDrop::Schemas::Config do
       end
     end
   end
+
   %i[
     ssl_ca_cert
     ssl_ca_cert_file_path
