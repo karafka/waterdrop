@@ -22,9 +22,18 @@ RSpec.describe WaterDrop::Schemas::Config do
         required_acks: 1,
         retry_backoff: 1,
         compression_threshold: 1,
-        compression_codec: nil,
-        sasl_over_ssl: true
-      }
+        compression_codec: nil
+      }.merge(ssl_details)
+    }
+  end
+  let(:ssl_details) do
+    {
+      ssl_ca_cert: 'ca_cert',
+      ssl_client_cert: 'client_cert',
+      ssl_client_cert_key: 'client_cert_key',
+      ssl_ca_certs_from_system: true,
+      ssl_client_cert_chain: nil,
+      sasl_over_ssl: true
     }
   end
 
@@ -734,8 +743,6 @@ RSpec.describe WaterDrop::Schemas::Config do
   %i[
     ssl_ca_cert
     ssl_ca_cert_file_path
-    ssl_client_cert
-    ssl_client_cert_key
     sasl_gssapi_principal
     sasl_gssapi_keytab
     sasl_plain_authzid
@@ -744,23 +751,116 @@ RSpec.describe WaterDrop::Schemas::Config do
     sasl_scram_username
     sasl_scram_password
     sasl_scram_mechanism
+    ssl_client_cert_chain
   ].each do |encryption_attribute|
-    context "when we run #{encryption_attribute} validator" do
-      it "#{encryption_attribute} is nil" do
-        config[:kafka][encryption_attribute] = nil
-        expect(schema.call(config)).to be_success
+    context "when we validate #{encryption_attribute}" do
+      context "when #{encryption_attribute} is nil" do
+        before { config[:kafka][encryption_attribute] = nil }
+
+        it { expect(schema.call(config)).to be_success }
       end
 
-      it "#{encryption_attribute} is not a string" do
-        config[:kafka][encryption_attribute] = 2
-        expect(schema.call(config)).not_to be_success
+      context "when #{encryption_attribute} is not a string" do
+        before { config[:kafka][encryption_attribute] = 2 }
+
+        it { expect(schema.call(config)).not_to be_success }
       end
     end
   end
 
+  context 'when we validate ssl_client_cert' do
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is nil' do
+      before do
+        config[:kafka][:ssl_client_cert] = nil
+        config[:kafka][:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert is nil and ssl_client_cert_key is not nil' do
+      before { config[:kafka][:ssl_client_cert] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert is not a string' do
+      before { config[:kafka][:ssl_client_cert] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate ssl_client_cert_key' do
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_key] = nil
+        config[:kafka][:ssl_client_cert] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_key is nil and ssl_client_cert is not nil' do
+      before { config[:kafka][:ssl_client_cert_key] = nil }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_key is not a string' do
+      before { config[:kafka][:ssl_client_cert_key] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate ssl_client_cert_chain' do
+    context 'when ssl_client_cert_chain is nil and ssl_client_cert is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_chain] = nil
+        config[:kafka][:ssl_client_cert] = nil
+        config[:kafka][:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is present but ssl_client_cert is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_chain] = 'chain'
+        config[:kafka][:ssl_client_cert] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is present but ssl_client_cert_key is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_chain] = 'chain'
+        config[:kafka][:ssl_client_cert_key] = nil
+      end
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+
+    context 'when ssl_client_cert_chain is not a string' do
+      before { config[:kafka][:ssl_client_cert_chain] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate ssl_ca_certs_from_system' do
-    context 'when ssl_ca_certs_from_system is not a boolean' do
+    context 'when ssl_ca_certs_from_system is not a bool' do
       before { config[:kafka][:ssl_ca_certs_from_system] = 2 }
+
+      it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate sasl_over_ssl' do
+    context 'when sasl_over_ssl is not a bool' do
+      before { config[:kafka][:sasl_over_ssl] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
     end
@@ -795,14 +895,6 @@ RSpec.describe WaterDrop::Schemas::Config do
       before { config[:kafka][:sasl_scram_mechanism] = 'sha512' }
 
       it { expect(schema.call(config)).to be_success }
-    end
-  end
-
-  context 'when we validate sasl_over_ssl' do
-    context 'when sasl_over_ssl is not a boolean' do
-      before { config[:kafka][:sasl_over_ssl] = 2 }
-
-      it { expect(schema.call(config)).not_to be_success }
     end
   end
 end
