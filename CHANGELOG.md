@@ -10,6 +10,7 @@
 - Support ruby-kafka 0.7
 - Support message headers
 - `sasl_over_ssl` support
+- `ssl_client_cert_key_password` support
 
 ## 1.2.4
 - Due to multiple requests, unlock of 0.7 with an additional post-install message

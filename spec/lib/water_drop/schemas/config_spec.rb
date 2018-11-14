@@ -743,6 +743,8 @@ RSpec.describe WaterDrop::Schemas::Config do
   %i[
     ssl_ca_cert
     ssl_ca_cert_file_path
+    ssl_client_cert_chain
+    ssl_client_cert_key_password
     sasl_gssapi_principal
     sasl_gssapi_keytab
     sasl_plain_authzid
@@ -751,7 +753,6 @@ RSpec.describe WaterDrop::Schemas::Config do
     sasl_scram_username
     sasl_scram_password
     sasl_scram_mechanism
-    ssl_client_cert_chain
   ].each do |encryption_attribute|
     context "when we validate #{encryption_attribute}" do
       context "when #{encryption_attribute} is nil" do
@@ -895,6 +896,35 @@ RSpec.describe WaterDrop::Schemas::Config do
       before { config[:kafka][:sasl_scram_mechanism] = 'sha512' }
 
       it { expect(schema.call(config)).to be_success }
+    end
+  end
+
+  context 'when we validate ssl_client_cert_key_password' do
+    context 'when ssl_client_cert_key_password is nil and ssl_client_cert is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_key_password] = nil
+        config[:kafka][:ssl_client_cert] = nil
+        config[:kafka][:ssl_client_cert_key] = nil
+      end
+      it { expect(schema.call(config)).to be_success }
+    end
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_key_password] = 'chain'
+        config[:kafka][:ssl_client_cert] = nil
+      end
+      it { expect(schema.call(config)).not_to be_success }
+    end
+    context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
+      before do
+        config[:kafka][:ssl_client_cert_key_password] = 'chain'
+        config[:kafka][:ssl_client_cert_key] = nil
+      end
+      it { expect(schema.call(config)).not_to be_success }
+    end
+    context 'when ssl_client_cert_key_password is not a string' do
+      before { config[:kafka][:ssl_client_cert_key_password] = 2 }
+      it { expect(schema.call(config)).not_to be_success }
     end
   end
 end
