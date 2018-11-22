@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## master
+- drop jruby support
+
 ## 1.2.4
 - Due to multiple requests, unlock of 0.7 with an additional post-install message
 
