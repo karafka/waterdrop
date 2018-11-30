@@ -41,7 +41,7 @@ GEM
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
       rouge (~> 2.0, >= 2.2.1)
-    dry-types (0.13.2)
+    dry-types (0.13.3)
       concurrent-ruby (~> 1.0)
       dry-container (~> 0.3)
       dry-core (~> 0.4, >= 0.4.4)
@@ -56,6 +56,7 @@ GEM
       dry-logic (~> 0.4, >= 0.4.0)
       dry-types (~> 0.13.1)
     json (2.1.0)
+    json (2.1.0-java)
     king_konf (0.3.7)
     null-logger (0.1.5)
     rouge (2.2.1)
@@ -81,6 +82,7 @@ GEM
     simplecov-html (0.10.2)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
