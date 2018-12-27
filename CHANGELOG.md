@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
-## 1.3-wip
+
+## 1.3
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Support message headers
 - `sasl_over_ssl` support
@@ -11,6 +12,8 @@
 - Support message headers
 - `sasl_over_ssl` support
 - `ssl_client_cert_key_password` support
+- drop jruby support
+- drop ruby 2.2 support
 
 ## 1.2.4
 - Due to multiple requests, unlock of 0.7 with an additional post-install message
