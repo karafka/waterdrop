@@ -906,24 +906,31 @@ RSpec.describe WaterDrop::Schemas::Config do
         config[:kafka][:ssl_client_cert] = nil
         config[:kafka][:ssl_client_cert_key] = nil
       end
+
       it { expect(schema.call(config)).to be_success }
     end
+
     context 'when ssl_client_cert_key_password is present but ssl_client_cert is nil' do
       before do
         config[:kafka][:ssl_client_cert_key_password] = 'chain'
         config[:kafka][:ssl_client_cert] = nil
       end
+
       it { expect(schema.call(config)).not_to be_success }
     end
+
     context 'when ssl_client_cert_key_password is present but ssl_client_cert_key is nil' do
       before do
         config[:kafka][:ssl_client_cert_key_password] = 'chain'
         config[:kafka][:ssl_client_cert_key] = nil
       end
+
       it { expect(schema.call(config)).not_to be_success }
     end
+
     context 'when ssl_client_cert_key_password is not a string' do
       before { config[:kafka][:ssl_client_cert_key_password] = 2 }
+
       it { expect(schema.call(config)).not_to be_success }
     end
   end
