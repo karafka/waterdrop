@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
-## master
+## 1.2.5
+- Bump deps to match Karafka
 - drop jruby support
 - drop ruby 2.2 support
 
