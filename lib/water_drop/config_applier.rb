@@ -36,6 +36,7 @@ module WaterDrop
       def compression_codec(delivery_boy_config, codec_name)
         # If there is no compression codec, we don't apply anything
         return unless codec_name
+
         delivery_boy_config.compression_codec = codec_name.to_s
       end
 

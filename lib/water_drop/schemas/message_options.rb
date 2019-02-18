@@ -3,7 +3,7 @@
 module WaterDrop
   module Schemas
     # Regexp to check that topic has a valid format
-    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/
+    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
 
     # Schema with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
@@ -14,6 +14,7 @@ module WaterDrop
       optional(:partition).filled(:int?, gteq?: 0)
       optional(:partition_key).maybe(:str?, :filled?)
       optional(:create_time).maybe(:time?)
+      optional(:headers).maybe(:hash?)
     end
   end
 end

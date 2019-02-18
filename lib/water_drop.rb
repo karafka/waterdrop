@@ -47,7 +47,7 @@ end
 %w[
   version
   instrumentation/monitor
-  instrumentation/listener
+  instrumentation/stdout_listener
   schemas/message_options
   schemas/config
   config

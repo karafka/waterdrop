@@ -108,6 +108,13 @@ module WaterDrop
       setting :sasl_scram_password, nil
       # option sasl_scram_mechanism [String, nil] Scram mechanism, either 'sha256' or 'sha512'
       setting :sasl_scram_mechanism, nil
+      # option sasl_over_ssl [Boolean] whether to enforce SSL with SASL
+      setting :sasl_over_ssl, true
+      # option ssl_client_cert_chain [String, nil] client cert chain or nil if not used
+      setting :ssl_client_cert_chain, nil
+      # option ssl_client_cert_key_password [String, nil] the password required to read
+      #   the ssl_client_cert_key
+      setting :ssl_client_cert_key_password, nil
     end
 
     class << self
@@ -130,6 +137,7 @@ module WaterDrop
       def validate!(config_hash)
         validation_result = Schemas::Config.call(config_hash)
         return true if validation_result.success?
+
         raise Errors::InvalidConfiguration, validation_result.errors
       end
     end

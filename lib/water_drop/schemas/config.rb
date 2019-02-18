@@ -6,10 +6,7 @@ module WaterDrop
     # Schema with validation rules for WaterDrop configuration details
     Config = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
-      URI_SCHEMES = %w[
-        kafka
-        kafka+ssl
-      ].freeze
+      URI_SCHEMES ||= %w[kafka kafka+ssl plaintext ssl].freeze
 
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
@@ -59,6 +56,8 @@ module WaterDrop
           ssl_ca_cert_file_path
           ssl_client_cert
           ssl_client_cert_key
+          ssl_client_cert_chain
+          ssl_client_cert_key_password
           sasl_gssapi_principal
           sasl_gssapi_keytab
           sasl_plain_authzid
@@ -71,10 +70,47 @@ module WaterDrop
         end
 
         optional(:ssl_ca_certs_from_system).maybe(:bool?)
+        optional(:sasl_over_ssl).maybe(:bool?)
 
         # It's not with other encryptions as it has some more rules
         optional(:sasl_scram_mechanism)
           .maybe(:str?, included_in?: WaterDrop::Schemas::SASL_SCRAM_MECHANISMS)
+
+        rule(
+          ssl_client_cert_with_ssl_client_cert_key: %i[
+            ssl_client_cert
+            ssl_client_cert_key
+          ]
+        ) do |ssl_client_cert, ssl_client_cert_key|
+          ssl_client_cert.filled? > ssl_client_cert_key.filled?
+        end
+
+        rule(
+          ssl_client_cert_key_with_ssl_client_cert: %i[
+            ssl_client_cert
+            ssl_client_cert_key
+          ]
+        ) do |ssl_client_cert, ssl_client_cert_key|
+          ssl_client_cert_key.filled? > ssl_client_cert.filled?
+        end
+
+        rule(
+          ssl_client_cert_chain_with_ssl_client_cert: %i[
+            ssl_client_cert
+            ssl_client_cert_chain
+          ]
+        ) do |ssl_client_cert, ssl_client_cert_chain|
+          ssl_client_cert_chain.filled? > ssl_client_cert.filled?
+        end
+
+        rule(
+          ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
+            ssl_client_cert_key_password
+            ssl_client_cert_key
+          ]
+        ) do |ssl_client_cert_key_password, ssl_client_cert_key|
+          ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
+        end
       end
     end
   end
