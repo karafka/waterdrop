@@ -934,4 +934,12 @@ RSpec.describe WaterDrop::Schemas::Config do
       it { expect(schema.call(config)).not_to be_success }
     end
   end
+
+  context 'when we validate sasl_oauth_token_provider' do
+    context 'when sasl_oauth_token_provider is nil' do
+      before { config[:kafka][:sasl_oauth_token_provider] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+  end
 end
