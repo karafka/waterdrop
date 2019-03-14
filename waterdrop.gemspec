@@ -20,7 +20,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 0.11'
-  spec.add_dependency 'null-logger', '~> 0.1'
   spec.add_dependency 'ruby-kafka', '>= 0.7.1'
 
   spec.required_ruby_version = '>= 2.3.0'

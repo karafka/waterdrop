@@ -37,6 +37,7 @@ require 'water_drop'
 WaterDrop.setup do |config|
   config.deliver = true
   config.kafka.seed_brokers = %w[kafka://localhost:9092]
+  config.logger = Logger.new(File.join(WaterDrop.gem_root, 'log', 'test.log'))
 end
 
 WaterDrop.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener)

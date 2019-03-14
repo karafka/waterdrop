@@ -65,13 +65,13 @@ module WaterDrop
           sasl_plain_password
           sasl_scram_username
           sasl_scram_password
-          sasl_oauth_token_provider
         ].each do |encryption_attribute|
           optional(encryption_attribute).maybe(:str?)
         end
 
         optional(:ssl_ca_certs_from_system).maybe(:bool?)
         optional(:sasl_over_ssl).maybe(:bool?)
+        optional(:sasl_oauth_token_provider)
 
         # It's not with other encryptions as it has some more rules
         optional(:sasl_scram_mechanism)
