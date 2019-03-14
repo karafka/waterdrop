@@ -5,7 +5,7 @@ RSpec.describe WaterDrop::Schemas::Config do
   let(:config) do
     {
       client_id: 'id',
-      logger: NullLogger.new,
+      logger: Logger.new('/dev/null'),
       deliver: false,
       raise_on_buffer_overflow: true,
       kafka: {

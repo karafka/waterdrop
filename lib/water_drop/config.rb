@@ -11,7 +11,7 @@ module WaterDrop
     # option client_id [String] identifier of this producer
     setting :client_id, 'waterdrop'
     # option [Instance, nil] logger that we want to use or nil to fallback to ruby-kafka logger
-    setting :logger, Logger.new($stdout)
+    setting :logger, Logger.new($stdout).tap { |logger| logger.level = Logger::WARN }
     # option [Instance] monitor that we want to use. See instrumentation part of the README for
     #   more details
     setting :monitor, WaterDrop::Instrumentation::Monitor.instance
