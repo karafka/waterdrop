@@ -941,5 +941,11 @@ RSpec.describe WaterDrop::Schemas::Config do
 
       it { expect(schema.call(config)).to be_success }
     end
+
+    context 'when sasl_oauth_token_provider is an object' do
+      before { config[:kafka][:sasl_oauth_token_provider] = Struct.new(:test).new }
+
+      it { expect(schema.call(config)).to be_success }
+    end
   end
 end
