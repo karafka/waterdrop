@@ -29,7 +29,7 @@ module WaterDrop
       # that are ported 1:1 from ruby-kafka
       # For some crazy reason, delivery boy requires compression codec as a string, when
       # ruby-kafka as a symbol. We follow ruby-kafka internal design, so we had to mimic
-      # that by assigning a stringified version that down the road will be symbolized again
+      # that by assigning a string version that down the road will be symbolized again
       # by delivery boy
       # @param delivery_boy_config [DeliveryBoy::Config] delivery boy config instance
       # @param codec_name [Symbol] codec name as a symbol

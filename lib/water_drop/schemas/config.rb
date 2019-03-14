@@ -65,6 +65,7 @@ module WaterDrop
           sasl_plain_password
           sasl_scram_username
           sasl_scram_password
+          sasl_oauth_token_provider
         ].each do |encryption_attribute|
           optional(encryption_attribute).maybe(:str?)
         end

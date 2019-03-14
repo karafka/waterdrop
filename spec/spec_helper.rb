@@ -8,7 +8,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   simplecov
 ].each(&method(:require))
 
-# Don't include unnecessary stuff into rcov
+# Don't include unnecessary stuff into coverage
 SimpleCov.start do
   %w[
     .bundle

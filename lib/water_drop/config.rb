@@ -3,7 +3,7 @@
 # Configuration and descriptions are based on the delivery boy zendesk gem
 # @see https://github.com/zendesk/delivery_boy
 module WaterDrop
-  # Configurator for setting up all options required by WaterDrop
+  # Configuration object for setting up all options required by WaterDrop
   class Config
     extend Dry::Configurable
 
@@ -115,10 +115,13 @@ module WaterDrop
       # option ssl_client_cert_key_password [String, nil] the password required to read
       #   the ssl_client_cert_key
       setting :ssl_client_cert_key_password, nil
+      # @param sasl_oauth_token_provider [Object, nil] OAuthBearer Token Provider instance that
+      #   implements method token.
+      setting :sasl_oauth_token_provider, nil
     end
 
     class << self
-      # Configurating method
+      # Configuration method
       # @yield Runs a block of code providing a config singleton instance to it
       # @yieldparam [WaterDrop::Config] WaterDrop config instance
       def setup
