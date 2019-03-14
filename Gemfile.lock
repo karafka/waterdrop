@@ -1,9 +1,4 @@
 PATH
-  remote: ../null-logger
-  specs:
-    null-logger (0.1.6)
-
-PATH
   remote: .
   specs:
     waterdrop (1.3.0)
@@ -87,7 +82,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  null-logger!
   rspec
   simplecov
   waterdrop!
