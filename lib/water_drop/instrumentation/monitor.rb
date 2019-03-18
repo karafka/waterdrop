@@ -5,7 +5,7 @@ module WaterDrop
   module Instrumentation
     # Monitor is used to hookup external monitoring services to monitor how WaterDrop works
     # Since it is a pub-sub based on dry-monitor, you can use as many subscribers/loggers at the
-    # same time, which means that you might have for example file logging and newrelic at the same
+    # same time, which means that you might have for example file logging and NewRelic at the same
     # time
     # @note This class acts as a singleton because we are only permitted to have single monitor
     #   per running process (just as logger)

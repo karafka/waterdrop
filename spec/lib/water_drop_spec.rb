@@ -7,12 +7,10 @@ RSpec.describe WaterDrop do
     let(:set_logger) { double }
 
     it 'returns default null logger instnace' do
-      allow(described_class.instance_variable_get(:@logger)) { nil }
-      expect(described_class.logger).to be_a(NullLogger)
+      expect(described_class.logger).to be_a(Logger)
     end
 
     it 'returns set logger' do
-      allow(described_class.instance_variable_get(:@logger)) { set_logger }
       expect(described_class).to receive(:logger).and_return(set_logger)
       described_class.logger
     end

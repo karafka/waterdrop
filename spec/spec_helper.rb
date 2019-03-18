@@ -8,7 +8,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
   simplecov
 ].each(&method(:require))
 
-# Don't include unnecessary stuff into rcov
+# Don't include unnecessary stuff into coverage
 SimpleCov.start do
   %w[
     .bundle
@@ -37,6 +37,7 @@ require 'water_drop'
 WaterDrop.setup do |config|
   config.deliver = true
   config.kafka.seed_brokers = %w[kafka://localhost:9092]
+  config.logger = Logger.new(File.join(WaterDrop.gem_root, 'log', 'test.log'))
 end
 
 WaterDrop.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener)

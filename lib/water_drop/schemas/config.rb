@@ -25,6 +25,12 @@ module WaterDrop
         rescue URI::InvalidURIError
           false
         end
+
+        # @param object [Object] an object that is suppose to respond to #token method
+        # @return [Boolean] true if an object responds to #token method
+        def respond_to_token?(object)
+          object.respond_to?(:token)
+        end
       end
 
       required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
@@ -71,6 +77,7 @@ module WaterDrop
 
         optional(:ssl_ca_certs_from_system).maybe(:bool?)
         optional(:sasl_over_ssl).maybe(:bool?)
+        optional(:sasl_oauth_token_provider).maybe
 
         # It's not with other encryptions as it has some more rules
         optional(:sasl_scram_mechanism)
@@ -110,6 +117,14 @@ module WaterDrop
           ]
         ) do |ssl_client_cert_key_password, ssl_client_cert_key|
           ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
+        end
+
+        rule(
+          sasl_oauth_token_provider_respond_to_token: %i[
+            sasl_oauth_token_provider
+          ]
+        ) do |sasl_oauth_token_provider|
+          sasl_oauth_token_provider.filled? > sasl_oauth_token_provider.respond_to_token?
         end
       end
     end

@@ -5,7 +5,7 @@ RSpec.describe WaterDrop::Schemas::Config do
   let(:config) do
     {
       client_id: 'id',
-      logger: NullLogger.new,
+      logger: Logger.new('/dev/null'),
       deliver: false,
       raise_on_buffer_overflow: true,
       kafka: {
@@ -932,6 +932,27 @@ RSpec.describe WaterDrop::Schemas::Config do
       before { config[:kafka][:ssl_client_cert_key_password] = 2 }
 
       it { expect(schema.call(config)).not_to be_success }
+    end
+  end
+
+  context 'when we validate sasl_oauth_token_provider' do
+    context 'when sasl_oauth_token_provider is nil' do
+      before { config[:kafka][:sasl_oauth_token_provider] = nil }
+
+      it { expect(schema.call(config)).to be_success }
+    end
+
+    context 'when sasl_oauth_token_provider is an object without token method' do
+      before { config[:kafka][:sasl_oauth_token_provider] = Struct.new(:test).new }
+
+      it { expect(schema.call(config)).to be_failure }
+      it { expect { schema.call(config).errors }.not_to raise_error }
+    end
+
+    context 'when sasl_oauth_token_provider is an object with token method' do
+      before { config[:kafka][:sasl_oauth_token_provider] = Struct.new(:token).new }
+
+      it { expect(schema.call(config)).to be_success }
     end
   end
 end

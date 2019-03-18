@@ -19,12 +19,12 @@ module WaterDrop
       end
 
       # Upon failed delivery, we may try to resend a message depending on the attempt number
-      #   or reraise an error if we're unable to do that after given number of retries
+      #   or re-raise an error if we're unable to do that after given number of retries
       #   This method checks that and also instruments errors and retries for the delivery
       # @param attempts_count [Integer] number of attempt (starting from 1) for the delivery
       # @param message [String] message that we want to send to Kafka
       # @param options [Hash] options (including topic) for producer
-      # @param error [Kafka::Error] error that occured
+      # @param error [Kafka::Error] error that occurred
       # @return [Boolean] true if this is a graceful attempt and we can retry or false it this
       #   was the final one and we should deal with the fact, that we cannot deliver a given
       #   message

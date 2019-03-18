@@ -4,7 +4,6 @@
 %w[
   json
   delivery_boy
-  null_logger
   singleton
   dry-configurable
   dry/monitor/notifications

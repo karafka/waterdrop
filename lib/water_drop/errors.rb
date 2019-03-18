@@ -9,7 +9,7 @@ module WaterDrop
     # Raised when configuration doesn't match with validation schema
     InvalidConfiguration = Class.new(BaseError)
 
-    # Raised when we try to send message with invalid optionss
+    # Raised when we try to send message with invalid options
     InvalidMessageOptions = Class.new(BaseError)
 
     # Raised when want to hook up to an event that is not registered and supported
