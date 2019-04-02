@@ -2,7 +2,6 @@ services:
   - docker
 
 dist: trusty
-sudo: false
 cache: bundler
 
 git:
@@ -23,7 +22,7 @@ jobs:
     - <<: *test
       rvm: 2.5.5
     - <<: *test
-      rvm: 2.4.5
+      rvm: 2.4.6
 
     - stage: coditsu
       language: ruby
