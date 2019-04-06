@@ -11,6 +11,7 @@ db/*.sqlite3
 /tmp/*
 *.gem
 *.~
+/.coditsu/local.yml
 
 # various artifacts
 **.war
