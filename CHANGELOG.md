@@ -12,6 +12,7 @@
 - Support message headers
 - `sasl_over_ssl` support
 - `ssl_client_cert_key_password` support
+- #87 - Make stdout listener as instance
 
 ## 1.2.5
 - Bump deps to match Karafka
