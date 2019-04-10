@@ -6,7 +6,7 @@ module WaterDrop
     # It can be removed/replaced or anything without any harm to the Waterdrop flow
     # @note It is a module as we can use it then as a part of the Karafka framework listener
     #   as well as we can use it standalone
-    module StdoutListener
+    class StdoutListener
       # Log levels that we use in this particular listener
       USED_LOG_LEVELS = %i[
         info
@@ -33,20 +33,12 @@ module WaterDrop
 
           info "Attempt #{attempts_count} of delivery to: #{options} because of #{error}"
         end
-
-        module_function error_name
-        module_function retry_name
-        public error_name
-        public retry_name
       end
 
       USED_LOG_LEVELS.each do |log_level|
         define_method log_level do |*args|
           WaterDrop.logger.send(log_level, *args)
         end
-
-        module_function log_level
-        private_class_method log_level
       end
     end
   end

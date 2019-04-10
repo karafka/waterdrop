@@ -40,4 +40,4 @@ WaterDrop.setup do |config|
   config.logger = Logger.new(File.join(WaterDrop.gem_root, 'log', 'test.log'))
 end
 
-WaterDrop.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener)
+WaterDrop.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)
