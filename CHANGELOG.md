@@ -3,6 +3,7 @@
 ## 1.3 Unreleased
 - Drop Ruby 2.3 support
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Ruby 2.6.3 support
 - Support message headers
 - `sasl_over_ssl` support
 - Unlock Ruby Kafka + provide support for 0.7 only
