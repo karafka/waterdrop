@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  # Namespace for all the schemas for config validations
   module Schemas
     # Schema with validation rules for WaterDrop configuration details
     Config = Dry::Validation.Schema do
