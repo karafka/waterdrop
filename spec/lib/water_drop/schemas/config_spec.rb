@@ -150,6 +150,7 @@ RSpec.describe WaterDrop::Schemas::Config do
       before { config[:kafka][:seed_brokers] = %w[#$^&* ^&*()] }
 
       it { expect(schema.call(config)).to be_failure }
+      it { p schema.call(config).errors }
       it { expect { schema.call(config).errors }.not_to raise_error }
     end
   end

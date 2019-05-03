@@ -19,8 +19,8 @@ module WaterDrop
       d_method = WaterDrop.config.raise_on_buffer_overflow ? :deliver_async! : :deliver_async
 
       DeliveryBoy.send(d_method, message, options)
-    rescue Kafka::Error => error
-      graceful_attempt?(attempts_count, message, options, error) ? retry : raise(error)
+    rescue Kafka::Error => e
+      graceful_attempt?(attempts_count, message, options, e) ? retry : raise(e)
     end
   end
 end

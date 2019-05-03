@@ -3,6 +3,7 @@
 ## 1.3 Unreleased
 - Drop Ruby 2.3 support
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Ruby 2.6.3 support
 - Support message headers
 - `sasl_over_ssl` support
 - Unlock Ruby Kafka + provide support for 0.7 only
@@ -12,6 +13,8 @@
 - Support message headers
 - `sasl_over_ssl` support
 - `ssl_client_cert_key_password` support
+- #87 - Make stdout listener as instance
+- Use Zeitwerk for gem code loading
 
 ## 1.2.5
 - Bump deps to match Karafka

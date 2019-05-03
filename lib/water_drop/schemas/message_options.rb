@@ -2,9 +2,6 @@
 
 module WaterDrop
   module Schemas
-    # Regex to check that topic has a valid format
-    TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
-
     # Schema with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
     # @note Does not validate message itself as it is not our concern

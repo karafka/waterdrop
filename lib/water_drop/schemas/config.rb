@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  # Namespace for all the schemas for config validations
   module Schemas
     # Schema with validation rules for WaterDrop configuration details
     class Config < Dry::Validation::Contract
@@ -10,6 +9,8 @@ module WaterDrop
 
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
+
+      AnyObject = Dry::Types::Nominal.new(Object)
 
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
@@ -20,7 +21,7 @@ module WaterDrop
         required(:raise_on_buffer_overflow).filled(:bool?)
 
         required(:kafka).schema do
-          #required(:seed_brokers).filled { each(:broker_schema?) }
+          required(:seed_brokers).filled(:array).each(:str?)
           required(:connect_timeout).filled(:int?, gt?: 0)
           required(:socket_timeout).filled(:int?, gt?: 0)
           required(:compression_threshold).filled(:int?, gteq?: 1)
@@ -58,11 +59,20 @@ module WaterDrop
 
           optional(:ssl_ca_certs_from_system).maybe(:bool?)
           optional(:sasl_over_ssl).maybe(:bool?)
-          optional(:ssl_oauth_token_provider).maybe(:any)
+          optional(:sasl_oauth_token_provider).maybe(AnyObject)
 
           # It's not with other encryptions as it has some more rules
           optional(:sasl_scram_mechanism)
             .maybe(:str?, included_in?: SASL_SCRAM_MECHANISMS)
+        end
+      end
+
+      rule(broker_schema?: { kafka: [:seed_brokers] }) do
+        if values[:kafka] &&
+          values[:kafka][:seed_brokers]
+          values[:kafka][:seed_brokers].each_with_index do |value, idx|
+            key.failure([:kafka, :seed_brokers]) unless broker_schema?(value)
+          end
         end
       end
 
@@ -71,43 +81,58 @@ module WaterDrop
           ssl_client_cert
           ssl_client_cert_key
         ]
-      ) do |ssl_client_cert, ssl_client_cert_key|
-        ssl_client_cert.filled? > ssl_client_cert_key.filled?
+      ) do
+        kafka = values[:kafka]
+
+        if kafka &&
+          kafka[:ssl_client_cert] &&
+          kafka[:ssl_client_cert_key].nil?
+          key([:kafka, :ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
+        end
       end
 
-      rule(
-        ssl_client_cert_key_with_ssl_client_cert: %i[
-          ssl_client_cert
-          ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert, ssl_client_cert_key|
-        #ssl_client_cert_key.filled? > ssl_client_cert.filled?
+      rule(:ssl_client_cert_key_with_ssl_client_cert) do
+        kafka = values[:kafka]
+
+        if values[:kafka] &&
+          values[:kafka][:ssl_client_cert_key] &&
+          values[:kafka][:ssl_client_cert].nil?
+          key.failure(:ssl_client_cert_key_with_ssl_client_cert)
+        end
       end
 
-      rule(
-        ssl_client_cert_chain_with_ssl_client_cert: %i[
-          ssl_client_cert
-          ssl_client_cert_chain
-        ]
-      ) do |ssl_client_cert, ssl_client_cert_chain|
-        #ssl_client_cert_chain.filled? > ssl_client_cert.filled?
+      rule(:ssl_client_cert_chain_with_ssl_client_cert) do
+        if values[:kafka] &&
+          values[:kafka][:ssl_client_cert_chain] &&
+          values[:kafka][:ssl_client_cert].nil?
+          key.failure(:ssl_client_cert_chain_with_ssl_client_cert)
+        end
       end
 
-      rule(
-        ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
-          ssl_client_cert_key_password
-          ssl_client_cert_key
-        ]
-      ) do |ssl_client_cert_key_password, ssl_client_cert_key|
-        #ssl_client_cert_key_password.filled? > ssl_client_cert_key.filled?
+      rule(:ssl_client_cert_key_password_with_ssl_client_cert_key) do
+        if values[:kafka] &&
+          values[:kafka][:ssl_client_cert_key_password] &&
+          values[:kafka][:ssl_client_cert_key].nil?
+          key.failure(:ssl_client_cert_key_password_with_ssl_client_cert_key)
+        end
       end
 
-      rule(
-        sasl_oauth_token_provider_respond_to_token: %i[
-          sasl_oauth_token_provider
-        ]
-      ) do |sasl_oauth_token_provider|
-        #sasl_oauth_token_provider.filled? > sasl_oauth_token_provider.respond_to_token?
+      rule(:sasl_oauth_token_provider_respond_to_token) do
+        if values[:kafka] &&
+          values[:kafka][:sasl_oauth_token_provider] &&
+          !values[:kafka][:sasl_oauth_token_provider].respond_to?(:token)
+          key.failure(:sasl_oauth_token_provider_respond_to_token)
+        end
+      end
+
+      # Uri validator to check if uri is in a Kafka acceptable format
+      # @param uri [String] uri we want to validate
+      # @return [Boolean] true if it is a valid uri, otherwise false
+      def broker_schema?(uri)
+        uri = URI.parse(uri)
+        URI_SCHEMES.include?(uri.scheme) && uri.port
+      rescue URI::InvalidURIError
+        false
       end
 
       def self.call(options)

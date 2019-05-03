@@ -8,10 +8,8 @@
   dry-configurable
   dry/monitor/notifications
   dry-validation
+  zeitwerk
 ].each { |lib| require lib }
-
-# Internal components
-base_path = File.dirname(__FILE__) + '/water_drop'
 
 # WaterDrop library
 module WaterDrop
@@ -43,16 +41,8 @@ module WaterDrop
   end
 end
 
-%w[
-  version
-  instrumentation/monitor
-  instrumentation/stdout_listener
-  schemas/message_options
-  schemas/config
-  config
-  config_applier
-  errors
-  base_producer
-  sync_producer
-  async_producer
-].each { |lib| require "#{base_path}/#{lib}" }
+Zeitwerk::Loader
+  .for_gem
+  .tap { |loader| loader.ignore("#{__dir__}/waterdrop.rb") }
+  .tap(&:setup)
+  .tap(&:eager_load)
