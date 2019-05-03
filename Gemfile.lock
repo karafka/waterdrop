@@ -1,3 +1,15 @@
+GIT
+  remote: https://github.com/dry-rb/dry-validation.git
+  revision: 61df27137f9d0b90d75908c0e26a4700ca96e90b
+  branch: master
+  specs:
+    dry-validation (1.0.0.rc1)
+      concurrent-ruby (~> 1.0)
+      dry-core (~> 0.4)
+      dry-equalizer (~> 0.2)
+      dry-initializer (~> 3.0)
+      dry-schema (~> 1.0)
+
 PATH
   remote: .
   specs:
@@ -43,7 +55,7 @@ GEM
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
-    dry-schema (0.6.0)
+    dry-schema (1.0.0)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.8, >= 0.8.0)
       dry-core (~> 0.4)
@@ -58,12 +70,6 @@ GEM
       dry-equalizer (~> 0.2, >= 0.2.2)
       dry-inflector (~> 0.1, >= 0.1.2)
       dry-logic (~> 1.0)
-    dry-validation (1.0.0.rc1)
-      concurrent-ruby (~> 1.0)
-      dry-core (~> 0.4)
-      dry-equalizer (~> 0.2)
-      dry-initializer (~> 3.0)
-      dry-schema (~> 0.6, >= 0.6)
     json (2.2.0)
     king_konf (0.3.7)
     rspec (3.8.0)
@@ -92,6 +98,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  dry-validation!
   rspec
   simplecov
   waterdrop!
