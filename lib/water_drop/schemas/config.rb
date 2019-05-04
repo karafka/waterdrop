@@ -59,7 +59,7 @@ module WaterDrop
 
           optional(:ssl_ca_certs_from_system).maybe(:bool?)
           optional(:sasl_over_ssl).maybe(:bool?)
-          optional(:sasl_oauth_token_provider).maybe(AnyObject)
+          optional(:sasl_oauth_token_provider).value(:any)
 
           # It's not with other encryptions as it has some more rules
           optional(:sasl_scram_mechanism)
@@ -67,26 +67,16 @@ module WaterDrop
         end
       end
 
-      rule(broker_schema?: { kafka: [:seed_brokers] }) do
-        if values[:kafka] &&
-          values[:kafka][:seed_brokers]
-          values[:kafka][:seed_brokers].each_with_index do |value, idx|
-            key.failure([:kafka, :seed_brokers]) unless broker_schema?(value)
-          end
+      rule(kafka: :seed_brokers) do
+        values[:kafka][:seed_brokers].each_with_index do |value, idx|
+          key([:kafka, :seed_brokers, idx]).failure(:broker_schema) unless broker_schema?(value)
         end
       end
 
-      rule(
-        ssl_client_cert_with_ssl_client_cert_key: %i[
-          ssl_client_cert
-          ssl_client_cert_key
-        ]
-      ) do
+      rule(:kafka, ssl_client_cert_with_ssl_client_cert_key: %i[ssl_client_cert  ssl_client_cert_key]) do
         kafka = values[:kafka]
 
-        if kafka &&
-          kafka[:ssl_client_cert] &&
-          kafka[:ssl_client_cert_key].nil?
+        if kafka[:ssl_client_cert] && kafka[:ssl_client_cert_key].nil?
           key([:kafka, :ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
         end
       end

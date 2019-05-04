@@ -141,7 +141,7 @@ module WaterDrop
         validation_result = Schemas::Config.call(config_hash)
         return true if validation_result.success?
 
-        raise Errors::InvalidConfiguration, validation_result.errors
+        raise Errors::InvalidConfiguration, validation_result.errors.to_h
       end
     end
   end
