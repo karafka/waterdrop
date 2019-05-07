@@ -98,9 +98,8 @@ module WaterDrop
 
       kafka_scope_rule(:seed_brokers) do |kafka|
         unless kafka[:seed_brokers]
-          .reject(&method(:broker_schema?))
-          .empty?
-
+               .reject(&method(:broker_schema?))
+               .empty?
           key(%i[kafka seed_brokers]).failure(:broker_schema)
         end
       end
@@ -113,7 +112,7 @@ module WaterDrop
       ) do |kafka|
         if kafka[:ssl_client_cert] &&
            kafka[:ssl_client_cert_key].nil?
-          key([:kafka, :ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
+          key(%i[kafka ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
         end
       end
 
