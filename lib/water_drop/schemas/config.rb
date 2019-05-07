@@ -10,9 +10,38 @@ module WaterDrop
       # Available sasl scram mechanism of authentication (plus nil)
       SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
 
-      AnyObject = Dry::Types::Nominal.new(Object)
-
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
+
+      class << self
+        # @param options [Hash] hash with data we want to validate
+        # @return [Dry::Validation::Result] dry validation execution result
+        def call(options)
+          new.call(options)
+        end
+
+        private
+
+        # Builder for kafka scoped data custom rules
+        # @param key [Symbol, Hash] the key definition
+        # @param block [Proc] block we want to run with validations within the kafka scope
+        def kafka_scope_rule(key, &block)
+          rule(key, :kafka) do
+            instance_exec(values[:kafka], &block)
+          end
+        end
+      end
+
+      private
+
+      # Uri validator to check if uri is in a Kafka acceptable format
+      # @param uri [String] uri we want to validate
+      # @return [Boolean] true if it is a valid uri, otherwise false
+      def broker_schema?(uri)
+        uri = URI.parse(uri)
+        URI_SCHEMES.include?(uri.scheme) && uri.port
+      rescue URI::InvalidURIError
+        false
+      end
 
       params do
         required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
@@ -67,60 +96,72 @@ module WaterDrop
         end
       end
 
-      def self.kafka_rule(key, &block)
-        rule(key, :kafka) do
-          instance_exec(values[:kafka], &block)
+      kafka_scope_rule(:seed_brokers) do |kafka|
+        unless kafka[:seed_brokers]
+          .reject(&method(:broker_schema?))
+          .empty?
+
+          key(%i[kafka seed_brokers]).failure(:broker_schema)
         end
       end
 
-      kafka_rule(:seed_brokers) do |kafka|
-        kafka[:seed_brokers].each_with_index do |value, idx|
-          key([:kafka, :seed_brokers, idx]).failure(:broker_schema) unless broker_schema?(value)
-        end
-      end
-
-      kafka_rule(ssl_client_cert_with_ssl_client_cert_key: %i[ssl_client_cert  ssl_client_cert_key]) do |kafka|
-        if kafka[:ssl_client_cert] && kafka[:ssl_client_cert_key].nil?
+      kafka_scope_rule(
+        ssl_client_cert_with_ssl_client_cert_key: %i[
+          ssl_client_cert
+          ssl_client_cert_key
+        ]
+      ) do |kafka|
+        if kafka[:ssl_client_cert] &&
+           kafka[:ssl_client_cert_key].nil?
           key([:kafka, :ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
         end
       end
 
-      kafka_rule(:ssl_client_cert_key_with_ssl_client_cert) do |kafka|
-        if kafka[:ssl_client_cert_key] && kafka[:ssl_client_cert].nil?
+      kafka_scope_rule(
+        ssl_client_cert_key_with_ssl_client_cert: %i[
+          ssl_client_cert_key
+          ssl_client_cert
+        ]
+      ) do |kafka|
+        if kafka[:ssl_client_cert_key] &&
+           kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_key_with_ssl_client_cert)
         end
       end
 
-      kafka_rule(:ssl_client_cert_chain_with_ssl_client_cert) do |kafka|
-        if kafka[:ssl_client_cert_chain] && kafka[:ssl_client_cert].nil?
+      kafka_scope_rule(
+        ssl_client_cert_chain_with_ssl_client_cert: %i[
+          ssl_client_cert_chain
+          ssl_client_cert
+        ]
+      ) do |kafka|
+        if kafka[:ssl_client_cert_chain] &&
+           kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_chain_with_ssl_client_cert)
         end
       end
 
-      kafka_rule(:ssl_client_cert_key_password_with_ssl_client_cert_key) do |kafka|
-        if kafka[:ssl_client_cert_key_password] && kafka[:ssl_client_cert_key].nil?
+      kafka_scope_rule(
+        ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
+          ssl_client_cert_key_password
+          ssl_client_cert_key
+        ]
+      ) do |kafka|
+        if kafka[:ssl_client_cert_key_password] &&
+           kafka[:ssl_client_cert_key].nil?
           key.failure(:ssl_client_cert_key_password_with_ssl_client_cert_key)
         end
       end
 
-      kafka_rule(:sasl_oauth_token_provider_respond_to_token) do |kafka|
-        if kafka[:sasl_oauth_token_provider] && !kafka[:sasl_oauth_token_provider].respond_to?(:token)
+      kafka_scope_rule(
+        sasl_oauth_token_provider_respond_to_token: %i[
+          sasl_oauth_token_provider
+        ]
+      ) do |kafka|
+        if kafka[:sasl_oauth_token_provider] &&
+           !kafka[:sasl_oauth_token_provider].respond_to?(:token)
           key.failure(:sasl_oauth_token_provider_respond_to_token)
         end
-      end
-
-      # Uri validator to check if uri is in a Kafka acceptable format
-      # @param uri [String] uri we want to validate
-      # @return [Boolean] true if it is a valid uri, otherwise false
-      def broker_schema?(uri)
-        uri = URI.parse(uri)
-        URI_SCHEMES.include?(uri.scheme) && uri.port
-      rescue URI::InvalidURIError
-        false
-      end
-
-      def self.call(options)
-        new.call(options)
       end
     end
   end

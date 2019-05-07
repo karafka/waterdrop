@@ -15,8 +15,12 @@ module WaterDrop
         optional(:headers).maybe(:hash?)
       end
 
-      def self.call(options)
-        new.call(options)
+      class << self
+        # @param options [Hash] hash with data we want to validate
+        # @return [Dry::Validation::Result] dry validation execution result
+        def call(options)
+          new.call(options)
+        end
       end
     end
   end
