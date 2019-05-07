@@ -59,7 +59,7 @@ module WaterDrop
 
           optional(:ssl_ca_certs_from_system).maybe(:bool?)
           optional(:sasl_over_ssl).maybe(:bool?)
-          optional(:sasl_oauth_token_provider).maybe(AnyObject)
+          optional(:sasl_oauth_token_provider).value(:any)
 
           # It's not with other encryptions as it has some more rules
           optional(:sasl_scram_mechanism)
@@ -67,60 +67,44 @@ module WaterDrop
         end
       end
 
-      rule(broker_schema?: { kafka: [:seed_brokers] }) do
-        if values[:kafka] &&
-          values[:kafka][:seed_brokers]
-          values[:kafka][:seed_brokers].each_with_index do |value, idx|
-            key.failure([:kafka, :seed_brokers]) unless broker_schema?(value)
-          end
+      def self.kafka_rule(key, &block)
+        rule(key, :kafka) do
+          instance_exec(values[:kafka], &block)
         end
       end
 
-      rule(
-        ssl_client_cert_with_ssl_client_cert_key: %i[
-          ssl_client_cert
-          ssl_client_cert_key
-        ]
-      ) do
-        kafka = values[:kafka]
+      kafka_rule(:seed_brokers) do |kafka|
+        kafka[:seed_brokers].each_with_index do |value, idx|
+          key([:kafka, :seed_brokers, idx]).failure(:broker_schema) unless broker_schema?(value)
+        end
+      end
 
-        if kafka &&
-          kafka[:ssl_client_cert] &&
-          kafka[:ssl_client_cert_key].nil?
+      kafka_rule(ssl_client_cert_with_ssl_client_cert_key: %i[ssl_client_cert  ssl_client_cert_key]) do |kafka|
+        if kafka[:ssl_client_cert] && kafka[:ssl_client_cert_key].nil?
           key([:kafka, :ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
         end
       end
 
-      rule(:ssl_client_cert_key_with_ssl_client_cert) do
-        kafka = values[:kafka]
-
-        if values[:kafka] &&
-          values[:kafka][:ssl_client_cert_key] &&
-          values[:kafka][:ssl_client_cert].nil?
+      kafka_rule(:ssl_client_cert_key_with_ssl_client_cert) do |kafka|
+        if kafka[:ssl_client_cert_key] && kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_key_with_ssl_client_cert)
         end
       end
 
-      rule(:ssl_client_cert_chain_with_ssl_client_cert) do
-        if values[:kafka] &&
-          values[:kafka][:ssl_client_cert_chain] &&
-          values[:kafka][:ssl_client_cert].nil?
+      kafka_rule(:ssl_client_cert_chain_with_ssl_client_cert) do |kafka|
+        if kafka[:ssl_client_cert_chain] && kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_chain_with_ssl_client_cert)
         end
       end
 
-      rule(:ssl_client_cert_key_password_with_ssl_client_cert_key) do
-        if values[:kafka] &&
-          values[:kafka][:ssl_client_cert_key_password] &&
-          values[:kafka][:ssl_client_cert_key].nil?
+      kafka_rule(:ssl_client_cert_key_password_with_ssl_client_cert_key) do |kafka|
+        if kafka[:ssl_client_cert_key_password] && kafka[:ssl_client_cert_key].nil?
           key.failure(:ssl_client_cert_key_password_with_ssl_client_cert_key)
         end
       end
 
-      rule(:sasl_oauth_token_provider_respond_to_token) do
-        if values[:kafka] &&
-          values[:kafka][:sasl_oauth_token_provider] &&
-          !values[:kafka][:sasl_oauth_token_provider].respond_to?(:token)
+      kafka_rule(:sasl_oauth_token_provider_respond_to_token) do |kafka|
+        if kafka[:sasl_oauth_token_provider] && !kafka[:sasl_oauth_token_provider].respond_to?(:token)
           key.failure(:sasl_oauth_token_provider_respond_to_token)
         end
       end
