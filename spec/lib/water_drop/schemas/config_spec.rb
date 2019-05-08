@@ -310,6 +310,12 @@ RSpec.describe WaterDrop::Schemas::Config do
 
       it { expect(schema.call(config)).to be_success }
     end
+
+    context 'when compression_codec is zstd' do
+      before { config[:kafka][:compression_codec] = :zstd }
+
+      it { expect(schema.call(config)).to be_success }
+    end
   end
 
   context 'when we run kafka.max_buffer_bytesize validations' do

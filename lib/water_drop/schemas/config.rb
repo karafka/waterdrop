@@ -5,10 +5,13 @@ module WaterDrop
     # Schema with validation rules for WaterDrop configuration details
     Config = Dry::Validation.Schema do
       # Valid uri schemas of Kafka broker url
-      URI_SCHEMES ||= %w[kafka kafka+ssl plaintext ssl].freeze
+      URI_SCHEMES = %w[kafka kafka+ssl plaintext ssl].freeze
 
       # Available sasl scram mechanism of authentication (plus nil)
-      SASL_SCRAM_MECHANISMS ||= %w[sha256 sha512].freeze
+      SASL_SCRAM_MECHANISMS = %w[sha256 sha512].freeze
+
+      # Supported compression codecs
+      COMPRESSION_CODES = %i[snappy gzip lz4 zstd]
 
       configure do
         config.messages_file = File.join(
@@ -42,7 +45,7 @@ module WaterDrop
         required(:connect_timeout).filled(:int?, gt?: 0)
         required(:socket_timeout).filled(:int?, gt?: 0)
         required(:compression_threshold).filled(:int?, gteq?: 1)
-        optional(:compression_codec).maybe(included_in?: %i[snappy gzip lz4])
+        optional(:compression_codec).maybe(included_in?: COMPRESSION_CODES)
 
         required(:max_buffer_bytesize).filled(:int?, gt?: 0)
         required(:max_buffer_size).filled(:int?, gt?: 0)
