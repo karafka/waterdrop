@@ -11,7 +11,7 @@ module WaterDrop
       SASL_SCRAM_MECHANISMS = %w[sha256 sha512].freeze
 
       # Supported compression codecs
-      COMPRESSION_CODES = %i[snappy gzip lz4 zstd]
+      COMPRESSION_CODECS = %i[snappy gzip lz4 zstd]
 
       configure do
         config.messages_file = File.join(
@@ -45,7 +45,7 @@ module WaterDrop
         required(:connect_timeout).filled(:int?, gt?: 0)
         required(:socket_timeout).filled(:int?, gt?: 0)
         required(:compression_threshold).filled(:int?, gteq?: 1)
-        optional(:compression_codec).maybe(included_in?: COMPRESSION_CODES)
+        optional(:compression_codec).maybe(included_in?: COMPRESSION_CODECS)
 
         required(:max_buffer_bytesize).filled(:int?, gt?: 0)
         required(:max_buffer_size).filled(:int?, gt?: 0)
