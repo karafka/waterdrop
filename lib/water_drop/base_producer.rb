@@ -8,6 +8,8 @@ module WaterDrop
     # dispatch to Kafka
     SCHEMA = Schemas::MessageOptions.new.freeze
 
+    private_constant :SCHEMA
+
     class << self
       private
 
