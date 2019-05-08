@@ -15,6 +15,7 @@
 - `ssl_client_cert_key_password` support
 - #87 - Make stdout listener as instance
 - Use Zeitwerk for gem code loading
+- #93 - zstd compression support
 
 ## 1.2.5
 - Bump deps to match Karafka
