@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe WaterDrop::Schemas::Config do
-  let(:schema) { described_class }
+  let(:schema) { described_class.new }
   let(:config) do
     {
       client_id: 'id',

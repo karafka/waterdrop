@@ -14,14 +14,6 @@ module WaterDrop
         optional(:create_time).maybe(:time?)
         optional(:headers).maybe(:hash?)
       end
-
-      class << self
-        # @param options [Hash] hash with data we want to validate
-        # @return [Dry::Validation::Result] dry validation execution result
-        def call(options)
-          new.call(options)
-        end
-      end
     end
   end
 end

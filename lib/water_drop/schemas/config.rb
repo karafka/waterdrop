@@ -16,12 +16,6 @@ module WaterDrop
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
       class << self
-        # @param options [Hash] hash with data we want to validate
-        # @return [Dry::Validation::Result] dry validation execution result
-        def call(options)
-          new.call(options)
-        end
-
         private
 
         # Builder for kafka scoped data custom rules
