@@ -21,8 +21,8 @@ module WaterDrop
         # Builder for kafka scoped data custom rules
         # @param key [Symbol, Hash] the key definition
         # @param block [Proc] block we want to run with validations within the kafka scope
-        def kafka_scope_rule(key, &block)
-          rule(key, :kafka) do
+        def kafka_scope_rule(*keys, &block)
+          rule(kafka: keys) do
             instance_exec(values[:kafka], &block)
           end
         end
@@ -101,59 +101,35 @@ module WaterDrop
         end
       end
 
-      kafka_scope_rule(
-        ssl_client_cert_with_ssl_client_cert_key: %i[
-          ssl_client_cert
-          ssl_client_cert_key
-        ]
-      ) do |kafka|
+      kafka_scope_rule(:ssl_client_cert, :ssl_client_cert_key) do |kafka|
         if kafka[:ssl_client_cert] &&
            kafka[:ssl_client_cert_key].nil?
           key(%i[kafka ssl_client_cert_key]).failure(:ssl_client_cert_with_ssl_client_cert_key)
         end
       end
 
-      kafka_scope_rule(
-        ssl_client_cert_key_with_ssl_client_cert: %i[
-          ssl_client_cert_key
-          ssl_client_cert
-        ]
-      ) do |kafka|
+      kafka_scope_rule(:ssl_client_cert_key, :ssl_client_cert) do |kafka|
         if kafka[:ssl_client_cert_key] &&
            kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_key_with_ssl_client_cert)
         end
       end
 
-      kafka_scope_rule(
-        ssl_client_cert_chain_with_ssl_client_cert: %i[
-          ssl_client_cert_chain
-          ssl_client_cert
-        ]
-      ) do |kafka|
+      kafka_scope_rule(:ssl_client_cert_chain, :ssl_client_cert) do |kafka|
         if kafka[:ssl_client_cert_chain] &&
            kafka[:ssl_client_cert].nil?
           key.failure(:ssl_client_cert_chain_with_ssl_client_cert)
         end
       end
 
-      kafka_scope_rule(
-        ssl_client_cert_key_password_with_ssl_client_cert_key: %i[
-          ssl_client_cert_key_password
-          ssl_client_cert_key
-        ]
-      ) do |kafka|
+      kafka_scope_rule(:ssl_client_cert_key_password, :ssl_client_cert_key) do |kafka|
         if kafka[:ssl_client_cert_key_password] &&
            kafka[:ssl_client_cert_key].nil?
           key.failure(:ssl_client_cert_key_password_with_ssl_client_cert_key)
         end
       end
 
-      kafka_scope_rule(
-        sasl_oauth_token_provider_respond_to_token: %i[
-          sasl_oauth_token_provider
-        ]
-      ) do |kafka|
+      kafka_scope_rule(:sasl_oauth_token_provider) do |kafka|
         if kafka[:sasl_oauth_token_provider] &&
            !kafka[:sasl_oauth_token_provider].respond_to?(:token)
           key.failure(:sasl_oauth_token_provider_respond_to_token)
