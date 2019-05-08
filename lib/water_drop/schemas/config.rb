@@ -11,7 +11,7 @@ module WaterDrop
       SASL_SCRAM_MECHANISMS = %w[sha256 sha512].freeze
 
       # Supported compression codecs
-      COMPRESSION_CODECS = %i[snappy gzip lz4 zstd]
+      COMPRESSION_CODECS = %i[snappy gzip lz4 zstd].freeze
 
       configure do
         config.messages_file = File.join(
