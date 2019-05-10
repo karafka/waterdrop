@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/dry-rb/dry-validation.git
-  revision: efda20aff0b408d4dfc4d830fb8eda7b83b105a4
+  revision: 1193d6b162269eb26f0cb25f76b3becfaeb6d46d
   branch: master
   specs:
     dry-validation (1.0.0.rc3)
@@ -85,7 +85,7 @@ GEM
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.8.0)
     rspec-support (3.8.0)
-    ruby-kafka (0.7.6)
+    ruby-kafka (0.7.7)
       digest-crc
     simplecov (0.16.1)
       docile (~> 1.1)
