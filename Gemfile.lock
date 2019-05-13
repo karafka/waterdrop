@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/dry-rb/dry-validation.git
-  revision: 1193d6b162269eb26f0cb25f76b3becfaeb6d46d
+  revision: d7482806fba2e13567e8ccde8974ab9b302379ef
   branch: master
   specs:
     dry-validation (1.0.0.rc3)
@@ -8,7 +8,7 @@ GIT
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-initializer (~> 3.0)
-      dry-schema (~> 1.0)
+      dry-schema (~> 1.0, >= 1.0.2)
 
 PATH
   remote: .
@@ -55,7 +55,7 @@ GEM
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
-    dry-schema (1.0.1)
+    dry-schema (1.0.2)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.8, >= 0.8.0)
       dry-core (~> 0.4)
