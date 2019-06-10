@@ -7,6 +7,12 @@ module WaterDrop
   class Config
     extend Dry::Configurable
 
+    # Config schema definition
+    # @note We use a single instance not to create new one upon each usage
+    SCHEMA = Schemas::Config.new.freeze
+
+    private_constant :SCHEMA
+
     # WaterDrop options
     # option client_id [String] identifier of this producer
     setting :client_id, 'waterdrop'
@@ -138,10 +144,10 @@ module WaterDrop
       # @raise [WaterDrop::Errors::InvalidConfiguration] raised when something is wrong with
       #   the configuration
       def validate!(config_hash)
-        validation_result = Schemas::Config.call(config_hash)
+        validation_result = SCHEMA.call(config_hash)
         return true if validation_result.success?
 
-        raise Errors::InvalidConfiguration, validation_result.errors
+        raise Errors::InvalidConfiguration, validation_result.errors.to_h
       end
     end
   end

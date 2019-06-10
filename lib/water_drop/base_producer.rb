@@ -4,6 +4,12 @@ module WaterDrop
   # Base messages producer that contains all the logic that is exactly the same for both
   # sync and async producers
   class BaseProducer
+    # Schema for checking the correctness of the provided data that someone wants to
+    # dispatch to Kafka
+    SCHEMA = Schemas::MessageOptions.new.freeze
+
+    private_constant :SCHEMA
+
     class << self
       private
 
@@ -12,7 +18,7 @@ module WaterDrop
       # @raise [WaterDrop::Errors::InvalidMessageOptions] raised when message options are
       #   somehow invalid and we cannot perform delivery because of that
       def validate!(options)
-        validation_result = Schemas::MessageOptions.call(options)
+        validation_result = SCHEMA.call(options)
         return true if validation_result.success?
 
         raise Errors::InvalidMessageOptions, validation_result.errors
