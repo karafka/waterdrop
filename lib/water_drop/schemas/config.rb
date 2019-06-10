@@ -19,7 +19,7 @@ module WaterDrop
         private
 
         # Builder for kafka scoped data custom rules
-        # @param key [Symbol, Hash] the key definition
+        # @param keys [Symbol, Hash] the keys names
         # @param block [Proc] block we want to run with validations within the kafka scope
         def kafka_scope_rule(*keys, &block)
           rule(kafka: keys) do
