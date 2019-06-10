@@ -4,7 +4,7 @@ source 'https://rubygems.org'
 
 gemspec
 
-gem 'dry-validation', git: 'https://github.com/dry-rb/dry-validation.git', branch: 'master'
+gem 'dry-validation'
 
 group :test do
   gem 'rspec'

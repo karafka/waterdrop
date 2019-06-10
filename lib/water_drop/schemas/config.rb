@@ -47,7 +47,7 @@ module WaterDrop
         required(:raise_on_buffer_overflow).filled(:bool?)
 
         required(:kafka).schema do
-          required(:seed_brokers).filled(:array).each(:str?)
+          required(:seed_brokers).value(:array, :filled?).each(:str?)
           required(:connect_timeout).filled(:int?, gt?: 0)
           required(:socket_timeout).filled(:int?, gt?: 0)
           required(:compression_threshold).filled(:int?, gteq?: 1)

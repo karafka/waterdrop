@@ -19,8 +19,8 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'delivery_boy', '~> 0.2'
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-monitor', '~> 0.3'
-  spec.add_dependency 'dry-validation', '~> 1.0.0.rc1'
-  spec.add_dependency 'ruby-kafka', '>= 0.7.6'
+  spec.add_dependency 'dry-validation', '~> 1.0'
+  spec.add_dependency 'ruby-kafka', '>= 0.7.7'
   spec.add_dependency 'zeitwerk', '~> 2.1'
 
   spec.required_ruby_version = '>= 2.4.0'
