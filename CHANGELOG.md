@@ -16,6 +16,7 @@
 - #87 - Make stdout listener as instance
 - Use Zeitwerk for gem code loading
 - #93 - zstd compression support
+- Schemas are renamed to contracts
 
 ## 1.2.5
 - Bump deps to match Karafka
