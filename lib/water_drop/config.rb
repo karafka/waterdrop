@@ -9,7 +9,7 @@ module WaterDrop
 
     # Config schema definition
     # @note We use a single instance not to create new one upon each usage
-    SCHEMA = Schemas::Config.new.freeze
+    SCHEMA = Contracts::Config.new.freeze
 
     private_constant :SCHEMA
 
@@ -20,7 +20,7 @@ module WaterDrop
     setting :logger, Logger.new($stdout, level: Logger::WARN)
     # option [Instance] monitor that we want to use. See instrumentation part of the README for
     #   more details
-    setting :monitor, WaterDrop::Instrumentation::Monitor.instance
+    setting :monitor, WaterDrop::Instrumentation::Monitor.new
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka
     setting :deliver, true

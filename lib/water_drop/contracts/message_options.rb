@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  module Schemas
-    # Schema with validation rules for validating that all the message options that
+  module Contracts
+    # Contract with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
     # @note Does not validate message itself as it is not our concern
     class MessageOptions < Dry::Validation::Contract

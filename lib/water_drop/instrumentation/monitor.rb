@@ -10,8 +10,6 @@ module WaterDrop
     # @note This class acts as a singleton because we are only permitted to have single monitor
     #   per running process (just as logger)
     class Monitor < Dry::Monitor::Notifications
-      include Singleton
-
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
       BASE_EVENTS = %w[
