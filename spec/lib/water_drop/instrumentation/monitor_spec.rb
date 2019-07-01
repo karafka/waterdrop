@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe WaterDrop::Instrumentation::Monitor do
-  subject(:monitor) { described_class.instance }
+  subject(:monitor) { described_class.new }
 
   describe '#instrument' do
     let(:result) { rand }
