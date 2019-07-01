@@ -6,7 +6,7 @@ module WaterDrop
     # Base class for all the WaterDrop internal errors
     BaseError = Class.new(StandardError)
 
-    # Raised when configuration doesn't match with validation schema
+    # Raised when configuration doesn't match with validation contract
     InvalidConfiguration = Class.new(BaseError)
 
     # Raised when we try to send message with invalid options

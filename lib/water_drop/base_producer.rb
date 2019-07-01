@@ -4,9 +4,9 @@ module WaterDrop
   # Base messages producer that contains all the logic that is exactly the same for both
   # sync and async producers
   class BaseProducer
-    # Schema for checking the correctness of the provided data that someone wants to
+    # Contract for checking the correctness of the provided data that someone wants to
     # dispatch to Kafka
-    SCHEMA = Schemas::MessageOptions.new.freeze
+    SCHEMA = Contracts::MessageOptions.new.freeze
 
     private_constant :SCHEMA
 

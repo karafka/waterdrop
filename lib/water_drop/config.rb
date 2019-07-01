@@ -9,7 +9,7 @@ module WaterDrop
 
     # Config schema definition
     # @note We use a single instance not to create new one upon each usage
-    SCHEMA = Schemas::Config.new.freeze
+    SCHEMA = Contracts::Config.new.freeze
 
     private_constant :SCHEMA
 

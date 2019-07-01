@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  module Schemas
-    # Schema with validation rules for WaterDrop configuration details
+  module Contracts
+    # Contract with validation rules for WaterDrop configuration details
     class Config < Dry::Validation::Contract
       # Valid uri schemas of Kafka broker url
       URI_SCHEMES = %w[kafka kafka+ssl plaintext ssl].freeze
@@ -41,7 +41,7 @@ module WaterDrop
       end
 
       params do
-        required(:client_id).filled(:str?, format?: Schemas::TOPIC_REGEXP)
+        required(:client_id).filled(:str?, format?: Contracts::TOPIC_REGEXP)
         required(:logger).filled
         required(:deliver).filled(:bool?)
         required(:raise_on_buffer_overflow).filled(:bool?)
