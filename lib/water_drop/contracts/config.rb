@@ -94,6 +94,8 @@ module WaterDrop
       end
 
       kafka_scope_rule(:seed_brokers) do |kafka|
+        next unless kafka[:seed_brokers].is_a?(Array)
+
         unless kafka[:seed_brokers].all?(&method(:broker_schema?))
           key(%i[kafka seed_brokers]).failure(:broker_schema)
         end
