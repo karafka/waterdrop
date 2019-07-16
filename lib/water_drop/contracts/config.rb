@@ -22,7 +22,7 @@ module WaterDrop
         # @param keys [Symbol, Hash] the keys names
         # @param block [Proc] block we want to run with validations within the kafka scope
         def kafka_scope_rule(*keys, &block)
-          rule(kafka: keys) do
+          rule(*[:kafka].product(keys)) do
             instance_exec(values[:kafka], &block)
           end
         end
@@ -94,8 +94,6 @@ module WaterDrop
       end
 
       kafka_scope_rule(:seed_brokers) do |kafka|
-        next unless kafka[:seed_brokers].is_a?(Array)
-
         unless kafka[:seed_brokers].all?(&method(:broker_schema?))
           key(%i[kafka seed_brokers]).failure(:broker_schema)
         end
