@@ -39,8 +39,14 @@ RSpec.describe WaterDrop::Instrumentation::Monitor do
     end
 
     context 'when we have an object listener' do
-      let(:subscription) { WaterDrop.monitor.subscribe(listener) }
-      let(:listener) { Class.new }
+      let(:subscription) { WaterDrop.monitor.subscribe(listener.new) }
+      let(:listener) do
+        Class.new do
+          def on_sync_producer_call_error(_event)
+            true
+          end
+        end
+      end
 
       it { expect { subscription }.not_to raise_error }
     end

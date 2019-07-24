@@ -3,7 +3,7 @@
 RSpec.describe WaterDrop::Instrumentation::StdoutListener do
   subject(:listener) { described_class.new }
 
-  let(:event) { Dry::Events::Event.new(rand, payload) }
+  let(:event) { Dry::Events::Event.new(rand.to_s, payload) }
   let(:attempts_count) { rand(10) }
   let(:error) { Kafka::Error }
   let(:options) { { topic: rand.to_s } }
