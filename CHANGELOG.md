@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 1.3.rc1
+## 1.3.0.rc1
 - Drop Ruby 2.3 support
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
 - Ruby 2.6.3 support
