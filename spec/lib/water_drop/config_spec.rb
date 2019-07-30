@@ -12,18 +12,14 @@ RSpec.describe WaterDrop::Config do
       let(:error_class) { ::WaterDrop::Errors::InvalidConfiguration }
       let(:error_message) { { client_id: ['must be filled'] }.to_s }
       let(:setup) do
-        module WaterDrop
-          setup do |config|
-            config.client_id = nil
-          end
+        WaterDrop.setup do |config|
+          config.client_id = nil
         end
       end
 
       after do
-        module WaterDrop
-          setup do |config|
-            config.client_id = rand(100).to_s
-          end
+        WaterDrop.setup do |config|
+          config.client_id = rand(100).to_s
         end
       end
 
