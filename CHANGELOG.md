@@ -17,6 +17,7 @@
 - Use Zeitwerk for gem code loading
 - #93 - zstd compression support
 - #99 - schemas are renamed to contracts
+- Bump delivery_boy (0.2.7 => 0.2.8)
 
 ## 1.2.5
 - Bump deps to match Karafka
