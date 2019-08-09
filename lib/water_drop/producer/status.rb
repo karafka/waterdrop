@@ -2,6 +2,7 @@
 
 module WaterDrop
   class Producer
+    # Producer lifecycle status object representation
     class Status
       # States in which the producer can be
       LIFECYCLE = %i[

@@ -32,7 +32,7 @@ producer.buffer_many(Array.new(10) { msg })
 producer.flush_sync
 
 producer.buffer_many(Array.new(10) { msg })
-p producer.flush_async
+producer.flush_async
 
 producer.close
 producer.close

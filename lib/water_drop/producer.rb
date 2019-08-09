@@ -16,7 +16,6 @@ module WaterDrop
       @buffer = Concurrent::Array.new
       @mutex = Mutex.new
       @contract = Contracts::Message.new
-      @validator = method(:validate_message!)
     end
 
     # Sets up the whole configuration and initializes all that is needed
@@ -60,11 +59,15 @@ module WaterDrop
       raise Errors::InvalidStatusError, @status.to_s
     end
 
+    # Ensures that the message we want to send out to Kafka is actually valid and that it can be
+    # sent there
+    # @param message [Hash] message we want to send
+    # @raise [Karafka::Errors::MessageInvalidError]
     def validate_message!(message)
       result = @contract.call(message)
       return if result.success?
 
-      raise Errors::InvalidMessageError, [
+      raise Errors::MessageInvalidError, [
         result.errors.to_h,
         message
       ]

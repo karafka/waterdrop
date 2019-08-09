@@ -15,7 +15,7 @@ module WaterDrop
     ProducerClosedError = Class.new(BaseError)
 
     # Raised when we want to send a message that is invalid (impossible topic, etc)
-    InvalidMessageError = Class.new(BaseError)
+    MessageInvalidError = Class.new(BaseError)
 
     # Raised when we've got an unexpected status. This should never happen. If it does, please
     # contact us as it is an error.

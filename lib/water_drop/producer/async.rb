@@ -5,7 +5,7 @@ module WaterDrop
     module Async
       def produce_async(message)
         ensure_active!
-        @validator.call(message)
+        validate_message!(message)
 
         @monitor.instrument(
           'message.produced_async',
@@ -16,7 +16,7 @@ module WaterDrop
 
       def produce_many_async(messages)
         ensure_active!
-        messages.each(&@validator)
+        messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
           'messages.produced_async',
