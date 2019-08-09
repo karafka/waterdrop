@@ -12,34 +12,15 @@ module WaterDrop
     class Monitor < Dry::Monitor::Notifications
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
-      BASE_EVENTS = %w[
-        async_producer.call.error
-        async_producer.call.retry
-        sync_producer.call.error
-        sync_producer.call.retry
+      EVENTS = %w[
       ].freeze
 
-      private_constant :BASE_EVENTS
+      private_constant :EVENTS
 
       # @return [WaterDrop::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize
         super(:waterdrop)
-        BASE_EVENTS.each(&method(:register_event))
-      end
-
-      # Allows us to subscribe to events with a code that will be yielded upon events
-      # @param event_name_or_listener [String, Object] name of the event we want to subscribe to
-      #   or a listener if we decide to go with object listener
-      def subscribe(event_name_or_listener)
-        return super unless event_name_or_listener.is_a?(String)
-        return super if available_events.include?(event_name_or_listener)
-
-        raise Errors::UnregisteredMonitorEvent, event_name_or_listener
-      end
-
-      # @return [Array<String>] names of available events to which we can subscribe
-      def available_events
-        __bus__.events.keys
+        EVENTS.each(&method(:register_event))
       end
     end
   end

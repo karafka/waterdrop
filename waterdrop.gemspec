@@ -16,11 +16,11 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'delivery_boy', '~> 0.2'
+  spec.add_dependency 'concurrent-ruby', '>= 1.1'
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 1.2'
-  spec.add_dependency 'ruby-kafka', '>= 0.7.8'
+  spec.add_dependency 'rdkafka', '>= 0.6.0'
   spec.add_dependency 'zeitwerk', '~> 2.1'
 
   spec.required_ruby_version = '>= 2.4.0'
