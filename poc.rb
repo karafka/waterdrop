@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'waterdrop'
 
 producer = WaterDrop::Producer.new
@@ -10,9 +12,9 @@ producer.setup do |config|
 end
 
 msg = {
-  topic:   "e2r12r1",
-  payload: "Payload" * 1,
-  key:     "%^&*(",
+  topic:   'e2r12r1',
+  payload: 'Payload' * 1,
+  key:     '%^&*(',
   partition: -1
 }
 

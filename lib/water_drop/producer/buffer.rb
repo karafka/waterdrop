@@ -89,7 +89,10 @@ module WaterDrop
         return dispatched unless sync
 
         dispatched.map { |handler| handler.wait(@config.wait_timeout) }
-      rescue Rdkafka::RdkafkaError, Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
+      rescue Rdkafka::RdkafkaError, Rdkafka::Producer::DeliveryHandle::WaitTimeoutError => e
+        key = sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async'
+        @monitor.instrument(key, producer: self, error: e, dispatched: dispatched)
+
         raise Errors::FlushFailureError.new(dispatched)
       end
     end

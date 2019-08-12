@@ -10,6 +10,7 @@ module WaterDrop
     attr_reader :status, :messages
 
     # Creates a not-yet-configured instance of the producer
+    # @param block [Proc] configuration block
     # @return [Producer] producer instance
     def initialize(&block)
       @mutex = Mutex.new
@@ -17,7 +18,9 @@ module WaterDrop
       @contract = Contracts::Message.new
       @messages = Concurrent::Array.new
 
-      setup(&block) if block
+      return unless block
+
+      setup(&block)
     end
 
     # Sets up the whole configuration and initializes all that is needed

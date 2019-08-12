@@ -12,7 +12,7 @@ module WaterDrop
         required(:payload).filled(:str?)
         optional(:key).maybe(:str?, :filled?)
         optional(:partition).filled(:int?, gteq?: -1)
-        optional(:timestamp).maybe { time? || int? }
+        optional(:timestamp).maybe { time? | int? }
         optional(:headers).maybe(:hash?)
       end
 
