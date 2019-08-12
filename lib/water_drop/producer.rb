@@ -11,11 +11,13 @@ module WaterDrop
 
     # Creates a not-yet-configured instance of the producer
     # @return [Producer] producer instance
-    def initialize
+    def initialize(&block)
       @status = Status.new
       @buffer = Concurrent::Array.new
       @mutex = Mutex.new
       @contract = Contracts::Message.new
+
+      setup(&block) if block
     end
 
     # Sets up the whole configuration and initializes all that is needed
