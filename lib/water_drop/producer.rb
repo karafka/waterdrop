@@ -7,15 +7,15 @@ module WaterDrop
     include Async
     include Buffer
 
-    attr_reader :status
+    attr_reader :status, :messages
 
     # Creates a not-yet-configured instance of the producer
     # @return [Producer] producer instance
     def initialize(&block)
-      @status = Status.new
-      @buffer = Concurrent::Array.new
       @mutex = Mutex.new
+      @status = Status.new
       @contract = Contracts::Message.new
+      @messages = Concurrent::Array.new
 
       setup(&block) if block
     end

@@ -17,7 +17,7 @@ module WaterDrop
           'message.buffered',
           producer: self,
           message: message
-        ) { @buffer << message }
+        ) { @messages << message }
       end
 
       # Adds given messages into the internal producer buffer without flushing them to Kafka
@@ -35,31 +35,34 @@ module WaterDrop
           producer: self,
           messages: messages
         ) do
-          messages.each { |message| @buffer << message }
+          messages.each { |message| @messages << message }
           messages
         end
       end
 
       # Flushes the internal buffer to Kafka in an async way
-      # @return 
+      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
+      #   flushed
       def flush_async
         ensure_active!
 
         @monitor.instrument(
           'buffer.flushed_async',
           producer: self,
-          buffer: @buffer
+          messages: @messages
         ) { flush(false) }
       end
 
       # Flushes the internal buffer to Kafka in a sync way
+      # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports for messages that were
+      #   flushed
       def flush_sync
         ensure_active!
 
         @monitor.instrument(
           'buffer.flushed_sync',
           producer: self,
-          buffer: @buffer
+          messages: @messages
         ) { flush(true) }
       end
 
@@ -77,8 +80,8 @@ module WaterDrop
         dispatched = []
 
         @mutex.synchronize do
-          data_for_dispatch = @buffer
-          @buffer = Concurrent::Array.new
+          data_for_dispatch = @messages
+          @messages = Concurrent::Array.new
         end
 
         dispatched = data_for_dispatch.map { |message| @client.produce(message) }

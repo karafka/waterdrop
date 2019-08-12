@@ -3,7 +3,6 @@ require 'waterdrop'
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
-  config.deliver = true
   config.kafka = {
     'bootstrap.servers' => 'localhost:9092',
     'request.required.acks' => [-1, 1].sample
@@ -34,5 +33,22 @@ producer.flush_sync
 producer.buffer_many(Array.new(10) { msg })
 producer.flush_async
 
+producer.buffer_many(Array.new(10) { msg })
 producer.close
-producer.close
+
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+end
+
+time = Time.now - 10
+
+while time < Time.now
+  time += 1
+  producer.buffer(topic: 'times', payload: Time.now.to_s)
+end
+
+puts "The buffer size #{producer.messages.size}"
+producer.flush_sync
+puts "The buffer size #{producer.messages.size}"

@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+## 2.0.0-pre1
+- Redesign the whole API (see `README.md`) on the use-cases
+- Remvoe `ruby-kafka`
+- Use `rdkafka`
+
 ## 1.3.0.rc1 (2019-07-31)
 - Drop Ruby 2.3 support
 - Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.

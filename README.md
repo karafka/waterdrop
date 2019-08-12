@@ -5,13 +5,15 @@
 
 Gem used to send messages to Kafka in an easy way with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
 
-WaterDrop is based on Zendesks [delivery_boy](https://github.com/zendesk/delivery_boy) gem.
+It:
 
-It is:
-
- - Thread safe
- - Supports sync and async producers
- - Working with 0.11+ Kafka
+ - Is thread safe
+ - Supports sync producing
+ - Supports async producing
+ - Supports buffering
+ - Supports producing messages to multiple clusters
+ - Supports multiple delivery policies
+ - Works with Kafka 1.0+ and Ruby 2.4+
 
 ## Installation
 
@@ -36,14 +38,19 @@ bundle install
 WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
 
 - WaterDrop options - options directly related to Karafka framework and it's components
-- Ruby-Kafka driver options - options related to Ruby-Kafka/Delivery boy
+- Kafka driver options - options related to `Kafka`
 
-To apply all those configuration options, you need to use the ```#setup``` method:
+To apply all those configuration options, you need to create a producer instance and use the ```#setup``` method:
 
 ```ruby
-WaterDrop.setup do |config|
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
   config.deliver = true
-  config.kafka.seed_brokers = %w[kafka://localhost:9092]
+  config.kafka = {
+    'bootstrap.servers' => 'localhost:9092',
+    'request.required.acks' => 1
+  }
 end
 ```
 
@@ -51,65 +58,97 @@ end
 
 | Option                      | Description                                                      |
 |-----------------------------|------------------------------------------------------------------|
-| client_id                   | This is how the client will identify itself to the Kafka brokers |
 | logger                      | Logger that we want to use                                       |
-| deliver                     | Should we send messages to Kafka                                 |
+| deliver                     | Should we send messages to Kafka or just fake the delivery       |
+| wait_timeout                | Logger that we want to use                                       |
 
-### Ruby-Kafka driver and Delivery boy configuration options
+### Kafka configuration options
 
-**Note:** We've listed here only **the most important** configuration options. If you're interested in all the options, please go to the [config.rb](https://github.com/karafka/waterdrop/blob/master/lib/water_drop/config.rb) file for more details.
-
-**Note:** All the options are subject to validations. In order to check what is and what is not acceptable, please go to the [config.rb validation schema](https://github.com/karafka/waterdrop/blob/master/lib/water_drop/schemas/config.rb) file.
-
-| Option                   | Description                                                                                                                                           |
-|--------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------|
-| raise_on_buffer_overflow | Should we raise an exception, when messages can't be sent in an async way due to the message buffer overflow or should we just drop them              |
-| delivery_interval        | The number of seconds between background message deliveries. Disable timer-based background deliveries by setting this to 0.                          |
-| delivery_threshold       | The number of buffered messages that will trigger a background message delivery. Disable buffer size based background deliveries by setting this to 0.|
-| required_acks            | The number of Kafka replicas that must acknowledge messages before they're considered as successfully written.                                        |
-| ack_timeout              | A timeout executed by a broker when the client is sending messages to it.                                                                             |
-| max_retries              | The number of retries when attempting to deliver messages.                                                                                            |
-| retry_backoff            | The number of seconds to wait after a failed attempt to send messages to a Kafka broker before retrying.                                              |
-| max_buffer_bytesize      | The maximum number of bytes allowed in the buffer before new messages are rejected.                                                                   |
-| max_buffer_size          | The maximum number of messages allowed in the buffer before new messages are rejected.                                                                |
-| max_queue_size           | The maximum number of messages allowed in the queue before new messages are rejected.                                                                 |
-| sasl_plain_username      | The username used to authenticate.                                                                                                                    |
-| sasl_plain_password      | The password used to authenticate.                                                                                                                    |
-
-This configuration can be also placed in *config/initializers* and can vary based on the environment:
-
-```ruby
-WaterDrop.setup do |config|
-  config.deliver = Rails.env.production?
-  config.kafka.seed_brokers = [Rails.env.production? ? 'kafka://prod-host:9091' : 'kafka://localhost:9092']
-end
-```
+You can create producers with different `kafka` settings. Documentation of the available configuration options is available on https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md.
 
 ## Usage
 
-To send Kafka messages, just use one of the producers:
+Please refer to the [documentation](https://www.rubydoc.info/github/karafka/waterdrop) in case you're interested in the more advanced API.
+
+### Basic usage
+
+To send Kafka messages, just create a producer:
 
 ```ruby
-WaterDrop::SyncProducer.call('message', topic: 'my-topic')
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+end
+
+producer.produce_sync(topic: 'my-topic', payload: 'my message')
+
 # or for async
-WaterDrop::AsyncProducer.call('message', topic: 'my-topic')
+producer.produce_async(topic: 'my-topic', payload: 'my message')
+
+# or in batches
+producer.produce_many_sync(
+  [
+    { topic: 'my-topic', payload: 'my message'},
+    { topic: 'my-topic', payload: 'my message'}
+  ]
+)
+
+# both sync and async
+producer.produce_many_async(
+  [
+    { topic: 'my-topic', payload: 'my message'},
+    { topic: 'my-topic', payload: 'my message'}
+  ]
+)
+
+# Don't forget to close the producer once you're done to flush the internal buffers, etc
+producer.close
 ```
 
-Both ```SyncProducer``` and ```AsyncProducer``` accept following options:
+Each message that you want to publish, will have it's value checked.
 
-| Option              | Required | Value type | Description                                                         |
-|-------------------- |----------|------------|---------------------------------------------------------------------|
-| ```topic```         | true     | String     | The Kafka topic that should be written to                           |
-| ```key```           | false    | String     | The key that should be set in the Kafka message                     |
-| ```partition```     | false    | Integer    | A specific partition number that should be written to               |
-| ```partition_key``` | false    | String     | A string that can be used to deterministically select the partition |
-| ```create_time```   | false    | Time       | The timestamp that should be set on the message                     |
-| ```headers```       | false    | Hash       | Headers for the message                                             |
+Here are all the things you can provide in the message hash:
+
+| Option              | Required | Value type    | Description                                                         |
+|-------------------- |----------|---------------|---------------------------------------------------------------------|
+| ```topic```         | true     | String        | The Kafka topic that should be written to                           |
+| ```payload```       | true     | String        | Data you want to send to Kafka                                      |
+| ```key```           | false    | String        | The key that should be set in the Kafka message                     |
+| ```partition```     | false    | Integer       | A specific partition number that should be written to               |
+| ```timestamp```     | false    | Time, Integer | The timestamp that should be set on the message                     |
+| ```headers```       | false    | Hash          | Headers for the message                                             |
 
 Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
 
+### Buffering
+
+WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long runinng processes:
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+end
+
+time = Time.now + 10
+
+while time < Time.now
+  producer.buffer(topic: 'times', payload: Time.now.to_s)
+end
+
+puts "The buffer size #{producer.buffer.size}"
+producer.flush_sync
+puts "The buffer size #{producer.buffer.size}"
+```
+
+## Instrumentation
+
 ## References
 
+* [WaterDrop code examples](https://travis-ci.org/karafka/waterdrop/master/examples)
+* [WaterDrop code documentation](https://www.rubydoc.info/github/karafka/waterdrop)
 * [Karafka framework](https://github.com/karafka/karafka)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
 * [WaterDrop Coditsu](https://app.coditsu.io/karafka/repositories/waterdrop)
