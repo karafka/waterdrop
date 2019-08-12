@@ -72,7 +72,7 @@ Please refer to the [documentation](https://www.rubydoc.info/github/karafka/wate
 
 ### Basic usage
 
-To send Kafka messages, just create a producer:
+To send Kafka messages, just create a producer and use it:
 
 ```ruby
 producer = WaterDrop::Producer.new
@@ -106,7 +106,7 @@ producer.produce_many_async(
 producer.close
 ```
 
-Each message that you want to publish, will have it's value checked.
+Each message that you want to publish, will have its value checked.
 
 Here are all the things you can provide in the message hash:
 
@@ -123,7 +123,7 @@ Keep in mind, that message you want to send should be either binary or stringifi
 
 ### Buffering
 
-WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long runinng processes:
+WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long runinng processes as well as buffer several messages to be flushed the same moment:
 
 ```ruby
 producer = WaterDrop::Producer.new
@@ -132,15 +132,16 @@ producer.setup do |config|
   config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
 end
 
-time = Time.now + 10
+time = Time.now - 10
 
 while time < Time.now
+  time += 1
   producer.buffer(topic: 'times', payload: Time.now.to_s)
 end
 
-puts "The buffer size #{producer.buffer.size}"
+puts "The messages buffer size #{producer.messages.size}"
 producer.flush_sync
-puts "The buffer size #{producer.buffer.size}"
+puts "The messages buffer size #{producer.message.size}"
 ```
 
 ## Instrumentation
