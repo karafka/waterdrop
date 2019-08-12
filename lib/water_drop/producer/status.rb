@@ -26,7 +26,7 @@ module WaterDrop
       end
 
       LIFECYCLE.each do |state|
-        module_eval "
+        module_eval <<-RUBY, __FILE__, __LINE__ + 1
           # @return [Boolean] true if current status is as we want, otherwise false
           def #{state}?
             @current == :#{state}
@@ -36,7 +36,7 @@ module WaterDrop
           def #{state}!
             @current = :#{state}
           end
-        "
+        RUBY
       end
     end
   end

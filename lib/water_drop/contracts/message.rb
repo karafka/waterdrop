@@ -4,7 +4,6 @@ module WaterDrop
   module Contracts
     # Contract with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
-    # @note Does not validate message itself as it is not our concern
     class Message < Dry::Validation::Contract
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 

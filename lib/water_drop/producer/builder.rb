@@ -4,7 +4,7 @@ module WaterDrop
   class Producer
     # Class used to construct the rdkafka producer client
     class Builder
-      # @param producer [WaterDrop::Producer] not yet configured producer for which we want to
+      # @param producer [Producer] not yet configured producer for which we want to
       #   build the client
       # @param config [Object] dry-configurable based configuration object
       # @return [Rdkafka::Producer, Producer::DummyClient] raw rdkafka producer or a dummy producer
@@ -23,11 +23,11 @@ module WaterDrop
 
       # Creates a proc that we want to run upon each successful message delivery
       #
-      # @param producer [WaterDrop::Producer]
+      # @param producer [Producer]
       # @param monitor [Object] monitor we want to use
       # @return [Proc] delivery callback
       def build_delivery_callback(producer, monitor)
-        ->(delivery_report) do
+        lambda do |delivery_report|
           monitor.instrument(
             'message.acknowledged',
             producer: producer,

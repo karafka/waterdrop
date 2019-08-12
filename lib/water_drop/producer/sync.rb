@@ -6,7 +6,7 @@ module WaterDrop
     module Sync
       # Produces a message to Kafka and waits for it to be delivered
       #
-      # @param message [Hash] hash that complies with the `WaterDrop::Contracts::Message` contract
+      # @param message [Hash] hash that complies with the {Contracts::Message} contract
       #
       # @return [Rdkafka::Producer::DeliveryReport] delivery report
       #
@@ -32,7 +32,7 @@ module WaterDrop
       # Produces many messages to Kafka and waits for them to be delivered
       #
       # @param messages [Array<Hash>] array with messages that comply with the
-      #   `Contracts::Message` contract
+      #   {Contracts::Message} contract
       #
       # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports
       #

@@ -4,8 +4,6 @@ module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
     class Config < Dry::Validation::Contract
-      private
-
       params do
         required(:logger).filled
         required(:deliver).filled(:bool?)

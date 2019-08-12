@@ -2,10 +2,11 @@
 
 module WaterDrop
   class Producer
+    # Component for buffered operations
     module Buffer
       # Adds given message into the internal producer buffer without flushing it to Kafka
       #
-      # @param message [Hash] hash that complies with the `WaterDrop::Contracts::Message` contract
+      # @param message [Hash] hash that complies with the {Contracts::Message} contract
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def buffer(message)
@@ -22,7 +23,7 @@ module WaterDrop
       # Adds given messages into the internal producer buffer without flushing them to Kafka
       #
       # @param messages [Array<Hash>] array with messages that comply with the
-      #   `Contracts::Message` contract
+      #   {Contracts::Message} contract
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def buffer_many(messages)
@@ -40,6 +41,7 @@ module WaterDrop
       end
 
       # Flushes the internal buffer to Kafka in an async way
+      # @return 
       def flush_async
         ensure_active!
 
@@ -63,6 +65,13 @@ module WaterDrop
 
       private
 
+      # Method for triggering the buffer
+      # @param sync [Boolean] should it flush in a sync way
+      # @note We use this method underneath to provide a different instrumentation for sync and
+      #   async flushing within the public API
+      # @return [Array<Rdkafka::Producer::DeliveryHandle, Rdkafka::Producer::DeliveryReport>]
+      #   delivery handles for async or delivery reports for sync
+      # @raise [Errors::FlushFailureError] when there was a failure in flushing
       def flush(sync)
         data_for_dispatch = nil
         dispatched = []

@@ -10,7 +10,7 @@ module WaterDrop
     attr_reader :status
 
     # Creates a not-yet-configured instance of the producer
-    # @return [WaterDrop::Producer] producer instance
+    # @return [Producer] producer instance
     def initialize
       @status = Status.new
       @buffer = Concurrent::Array.new
