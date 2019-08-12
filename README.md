@@ -142,6 +142,8 @@ end
 puts "The messages buffer size #{producer.messages.size}"
 producer.flush_sync
 puts "The messages buffer size #{producer.message.size}"
+
+producer.close
 ```
 
 ## Instrumentation
