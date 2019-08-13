@@ -113,8 +113,8 @@ RSpec.describe WaterDrop::Contracts::Message do
       it { expect(contract_result).to be_success }
     end
 
-    context 'when partition is less than 0' do
-      before { message[:partition] = rand(1..100) * -1 }
+    context 'when partition is less than -1' do
+      before { message[:partition] = rand(2..100) * -1 }
 
       it { expect(contract_result).not_to be_success }
     end
