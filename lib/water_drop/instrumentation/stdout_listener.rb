@@ -72,7 +72,6 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_buffered(event)
         messages = event[:messages]
-        buffer_size = event[:producer].messages.size
 
         info event, "Buffering of #{messages.size} messages."
         debug event, [message, event[:producer].messages.size]
