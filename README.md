@@ -56,11 +56,13 @@ end
 
 ### WaterDrop configuration options
 
-| Option                      | Description                                                      |
-|-----------------------------|------------------------------------------------------------------|
-| logger                      | Logger that we want to use                                       |
-| deliver                     | Should we send messages to Kafka or just fake the delivery       |
-| wait_timeout                | Logger that we want to use                                       |
+| Option             | Description                                                |
+|--------------------|------------------------------------------------------------|
+| `logger`           | Logger that we want to use                                 |
+| `deliver`          | Should we send messages to Kafka or just fake the delivery |
+| `wait_timeout`     | Logger that we want to use                                 |
+| `max_wait_timeout` | Waits that long for the delivery report or raises an error |
+| `wait_timeout`     | Time between re-checks of the delivery report availability |
 
 ### Kafka configuration options
 
@@ -110,14 +112,14 @@ Each message that you want to publish, will have its value checked.
 
 Here are all the things you can provide in the message hash:
 
-| Option              | Required | Value type    | Description                                                         |
-|-------------------- |----------|---------------|---------------------------------------------------------------------|
-| ```topic```         | true     | String        | The Kafka topic that should be written to                           |
-| ```payload```       | true     | String        | Data you want to send to Kafka                                      |
-| ```key```           | false    | String        | The key that should be set in the Kafka message                     |
-| ```partition```     | false    | Integer       | A specific partition number that should be written to               |
-| ```timestamp```     | false    | Time, Integer | The timestamp that should be set on the message                     |
-| ```headers```       | false    | Hash          | Headers for the message                                             |
+| Option      | Required | Value type    | Description                                           |
+|-------------|----------|---------------|-------------------------------------------------------|
+| `topic`     | true     | String        | The Kafka topic that should be written to             |
+| `payload`   | true     | String        | Data you want to send to Kafka                        |
+| `key`       | false    | String        | The key that should be set in the Kafka message       |
+| `partition` | false    | Integer       | A specific partition number that should be written to |
+| `timestamp` | false    | Time, Integer | The timestamp that should be set on the message       |
+| `headers`   | false    | Hash          | Headers for the message                               |
 
 Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
 
@@ -147,6 +149,24 @@ producer.close
 ```
 
 ## Instrumentation
+
+Each of the producers after the `#setup` is done, has a custom monitor to which you can subscribe.
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+end
+
+producer.monitor.subscribe('message.produced_async') do |event|
+  puts "A message was produced to '#{event[:message][:topic]}' topic!"
+end
+
+producer.produce_async(topic: 'events', payload: 'data')
+```
+
+See the `WaterDrop::Instrumentation::Monitor::EVENTS` for the list of all the supported events.
 
 ## References
 

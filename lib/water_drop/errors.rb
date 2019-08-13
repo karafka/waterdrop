@@ -12,6 +12,9 @@ module WaterDrop
     # Raised when we want to use a producer that was not configured
     ProducerNotConfiguredError = Class.new(BaseError)
 
+    # Raised when we want to reconfigure a producer that was already configured
+    ProducerAlreadyConfiguredError = Class.new(BaseError)
+
     # Raised when there was an attempt to use a closed producer
     ProducerClosedError = Class.new(BaseError)
 

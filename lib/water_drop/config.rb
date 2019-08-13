@@ -17,7 +17,11 @@ module WaterDrop
     setting(:monitor, false) { |monitor| monitor || WaterDrop::Instrumentation::Monitor.new }
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
     #   longer than the timeout.
-    setting :wait_timeout, 5
+    setting :max_wait_timeout, 5
+    # option [Numeric] how long should we wait between re-checks on the availability of the
+    #   delivery report. In a really robust systems, this describes the min-delivery time
+    #   for a single sync message when produced in isolation
+    setting :wait_timeout, 0.005 # 5 milliseconds
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc

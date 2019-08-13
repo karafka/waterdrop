@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## 2.0.0-pre1
-- Redesign the whole API (see `README.md`) on the use-cases
+- Redesign of the whole API (see `README.md` for the use-cases and the current API)
 - Remvoe `ruby-kafka`
 - Use `rdkafka`
 

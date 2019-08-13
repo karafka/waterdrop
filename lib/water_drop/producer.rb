@@ -7,7 +7,7 @@ module WaterDrop
     include Async
     include Buffer
 
-    attr_reader :status, :messages
+    attr_reader :status, :messages, :monitor, :config
 
     # Creates a not-yet-configured instance of the producer
     # @param block [Proc] configuration block
@@ -29,6 +29,8 @@ module WaterDrop
     #
     # @param block [Block] configuration block
     def setup(&block)
+      raise Errors::ProducerAlreadyConfiguredError unless @status.initial?
+
       @config = Config
                 .new
                 .setup(&block)

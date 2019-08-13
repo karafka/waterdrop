@@ -5,11 +5,18 @@ require 'waterdrop'
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
+  config.logger = Logger.new($stdout, level: Logger::DEBUG)
   config.kafka = {
     'bootstrap.servers' => 'localhost:9092',
-    'request.required.acks' => [-1, 1].sample
+    'request.required.acks' => 1
   }
 end
+
+producer.monitor.subscribe(
+  WaterDrop::Instrumentation::StdoutListener.new(
+    producer.config.logger
+  )
+)
 
 msg = {
   topic:   'e2r12r1',
@@ -18,7 +25,18 @@ msg = {
   partition: -1
 }
 
-producer.produce_sync(msg)
+100.times do
+  producer.produce_sync(msg)
+end
+
+
+
+
+
+
+exit
+
+
 producer.produce_async(msg)
 producer.produce_many_sync(Array.new(10) { msg })
 producer.produce_many_async(Array.new(10) { msg })
@@ -43,14 +61,3 @@ producer = WaterDrop::Producer.new
 producer.setup do |config|
   config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
 end
-
-time = Time.now - 10
-
-while time < Time.now
-  time += 1
-  producer.buffer(topic: 'times', payload: Time.now.to_s)
-end
-
-puts "The buffer size #{producer.messages.size}"
-producer.flush_sync
-puts "The buffer size #{producer.messages.size}"
