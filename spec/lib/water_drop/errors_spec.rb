@@ -7,15 +7,17 @@ RSpec.describe WaterDrop::Errors do
     specify { expect(error).to be < StandardError }
   end
 
-  describe 'InvalidConfiguration' do
-    subject(:error) { described_class::InvalidConfiguration }
+  describe 'ConfigurationInvalidError' do
+    subject(:error) { described_class::ConfigurationInvalidError }
 
     specify { expect(error).to be < described_class::BaseError }
   end
 
-  describe 'InvalidMessageOptions' do
-    subject(:error) { described_class::InvalidMessageOptions }
+  describe 'MessageInvalidError' do
+    subject(:error) { described_class::MessageInvalidError }
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  pending
 end

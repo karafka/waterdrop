@@ -78,7 +78,7 @@ module WaterDrop
       raise Errors::ProducerNotConfiguredError if @status.initial?
       raise Errors::ProducerClosedError if @status.closing? || @status.closed?
 
-      raise Errors::InvalidStatusError, @status.to_s
+      raise Errors::StatusInvalidError, @status.to_s
     end
 
     # Ensures that the message we want to send out to Kafka is actually valid and that it can be

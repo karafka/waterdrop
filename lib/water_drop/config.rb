@@ -47,13 +47,13 @@ module WaterDrop
 
     # Validates the configuration and if anything is wrong, will raise an exception
     # @param config_hash [Hash] config hash with setup details
-    # @raise [WaterDrop::Errors::InvalidConfigurationError] raised when something is wrong with
+    # @raise [WaterDrop::Errors::ConfigurationInvalidError] raised when something is wrong with
     #   the configuration
     def validate!(config_hash)
       result = Contracts::Config.new.call(config_hash)
       return true if result.success?
 
-      raise Errors::InvalidConfigurationError, result.errors.to_h
+      raise Errors::ConfigurationInvalidError, result.errors.to_h
     end
   end
 end
