@@ -18,6 +18,7 @@ module WaterDrop
         info
         error
       ].each do |log_level|
+        # Creates a custom logging methods that add some extra info when printing to the stdout
         define_method log_level do |event, log_message|
           @logger.public_send(
             log_level,
@@ -26,6 +27,7 @@ module WaterDrop
         end
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_message_produced_async(event)
         message = event[:message]
 
@@ -33,6 +35,7 @@ module WaterDrop
         debug event, message
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_message_produced_sync(event)
         message = event[:message]
 
@@ -40,6 +43,7 @@ module WaterDrop
         debug event, message
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_produced_async(event)
         messages = event[:messages]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
@@ -48,15 +52,16 @@ module WaterDrop
         debug event, messages
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_produced_sync(event)
         messages = event[:messages]
-        producer = event[:producer]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
         info event, "Sync producing of #{messages.size} messages to #{topics_count} topics"
         debug event, messages
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_message_buffered(event)
         message = event[:message]
         buffer_size = event[:producer].messages.size
@@ -65,6 +70,7 @@ module WaterDrop
         debug event, message
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_buffered(event)
         messages = event[:messages]
         buffer_size = event[:producer].messages.size
@@ -73,6 +79,7 @@ module WaterDrop
         debug event, messages
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_async(event)
         messages = event[:messages]
 
@@ -80,6 +87,7 @@ module WaterDrop
         debug event, messages
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
@@ -87,6 +95,7 @@ module WaterDrop
         debug event, messages
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_closed(event)
         info event, 'Closing producer'
         debug event, event[:producer].messages.size

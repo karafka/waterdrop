@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 module WaterDrop
+  # Namespace for all the patches of external libs
   module Patches
+    # Patches related to the rdkafka delivery handle object
     # This can be removed once PR 83 is merged to rdkafka
     # @see https://github.com/appsignal/rdkafka-ruby/pull/83
     module RdkafkaDeliveryHandle

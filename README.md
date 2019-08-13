@@ -58,6 +58,7 @@ end
 
 | Option             | Description                                                |
 |--------------------|------------------------------------------------------------|
+| `id`               | id of the producer for instrumentation and logging         |
 | `logger`           | Logger that we want to use                                 |
 | `deliver`          | Should we send messages to Kafka or just fake the delivery |
 | `wait_timeout`     | Logger that we want to use                                 |
