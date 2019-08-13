@@ -64,10 +64,9 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_message_buffered(event)
         message = event[:message]
-        buffer_size = event[:producer].messages.size
 
-        info event, "Buffering of a message to '#{message[:topic]}' topic. Buffer size: #{buffer_size}"
-        debug event, message
+        info event, "Buffering of a message to '#{message[:topic]}' topic."
+        debug event, [message, event[:producer].messages.size]
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -75,8 +74,8 @@ module WaterDrop
         messages = event[:messages]
         buffer_size = event[:producer].messages.size
 
-        info event, "Buffering of #{messages.size} messages. Buffer size: #{buffer_size}"
-        debug event, messages
+        info event, "Buffering of #{messages.size} messages."
+        debug event, [message, event[:producer].messages.size]
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
