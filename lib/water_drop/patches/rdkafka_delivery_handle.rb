@@ -2,7 +2,10 @@
 
 module WaterDrop
   module Patches
+    # This can be removed once PR 83 is merged to rdkafka
+    # @see https://github.com/appsignal/rdkafka-ruby/pull/83
     module RdkafkaDeliveryHandle
+      # Callable that can be used to get the current monotonic clock
       CURRENT_TIME = -> { Process.clock_gettime(Process::CLOCK_MONOTONIC) }.freeze
 
       private_constant :CURRENT_TIME

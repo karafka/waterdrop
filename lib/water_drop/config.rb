@@ -9,6 +9,9 @@ module WaterDrop
 
     # WaterDrop options
     #
+    # option [String] id of the producer. This can be helpful when building producer specific
+    #   instrumentation or loggers. It is not the kafka producer id
+    setting(:id, false) { |id| id || SecureRandom.uuid }
     # option [Instance] logger that we want to use
     # @note Due to how rdkafka works, this setting is global for all the producers
     setting(:logger, false) { |logger| logger || Logger.new($stdout, level: Logger::WARN) }

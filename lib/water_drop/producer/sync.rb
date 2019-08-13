@@ -21,6 +21,7 @@ module WaterDrop
 
         @monitor.instrument(
           'message.produced_sync',
+          producer: self,
           message: message
         ) do
           @client
@@ -50,6 +51,7 @@ module WaterDrop
 
         @monitor.instrument(
           'messages.produced_sync',
+          producer: self,
           messages: messages
         ) do
           messages

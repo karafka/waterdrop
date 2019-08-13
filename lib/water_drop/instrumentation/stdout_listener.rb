@@ -7,88 +7,89 @@ module WaterDrop
     # @note It is a module as we can use it then as a part of the Karafka framework listener
     #   as well as we can use it standalone
     class StdoutListener
+      # @param logger [Object] stdout logger we want to use
       def initialize(logger)
         @logger = logger
       end
 
       # Log levels that we use in this particular listener
-      USED_LOG_LEVELS = %i[
+      %i[
         debug
         info
         error
-      ].freeze
+      ].each do |log_level|
+        define_method log_level do |event, log_message|
+          @logger.public_send(
+            log_level,
+            "[#{event[:producer].id}] #{log_message} took #{event[:time]} ms"
+          )
+        end
+      end
 
       def on_message_produced_async(event)
         message = event[:message]
 
-        info "Async producing of a message to '#{message[:topic]}' topic"
-        debug [message, event[:time]]
+        info event, "Async producing of a message to '#{message[:topic]}' topic"
+        debug event, message
       end
 
       def on_message_produced_sync(event)
         message = event[:message]
 
-        info "Sync producing of a message to '#{message[:topic]}' topic"
-        debug [message, event[:time]]
+        info event, "Sync producing of a message to '#{message[:topic]}' topic"
+        debug event, message
       end
 
       def on_messages_produced_async(event)
         messages = event[:messages]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
-        info "Async producing of #{messages.size} messages to #{topics_count} topics"
-        debug [messages, event[:time]]
+        info event, "Async producing of #{messages.size} messages to #{topics_count} topics"
+        debug event, messages
       end
 
       def on_messages_produced_sync(event)
         messages = event[:messages]
+        producer = event[:producer]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
-        info "Sync producing of #{messages.size} messages to #{topics_count} topics"
-        debug [messages, event[:time]]
+        info event, "Sync producing of #{messages.size} messages to #{topics_count} topics"
+        debug event, messages
       end
 
       def on_message_buffered(event)
         message = event[:message]
-        producer = event[:producer]
-        buffer_size = producer.messages.size
+        buffer_size = event[:producer].messages.size
 
-        info "Buffering of a message to '#{message[:topic]}' topic. Buffer size: #{buffer_size}"
-        debug [message, event[:time]]
+        info event, "Buffering of a message to '#{message[:topic]}' topic. Buffer size: #{buffer_size}"
+        debug event, message
       end
 
       def on_messages_buffered(event)
         messages = event[:messages]
-        producer = event[:producer]
-        buffer_size = producer.messages.size
+        buffer_size = event[:producer].messages.size
 
-        info "Buffering of #{messages.size} messages. Buffer size: #{buffer_size}"
-        debug [messages, event[:time]]
+        info event, "Buffering of #{messages.size} messages. Buffer size: #{buffer_size}"
+        debug event, messages
       end
 
       def on_buffer_flushed_async(event)
         messages = event[:messages]
 
-        info "Async flushing of #{messages.size} messages from the buffer."
-        debug [messages, event[:time]]
+        info event, "Async flushing of #{messages.size} messages from the buffer."
+        debug event, messages
       end
 
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
-        info "Sync flushing of #{messages.size} messages from the buffer."
-        debug [messages, event[:time]]
+        info event, "Sync flushing of #{messages.size} messages from the buffer."
+        debug event, messages
       end
 
-      %i[
-        buffer.flushed_async.error
-        buffer.flushed_sync.error
-      ]
-
-      USED_LOG_LEVELS.each do |log_level|
-        define_method log_level do |*args|
-          @logger.send(log_level, *args)
-        end
+      def on_producer_closed(event)
+        info event, 'Closing producer'
+        debug event, event[:producer].messages.size
       end
     end
   end

@@ -9,6 +9,7 @@
   rdkafka
   json
   zeitwerk
+  securerandom
 ].each { |lib| require lib }
 
 # WaterDrop library

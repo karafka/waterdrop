@@ -19,23 +19,15 @@ producer.monitor.subscribe(
 )
 
 msg = {
-  topic:   'e2r12r1',
+  topic: 'e2r12r1',
   payload: 'Payload' * 1,
-  key:     '%^&*(',
+  key: '%^&*(',
   partition: -1
 }
 
 100.times do
   producer.produce_sync(msg)
 end
-
-
-
-
-
-
-exit
-
 
 producer.produce_async(msg)
 producer.produce_many_sync(Array.new(10) { msg })
@@ -55,9 +47,3 @@ producer.flush_async
 
 producer.buffer_many(Array.new(10) { msg })
 producer.close
-
-producer = WaterDrop::Producer.new
-
-producer.setup do |config|
-  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
-end

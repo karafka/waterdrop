@@ -5,6 +5,7 @@ module WaterDrop
     # Contract with validation rules for WaterDrop configuration details
     class Config < Dry::Validation::Contract
       params do
+        required(:id).filled(:str?)
         required(:logger).filled
         required(:deliver).filled(:bool?)
         required(:kafka).filled(:hash?)

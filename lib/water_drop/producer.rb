@@ -7,7 +7,16 @@ module WaterDrop
     include Async
     include Buffer
 
-    attr_reader :status, :messages, :monitor, :config
+    # @return [String] uuid of the current producer
+    attr_reader :id
+    # @return [Status] producer status object
+    attr_reader :status
+    # @return [Concurrent::Array] internal messages buffer
+    attr_reader :messages
+    # @return [Object] monitor we want to use
+    attr_reader :monitor
+    # @return [Object] dry-configurable config object
+    attr_reader :config
 
     # Creates a not-yet-configured instance of the producer
     # @param block [Proc] configuration block
@@ -36,6 +45,7 @@ module WaterDrop
                 .setup(&block)
                 .config
 
+      @id = @config.id
       @monitor = @config.monitor
       @client = Builder.new.call(self, @config)
       @status.active!
@@ -45,12 +55,17 @@ module WaterDrop
     def close
       return unless @status.active?
 
-      @status.closing!
+      @monitor.instrument(
+        'producer.closed',
+        producer: self
+      ) do
+        @status.closing!
 
-      flush(false)
+        flush(false)
 
-      @client.close
-      @status.closed!
+        @client.close
+        @status.closed!
+      end
     end
 
     private

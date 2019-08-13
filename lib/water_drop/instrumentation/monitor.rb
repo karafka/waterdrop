@@ -13,6 +13,7 @@ module WaterDrop
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
       EVENTS = %w[
+        producer.closed
         message.produced_async
         message.produced_sync
         messages.produced_async
