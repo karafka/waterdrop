@@ -38,7 +38,7 @@ module WaterDrop
     #
     # @param block [Block] configuration block
     def setup(&block)
-      raise Errors::ProducerAlreadyConfiguredError unless @status.initial?
+      raise Errors::ProducerAlreadyConfiguredError, id unless @status.initial?
 
       @config = Config
                 .new
@@ -75,10 +75,10 @@ module WaterDrop
     def ensure_active!
       return if @status.active?
 
-      raise Errors::ProducerNotConfiguredError if @status.initial?
-      raise Errors::ProducerClosedError if @status.closing? || @status.closed?
-
-      raise Errors::StatusInvalidError, @status.to_s
+      raise Errors::ProducerNotConfiguredError, id if @status.initial?
+      raise Errors::ProducerClosedError, id if @status.closing? || @status.closed?
+      # This should never happen
+      raise Errors::StatusInvalidError, [id, @status.to_s]
     end
 
     # Ensures that the message we want to send out to Kafka is actually valid and that it can be
