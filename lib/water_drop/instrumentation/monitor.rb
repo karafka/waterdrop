@@ -20,6 +20,7 @@ module WaterDrop
         messages.produced_sync
         message.buffered
         messages.buffered
+        message.acknowledged
         buffer.flushed_async
         buffer.flushed_async.error
         buffer.flushed_sync
