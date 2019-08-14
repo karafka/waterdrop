@@ -5,6 +5,11 @@ module WaterDrop
     # Contract with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
     class Message < Dry::Validation::Contract
+      # Regex to check that topic has a valid format
+      TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
+
+      private_constant :TOPIC_REGEXP
+
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
       params do
