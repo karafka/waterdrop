@@ -17,9 +17,9 @@ module WaterDrop
       end
 
       # Dummy method for returning the delivery report
-      # @param _timeout [Integer] number of seconds to wait for the report
+      # @param _args [Object] anything that the delivery handle accepts
       # @return [::Rdkafka::Producer::DeliveryReport]
-      def wait(_timeout = 60)
+      def wait(*_args)
         ::Rdkafka::Producer::DeliveryReport.new(0, @counter += 1)
       end
 
