@@ -77,6 +77,7 @@ module WaterDrop
 
       raise Errors::ProducerNotConfiguredError, id if @status.initial?
       raise Errors::ProducerClosedError, id if @status.closing? || @status.closed?
+
       # This should never happen
       raise Errors::StatusInvalidError, [id, @status.to_s]
     end
