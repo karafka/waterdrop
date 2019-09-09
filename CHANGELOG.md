@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support
 
 ## 1.3.0.rc1 (2019-07-31)
