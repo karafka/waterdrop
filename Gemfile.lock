@@ -93,7 +93,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  dry-validation
   rspec
   simplecov
   waterdrop!
