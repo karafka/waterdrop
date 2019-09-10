@@ -54,6 +54,18 @@ producer.setup do |config|
 end
 ```
 
+or you can do the same while initializing the producer:
+
+```ruby
+producer = WaterDrop::Producer.new do |config|
+  config.deliver = true
+  config.kafka = {
+    'bootstrap.servers' => 'localhost:9092',
+    'request.required.acks' => 1
+  }
+end
+```
+
 ### WaterDrop configuration options
 
 | Option             | Description                                                     |

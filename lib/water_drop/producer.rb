@@ -24,7 +24,6 @@ module WaterDrop
     def initialize(&block)
       @mutex = Mutex.new
       @status = Status.new
-      @contract = Contracts::Message.new
       @messages = Concurrent::Array.new
 
       return unless block
@@ -33,9 +32,6 @@ module WaterDrop
     end
 
     # Sets up the whole configuration and initializes all that is needed
-    # @note When using forked process such as when using Unicorn you currently need to make sure
-    #   that you run the setup after forking.
-    #
     # @param block [Block] configuration block
     def setup(&block)
       raise Errors::ProducerAlreadyConfiguredError, id unless @status.initial?
@@ -48,6 +44,7 @@ module WaterDrop
       @id = @config.id
       @monitor = @config.monitor
       @client = Builder.new.call(self, @config)
+      @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
       @status.active!
     end
 

@@ -10,6 +10,7 @@ RSpec.describe WaterDrop::Contracts::Config do
       logger: Logger.new('/dev/null'),
       deliver: false,
       kafka: { 'bootstrap.servers' => 'localhost:9092' },
+      max_payload_size: 1024 * 1024,
       max_wait_timeout: 1,
       wait_timeout: 0.1
     }
@@ -94,6 +95,45 @@ RSpec.describe WaterDrop::Contracts::Config do
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:kafka]).not_to be_empty }
+  end
+
+  context 'when max_payload_size is nil' do
+    before { config[:max_payload_size] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_payload_size]).not_to be_empty }
+  end
+
+  context 'when max_payload_size is a negative int' do
+    before { config[:max_payload_size] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_payload_size]).not_to be_empty }
+  end
+
+  context 'when max_payload_size is a negative float' do
+    before { config[:max_payload_size] = -0.1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_payload_size]).not_to be_empty }
+  end
+
+  context 'when max_payload_size is 0' do
+    before { config[:max_payload_size] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when max_payload_size is positive int' do
+    before { config[:max_payload_size] = 1 }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when max_payload_size is positive float' do
+    before { config[:max_payload_size] = 1.1 }
+
+    it { expect(contract_result).not_to be_success }
   end
 
   context 'when max_wait_timeout is missing' do

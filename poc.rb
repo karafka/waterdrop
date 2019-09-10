@@ -5,7 +5,7 @@ require 'waterdrop'
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
-  config.logger = Logger.new($stdout, level: Logger::DEBUG)
+  config.logger = Logger.new($stdout, level: Logger::INFO)
   config.kafka = {
     'bootstrap.servers' => 'localhost:9092',
     'request.required.acks' => 1
@@ -20,7 +20,7 @@ producer.monitor.subscribe(
 
 msg = {
   topic: 'e2r12r1',
-  payload: 'Payload' * 1,
+  payload: 'X' * 2048*1000,
   key: '%^&*(',
   partition: -1
 }
@@ -46,4 +46,10 @@ producer.buffer_many(Array.new(10) { msg })
 producer.flush_async
 
 producer.buffer_many(Array.new(10) { msg })
-producer.close
+# producer.close
+
+
+handlers = producer.produce_many_async(Array.new(100) { msg })
+
+handlers.map(&:wait)
+nil

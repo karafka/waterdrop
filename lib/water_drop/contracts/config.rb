@@ -9,6 +9,7 @@ module WaterDrop
         required(:logger).filled
         required(:deliver).filled(:bool?)
         required(:kafka).filled(:hash?)
+        required(:max_payload_size).filled(:int?, gteq?: 1)
         required(:max_wait_timeout).filled(:number?, gteq?: 0)
         required(:wait_timeout).filled(:number?, gt?: 0)
       end

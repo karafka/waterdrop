@@ -12,6 +12,8 @@ module WaterDrop
 
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
+      option :max_payload_size
+
       params do
         required(:topic).filled(:str?, format?: TOPIC_REGEXP)
         required(:payload).filled(:str?)
@@ -28,6 +30,10 @@ module WaterDrop
 
         key.failure(:invalid_key_type) unless value.keys.all?(&assertion)
         key.failure(:invalid_value_type) unless value.values.all?(&assertion)
+      end
+
+      rule(:payload) do
+        key.failure(:max_payload_size) if value.bytesize > max_payload_size
       end
     end
   end
