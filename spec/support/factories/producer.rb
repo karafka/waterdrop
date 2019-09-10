@@ -6,6 +6,7 @@ FactoryBot.define do
 
     deliver { true }
     logger { Logger.new($stdout, level: Logger::INFO) }
+    max_wait_timeout { 30 }
     kafka do
       {
         'bootstrap.servers' => 'localhost:9092',
@@ -19,6 +20,7 @@ FactoryBot.define do
         config.deliver = deliver
         config.logger = logger
         config.kafka = kafka
+        config.max_wait_timeout = max_wait_timeout
       end
     end
   end
