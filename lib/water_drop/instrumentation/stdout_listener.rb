@@ -12,21 +12,6 @@ module WaterDrop
         @logger = logger
       end
 
-      # Log levels that we use in this particular listener
-      %i[
-        debug
-        info
-        error
-      ].each do |log_level|
-        # Creates a custom logging methods that add some extra info when printing to the stdout
-        define_method log_level do |event, log_message|
-          @logger.public_send(
-            log_level,
-            "[#{event[:producer].id}] #{log_message} took #{event[:time]} ms"
-          )
-        end
-      end
-
       # @param event [Dry::Events::Event] event that happened with the details
       def on_message_produced_async(event)
         message = event[:message]
@@ -86,6 +71,14 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_buffer_flushed_async_error(event)
+        messages = event[:messages]
+
+        error event, "Async flushing of #{messages.size} failed due to: #{error.class} - #{error.message}"
+        debug event, messages
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
@@ -94,9 +87,38 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_buffer_flushed_sync_error(event)
+        messages = event[:dispatched]
+        error = event[:error]
+
+        error event, "Sync flushing of #{messages.size} failed due to: #{error.class} - #{error.message}"
+        debug event, messages
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_closed(event)
         info event, 'Closing producer'
         debug event, event[:producer].messages.size
+      end
+
+      private
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      # @param log_message [String] message we want to publish
+      def debug(event, log_message)
+        @logger.debug "[#{event[:producer].id}] #{log_message}"
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      # @param log_message [String] message we want to publish
+      def info(event, log_message)
+        @logger.info "[#{event[:producer].id}] #{log_message} took #{event[:time]} ms"
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      # @param log_message [String] message we want to publish
+      def error(event, log_message)
+        @logger.error "[#{event[:producer].id}] #{log_message}"
       end
     end
   end

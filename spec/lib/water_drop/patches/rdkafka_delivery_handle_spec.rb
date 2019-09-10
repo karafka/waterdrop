@@ -1,5 +1,4 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Patches::RdkafkaDeliveryHandle do
-  pending
-end
+# Patches are temp.
+# Can be removed once https://github.com/appsignal/rdkafka-ruby/issues/54 is merged

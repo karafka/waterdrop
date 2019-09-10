@@ -26,9 +26,12 @@ module WaterDrop
       # @raise [WaitTimeoutError] When the timeout has been reached and the handle is still pending
       #
       # @return [DeliveryReport]
-      def wait(max_wait_timeout = 60, wait_timeout = 0.1)
-        timeout = max_wait_timeout ? CURRENT_TIME.call + max_wait_timeout : nil
-
+      def wait(max_wait_timeout: 60, wait_timeout: 0.1)
+        timeout = if max_wait_timeout
+                    CURRENT_TIME.call + max_wait_timeout
+                  else
+                    nil
+                  end
         loop do
           if pending?
             if timeout && timeout <= CURRENT_TIME.call
@@ -38,7 +41,7 @@ module WaterDrop
             end
             sleep wait_timeout
           elsif self[:response] != 0
-            raise RdkafkaError.new(self[:response])
+            raise Rdkafka::RdkafkaError.new(self[:response])
           else
             return Rdkafka::Producer::DeliveryReport.new(self[:partition], self[:offset])
           end
