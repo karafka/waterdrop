@@ -27,7 +27,7 @@ module WaterDrop
           @client
             .produce(message)
             .wait(
-              max_wait_timeout:@config.max_wait_timeout,
+              max_wait_timeout: @config.max_wait_timeout,
               wait_timeout: @config.wait_timeout
             )
         end
@@ -58,7 +58,7 @@ module WaterDrop
             .map { |message| @client.produce(message) }
             .map do |handler|
               handler.wait(
-                max_wait_timeout:@config.max_wait_timeout,
+                max_wait_timeout: @config.max_wait_timeout,
                 wait_timeout: @config.wait_timeout
               )
             end

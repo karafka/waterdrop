@@ -70,11 +70,11 @@ module WaterDrop
 
       # Method for triggering the buffer
       # @param sync [Boolean] should it flush in a sync way
-      # @note We use this method underneath to provide a different instrumentation for sync and
-      #   async flushing within the public API
       # @return [Array<Rdkafka::Producer::DeliveryHandle, Rdkafka::Producer::DeliveryReport>]
       #   delivery handles for async or delivery reports for sync
       # @raise [Errors::FlushFailureError] when there was a failure in flushing
+      # @note We use this method underneath to provide a different instrumentation for sync and
+      #   async flushing within the public API
       def flush(sync)
         data_for_dispatch = nil
         dispatched = []
@@ -90,7 +90,7 @@ module WaterDrop
 
         dispatched.map do |handler|
           handler.wait(
-            max_wait_timeout:@config.max_wait_timeout,
+            max_wait_timeout: @config.max_wait_timeout,
             wait_timeout: @config.wait_timeout
           )
         end

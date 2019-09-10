@@ -14,7 +14,6 @@ FactoryBot.define do
       }
     end
 
-
     initialize_with do
       new do |config|
         config.deliver = deliver

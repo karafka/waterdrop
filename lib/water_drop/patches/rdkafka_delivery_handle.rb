@@ -22,16 +22,15 @@ module WaterDrop
       # @param wait_timeout [Numeric] Amount of time we should wait before we recheck if there
       #   is a delivery report available
       #
+      # @return [DeliveryReport]
+      #
       # @raise [RdkafkaError] When delivering the message failed
       # @raise [WaitTimeoutError] When the timeout has been reached and the handle is still pending
-      #
-      # @return [DeliveryReport]
       def wait(max_wait_timeout: 60, wait_timeout: 0.1)
         timeout = if max_wait_timeout
                     CURRENT_TIME.call + max_wait_timeout
-                  else
-                    nil
                   end
+
         loop do
           if pending?
             if timeout && timeout <= CURRENT_TIME.call

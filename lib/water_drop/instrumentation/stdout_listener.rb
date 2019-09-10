@@ -50,7 +50,7 @@ module WaterDrop
       def on_message_buffered(event)
         message = event[:message]
 
-        info event, "Buffering of a message to '#{message[:topic]}' topic."
+        info event, "Buffering of a message to '#{message[:topic]}' topic"
         debug event, [message, event[:producer].messages.size]
       end
 
@@ -58,7 +58,7 @@ module WaterDrop
       def on_messages_buffered(event)
         messages = event[:messages]
 
-        info event, "Buffering of #{messages.size} messages."
+        info event, "Buffering of #{messages.size} messages"
         debug event, [messages, event[:producer].messages.size]
       end
 
@@ -66,7 +66,7 @@ module WaterDrop
       def on_buffer_flushed_async(event)
         messages = event[:messages]
 
-        info event, "Async flushing of #{messages.size} messages from the buffer."
+        info event, "Async flushing of #{messages.size} messages from the buffer"
         debug event, messages
       end
 
@@ -74,7 +74,7 @@ module WaterDrop
       def on_buffer_flushed_async_error(event)
         messages = event[:messages]
 
-        error event, "Async flushing of #{messages.size} failed due to: #{error.class} - #{error.message}"
+        error event, "Async flushing of #{messages.size} failed due to: #{error}"
         debug event, messages
       end
 
@@ -82,7 +82,7 @@ module WaterDrop
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
-        info event, "Sync flushing of #{messages.size} messages from the buffer."
+        info event, "Sync flushing of #{messages.size} messages from the buffer"
         debug event, messages
       end
 
@@ -91,7 +91,7 @@ module WaterDrop
         messages = event[:dispatched]
         error = event[:error]
 
-        error event, "Sync flushing of #{messages.size} failed due to: #{error.class} - #{error.message}"
+        error event, "Sync flushing of #{messages.size} failed due to: #{error}"
         debug event, messages
       end
 
