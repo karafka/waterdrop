@@ -4,6 +4,7 @@
 /vendor/ruby/
 /ruby/
 app.god
+example.rb
 
 # minimal Rails specific artifacts
 db/*.sqlite3

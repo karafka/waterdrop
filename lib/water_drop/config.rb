@@ -19,7 +19,7 @@ module WaterDrop
     #   more details
     setting(:monitor, false) { |monitor| monitor || WaterDrop::Instrumentation::Monitor.new }
     # option [Integer] max payload size allowed for delivery to Kafka
-    setting :max_payload_size, 1024 * 1024 # 1MB
+    setting :max_payload_size, 1_000_012
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
     #   longer than the timeout.
     setting :max_wait_timeout, 5

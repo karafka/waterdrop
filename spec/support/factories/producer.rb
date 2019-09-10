@@ -2,7 +2,6 @@
 
 FactoryBot.define do
   factory :producer, class: 'WaterDrop::Producer' do
-
     skip_create
 
     initialize_with do
