@@ -4,6 +4,14 @@ module WaterDrop
   class Producer
     # Component for buffered operations
     module Buffer
+      # Exceptions we catch when dispatching messages from a buffer
+      RESCUED_ERRORS = [
+        Rdkafka::RdkafkaError,
+        Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
+      ].freeze
+
+      private_constant :RESCUED_ERRORS
+
       # Adds given message into the internal producer buffer without flushing it to Kafka
       #
       # @param message [Hash] hash that complies with the {Contracts::Message} contract
@@ -94,7 +102,7 @@ module WaterDrop
             wait_timeout: @config.wait_timeout
           )
         end
-      rescue Rdkafka::RdkafkaError, Rdkafka::Producer::DeliveryHandle::WaitTimeoutError => e
+      rescue *RESCUED_ERRORS => e
         key = sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async.error'
         @monitor.instrument(key, producer: self, error: e, dispatched: dispatched)
 
