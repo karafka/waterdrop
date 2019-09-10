@@ -17,6 +17,8 @@ module WaterDrop
     attr_reader :monitor
     # @return [Object] dry-configurable config object
     attr_reader :config
+    # @return [Rdkafka::Producer] raw rdkafka producer
+    attr_reader :client
 
     # Creates a not-yet-configured instance of the producer
     # @param block [Proc] configuration block

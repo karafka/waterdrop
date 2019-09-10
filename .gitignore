@@ -13,6 +13,7 @@ db/*.sqlite3
 *.gem
 *.~
 /.coditsu/local.yml
+.byebug_history
 
 # various artifacts
 **.war
