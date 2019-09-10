@@ -4,13 +4,21 @@ FactoryBot.define do
   factory :producer, class: 'WaterDrop::Producer' do
     skip_create
 
+    deliver { true }
+    logger { Logger.new($stdout, level: Logger::INFO) }
+    kafka do
+      {
+        'bootstrap.servers' => 'localhost:9092',
+        'request.required.acks' => 1
+      }
+    end
+
+
     initialize_with do
       new do |config|
-        config.logger = Logger.new($stdout, level: Logger::DEBUG)
-        config.kafka = {
-          'bootstrap.servers' => 'localhost:9092',
-          'request.required.acks' => 1
-        }
+        config.deliver = deliver
+        config.logger = logger
+        config.kafka = kafka
       end
     end
   end
