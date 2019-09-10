@@ -4,6 +4,10 @@ services:
 dist: trusty
 cache: bundler
 
+env:
+  global:
+    - KAFKA_HEAP_OPTS="-Xmx512m -Xms512m"
+
 git:
   depth: false
 
@@ -13,7 +17,13 @@ test: &test
   before_install:
     - gem install bundler
     - gem update --system
+  before_script:
+    - docker-compose up -d
+
   script: bundle exec rspec
+
+  after_script:
+    - docker-compose stop
 
 jobs:
   include:
