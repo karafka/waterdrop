@@ -44,7 +44,7 @@ RSpec.describe WaterDrop::Producer::Sync do
       let(:messages) { Array.new(10) { build(:valid_message) } }
 
       it 'expect all the results to be delivery handles' do
-        delivery.each { |handler| expect(handler).to be_a(Rdkafka::Producer::DeliveryReport) }
+        expect(delivery).to all be_a(Rdkafka::Producer::DeliveryReport)
       end
     end
   end
