@@ -16,16 +16,16 @@ module WaterDrop
       def on_message_produced_async(event)
         message = event[:message]
 
-        info event, "Async producing of a message to '#{message[:topic]}' topic"
-        debug event, message
+        info(event, "Async producing of a message to '#{message[:topic]}' topic")
+        debug(event, message)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_message_produced_sync(event)
         message = event[:message]
 
-        info event, "Sync producing of a message to '#{message[:topic]}' topic"
-        debug event, message
+        info(event, "Sync producing of a message to '#{message[:topic]}' topic")
+        debug(event, message)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -33,8 +33,8 @@ module WaterDrop
         messages = event[:messages]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
-        info event, "Async producing of #{messages.size} messages to #{topics_count} topics"
-        debug event, messages
+        info(event, "Async producing of #{messages.size} messages to #{topics_count} topics")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -42,48 +42,48 @@ module WaterDrop
         messages = event[:messages]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
-        info event, "Sync producing of #{messages.size} messages to #{topics_count} topics"
-        debug event, messages
+        info(event, "Sync producing of #{messages.size} messages to #{topics_count} topics")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_message_buffered(event)
         message = event[:message]
 
-        info event, "Buffering of a message to '#{message[:topic]}' topic"
-        debug event, [message, event[:producer].messages.size]
+        info(event, "Buffering of a message to '#{message[:topic]}' topic")
+        debug(event, [message, event[:producer].messages.size])
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_buffered(event)
         messages = event[:messages]
 
-        info event, "Buffering of #{messages.size} messages"
-        debug event, [messages, event[:producer].messages.size]
+        info(event, "Buffering of #{messages.size} messages")
+        debug(event, [messages, event[:producer].messages.size])
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_async(event)
         messages = event[:messages]
 
-        info event, "Async flushing of #{messages.size} messages from the buffer"
-        debug event, messages
+        info(event, "Async flushing of #{messages.size} messages from the buffer")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_async_error(event)
         messages = event[:messages]
 
-        error event, "Async flushing of #{messages.size} failed due to: #{error}"
-        debug event, messages
+        error(event, "Async flushing of #{messages.size} failed due to: #{error}")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
-        info event, "Sync flushing of #{messages.size} messages from the buffer"
-        debug event, messages
+        info(event, "Sync flushing of #{messages.size} messages from the buffer")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -91,8 +91,8 @@ module WaterDrop
         messages = event[:dispatched]
         error = event[:error]
 
-        error event, "Sync flushing of #{messages.size} failed due to: #{error}"
-        debug event, messages
+        error(event, "Sync flushing of #{messages.size} failed due to: #{error}")
+        debug(event, messages)
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -106,19 +106,19 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       # @param log_message [String] message we want to publish
       def debug(event, log_message)
-        @logger.debug "[#{event[:producer].id}] #{log_message}"
+        @logger.debug("[#{event[:producer].id}] #{log_message}")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       # @param log_message [String] message we want to publish
       def info(event, log_message)
-        @logger.info "[#{event[:producer].id}] #{log_message} took #{event[:time]} ms"
+        @logger.info("[#{event[:producer].id}] #{log_message} took #{event[:time]} ms")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       # @param log_message [String] message we want to publish
       def error(event, log_message)
-        @logger.error "[#{event[:producer].id}] #{log_message}"
+        @logger.error("[#{event[:producer].id}] #{log_message}")
       end
     end
   end

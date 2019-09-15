@@ -2,8 +2,7 @@
 
 ## 2.0.0-pre1
 - Redesign of the whole API (see `README.md` for the use-cases and the current API)
-- Remvoe `ruby-kafka`
-- Use `rdkafka`
+- Replace `ruby-kafka` with `rdkafka`
 
 ## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support
