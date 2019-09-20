@@ -1,3 +1,12 @@
+GIT
+  remote: https://github.com/appsignal/rdkafka-ruby.git
+  revision: 734afca0e13bb325af6ad5ce4a39728dce388b5c
+  specs:
+    rdkafka (0.6.0)
+      ffi (~> 1.9)
+      mini_portile2 (~> 2.1)
+      rake (~> 12.3)
+
 PATH
   remote: .
   specs:
@@ -77,10 +86,6 @@ GEM
     mini_portile2 (2.4.0)
     minitest (5.11.3)
     rake (12.3.3)
-    rdkafka (0.6.0)
-      ffi (~> 1.9)
-      mini_portile2 (~> 2.1)
-      rake (~> 12.3)
     rspec (3.8.0)
       rspec-core (~> 3.8.0)
       rspec-expectations (~> 3.8.0)
@@ -110,6 +115,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   factory_bot
+  rdkafka!
   rspec
   simplecov
   waterdrop!
