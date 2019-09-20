@@ -10,12 +10,6 @@ module WaterDrop
         @counter = -1
       end
 
-      # @param _args [Object] anything really, this dummy is suppose to support anything
-      # @return [self] returns self for chaining cases
-      def method_missing(*_args)
-        self || super
-      end
-
       # Dummy method for returning the delivery report
       # @param _args [Object] anything that the delivery handle accepts
       # @return [::Rdkafka::Producer::DeliveryReport]
@@ -26,6 +20,12 @@ module WaterDrop
       # @param _args [Object] anything really, this dummy is suppose to support anything
       def respond_to_missing?(*_args)
         true
+      end
+
+      # @param _args [Object] anything really, this dummy is suppose to support anything
+      # @return [self] returns self for chaining cases
+      def method_missing(*_args)
+        self || super
       end
     end
   end

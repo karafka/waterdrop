@@ -6,6 +6,14 @@ RSpec.describe WaterDrop::Producer::Buffer do
   describe '#buffer' do
     subject(:buffering) { producer.buffer(message) }
 
+    context 'when producer is closed' do
+      before { producer.close }
+
+      let(:message) { build(:valid_message) }
+
+      it { expect { buffering }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
+    end
+
     context 'when message is invalid' do
       let(:message) { build(:invalid_message) }
 
@@ -21,6 +29,14 @@ RSpec.describe WaterDrop::Producer::Buffer do
 
   describe '#buffer_many' do
     subject(:buffering) { producer.buffer_many(messages) }
+
+    context 'when producer is closed' do
+      before { producer.close }
+
+      let(:messages) { [build(:valid_message)] }
+
+      it { expect { buffering }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
+    end
 
     context 'when we have several invalid messages' do
       let(:messages) { Array.new(10) { build(:invalid_message) } }
@@ -50,10 +66,66 @@ RSpec.describe WaterDrop::Producer::Buffer do
   end
 
   describe '#flush_async' do
-    pending
+    subject(:flushing) { producer.flush_async }
+
+    context 'when producer is closed' do
+      before { producer.close }
+
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
+    end
+
+    context 'when there are no messages in the buffer' do
+      it { expect(flushing).to eq([]) }
+    end
+
+    context 'when there are messages in the buffer' do
+      before { producer.buffer(create(:valid_message)) }
+
+      it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryHandle) }
+      it { expect(producer.tap(&:flush_async).messages).to be_empty }
+    end
+
+    context 'when an error occurred during flushing' do
+      let(:error) { Rdkafka::RdkafkaError.new(0) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(error)
+        producer.buffer(create(:valid_message))
+      end
+
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::FlushFailureError) }
+    end
   end
 
   describe '#flush_sync' do
-    pending
+    subject(:flushing) { producer.flush_sync }
+
+    context 'when producer is closed' do
+      before { producer.close }
+
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
+    end
+
+    context 'when there are no messages in the buffer' do
+      it { expect(flushing).to eq([]) }
+    end
+
+    context 'when there are messages in the buffer' do
+      before { producer.buffer(create(:valid_message)) }
+
+      it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryReport) }
+      it { expect(producer.tap(&:flush_sync).messages).to be_empty }
+    end
+
+    context 'when an error occurred during flushing' do
+      let(:error) { Rdkafka::RdkafkaError.new(0) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(error)
+        producer.buffer(create(:valid_message))
+      end
+
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::FlushFailureError) }
+    end
   end
 end

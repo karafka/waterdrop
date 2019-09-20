@@ -20,4 +20,8 @@ RSpec.describe WaterDrop::Producer::DummyClient do
       end
     end
   end
+
+  describe '#respond_to?' do
+    it { expect(client.respond_to?(:test)).to eq(true) }
+  end
 end
