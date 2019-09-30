@@ -3,6 +3,7 @@
 ## 2.0.0-pre1
 - Redesign of the whole API (see `README.md` for the use-cases and the current API)
 - Replace `ruby-kafka` with `rdkafka`
+- Switch license from `MIT` to `LGPL-3.0`
 
 ## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support

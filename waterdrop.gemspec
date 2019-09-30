@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/karafka/waterdrop'
   spec.summary       = 'Kafka messaging made easy!'
   spec.description   = spec.summary
-  spec.license       = 'MIT'
+  spec.license       = 'LGPL-3.0'
 
   spec.add_dependency 'concurrent-ruby', '>= 1.1'
   spec.add_dependency 'dry-configurable', '~> 0.8'
