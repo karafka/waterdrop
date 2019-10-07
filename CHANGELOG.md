@@ -5,6 +5,9 @@
 - Replace `ruby-kafka` with `rdkafka`
 - Switch license from `MIT` to `LGPL-3.0`
 
+## Unreleased (master)
+- Ruby 2.6.5 support
+
 ## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support
 
