@@ -14,7 +14,7 @@ RSpec.describe WaterDrop::Producer do
   end
 
   describe '#ensure_active!' do
-    subject(:producer) {  create(:producer) }
+    subject(:producer) { create(:producer) }
 
     context 'when status is invalid' do
       let(:expected_error) { WaterDrop::Errors::StatusInvalidError }

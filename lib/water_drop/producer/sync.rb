@@ -49,14 +49,10 @@ module WaterDrop
         ensure_active!
         messages.each { |message| validate_message!(message) }
 
-        @monitor.instrument(
-          'messages.produced_sync',
-          producer: self,
-          messages: messages
-        ) do
+        @monitor.instrument('messages.produced_sync', producer: self, messages: messages) do
           messages
             .map { |message| @client.produce(message) }
-            .map do |handler|
+            .map! do |handler|
               handler.wait(
                 max_wait_timeout: @config.max_wait_timeout,
                 wait_timeout: @config.wait_timeout
