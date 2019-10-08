@@ -73,6 +73,7 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_async_error(event)
         messages = event[:messages]
+        error = event[:error]
 
         error(event, "Async flushing of #{messages.size} failed due to: #{error}")
         debug(event, messages)
