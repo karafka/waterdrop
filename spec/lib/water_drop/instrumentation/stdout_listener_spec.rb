@@ -79,6 +79,17 @@ RSpec.describe WaterDrop::Instrumentation::StdoutListener do
     it { expect(logged_data[1]).to include(message.to_s) }
   end
 
+  describe '#on_messages_buffered' do
+    before { listener.on_messages_buffered(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Buffering of 2 messages ') }
+    it { expect(logged_data[1]).to include(producer.id) }
+    it { expect(logged_data[1]).to include('DEBUG') }
+    it { expect(logged_data[1]).to include(message.to_s) }
+  end
+
   describe '#on_buffer_flushed_async' do
     before { listener.on_buffer_flushed_async(event) }
 
