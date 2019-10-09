@@ -865,6 +865,14 @@ RSpec.describe WaterDrop::Contracts::Config do
     end
   end
 
+  context 'when we validate ssl_verify_hostname' do
+    context 'when ssl_verify_hostname is not a bool' do
+      before { config[:kafka][:ssl_verify_hostname] = 2 }
+
+      it { expect(contract.call(config)).not_to be_success }
+    end
+  end
+
   context 'when we validate sasl_over_ssl' do
     context 'when sasl_over_ssl is not a bool' do
       before { config[:kafka][:sasl_over_ssl] = 2 }
