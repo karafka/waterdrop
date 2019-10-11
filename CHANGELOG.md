@@ -2,6 +2,7 @@
 
 ## Unreleased (master)
 - Ruby 2.6.5 support
+- Expose setting to optionally verify hostname on ssl certs #109 (tabdollahi)
 
 ## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support
