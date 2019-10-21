@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased (master)
+## 1.3.1 (2019-10-21)
 - Ruby 2.6.5 support
 - Expose setting to optionally verify hostname on ssl certs #109 (tabdollahi)
 
