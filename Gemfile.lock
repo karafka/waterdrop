@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/appsignal/rdkafka-ruby.git
-  revision: 309457eaed6b34d43ba756fc12bfb75f780ef7d5
+  revision: da89e9c7ba20574b0d5ce0878bdc9ee9c3c7e497
   specs:
     rdkafka (0.7.0)
       ffi (~> 1.9)
@@ -44,7 +44,7 @@ GEM
       concurrent-ruby (~> 1.0)
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
-    dry-inflector (0.1.2)
+    dry-inflector (0.2.0)
     dry-initializer (3.0.1)
     dry-logic (1.0.3)
       concurrent-ruby (~> 1.0)
@@ -55,7 +55,7 @@ GEM
       dry-core (~> 0.4)
       dry-equalizer (~> 0.2)
       dry-events (~> 0.1)
-    dry-schema (1.4.0)
+    dry-schema (1.4.1)
       concurrent-ruby (~> 1.0)
       dry-configurable (~> 0.8, >= 0.8.3)
       dry-core (~> 0.4)
@@ -107,7 +107,7 @@ GEM
     thread_safe (0.3.6)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
-    zeitwerk (2.1.10)
+    zeitwerk (2.2.0)
 
 PLATFORMS
   ruby

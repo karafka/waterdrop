@@ -137,7 +137,7 @@ Keep in mind, that message you want to send should be either binary or stringifi
 
 ### Buffering
 
-WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long runinng processes as well as buffer several messages to be flushed the same moment:
+WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long running processes as well as buffer several messages to be flushed the same moment:
 
 ```ruby
 producer = WaterDrop::Producer.new
