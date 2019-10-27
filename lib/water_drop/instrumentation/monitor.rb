@@ -25,6 +25,7 @@ module WaterDrop
         buffer.flushed_async.error
         buffer.flushed_sync
         buffer.flushed_sync.error
+        statistics.emitted
       ].freeze
 
       private_constant :EVENTS

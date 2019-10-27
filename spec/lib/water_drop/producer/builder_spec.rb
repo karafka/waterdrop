@@ -51,7 +51,7 @@ RSpec.describe WaterDrop::Producer::Builder do
       client
       callback_event = nil
 
-      config.monitor.subscribe('message.acknowledged') do |event|
+      config.monitor.subscribe('statistics.emitted') do |event|
         callback_event = event
       end
 
