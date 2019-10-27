@@ -13,6 +13,7 @@ module WaterDrop
         return DummyClient.new unless config.deliver
 
         Rdkafka::Config.logger = config.logger
+        Rdkafka::Config.statistics_callback = build_statistics_callback(producer, config.monitor)
 
         client = Rdkafka::Config.new(config.kafka.to_h).producer
         client.delivery_callback = build_delivery_callback(producer, config.monitor)
@@ -33,6 +34,21 @@ module WaterDrop
             producer: producer,
             offset: delivery_report.offset,
             partition: delivery_report.partition
+          )
+        end
+      end
+
+      # Creates a proc that we want to run upon each statistics callback execution
+      #
+      # @param producer [Producer]
+      # @param monitor [Object] monitor we want to use
+      # @return [Proc] statistics callback
+      def build_statistics_callback(producer, monitor)
+        lambda do |statistics|
+          monitor.instrument(
+            'statistics.emitted',
+            producer: producer,
+            statistics: statistics
           )
         end
       end

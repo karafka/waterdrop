@@ -44,4 +44,21 @@ RSpec.describe WaterDrop::Producer::Builder do
     it { expect(callback_event[:partition]).to eq(delivery_report.partition) }
     it { expect(callback_event[:producer]).to eq(producer) }
   end
+
+  context 'when the statistics_callback is executed' do
+    let(:statistics) { { rand => rand } }
+    let(:callback_event) do
+      client
+      callback_event = nil
+
+      config.monitor.subscribe('message.acknowledged') do |event|
+        callback_event = event
+      end
+
+      Rdkafka::Config.statistics_callback.call(statistics)
+      callback_event
+    end
+
+    it { expect(callback_event[:statistics]).to eq(statistics) }
+  end
 end
