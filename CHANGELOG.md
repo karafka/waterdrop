@@ -5,8 +5,9 @@
 - Replace `ruby-kafka` with `rdkafka`
 - Switch license from `MIT` to `LGPL-3.0`
 
-## Unreleased (master)
+## 1.3.1 (2019-10-21)
 - Ruby 2.6.5 support
+- Expose setting to optionally verify hostname on ssl certs #109 (tabdollahi)
 
 ## 1.3.0 (2019-09-09)
 - Drop Ruby 2.4 support
