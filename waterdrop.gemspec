@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require 'water_drop/version'
@@ -9,24 +9,27 @@ Gem::Specification.new do |spec|
   spec.name          = 'waterdrop'
   spec.version       = ::WaterDrop::VERSION
   spec.platform      = Gem::Platform::RUBY
-  spec.authors       = ['Maciej Mensfeld', 'Pavlo Vavruk']
-  spec.email         = %w[maciej@mensfeld.pl pavlo.vavruk@gmail.com]
+  spec.authors       = ['Maciej Mensfeld']
+  spec.email         = %w[maciej@mensfeld.pl]
   spec.homepage      = 'https://github.com/karafka/waterdrop'
-  spec.summary       = ' Kafka messaging made easy! '
+  spec.summary       = 'Kafka messaging made easy!'
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'bundler', '>= 0'
-  spec.add_dependency 'rake', '>= 0'
-  spec.add_dependency 'ruby-kafka', '>= 0'
-  spec.add_dependency 'connection_pool', '>= 0'
-  spec.add_dependency 'null-logger'
-  spec.add_dependency 'dry-configurable', '~> 0.6'
+  spec.add_dependency 'delivery_boy', '~> 0.2'
+  spec.add_dependency 'dry-configurable', '~> 0.8'
+  spec.add_dependency 'dry-monitor', '~> 0.3'
+  spec.add_dependency 'dry-validation', '~> 1.2'
+  spec.add_dependency 'ruby-kafka', '>= 0.7.8'
+  spec.add_dependency 'zeitwerk', '~> 2.1'
 
-  spec.add_development_dependency 'rspec', '~> 3.6.0'
-  spec.add_development_dependency 'simplecov', '~> 0.14.1'
-  spec.required_ruby_version = '>= 2.2.0'
+  spec.required_ruby_version = '>= 2.5.0'
 
+  if $PROGRAM_NAME.end_with?('gem')
+    spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
+  end
+
+  spec.cert_chain    = %w[certs/mensfeld.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]

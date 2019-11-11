@@ -1,9 +1,35 @@
-language: ruby
-rvm:
-  - 2.3.0
-  - 2.3.1
-  - 2.3.2
-  - 2.3.3
-  - 2.4.0
-script:
-  - bundle exec rake
+services:
+  - docker
+
+dist: trusty
+cache: bundler
+
+git:
+  depth: false
+
+test: &test
+  stage: Test
+  language: ruby
+  before_install:
+    - gem install bundler
+    - gem update --system
+  script: bundle exec rspec
+
+jobs:
+  include:
+    - <<: *test
+      rvm: 2.6.5
+    - <<: *test
+      rvm: 2.5.5
+
+    - stage: coditsu
+      language: ruby
+      rvm: 2.6.5
+      before_install:
+        - gem update --system
+        - gem install bundler
+      script: \curl -sSL https://api.coditsu.io/run/ci | bash
+
+stages:
+  - coditsu
+  - test

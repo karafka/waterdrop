@@ -1,5 +1,81 @@
 # WaterDrop changelog
 
+## 1.3.1 (2019-10-21)
+- Ruby 2.6.5 support
+- Expose setting to optionally verify hostname on ssl certs #109 (tabdollahi)
+
+## 1.3.0 (2019-09-09)
+- Drop Ruby 2.4 support
+
+## 1.3.0.rc1 (2019-07-31)
+- Drop Ruby 2.3 support
+- Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Ruby 2.6.3 support
+- Support message headers
+- `sasl_over_ssl` support
+- Unlock Ruby Kafka + provide support for 0.7 only
+- #60 - Rename listener to StdoutListener
+- Drop support for Kafka 0.10 in favor of native support for Kafka 0.11.
+- Support ruby-kafka 0.7
+- Support message headers
+- `sasl_over_ssl` support
+- `ssl_client_cert_key_password` support
+- #87 - Make stdout listener as instance
+- Use Zeitwerk for gem code loading
+- #93 - zstd compression support
+- #99 - schemas are renamed to contracts
+- Bump delivery_boy (0.2.7 => 0.2.8)
+
+## 1.2.5
+- Bump deps to match Karafka
+- drop jruby support
+- drop ruby 2.2 support
+
+## 1.2.4
+- Due to multiple requests, unlock of 0.7 with an additional post-install message
+
+## 1.2.3
+- Lock ruby-kafka to 0.6 (0.7 support targeted for WaterDrop 1.3)
+
+## 1.2.2
+- #55 - Codec settings unification and config applier
+
+## 1.2.1
+- #54 - compression_codec api sync with king-konf requirements
+
+## 1.2.0
+- #45 - Allow specifying a create time for messages
+- #47 - Support SCRAM once released
+- #49 - Add lz4 support once merged and released
+- #50 - Potential message loss in async mode
+- Ruby 2.5.0 support
+- Gem bump to match Karafka framework versioning
+- #48 - ssl_ca_certs_from_system
+- #52 - Use instrumentation compatible with Karafka 1.2
+
+## 1.0.1
+- Added high level retry on connection problems
+
+## 1.0.0
+
+- #37 - ack level for producer
+- Gem bump
+- Ruby 2.4.2 support
+- Raw ruby-kafka driver is now replaced with delivery_boy
+- Sync and async producers
+- Complete update of the API
+- Much better validations for config details
+- Complete API remodel - please read the new README
+- Renamed send_messages to deliver
+
+## 0.4
+- Bump to match Karafka
+- Renamed ```hosts``` to ```seed_brokers```
+- Removed the ```ssl``` scoping for ```kafka``` config namespace to better match Karafka conventions
+- Added ```client_id``` option on a root config level
+- Added ```logger``` option on a root config level
+- Auto Propagation of config down to ruby-kafka
+
 ## 0.3.2
 - Removed support for Ruby 2.1.*
 - ~~Ruby 2.3.3 as default~~

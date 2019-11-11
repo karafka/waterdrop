@@ -7,10 +7,11 @@ app.god
 
 # minimal Rails specific artifacts
 db/*.sqlite3
-/log/*
+/log/*.log
 /tmp/*
 *.gem
 *.~
+/.coditsu/local.yml
 
 # various artifacts
 **.war
