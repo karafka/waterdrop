@@ -31,5 +31,5 @@ jobs:
       script: \curl -sSL https://api.coditsu.io/run/ci | bash
 
 stages:
-  - coditsu
   - test
+  - coditsu
