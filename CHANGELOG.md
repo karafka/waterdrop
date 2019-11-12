@@ -27,7 +27,7 @@
 - Bump delivery_boy (0.2.7 => 0.2.8)
 
 ## 1.2.5
-- Bump deps to match Karafka
+- Bump dependencies to match Karafka
 - drop jruby support
 - drop ruby 2.2 support
 
@@ -90,7 +90,7 @@
 - Dev tools update
 - Gem update
 - Specs updates
-- File namming convention fix from waterdrop to water_drop + compatibility file
+- File naming convention fix from waterdrop to water_drop + compatibility file
 - Additional params (partition, etc) that can be passed into producer
 
 ## 0.3.0
@@ -99,7 +99,7 @@
 ## 0.2.0
 - Version dump - this WaterDrop version no longer relies on Aspector to work
 - #17 - Logger for Aspector - WaterDrop no longer depends on Aspector
-- #8 - add send date as a default value added to a message - wontfix. Should be implemented on a message level since WaterDrop just transports messages without adding additional stuff.
+- #8 - add send date as a default value added to a message - wont-fix. Should be implemented on a message level since WaterDrop just transports messages without adding additional stuff.
 - #11 - same as above
 
 ## 0.1.13
@@ -118,7 +118,7 @@
 
 ## 0.1.9
 - Required acks and set to -1 (most secure but slower)
-- Added a proxu layer to to producer so we could replate Kafka with other messaging systems
+- Added a proxy layer to to producer so we could replace Kafka with other messaging systems
 - Gem dump
 
 ## 0.1.8
