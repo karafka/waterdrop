@@ -3,6 +3,10 @@
 module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
+    SEED_BROKERS_SEPARATOR = ",".freeze
+    SEED_BROKER_FORMAT_REGEXP = /(?=^((?!\:\/\/).)*$).+\:\d+/.freeze
+    private_constant :SEED_BROKERS_SEPARATOR, :SEED_BROKER_FORMAT_REGEXP
+
     class Config < Dry::Validation::Contract
       params do
         required(:id).filled(:str?)
@@ -12,6 +16,16 @@ module WaterDrop
         required(:max_payload_size).filled(:int?, gteq?: 1)
         required(:max_wait_timeout).filled(:number?, gteq?: 0)
         required(:wait_timeout).filled(:number?, gt?: 0)
+      end
+
+      rule(:kafka) do
+        next unless value.is_a?(Hash)
+        bootstrap_servers = value.symbolize_keys[:"bootstrap.servers"].to_s
+
+        key.failure(:bootstrap_servers_must_be_filled) and next if bootstrap_servers.to_s.empty?
+        if !bootstrap_servers.split(SEED_BROKERS_SEPARATOR).all? { |seed_broker| SEED_BROKER_FORMAT_REGEXP.match?(seed_broker) }
+          key.failure(:invalid_seed_brokers_format)
+        end
       end
     end
   end
