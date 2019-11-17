@@ -19,7 +19,7 @@ RSpec.describe WaterDrop::Config do
 
     context 'when configuration is valid' do
       it 'not raise ConfigurationInvalidError exception' do
-        expect { config.setup { |config| config.kafka = { rand => rand } } }
+        expect { config.setup { |config| config.kafka = { 'bootstrap.servers' => 'localhost:9092', rand => rand } } }
           .not_to raise_error
       end
     end
