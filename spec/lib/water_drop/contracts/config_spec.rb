@@ -98,6 +98,11 @@ RSpec.describe WaterDrop::Contracts::Config do
   end
 
   context 'when kafka hash is present' do
+    let(:invalid_format_error_message) do
+      'the expected format for \'bootstrap.servers\' value is host1:port1,host2:port2, ' \
+      'without explicit URI scheme'
+    end
+
     context 'when bootstrap.servers is nil' do
       before { config[:kafka] = { 'bootstrap.servers': nil } }
 
@@ -117,24 +122,21 @@ RSpec.describe WaterDrop::Contracts::Config do
       before { config[:kafka] = { 'bootstrap.servers': 1234 } }
 
       it { expect(contract_result).not_to be_success }
-      it { expect(contract_errors[:kafka]).to eq ['the expected format for \'bootstrap.servers\' ' +
-        'value is host1:port1,host2:port2, without explicit URI scheme'] }
+      it { expect(contract_errors[:kafka]).to eq [invalid_format_error_message] }
     end
 
     context 'when bootstrap.servers contains a single seed broker with explicit URI scheme' do
       before { config[:kafka] = { 'bootstrap.servers': 'kafka://127.0.0.1:9092' } }
 
       it { expect(contract_result).not_to be_success }
-      it { expect(contract_errors[:kafka]).to eq ['the expected format for \'bootstrap.servers\' ' +
-        'value is host1:port1,host2:port2, without explicit URI scheme'] }
+      it { expect(contract_errors[:kafka]).to eq [invalid_format_error_message] }
     end
 
     context 'when bootstrap.servers contains a single seed broker without a port' do
       before { config[:kafka] = { 'bootstrap.servers': '127.0.0.1' } }
 
       it { expect(contract_result).not_to be_success }
-      it { expect(contract_errors[:kafka]).to eq ['the expected format for \'bootstrap.servers\' ' +
-        'value is host1:port1,host2:port2, without explicit URI scheme'] }
+      it { expect(contract_errors[:kafka]).to eq [invalid_format_error_message] }
     end
 
     context 'when bootstrap.servers contains a valid single seed broker' do
@@ -149,8 +151,7 @@ RSpec.describe WaterDrop::Contracts::Config do
       before { config[:kafka] = { 'bootstrap.servers': '127.0.0.1:9092,kafka://127.0.0.1:9093' } }
 
       it { expect(contract_result).not_to be_success }
-      it { expect(contract_errors[:kafka]).to eq ['the expected format for \'bootstrap.servers\' ' +
-        'value is host1:port1,host2:port2, without explicit URI scheme'] }
+      it { expect(contract_errors[:kafka]).to eq [invalid_format_error_message] }
     end
 
     context 'when bootstrap.servers contains multiple seed brokers separated by a comma with at
@@ -158,8 +159,7 @@ RSpec.describe WaterDrop::Contracts::Config do
       before { config[:kafka] = { 'bootstrap.servers': '127.0.0.1,kafka:9092' } }
 
       it { expect(contract_result).not_to be_success }
-      it { expect(contract_errors[:kafka]).to eq ['the expected format for \'bootstrap.servers\' ' +
-        'value is host1:port1,host2:port2, without explicit URI scheme'] }
+      it { expect(contract_errors[:kafka]).to eq [invalid_format_error_message] }
     end
 
     context 'when bootstrap.servers contains a single seed brokers separated by a comma and none

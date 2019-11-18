@@ -30,7 +30,9 @@ module WaterDrop
           next
         end
 
-        seed_broker_has_valid_format = ->(seed_broker) { SEED_BROKER_FORMAT_REGEXP.match?(seed_broker) }
+        seed_broker_has_valid_format = ->(seed_broker) do
+          SEED_BROKER_FORMAT_REGEXP.match?(seed_broker)
+        end
         unless bootstrap_servers.split(SEED_BROKERS_SEPARATOR).all?(&seed_broker_has_valid_format)
           key.failure(:invalid_seed_brokers_format)
         end
