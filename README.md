@@ -176,6 +176,8 @@ producer.monitor.subscribe('message.produced_async') do |event|
 end
 
 producer.produce_async(topic: 'events', payload: 'data')
+
+producer.close
 ```
 
 See the `WaterDrop::Instrumentation::Monitor::EVENTS` for the list of all the supported events.
