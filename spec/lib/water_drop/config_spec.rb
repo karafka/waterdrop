@@ -6,7 +6,7 @@ RSpec.describe WaterDrop::Config do
   describe '#setup' do
     context 'when configuration has errors' do
       let(:error_class) { ::WaterDrop::Errors::ConfigurationInvalidError }
-      let(:error_message) { { kafka: ['must be filled'] }.to_s }
+      let(:error_message) { { kafka: { 'bootstrap.servers': ['is missing'] } }.to_s }
       let(:setup) { described_class.new.setup {} }
 
       it 'raise ConfigurationInvalidError exception' do

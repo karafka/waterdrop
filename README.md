@@ -48,8 +48,8 @@ producer = WaterDrop::Producer.new
 producer.setup do |config|
   config.deliver = true
   config.kafka = {
-    'bootstrap.servers' => 'localhost:9092',
-    'request.required.acks' => 1
+    'bootstrap.servers': 'localhost:9092',
+    'request.required.acks': 1
   }
 end
 ```
@@ -60,8 +60,8 @@ or you can do the same while initializing the producer:
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = {
-    'bootstrap.servers' => 'localhost:9092',
-    'request.required.acks' => 1
+    'bootstrap.servers': 'localhost:9092',
+    'request.required.acks': 1
   }
 end
 ```
@@ -92,7 +92,7 @@ To send Kafka messages, just create a producer and use it:
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
-  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
 end
 
 producer.produce_sync(topic: 'my-topic', payload: 'my message')
@@ -143,7 +143,7 @@ WaterDrop producers support buffering of messages, which means that you can easi
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
-  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
 end
 
 time = Time.now - 10
@@ -168,7 +168,7 @@ Each of the producers after the `#setup` is done, has a custom monitor to which 
 producer = WaterDrop::Producer.new
 
 producer.setup do |config|
-  config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
 end
 
 producer.monitor.subscribe('message.produced_async') do |event|
