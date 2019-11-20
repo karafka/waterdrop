@@ -4,6 +4,7 @@
 - Redesign of the whole API (see `README.md` for the use-cases and the current API)
 - Replace `ruby-kafka` with `rdkafka`
 - Switch license from `MIT` to `LGPL-3.0`
+- #113 - Add some basic validations of the kafka scope of the config (Azdaroth)
 
 ## 1.3.1 (2019-10-21)
 - Ruby 2.6.5 support

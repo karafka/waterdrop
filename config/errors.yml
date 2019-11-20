@@ -4,5 +4,3 @@ en:
       invalid_key_type: all keys need to be of type String
       invalid_value_type: all values need to be of type String
       max_payload_size: is more than `max_payload_size` config value
-      bootstrap_servers_must_be_filled: bootstrap.servers must be filled
-      invalid_seed_brokers_format: the expected format for 'bootstrap.servers' value is host1:port1,host2:port2, without explicit URI scheme

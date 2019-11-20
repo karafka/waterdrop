@@ -8,7 +8,10 @@ module WaterDrop
       # Regex to check that topic has a valid format
       TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
 
-      private_constant :TOPIC_REGEXP
+      # Checks, that the given value is a string
+      STRING_ASSERTION = ->(value) { value.is_a?(String) }.to_proc
+
+      private_constant :TOPIC_REGEXP, :STRING_ASSERTION
 
       config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
@@ -26,10 +29,8 @@ module WaterDrop
       rule(:headers) do
         next unless value.is_a?(Hash)
 
-        assertion = ->(value) { value.is_a?(String) }
-
-        key.failure(:invalid_key_type) unless value.keys.all?(&assertion)
-        key.failure(:invalid_value_type) unless value.values.all?(&assertion)
+        key.failure(:invalid_key_type) unless value.keys.all?(&STRING_ASSERTION)
+        key.failure(:invalid_value_type) unless value.values.all?(&STRING_ASSERTION)
       end
 
       rule(:payload) do
