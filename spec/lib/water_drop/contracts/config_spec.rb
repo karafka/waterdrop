@@ -95,7 +95,7 @@ RSpec.describe WaterDrop::Contracts::Config do
   context 'when kafka hash is present' do
     let(:invalid_format) { 'is in invalid format' }
 
-    context 'bootstrap.servers' do
+    context 'when validating bootstrap.servers scope' do
       before { config[:kafka] = { 'bootstrap.servers': bootstrap_servers } }
 
       context 'when nil' do
