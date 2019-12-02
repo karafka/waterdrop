@@ -43,12 +43,18 @@ module WaterDrop
       # @param producer [Producer]
       # @param monitor [Object] monitor we want to use
       # @return [Proc] statistics callback
+      # @note We decorate the statistics with our own decorator because some of the metrics from
+      #   rdkafka are absolute. For example number of sent messages increases not in reference to
+      #   previous statistics emit but from the beginning of the process. We decorate it with diff
+      #   of all the numeric values against the data from the previous callback emit
       def build_statistics_callback(producer, monitor)
+        statistics_decorator = StatisticsDecorator.new
+
         lambda do |statistics|
           monitor.instrument(
             'statistics.emitted',
             producer: producer,
-            statistics: statistics
+            statistics: statistics_decorator.call(statistics)
           )
         end
       end

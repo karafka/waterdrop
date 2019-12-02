@@ -182,9 +182,60 @@ producer.close
 
 See the `WaterDrop::Instrumentation::Monitor::EVENTS` for the list of all the supported events.
 
+### Usage statistics
+
+WaterDrop may be configured to emit internal metrics at a fixed interval by setting the `kafka` `statistics.interval.ms` configuration property to a value > `0`. Once that is done, emitted statistics are available after subscribing to the `statistics.emitted` publisher event.
+
+The statistics include all of the metrics from `librdkafka` (full list [here](https://github.com/edenhill/librdkafka/blob/master/STATISTICS.md)) as well as the diff of those against the previously emitted values.
+
+For several attributes like `txmsgs`, `librdkafka` publishes only the totals. In order to make it easier to track the progress (for example number of messages sent between statistics emitted events), WaterDrop diffs all the numeric values against previously available numbers. All of those metrics are available under the same key as the metric but with additional `_d` postfix:
+
+
+```ruby
+producer = WaterDrop::Producer.new do |config|
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'statistics.interval.ms': 2_000 # emit statistics every 2 seconds
+  }
+end
+
+producer.monitor.subscribe('statistics.emitted') do |event|
+  sum = event[:statistics]['txmsgs']
+  diff = event[:statistics]['txmsgs_d']
+
+  p "Sent messages: #{sum}"
+  p "Messages sent from last statistics report: #{diff}"
+end
+
+sleep(2)
+
+# Sent messages: 0
+# Messages sent from last statistics report: 0
+
+20.times { producer.produce_async(topic: 'events', payload: 'data') }
+
+# Sent messages: 20
+# Messages sent from last statistics report: 20
+
+sleep(2)
+
+20.times { producer.produce_async(topic: 'events', payload: 'data') }
+
+# Sent messages: 40
+# Messages sent from last statistics report: 20
+
+sleep(2)
+
+# Sent messages: 40
+# Messages sent from last statistics report: 0
+
+producer.close
+```
+
+Note: The metrics returned may not be completely consistent between brokers, toppars and totals, due to the internal asynchronous nature of librdkafka. E.g., the top level tx total may be less than the sum of the broker tx values which it represents.
+
 ## References
 
-* [WaterDrop code examples](https://travis-ci.org/karafka/waterdrop/master/examples)
 * [WaterDrop code documentation](https://www.rubydoc.info/github/karafka/waterdrop)
 * [Karafka framework](https://github.com/karafka/karafka)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
