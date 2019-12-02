@@ -64,7 +64,7 @@ module WaterDrop
       def append(current, key, result)
         return unless result.is_a?(Numeric)
 
-        current["#{key}_d".to_sym] = result
+        current["#{key}_d"] = result
       end
     end
   end
