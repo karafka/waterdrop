@@ -236,7 +236,6 @@ Note: The metrics returned may not be completely consistent between brokers, top
 
 ## References
 
-* [WaterDrop code examples](https://travis-ci.org/karafka/waterdrop/master/examples)
 * [WaterDrop code documentation](https://www.rubydoc.info/github/karafka/waterdrop)
 * [Karafka framework](https://github.com/karafka/karafka)
 * [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
