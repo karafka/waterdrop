@@ -3,6 +3,7 @@
 RSpec.describe WaterDrop::ConfigApplier do
   subject(:sync) { described_class.call(delivery_boy_config, settings) }
 
+  let!(:original_delivery_boy_config) { DeliveryBoy.config }
   let(:delivery_boy_config) { DeliveryBoy.config }
 
   describe '#call' do
@@ -33,6 +34,7 @@ RSpec.describe WaterDrop::ConfigApplier do
         ack_timeout
         delivery_interval
         delivery_threshold
+        transactional_timeout
         max_retries
         retry_backoff
       ].each do |key|
@@ -40,6 +42,23 @@ RSpec.describe WaterDrop::ConfigApplier do
 
         context "when we sync #{key} with int value" do
           let(:settings) { { key => rand(1000..10_000) } }
+
+          it { expect(delivery_boy_config.public_send(key)).to eq settings[key] }
+        end
+      end
+
+      # Typical bool cases
+      %i[
+        idempotent
+        transactional
+        ssl_ca_certs_from_system
+        ssl_verify_hostname
+        sasl_over_ssl
+      ].each do |key|
+        before { sync }
+
+        context "when we sync #{key} with the opposite bool value" do
+          let(:settings) { { key => !original_delivery_boy_config.public_send(key) } }
 
           it { expect(delivery_boy_config.public_send(key)).to eq settings[key] }
         end

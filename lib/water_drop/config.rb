@@ -71,6 +71,12 @@ module WaterDrop
       #   delivery. Default is 100 messages. Disable buffer size based background deliveries by
       #   setting this to 0.
       setting :delivery_threshold, 100
+      # option [Boolean]
+      setting :idempotent, false
+      # option [Boolean]
+      setting :transactional, false
+      # option [Integer]
+      setting :transactional_timeout, 60
 
       # option [Integer] The number of retries when attempting to deliver messages.
       setting :max_retries, 2
