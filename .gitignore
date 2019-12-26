@@ -66,3 +66,5 @@ pickle-email-*.html
 
 # documentation
 .yardoc
+
+.byebug_history

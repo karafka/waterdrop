@@ -8,6 +8,10 @@
 - Global state removed
 - Redesigned metrics that use `rdkafka` internal data + custom diffing
 
+## 1.3.2 (2019-26-12)
+- Ruby 2.7.0 support
+- Fix missing `delegate` dependency on `ruby-kafka`
+
 ## 1.3.1 (2019-10-21)
 - Ruby 2.6.5 support
 - Expose setting to optionally verify hostname on ssl certs #109 (tabdollahi)
