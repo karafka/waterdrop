@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # External components
+# delegate should be removed because we don't need it, we just add it because of ruby-kafka
 %w[
+  delegate
   json
   delivery_boy
   singleton
