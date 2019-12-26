@@ -92,7 +92,7 @@ module WaterDrop
           @messages = Concurrent::Array.new
         end
 
-        dispatched = data_for_dispatch.map { |message| @client.produce(message) }
+        dispatched = data_for_dispatch.map { |message| @client.produce(**message) }
 
         return dispatched unless sync
 
