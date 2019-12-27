@@ -25,7 +25,7 @@ module WaterDrop
           message: message
         ) do
           @client
-            .produce(message)
+            .produce(**message)
             .wait(
               max_wait_timeout: @config.max_wait_timeout,
               wait_timeout: @config.wait_timeout
@@ -51,7 +51,7 @@ module WaterDrop
 
         @monitor.instrument('messages.produced_sync', producer: self, messages: messages) do
           messages
-            .map { |message| @client.produce(message) }
+            .map { |message| @client.produce(**message) }
             .map! do |handler|
               handler.wait(
                 max_wait_timeout: @config.max_wait_timeout,
