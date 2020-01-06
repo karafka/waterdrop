@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 1.3.3 (2019-01-06)
 - #119 - Support exactly once delivery and transactional messaging (kylekthompson)
 - #119 - Support delivery_boy 1.0 (kylekthompson)
 
