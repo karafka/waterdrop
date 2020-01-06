@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'delivery_boy', '~> 0.2'
+  spec.add_dependency 'delivery_boy', '>= 0.2', '< 2.x'
   spec.add_dependency 'dry-configurable', '~> 0.8'
   spec.add_dependency 'dry-monitor', '~> 0.3'
   spec.add_dependency 'dry-validation', '~> 1.2'
