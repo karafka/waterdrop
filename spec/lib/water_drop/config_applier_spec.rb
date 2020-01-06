@@ -11,7 +11,6 @@ RSpec.describe WaterDrop::ConfigApplier do
       before { sync }
 
       context 'when we sync client_id' do
-
         let(:settings) { { client_id: rand.to_s } }
 
         it { expect(delivery_boy_config.client_id).to eq settings[:client_id] }
