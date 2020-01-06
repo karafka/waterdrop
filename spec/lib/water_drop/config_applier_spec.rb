@@ -8,8 +8,9 @@ RSpec.describe WaterDrop::ConfigApplier do
 
   describe '#call' do
     describe 'when we handle standard, valid cases' do
+      before { sync }
+
       context 'when we sync client_id' do
-        before { sync }
 
         let(:settings) { { client_id: rand.to_s } }
 
@@ -17,8 +18,6 @@ RSpec.describe WaterDrop::ConfigApplier do
       end
 
       context 'when we have valid sasl_scram_mechanism string' do
-        before { sync }
-
         let(:settings) { { sasl_scram_mechanism: 'sha512' } }
 
         it { expect(delivery_boy_config.sasl_scram_mechanism).to eq settings.values.first }
@@ -38,8 +37,6 @@ RSpec.describe WaterDrop::ConfigApplier do
         max_retries
         retry_backoff
       ].each do |key|
-        before { sync }
-
         context "when we sync #{key} with int value" do
           let(:settings) { { key => rand(1000..10_000) } }
 
@@ -55,8 +52,6 @@ RSpec.describe WaterDrop::ConfigApplier do
         ssl_verify_hostname
         sasl_over_ssl
       ].each do |key|
-        before { sync }
-
         context "when we sync #{key} with the opposite bool value" do
           let(:settings) { { key => !original_delivery_boy_config.public_send(key) } }
 
