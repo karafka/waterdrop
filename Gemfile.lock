@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/appsignal/rdkafka-ruby.git
-  revision: d07c9595a063691c16bc8428fe671feb13d07714
+  revision: d0d71f669daadbfeec056085b8abe065478be784
   specs:
     rdkafka (0.7.0)
       ffi (~> 1.9)
@@ -90,15 +90,15 @@ GEM
       rspec-core (~> 3.9.0)
       rspec-expectations (~> 3.9.0)
       rspec-mocks (~> 3.9.0)
-    rspec-core (3.9.0)
-      rspec-support (~> 3.9.0)
+    rspec-core (3.9.1)
+      rspec-support (~> 3.9.1)
     rspec-expectations (3.9.0)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
-    rspec-mocks (3.9.0)
+    rspec-mocks (3.9.1)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.9.0)
-    rspec-support (3.9.0)
+    rspec-support (3.9.2)
     simplecov (0.17.1)
       docile (~> 1.1)
       json (>= 1.8, < 3)
@@ -121,4 +121,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   2.1.2
+   2.1.4
