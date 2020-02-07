@@ -8,6 +8,10 @@
 - Global state removed
 - Redesigned metrics that use `rdkafka` internal data + custom diffing
 
+## 1.3.3 (2019-01-06)
+- #119 - Support exactly once delivery and transactional messaging (kylekthompson)
+- #119 - Support delivery_boy 1.0 (kylekthompson)
+
 ## 1.3.2 (2019-26-12)
 - Ruby 2.7.0 support
 - Fix missing `delegate` dependency on `ruby-kafka`
