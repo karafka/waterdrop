@@ -8,6 +8,9 @@
 - Global state removed
 - Redesigned metrics that use `rdkafka` internal data + custom diffing
 
+## 1.3.4 (2020-02-17)
+- Support for new `dry-configurable`
+
 ## 1.3.3 (2019-01-06)
 - #119 - Support exactly once delivery and transactional messaging (kylekthompson)
 - #119 - Support delivery_boy 1.0 (kylekthompson)
