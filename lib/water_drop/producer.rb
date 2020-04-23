@@ -28,6 +28,10 @@ module WaterDrop
       @status = Status.new
       @messages = Concurrent::Array.new
 
+      # Finalizer tracking is needed for handling shutdowns gracefully.
+      # I don't expect everyone to remember about closing all the producers all the time
+      ObjectSpace.define_finalizer(self, proc { close })
+
       return unless block
 
       setup(&block)
