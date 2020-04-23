@@ -6,7 +6,7 @@ WaterDrop `2.0` does **not** work with Karafka `1.3.*` and aims to either work a
 
 Please refer to [this](https://github.com/karafka/waterdrop/tree/1.3) branch and it's documentation for details about WaterDrop `1.3.*` usage.
 
-[![Build Status](https://travis-ci.org/karafka/waterdrop.svg)](https://travis-ci.org/karafka/waterdrop)
+[![Build Status](https://github.com/karafka/waterdrop/workflows/ci/badge.svg)](https://github.com/karafka/waterdrop/actions?query=workflow%3Aci)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Gem used to send messages to Kafka in an easy way with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
@@ -244,7 +244,7 @@ Note: The metrics returned may not be completely consistent between brokers, top
 
 * [WaterDrop code documentation](https://www.rubydoc.info/github/karafka/waterdrop)
 * [Karafka framework](https://github.com/karafka/karafka)
-* [WaterDrop Travis CI](https://travis-ci.org/karafka/waterdrop)
+* [WaterDrop Actions CI](https://github.com/karafka/waterdrop/actions?query=workflow%3Ac)
 * [WaterDrop Coditsu](https://app.coditsu.io/karafka/repositories/waterdrop)
 
 ## Note on contributions
