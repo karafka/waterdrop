@@ -1,5 +1,11 @@
 # WaterDrop
 
+**Note**: Documentation presented here refers to WaterDrop `2.0.0.pre1`.
+
+WaterDrop `2.0` does **not** work with Karafka `1.3.*` and aims to either work as a standalone producer outside of Karafka `1.3.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
+
+Please refer to [this](https://github.com/karafka/waterdrop/tree/1.3) branch and it's documentation for details about WaterDrop `1.3.*` usage.
+
 [![Build Status](https://travis-ci.org/karafka/waterdrop.svg)](https://travis-ci.org/karafka/waterdrop)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
@@ -13,7 +19,7 @@ It:
  - Supports buffering
  - Supports producing messages to multiple clusters
  - Supports multiple delivery policies
- - Works with Kafka 1.0+ and Ruby 2.4+
+ - Works with Kafka 1.0+ and Ruby 2.5+
 
 ## Installation
 
