@@ -30,7 +30,9 @@ jobs:
       - name: Bundle install
         run: bundle install --jobs 4 --retry 3
       - name: Run Kafka with docker-compose
-        run: docker-compose up -d && sleep 5
+        run: docker-compose up -d
+      - name: Wait for Kafka to start
+        run: sleep 10
       - name: Run all tests
         run: bundle exec rspec
   coditsu:
