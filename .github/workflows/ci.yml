@@ -30,9 +30,7 @@ jobs:
       - name: Bundle install
         run: bundle install --jobs 4 --retry 3
       - name: Run Kafka with docker-compose
-        run: docker-compose --log-level INFO up -d --build
-      - name: "Docker Logs"
-        run: docker-compose logs
+        run: docker-compose up -d
       - name: Run all tests
         run: bundle exec rspec
   coditsu:
