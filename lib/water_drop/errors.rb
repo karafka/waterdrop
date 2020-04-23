@@ -7,12 +7,33 @@ module WaterDrop
     BaseError = Class.new(StandardError)
 
     # Raised when configuration doesn't match with validation contract
-    InvalidConfiguration = Class.new(BaseError)
+    ConfigurationInvalidError = Class.new(BaseError)
 
-    # Raised when we try to send message with invalid options
-    InvalidMessageOptions = Class.new(BaseError)
+    # Raised when we want to use a producer that was not configured
+    ProducerNotConfiguredError = Class.new(BaseError)
 
-    # Raised when want to hook up to an event that is not registered and supported
-    UnregisteredMonitorEvent = Class.new(BaseError)
+    # Raised when we want to reconfigure a producer that was already configured
+    ProducerAlreadyConfiguredError = Class.new(BaseError)
+
+    # Raised when there was an attempt to use a closed producer
+    ProducerClosedError = Class.new(BaseError)
+
+    # Raised when we want to send a message that is invalid (impossible topic, etc)
+    MessageInvalidError = Class.new(BaseError)
+
+    # Raised when we've got an unexpected status. This should never happen. If it does, please
+    # contact us as it is an error.
+    StatusInvalidError = Class.new(BaseError)
+
+    # Raised when during messages flushing something bad happened
+    class FlushFailureError < BaseError
+      attr_reader :dispatched_messages
+
+      # @param dispatched_messages [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the
+      #   messages that we've dispatched
+      def initialize(dispatched_messages)
+        @dispatched_messages = dispatched_messages
+      end
+    end
   end
 end

@@ -4,6 +4,7 @@
 /vendor/ruby/
 /ruby/
 app.god
+example.rb
 
 # minimal Rails specific artifacts
 db/*.sqlite3
@@ -12,6 +13,7 @@ db/*.sqlite3
 *.gem
 *.~
 /.coditsu/local.yml
+.byebug_history
 
 # various artifacts
 **.war

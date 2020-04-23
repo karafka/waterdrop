@@ -4,6 +4,8 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 %w[
+  byebug
+  factory_bot
   rubygems
   simplecov
 ].each(&method(:require))
@@ -22,7 +24,12 @@ SimpleCov.start do
   merge_timeout 600
 end
 
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
+
+SimpleCov.minimum_coverage 100
+
 RSpec.configure do |config|
+  config.include FactoryBot::Syntax::Methods
   config.disable_monkey_patching!
   config.order = :random
 
@@ -32,12 +39,3 @@ RSpec.configure do |config|
 end
 
 require 'water_drop'
-
-# Configure for test setup
-WaterDrop.setup do |config|
-  config.deliver = true
-  config.kafka.seed_brokers = %w[kafka://localhost:9092]
-  config.logger = Logger.new(File.join(WaterDrop.gem_root, 'log', 'test.log'))
-end
-
-WaterDrop.monitor.subscribe(WaterDrop::Instrumentation::StdoutListener.new)

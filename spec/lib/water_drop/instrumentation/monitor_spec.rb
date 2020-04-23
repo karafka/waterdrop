@@ -5,14 +5,12 @@ RSpec.describe WaterDrop::Instrumentation::Monitor do
 
   describe '#instrument' do
     let(:result) { rand }
-    let(:event_name) { monitor.available_events[0] }
+    let(:event_name) { 'message.produced_async' }
     let(:instrumentation) do
       monitor.instrument(
         event_name,
         call: self,
-        attempts_count: 1,
-        error: Kafka::Error,
-        options: {}
+        error: StandardError
       ) { result }
     end
 
@@ -23,26 +21,26 @@ RSpec.describe WaterDrop::Instrumentation::Monitor do
 
   describe '#subscribe' do
     context 'when we have a block based listener' do
-      let(:subscription) { WaterDrop.monitor.subscribe(event_name) {} }
+      let(:subscription) { monitor.subscribe(event_name) {} }
 
       context 'when we try to subscribe to an unsupported event' do
         let(:event_name) { 'unsupported' }
 
-        it { expect { subscription }.to raise_error WaterDrop::Errors::UnregisteredMonitorEvent }
+        it { expect { subscription }.to raise_error Dry::Events::InvalidSubscriberError }
       end
 
       context 'when we try to subscribe to a supported event' do
-        let(:event_name) { monitor.available_events.sample }
+        let(:event_name) { 'message.produced_async' }
 
         it { expect { subscription }.not_to raise_error }
       end
     end
 
     context 'when we have an object listener' do
-      let(:subscription) { WaterDrop.monitor.subscribe(listener.new) }
+      let(:subscription) { monitor.subscribe(listener.new) }
       let(:listener) do
         Class.new do
-          def on_sync_producer_call_error(_event)
+          def on_message_produced_async(_event)
             true
           end
         end
@@ -50,13 +48,5 @@ RSpec.describe WaterDrop::Instrumentation::Monitor do
 
       it { expect { subscription }.not_to raise_error }
     end
-  end
-
-  describe '#available_events' do
-    it 'expect to include registered events' do
-      expect(monitor.available_events.size).to eq 4
-    end
-
-    it { expect(monitor.available_events).to include 'sync_producer.call.error' }
   end
 end

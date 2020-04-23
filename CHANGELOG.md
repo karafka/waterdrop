@@ -1,5 +1,13 @@
 # WaterDrop changelog
 
+## 2.0.0-pre1
+- Redesign of the whole API (see `README.md` for the use-cases and the current API)
+- Replace `ruby-kafka` with `rdkafka`
+- Switch license from `MIT` to `LGPL-3.0`
+- #113 - Add some basic validations of the kafka scope of the config (Azdaroth)
+- Global state removed
+- Redesigned metrics that use `rdkafka` internal data + custom diffing
+
 ## 1.3.4 (2020-02-17)
 - Support for new `dry-configurable`
 
