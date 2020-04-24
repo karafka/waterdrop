@@ -16,7 +16,6 @@ jobs:
           - '2.6'
           - '2.5'
           - 'jruby'
-          - 'truffleruby'
         include:
           - ruby: '2.7'
             coverage: 'true'
