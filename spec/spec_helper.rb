@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-coverage = !ENV.key?('GITHUB_WORKFLOW')
-coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
-
 %w[
   byebug
   factory_bot
 ].each(&method(:require))
+
+
+coverage = !ENV.key?('GITHUB_WORKFLOW')
+coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
 
 if coverage
   require 'simplecov'
@@ -27,8 +28,6 @@ if coverage
 end
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
-
-SimpleCov.minimum_coverage 100
 
 RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
