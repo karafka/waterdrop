@@ -12,9 +12,14 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - "2.7"
-          - "2.6"
-          - "2.5"
+          - '2.7'
+          - '2.6'
+          - '2.5'
+          - 'jruby'
+          - 'truffleruby'
+        include:
+          - ruby: '2.7'
+            coverage: 'true'
     steps:
       - uses: actions/checkout@v2
       - name: Install package dependencies
@@ -32,6 +37,8 @@ jobs:
       - name: Run Kafka with docker-compose
         run: docker-compose up -d
       - name: Run all tests
+        env:
+          GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bundle exec rspec
   coditsu:
     runs-on: ubuntu-latest

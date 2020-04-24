@@ -7,6 +7,8 @@
 - #113 - Add some basic validations of the kafka scope of the config (Azdaroth)
 - Global state removed
 - Redesigned metrics that use `rdkafka` internal data + custom diffing
+- Restore JRuby support
+- Add TruffleRuby support (?)
 
 ## 1.3.4 (2020-02-17)
 - Support for new `dry-configurable`
