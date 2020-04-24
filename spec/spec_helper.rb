@@ -1,9 +1,6 @@
 # frozen_string_literal: true
 
-%w[
-  byebug
-  factory_bot
-].each(&method(:require))
+require 'factory_bot'
 
 coverage = !ENV.key?('GITHUB_WORKFLOW')
 coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
