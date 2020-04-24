@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  # Namespace for all the things related with WaterDrop instrumentation process
   module Instrumentation
     # Monitor is used to hookup external monitoring services to monitor how WaterDrop works
     # Since it is a pub-sub based on dry-monitor, you can use as many subscribers/loggers at the

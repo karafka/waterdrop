@@ -12,9 +12,13 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - "2.7"
-          - "2.6"
-          - "2.5"
+          - '2.7'
+          - '2.6'
+          - '2.5'
+          - 'jruby'
+        include:
+          - ruby: '2.7'
+            coverage: 'true'
     steps:
       - uses: actions/checkout@v2
       - name: Install package dependencies
@@ -28,10 +32,14 @@ jobs:
           gem install bundler --no-document
           bundle config set without 'tools benchmarks docs'
       - name: Bundle install
-        run: bundle install --jobs 4 --retry 3
+        run: |
+          bundle config set without development
+          bundle install --jobs 4 --retry 3
       - name: Run Kafka with docker-compose
         run: docker-compose up -d
       - name: Run all tests
+        env:
+          GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bundle exec rspec
   coditsu:
     runs-on: ubuntu-latest
