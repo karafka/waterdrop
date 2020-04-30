@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/appsignal/rdkafka-ruby.git
-  revision: 74bcc09e6ca6ff32c9b0006797430a1365eb6ebd
+  revision: f0a79b611a4df5a0b08ae6f3ea1a876a67f74d7a
   specs:
     rdkafka (0.7.0)
       ffi (~> 1.9)
