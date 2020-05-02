@@ -44,6 +44,41 @@ RSpec.describe WaterDrop::Producer do
     end
   end
 
+  describe '#client' do
+    subject(:client) { producer.client }
+
+    let(:producer) { build(:producer) }
+
+    context 'when client is already connected' do
+      before { producer.client }
+
+      context 'when called from a fork' do
+        let(:expected_error) { WaterDrop::Errors::ProducerUsedInParentProcess }
+
+        # Simulates fork by changing the pid
+        before { allow(Process).to receive(:pid).and_return(-1) }
+
+        it { expect { client }.to raise_error(expected_error) }
+      end
+
+      context 'when called from the main process' do
+        it { expect { client }.not_to raise_error }
+      end
+    end
+
+    context 'when client is not connected' do
+      context 'when called from a fork' do
+        before { allow(Process).to receive(:pid).and_return(-1) }
+
+        it { expect { client }.not_to raise_error }
+      end
+
+      context 'when called from the main process' do
+        it { expect { client }.not_to raise_error }
+      end
+    end
+  end
+
   describe '#close' do
     subject(:producer) { build(:producer).tap(&:client) }
 

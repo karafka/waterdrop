@@ -57,7 +57,7 @@ module WaterDrop
 
       # We should raise an error when trying to use a producer from a fork, that is already
       # connected to Kafka. We allow forking producers only before they are used
-      raise Errors::ProducerUsedInParentProcess if @status.connected?
+      raise Errors::ProducerUsedInParentProcess, Process.pid if @status.connected?
 
       # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
       # process don't leak
