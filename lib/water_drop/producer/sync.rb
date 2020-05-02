@@ -16,7 +16,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def produce_sync(message)
-        ensure_usable!
+        ensure_active!
         validate_message!(message)
 
         @monitor.instrument(
@@ -46,7 +46,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_sync(messages)
-        ensure_usable!
+        ensure_active!
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument('messages.produced_sync', producer: self, messages: messages) do

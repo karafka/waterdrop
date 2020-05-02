@@ -65,13 +65,13 @@ module WaterDrop
       ObjectSpace.define_finalizer(self, proc { close })
 
       @pid = Process.pid
-      @status.active!
+      @status.connected!
       @client = Builder.new.call(self, @config)
     end
 
     # Flushes the buffers in a sync way and closes the producer
     def close
-      return unless @status.usable?
+      return unless @status.active?
 
       @monitor.instrument(
         'producer.closed',
@@ -92,8 +92,8 @@ module WaterDrop
 
     # Ensures that we don't run any operations when the producer is not configured or when it
     # was already closed
-    def ensure_usable!
-      return if @status.usable?
+    def ensure_active!
+      return if @status.active?
 
       raise Errors::ProducerNotConfiguredError, id if @status.initial?
       raise Errors::ProducerClosedError, id if @status.closing? || @status.closed?

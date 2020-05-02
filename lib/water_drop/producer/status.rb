@@ -8,7 +8,7 @@ module WaterDrop
       LIFECYCLE = %i[
         initial
         configured
-        active
+        connected
         closing
         closed
       ].freeze
@@ -21,12 +21,12 @@ module WaterDrop
         @current = LIFECYCLE.first
       end
 
-      # @return [Boolean] true if producer is in a usable state. Usable means, that we can start
-      #   sending messages. Usable states are active (connection established) and configured,
+      # @return [Boolean] true if producer is in a active state. Active means, that we can start
+      #   sending messages. Actives states are connected (connection established) or configured,
       #   which means, that producer is configured, but connection with Kafka is
       #   not yet established.
-      def usable?
-        active? || configured?
+      def active?
+        connected? || configured?
       end
 
       # @return [String] current status as a string

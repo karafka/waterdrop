@@ -19,7 +19,7 @@ RSpec.describe WaterDrop::Producer do
 
       it { expect { producer }.not_to raise_error }
       it { expect(producer.status.configured?).to eq(true) }
-      it { expect(producer.status.active?).to eq(false) }
+      it { expect(producer.status.active?).to eq(true) }
     end
   end
 
@@ -74,13 +74,13 @@ RSpec.describe WaterDrop::Producer do
 
       before do
         allow(producer.status).to receive(:configured?).and_return(false)
-        allow(producer.status).to receive(:active?).and_return(false)
+        allow(producer.status).to receive(:connected?).and_return(false)
         allow(producer.status).to receive(:initial?).and_return(false)
         allow(producer.status).to receive(:closing?).and_return(false)
         allow(producer.status).to receive(:closed?).and_return(false)
       end
 
-      it { expect { producer.send(:ensure_usable!) }.to raise_error(expected_error) }
+      it { expect { producer.send(:ensure_active!) }.to raise_error(expected_error) }
     end
   end
 end

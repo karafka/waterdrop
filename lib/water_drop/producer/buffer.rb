@@ -18,7 +18,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def buffer(message)
-        ensure_usable!
+        ensure_active!
         validate_message!(message)
 
         @monitor.instrument(
@@ -35,7 +35,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def buffer_many(messages)
-        ensure_usable!
+        ensure_active!
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
@@ -52,7 +52,7 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
       #   flushed
       def flush_async
-        ensure_usable!
+        ensure_active!
 
         @monitor.instrument(
           'buffer.flushed_async',
@@ -65,7 +65,7 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports for messages that were
       #   flushed
       def flush_sync
-        ensure_usable!
+        ensure_active!
 
         @monitor.instrument(
           'buffer.flushed_sync',
