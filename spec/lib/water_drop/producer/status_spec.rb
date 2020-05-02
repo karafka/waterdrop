@@ -9,9 +9,12 @@ RSpec.describe WaterDrop::Producer::Status do
     before { status.initial! }
 
     it { expect(status.initial?).to eq(true) }
+    it { expect(status.configured?).to eq(false) }
     it { expect(status.active?).to eq(false) }
+    it { expect(status.usable?).to eq(false) }
     it { expect(status.closing?).to eq(false) }
     it { expect(status.closed?).to eq(false) }
+    it { expect(status.usable?).to eq(false) }
     it { expect(status.to_s).to eq('initial') }
   end
 
@@ -19,7 +22,9 @@ RSpec.describe WaterDrop::Producer::Status do
     before { status.active! }
 
     it { expect(status.initial?).to eq(false) }
+    it { expect(status.configured?).to eq(false) }
     it { expect(status.active?).to eq(true) }
+    it { expect(status.usable?).to eq(true) }
     it { expect(status.closing?).to eq(false) }
     it { expect(status.closed?).to eq(false) }
     it { expect(status.to_s).to eq('active') }
@@ -29,7 +34,9 @@ RSpec.describe WaterDrop::Producer::Status do
     before { status.closing! }
 
     it { expect(status.initial?).to eq(false) }
+    it { expect(status.configured?).to eq(false) }
     it { expect(status.active?).to eq(false) }
+    it { expect(status.usable?).to eq(false) }
     it { expect(status.closing?).to eq(true) }
     it { expect(status.closed?).to eq(false) }
     it { expect(status.to_s).to eq('closing') }
@@ -39,7 +46,9 @@ RSpec.describe WaterDrop::Producer::Status do
     before { status.closed! }
 
     it { expect(status.initial?).to eq(false) }
+    it { expect(status.configured?).to eq(false) }
     it { expect(status.active?).to eq(false) }
+    it { expect(status.usable?).to eq(false) }
     it { expect(status.closing?).to eq(false) }
     it { expect(status.closed?).to eq(true) }
     it { expect(status.to_s).to eq('closed') }

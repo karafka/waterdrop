@@ -16,7 +16,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def produce_sync(message)
-        ensure_active!
+        ensure_usable!
         validate_message!(message)
 
         @monitor.instrument(
@@ -24,7 +24,7 @@ module WaterDrop
           producer: self,
           message: message
         ) do
-          @client
+          client
             .produce(**message)
             .wait(
               max_wait_timeout: @config.max_wait_timeout,
@@ -46,12 +46,12 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_sync(messages)
-        ensure_active!
+        ensure_usable!
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument('messages.produced_sync', producer: self, messages: messages) do
           messages
-            .map { |message| @client.produce(**message) }
+            .map { |message| client.produce(**message) }
             .map! do |handler|
               handler.wait(
                 max_wait_timeout: @config.max_wait_timeout,

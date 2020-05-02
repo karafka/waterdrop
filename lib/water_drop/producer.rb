@@ -17,8 +17,6 @@ module WaterDrop
     attr_reader :monitor
     # @return [Object] dry-configurable config object
     attr_reader :config
-    # @return [Rdkafka::Producer] raw rdkafka producer
-    attr_reader :client
 
     # Creates a not-yet-configured instance of the producer
     # @param block [Proc] configuration block
@@ -27,10 +25,6 @@ module WaterDrop
       @mutex = Mutex.new
       @status = Status.new
       @messages = Concurrent::Array.new
-
-      # Finalizer tracking is needed for handling shutdowns gracefully.
-      # I don't expect everyone to remember about closing all the producers all the time
-      ObjectSpace.define_finalizer(self, proc { close })
 
       return unless block
 
@@ -49,14 +43,34 @@ module WaterDrop
 
       @id = @config.id
       @monitor = @config.monitor
-      @client = Builder.new.call(self, @config)
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
+      @status.configured!
+    end
+
+    # @return [Rdkafka::Producer] raw rdkafka producer
+    # @note Client is lazy initialized, keeping in mind also the fact of a potential fork that
+    #   can happen any time.
+    # @note It is not recommended to fork a producer that is already in use so in case of
+    #   bootstrapping a cluster, it's much better to fork configured but not used producers
+    def client
+      return @client if @pid == Process.pid
+
+      # We need to rebind finalizers
+      ObjectSpace.undefine_finalizer(self)
+      # Finalizer tracking is needed for handling shutdowns gracefully.
+      # I don't expect everyone to remember about closing all the producers all the time, thus
+      # this approach is better. Although it is still worth keeping in mind, that this will
+      # block GC from removing a no longer used producer unless closed
+      ObjectSpace.define_finalizer(self, proc { close })
+
       @status.active!
+      @pid = Process.pid
+      @client = Builder.new.call(self, @config)
     end
 
     # Flushes the buffers in a sync way and closes the producer
     def close
-      return unless @status.active?
+      return unless @status.usable?
 
       @monitor.instrument(
         'producer.closed',
@@ -66,17 +80,19 @@ module WaterDrop
 
         flush(false)
 
-        @client.close
+        client.close
         @status.closed!
       end
-    end
 
-    private
+      # No need for auto-gc if everything got closed by us
+      # This should be used only in case a producer was not closed properly
+      ObjectSpace.undefine_finalizer(self)
+    end
 
     # Ensures that we don't run any operations when the producer is not configured or when it
     # was already closed
-    def ensure_active!
-      return if @status.active?
+    def ensure_usable!
+      return if @status.usable?
 
       raise Errors::ProducerNotConfiguredError, id if @status.initial?
       raise Errors::ProducerClosedError, id if @status.closing? || @status.closed?

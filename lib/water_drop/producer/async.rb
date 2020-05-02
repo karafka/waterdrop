@@ -14,14 +14,14 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def produce_async(message)
-        ensure_active!
+        ensure_usable!
         validate_message!(message)
 
         @monitor.instrument(
           'message.produced_async',
           producer: self,
           message: message
-        ) { @client.produce(**message) }
+        ) { client.produce(**message) }
       end
 
       # Produces many messages to Kafka and does not wait for them to be delivered
@@ -35,7 +35,7 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_async(messages)
-        ensure_active!
+        ensure_usable!
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
@@ -43,7 +43,7 @@ module WaterDrop
           producer: self,
           messages: messages
         ) do
-          messages.map { |message| @client.produce(**message) }
+          messages.map { |message| client.produce(**message) }
         end
       end
     end

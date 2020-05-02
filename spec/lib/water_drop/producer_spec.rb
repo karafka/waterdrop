@@ -18,7 +18,8 @@ RSpec.describe WaterDrop::Producer do
       end
 
       it { expect { producer }.not_to raise_error }
-      it { expect(producer.status.active?).to eq(true) }
+      it { expect(producer.status.configured?).to eq(true) }
+      it { expect(producer.status.active?).to eq(false) }
     end
   end
 
@@ -44,9 +45,9 @@ RSpec.describe WaterDrop::Producer do
   end
 
   describe '#close' do
-    subject(:producer) { build(:producer) }
+    subject(:producer) { build(:producer).tap(&:client) }
 
-    context 'when producer already closed' do
+    context 'when producer is already closed' do
       before { producer.close }
 
       it { expect { producer.close }.not_to raise_error }
@@ -65,20 +66,21 @@ RSpec.describe WaterDrop::Producer do
     end
   end
 
-  describe '#ensure_active!' do
+  describe '#ensure_usable!' do
     subject(:producer) { create(:producer) }
 
     context 'when status is invalid' do
       let(:expected_error) { WaterDrop::Errors::StatusInvalidError }
 
       before do
+        allow(producer.status).to receive(:configured?).and_return(false)
         allow(producer.status).to receive(:active?).and_return(false)
         allow(producer.status).to receive(:initial?).and_return(false)
         allow(producer.status).to receive(:closing?).and_return(false)
         allow(producer.status).to receive(:closed?).and_return(false)
       end
 
-      it { expect { producer.send(:ensure_active!) }.to raise_error(expected_error) }
+      it { expect { producer.send(:ensure_usable!) }.to raise_error(expected_error) }
     end
   end
 end
