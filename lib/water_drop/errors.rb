@@ -15,6 +15,10 @@ module WaterDrop
     # Raised when we want to reconfigure a producer that was already configured
     ProducerAlreadyConfiguredError = Class.new(BaseError)
 
+    # Raised when trying to use connected producer from a forked child process
+    # Producers cannot be used in forks if they were already used in the child processes
+    ProducerUsedInParentProcess = Class.new(BaseError)
+
     # Raised when there was an attempt to use a closed producer
     ProducerClosedError = Class.new(BaseError)
 
