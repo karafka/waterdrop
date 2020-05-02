@@ -17,7 +17,6 @@ RSpec.describe WaterDrop::Producer::Status do
     it { expect(status.to_s).to eq('initial') }
   end
 
-
   context 'when in the configured state' do
     before { status.configured! }
 
