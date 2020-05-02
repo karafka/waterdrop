@@ -55,16 +55,17 @@ module WaterDrop
     def client
       return @client if @pid == Process.pid
 
-      # We need to rebind finalizers
+      # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
+      # process don't leak
       ObjectSpace.undefine_finalizer(self)
       # Finalizer tracking is needed for handling shutdowns gracefully.
       # I don't expect everyone to remember about closing all the producers all the time, thus
       # this approach is better. Although it is still worth keeping in mind, that this will
-      # block GC from removing a no longer used producer unless closed
+      # block GC from removing a no longer used producer unless closed properly
       ObjectSpace.define_finalizer(self, proc { close })
 
-      @status.active!
       @pid = Process.pid
+      @status.active!
       @client = Builder.new.call(self, @config)
     end
 
@@ -85,7 +86,7 @@ module WaterDrop
       end
 
       # No need for auto-gc if everything got closed by us
-      # This should be used only in case a producer was not closed properly
+      # This should be used only in case a producer was not closed properly and forgotten
       ObjectSpace.undefine_finalizer(self)
     end
 

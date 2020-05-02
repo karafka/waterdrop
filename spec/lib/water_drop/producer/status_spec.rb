@@ -14,8 +14,20 @@ RSpec.describe WaterDrop::Producer::Status do
     it { expect(status.usable?).to eq(false) }
     it { expect(status.closing?).to eq(false) }
     it { expect(status.closed?).to eq(false) }
-    it { expect(status.usable?).to eq(false) }
     it { expect(status.to_s).to eq('initial') }
+  end
+
+
+  context 'when in the configured state' do
+    before { status.configured! }
+
+    it { expect(status.initial?).to eq(false) }
+    it { expect(status.configured?).to eq(true) }
+    it { expect(status.active?).to eq(false) }
+    it { expect(status.usable?).to eq(true) }
+    it { expect(status.closing?).to eq(false) }
+    it { expect(status.closed?).to eq(false) }
+    it { expect(status.to_s).to eq('configured') }
   end
 
   context 'when in the active state' do
