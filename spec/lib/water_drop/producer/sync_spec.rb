@@ -15,12 +15,6 @@ RSpec.describe WaterDrop::Producer::Sync do
     context 'when message is valid' do
       let(:message) { build(:valid_message) }
 
-      it do
-        fork do
-          100.times { delivery }
-        end
-      end
-
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
   end
