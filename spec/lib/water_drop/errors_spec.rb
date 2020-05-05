@@ -25,6 +25,12 @@ RSpec.describe WaterDrop::Errors do
     specify { expect(error).to be < described_class::BaseError }
   end
 
+  describe 'ProducerUsedInParentProcess' do
+    subject(:error) { described_class::ProducerUsedInParentProcess }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
   describe 'ProducerClosedError' do
     subject(:error) { described_class::ProducerClosedError }
 

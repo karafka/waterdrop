@@ -21,7 +21,7 @@ module WaterDrop
           'message.produced_async',
           producer: self,
           message: message
-        ) { @client.produce(**message) }
+        ) { client.produce(**message) }
       end
 
       # Produces many messages to Kafka and does not wait for them to be delivered
@@ -43,7 +43,7 @@ module WaterDrop
           producer: self,
           messages: messages
         ) do
-          messages.map { |message| @client.produce(**message) }
+          messages.map { |message| client.produce(**message) }
         end
       end
     end

@@ -18,6 +18,7 @@ RSpec.describe WaterDrop::Producer do
       end
 
       it { expect { producer }.not_to raise_error }
+      it { expect(producer.status.configured?).to eq(true) }
       it { expect(producer.status.active?).to eq(true) }
     end
   end
@@ -43,10 +44,45 @@ RSpec.describe WaterDrop::Producer do
     end
   end
 
-  describe '#close' do
-    subject(:producer) { build(:producer) }
+  describe '#client' do
+    subject(:client) { producer.client }
 
-    context 'when producer already closed' do
+    let(:producer) { build(:producer) }
+
+    context 'when client is already connected' do
+      before { producer.client }
+
+      context 'when called from a fork' do
+        let(:expected_error) { WaterDrop::Errors::ProducerUsedInParentProcess }
+
+        # Simulates fork by changing the pid
+        before { allow(Process).to receive(:pid).and_return(-1) }
+
+        it { expect { client }.to raise_error(expected_error) }
+      end
+
+      context 'when called from the main process' do
+        it { expect { client }.not_to raise_error }
+      end
+    end
+
+    context 'when client is not connected' do
+      context 'when called from a fork' do
+        before { allow(Process).to receive(:pid).and_return(-1) }
+
+        it { expect { client }.not_to raise_error }
+      end
+
+      context 'when called from the main process' do
+        it { expect { client }.not_to raise_error }
+      end
+    end
+  end
+
+  describe '#close' do
+    subject(:producer) { build(:producer).tap(&:client) }
+
+    context 'when producer is already closed' do
       before { producer.close }
 
       it { expect { producer.close }.not_to raise_error }
@@ -65,14 +101,15 @@ RSpec.describe WaterDrop::Producer do
     end
   end
 
-  describe '#ensure_active!' do
+  describe '#ensure_usable!' do
     subject(:producer) { create(:producer) }
 
     context 'when status is invalid' do
       let(:expected_error) { WaterDrop::Errors::StatusInvalidError }
 
       before do
-        allow(producer.status).to receive(:active?).and_return(false)
+        allow(producer.status).to receive(:configured?).and_return(false)
+        allow(producer.status).to receive(:connected?).and_return(false)
         allow(producer.status).to receive(:initial?).and_return(false)
         allow(producer.status).to receive(:closing?).and_return(false)
         allow(producer.status).to receive(:closed?).and_return(false)

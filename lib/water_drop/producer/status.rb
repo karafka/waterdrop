@@ -7,7 +7,8 @@ module WaterDrop
       # States in which the producer can be
       LIFECYCLE = %i[
         initial
-        active
+        configured
+        connected
         closing
         closed
       ].freeze
@@ -18,6 +19,14 @@ module WaterDrop
       # @return [Status]
       def initialize
         @current = LIFECYCLE.first
+      end
+
+      # @return [Boolean] true if producer is in a active state. Active means, that we can start
+      #   sending messages. Actives states are connected (connection established) or configured,
+      #   which means, that producer is configured, but connection with Kafka is
+      #   not yet established.
+      def active?
+        connected? || configured?
       end
 
       # @return [String] current status as a string
