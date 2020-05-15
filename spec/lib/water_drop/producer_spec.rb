@@ -47,9 +47,17 @@ RSpec.describe WaterDrop::Producer do
   describe '#client' do
     subject(:client) { producer.client }
 
-    let(:producer) { build(:producer) }
+    context 'when producer is not configured' do
+      let(:expected_error) { WaterDrop::Errors::ProducerNotConfiguredError }
+
+      it 'expect not to allow to build client' do
+        expect { client }.to raise_error expected_error
+      end
+    end
 
     context 'when client is already connected' do
+      let(:producer) { build(:producer) }
+
       before { producer.client }
 
       context 'when called from a fork' do
@@ -67,6 +75,8 @@ RSpec.describe WaterDrop::Producer do
     end
 
     context 'when client is not connected' do
+      let(:producer) { build(:producer) }
+
       context 'when called from a fork' do
         before { allow(Process).to receive(:pid).and_return(-1) }
 

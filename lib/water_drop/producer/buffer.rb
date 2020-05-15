@@ -87,7 +87,7 @@ module WaterDrop
         data_for_dispatch = nil
         dispatched = []
 
-        @mutex.synchronize do
+        @buffer_mutex.synchronize do
           data_for_dispatch = @messages
           @messages = Concurrent::Array.new
         end
