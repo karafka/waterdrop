@@ -55,7 +55,6 @@ RSpec.describe WaterDrop::Producer do
       end
     end
 
-
     context 'when client is already connected' do
       let(:producer) { build(:producer) }
 
