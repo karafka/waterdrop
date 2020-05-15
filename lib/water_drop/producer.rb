@@ -22,7 +22,6 @@ module WaterDrop
     # @param block [Proc] configuration block
     # @return [Producer] producer instance
     def initialize(&block)
-      # Mutex for managing the internal buffers that can be flushed
       @buffer_mutex = Mutex.new
       @connecting_mutex = Mutex.new
       @closing_mutex = Mutex.new
