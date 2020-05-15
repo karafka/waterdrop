@@ -78,9 +78,11 @@ module WaterDrop
         ObjectSpace.define_finalizer(self, proc { close })
 
         @pid = Process.pid
-        @status.connected!
         @client = Builder.new.call(self, @config)
+        @status.connected!
       end
+
+      @client
     end
 
     # Flushes the buffers in a sync way and closes the producer
