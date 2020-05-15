@@ -96,6 +96,10 @@ module WaterDrop
         ) do
           @status.closing!
 
+          # No need for auto-gc if everything got closed by us
+          # This should be used only in case a producer was not closed properly and forgotten
+          ObjectSpace.undefine_finalizer(self)
+
           # Flush has it's own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
           flush(false)
@@ -106,10 +110,6 @@ module WaterDrop
 
           @status.closed!
         end
-
-        # No need for auto-gc if everything got closed by us
-        # This should be used only in case a producer was not closed properly and forgotten
-        ObjectSpace.undefine_finalizer(self)
       end
     end
 
