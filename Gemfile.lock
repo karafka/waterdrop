@@ -1,8 +1,8 @@
 GIT
   remote: https://github.com/appsignal/rdkafka-ruby.git
-  revision: 81fee5c492cfb809dc7e291cbe124930e345f545
+  revision: 694660afc1b52d03bdc56a8d25c8a8160a6fbc9b
   specs:
-    rdkafka (0.7.0)
+    rdkafka (0.8.0.beta.1)
       ffi (~> 1.9)
       mini_portile2 (~> 2.1)
       rake (>= 12.3)
@@ -81,7 +81,7 @@ GEM
     factory_bot (5.2.0)
       activesupport (>= 4.2.0)
     ffi (1.13.0)
-    i18n (1.8.2)
+    i18n (1.8.3)
       concurrent-ruby (~> 1.0)
     mini_portile2 (2.5.0)
     minitest (5.14.1)
