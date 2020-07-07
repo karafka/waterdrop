@@ -2,6 +2,8 @@
 
 source 'https://rubygems.org'
 
+plugin 'diffend'
+
 gemspec
 
 gem 'rdkafka', git: 'https://github.com/appsignal/rdkafka-ruby.git'
