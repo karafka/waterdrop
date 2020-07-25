@@ -81,7 +81,7 @@ GEM
     factory_bot (6.1.0)
       activesupport (>= 5.0.0)
     ffi (1.13.1)
-    i18n (1.8.4)
+    i18n (1.8.5)
       concurrent-ruby (~> 1.0)
     mini_portile2 (2.5.0)
     minitest (5.14.1)
