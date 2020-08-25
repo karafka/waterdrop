@@ -2,9 +2,9 @@
 
 **Note**: Documentation presented here refers to WaterDrop `2.0.0.pre1`.
 
-WaterDrop `2.0` does **not** work with Karafka `1.3.*` and aims to either work as a standalone producer outside of Karafka `1.3.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
+WaterDrop `2.0` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
 
-Please refer to [this](https://github.com/karafka/waterdrop/tree/1.3) branch and it's documentation for details about WaterDrop `1.3.*` usage.
+Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and it's documentation for details about WaterDrop `1.*` usage.
 
 [![Build Status](https://github.com/karafka/waterdrop/workflows/ci/badge.svg)](https://github.com/karafka/waterdrop/actions?query=workflow%3Aci)
 [![Join the chat at https://gitter.im/karafka/karafka](https://badges.gitter.im/karafka/karafka.svg)](https://gitter.im/karafka/karafka?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
