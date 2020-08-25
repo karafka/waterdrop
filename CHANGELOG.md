@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.4.0 (2020-08-25)
+- Release to match Karafka 1.4 versioning.
+
 ## 1.3.4 (2020-02-17)
 - Support for new `dry-configurable`
 
