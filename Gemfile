@@ -6,7 +6,7 @@ plugin 'diffend'
 
 gemspec
 
-gem 'rdkafka', git: 'https://github.com/appsignal/rdkafka-ruby.git'
+gem 'rdkafka'
 
 group :development do
   gem 'byebug'
