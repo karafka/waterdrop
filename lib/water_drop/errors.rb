@@ -36,6 +36,7 @@ module WaterDrop
       # @param dispatched_messages [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the
       #   messages that we've dispatched
       def initialize(dispatched_messages)
+        super()
         @dispatched_messages = dispatched_messages
       end
     end
