@@ -6,7 +6,7 @@ module WaterDrop
     # we provide to producer ale valid and usable
     class Message < Dry::Validation::Contract
       # Regex to check that topic has a valid format
-      TOPIC_REGEXP = /\A(\w|\-|\.)+\z/.freeze
+      TOPIC_REGEXP = /\A(\w|-|\.)+\z/.freeze
 
       # Checks, that the given value is a string
       STRING_ASSERTION = ->(value) { value.is_a?(String) }.to_proc
