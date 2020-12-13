@@ -1,6 +1,6 @@
 # WaterDrop
 
-**Note**: Documentation presented here refers to WaterDrop `2.0.0.pre1`.
+**Note**: Documentation presented here refers to WaterDrop `2.0.0`.
 
 WaterDrop `2.0` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
 
