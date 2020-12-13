@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.0.0-rc1 (unreleased)
+## 2.0.0 (2020-12-13)
 - Redesign of the whole API (see `README.md` for the use-cases and the current API)
 - Replace `ruby-kafka` with `rdkafka`
 - Switch license from `MIT` to `LGPL-3.0`
