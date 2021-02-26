@@ -71,7 +71,7 @@ GEM
     i18n (1.8.9)
       concurrent-ruby (~> 1.0)
     mini_portile2 (2.5.0)
-    minitest (5.14.3)
+    minitest (5.14.4)
     rake (13.0.3)
     rdkafka (0.8.1)
       ffi (~> 1.9)
