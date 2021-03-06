@@ -67,7 +67,7 @@ GEM
       dry-schema (~> 1.5, >= 1.5.2)
     factory_bot (6.1.0)
       activesupport (>= 5.0.0)
-    ffi (1.14.2)
+    ffi (1.15.0)
     i18n (1.8.9)
       concurrent-ruby (~> 1.0)
     mini_portile2 (2.5.0)
@@ -101,8 +101,6 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
-  ruby
-  x86_64-darwin-19
   x86_64-linux
 
 DEPENDENCIES
@@ -114,4 +112,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   2.2.11
+   2.2.13
