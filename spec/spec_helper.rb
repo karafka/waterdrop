@@ -1,25 +1,24 @@
 # frozen_string_literal: true
 
-$LOAD_PATH.unshift(File.dirname(__FILE__))
-$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
+coverage = !ENV.key?('GITHUB_WORKFLOW')
+coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
 
-%w[
-  rubygems
-  simplecov
-].each(&method(:require))
+if coverage
+  require 'simplecov'
 
-# Don't include unnecessary stuff into coverage
-SimpleCov.start do
-  %w[
-    .bundle
-    config
-    doc
-    gems
-    spec
-    vendor
-  ].each { |dir| add_filter "/#{dir}/" }
+  # Don't include unnecessary stuff into rcov
+  SimpleCov.start do
+    add_filter '/spec/'
+    add_filter '/vendor/'
+    add_filter '/gems/'
+    add_filter '/.bundle/'
+    add_filter '/doc/'
+    add_filter '/config/'
 
-  merge_timeout 600
+    merge_timeout 600
+    minimum_coverage 100
+    enable_coverage :branch
+  end
 end
 
 RSpec.configure do |config|

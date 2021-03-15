@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.4.1 (Unreleased)
+- Support for Ruby 3.0
+
 ## 1.4.0 (2020-08-25)
 - Release to match Karafka 1.4 versioning.
 
