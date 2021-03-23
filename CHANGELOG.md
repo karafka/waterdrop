@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 1.4.1 (Unreleased)
+## 1.4.1 (2021-03-23)
 - Support for Ruby 3.0
 
 ## 1.4.0 (2020-08-25)
