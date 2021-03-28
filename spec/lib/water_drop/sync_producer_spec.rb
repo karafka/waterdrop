@@ -31,7 +31,7 @@ RSpec.describe WaterDrop::SyncProducer do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
-          expect(DeliveryBoy).to receive(:deliver).with(message, topic: topic)
+          expect(DeliveryBoy).to receive(:deliver).with(message, topic: topic).and_call_original
           expect { delivery }.not_to raise_error
         end
       end

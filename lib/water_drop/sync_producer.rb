@@ -16,7 +16,7 @@ module WaterDrop
       validate!(options)
       return unless WaterDrop.config.deliver
 
-      DeliveryBoy.deliver(message, options)
+      DeliveryBoy.deliver(message, **options)
     rescue Kafka::Error => e
       graceful_attempt?(attempts_count, message, options, e) ? retry : raise(e)
     end
