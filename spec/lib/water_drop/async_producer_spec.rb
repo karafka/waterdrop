@@ -32,7 +32,7 @@ RSpec.describe WaterDrop::AsyncProducer do
 
         it 'expect to pass to ruby-kafka' do
           expect(DeliveryBoy).to receive(:deliver_async!).with(message, topic: topic)
-            .and_call_original
+                                                         .and_call_original
           expect { delivery }.not_to raise_error
         end
       end
@@ -45,7 +45,7 @@ RSpec.describe WaterDrop::AsyncProducer do
 
         it 'expect to run with a silent delivery method on ruby-kafka' do
           expect(DeliveryBoy).to receive(:deliver_async).with(message, topic: topic)
-            .and_call_original
+                                                        .and_call_original
           expect { delivery }.not_to raise_error
         end
       end
