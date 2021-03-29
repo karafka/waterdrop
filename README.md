@@ -89,7 +89,7 @@ You can create producers with different `kafka` settings. Documentation of the a
 
 ## Usage
 
-Please refer to the [documentation](https://www.rubydoc.info/github/karafka/waterdrop) in case you're interested in the more advanced API.
+Please refer to the [documentation](https://www.rubydoc.info/gems/waterdrop) in case you're interested in the more advanced API.
 
 ### Basic usage
 
