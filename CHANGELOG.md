@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.4.2 (2021-03-29)
+- Additional 3.0 fixes (ojab)
+
 ## 1.4.1 (2021-03-23)
 - Support for Ruby 3.0
 

@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (1.4.1)
+    waterdrop (1.4.2)
       delivery_boy (>= 0.2, < 2.x)
       dry-configurable (~> 0.8)
       dry-monitor (~> 0.3)
