@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 1.4.2 (2021-03-29)
+## 1.4.2 (2021-03-30)
 - Additional 3.0 fixes (ojab)
 
 ## 1.4.1 (2021-03-23)
