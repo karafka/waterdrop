@@ -31,7 +31,8 @@ RSpec.describe WaterDrop::AsyncProducer do
         before { allow(WaterDrop.config).to receive(:deliver).and_return(true) }
 
         it 'expect to pass to ruby-kafka' do
-          expect(DeliveryBoy).to receive(:deliver_async!).with(message, topic: topic).and_call_original
+          expect(DeliveryBoy).to receive(:deliver_async!).with(message, topic: topic)
+                                                         .and_call_original
           expect { delivery }.not_to raise_error
         end
       end
@@ -43,7 +44,8 @@ RSpec.describe WaterDrop::AsyncProducer do
         end
 
         it 'expect to run with a silent delivery method on ruby-kafka' do
-          expect(DeliveryBoy).to receive(:deliver_async).with(message, topic: topic).and_call_original
+          expect(DeliveryBoy).to receive(:deliver_async).with(message, topic: topic)
+                                                        .and_call_original
           expect { delivery }.not_to raise_error
         end
       end
