@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
+
 ## 1.4.2 (2021-03-30)
 - Additional 3.0 fixes (ojab)
 
