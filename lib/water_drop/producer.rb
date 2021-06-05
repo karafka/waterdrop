@@ -70,12 +70,13 @@ module WaterDrop
 
         # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
         # process don't leak
-        ObjectSpace.undefine_finalizer(self)
+        ObjectSpace.undefine_finalizer(id)
         # Finalizer tracking is needed for handling shutdowns gracefully.
         # I don't expect everyone to remember about closing all the producers all the time, thus
         # this approach is better. Although it is still worth keeping in mind, that this will
-        # block GC from removing a no longer used producer unless closed properly
-        ObjectSpace.define_finalizer(self, proc { close })
+        # block GC from removing a no longer used producer unless closed properly but at least
+        # won't crash the VM upon closing the process
+        ObjectSpace.define_finalizer(id, proc { close })
 
         @pid = Process.pid
         @client = Builder.new.call(self, @config)
@@ -98,7 +99,7 @@ module WaterDrop
 
           # No need for auto-gc if everything got closed by us
           # This should be used only in case a producer was not closed properly and forgotten
-          ObjectSpace.undefine_finalizer(self)
+          ObjectSpace.undefine_finalizer(id)
 
           # Flush has it's own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
