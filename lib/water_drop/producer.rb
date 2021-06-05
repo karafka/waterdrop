@@ -70,12 +70,13 @@ module WaterDrop
 
         # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
         # process don't leak
-        ObjectSpace.undefine_finalizer(self)
+        ObjectSpace.undefine_finalizer(+'')
         # Finalizer tracking is needed for handling shutdowns gracefully.
         # I don't expect everyone to remember about closing all the producers all the time, thus
         # this approach is better. Although it is still worth keeping in mind, that this will
-        # block GC from removing a no longer used producer unless closed properly
-        ObjectSpace.define_finalizer(self, proc { close })
+        # block GC from removing a no longer used producer unless closed properly but at least
+        # won't crash the VM upon closing the process
+        ObjectSpace.define_finalizer(+'', proc { close })
 
         @pid = Process.pid
         @client = Builder.new.call(self, @config)

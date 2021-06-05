@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
+- Fix the `finalizer references object to be finalized` warning issued with 3.0
 
 ## 2.0.0 (2020-12-13)
 - Redesign of the whole API (see `README.md` for the use-cases and the current API)
