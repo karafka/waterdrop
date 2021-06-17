@@ -65,7 +65,7 @@ GEM
       dry-schema (~> 1.5, >= 1.5.2)
     factory_bot (6.2.0)
       activesupport (>= 5.0.0)
-    ffi (1.15.1)
+    ffi (1.15.3)
     i18n (1.8.10)
       concurrent-ruby (~> 1.0)
     mini_portile2 (2.6.1)
