@@ -4,7 +4,7 @@
 
 WaterDrop `2.0` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
 
-Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and it's documentation for details about WaterDrop `1.*` usage.
+Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and its documentation for details about WaterDrop `1.*` usage.
 
 [![Build Status](https://github.com/karafka/waterdrop/workflows/ci/badge.svg)](https://github.com/karafka/waterdrop/actions?query=workflow%3Aci)
 [![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
@@ -44,8 +44,8 @@ bundle install
 
 WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
 
-- WaterDrop options - options directly related to Karafka framework and it's components
-- Kafka driver options - options related to `Kafka`
+- WaterDrop options - options directly related to WaterDrop and its components
+- Kafka driver options - options related to `rdkafka`
 
 To apply all those configuration options, you need to create a producer instance and use the ```#setup``` method:
 
@@ -144,7 +144,11 @@ Keep in mind, that message you want to send should be either binary or stringifi
 
 ### Buffering
 
-WaterDrop producers support buffering of messages, which means that you can easily implement periodic flushing for long running processes as well as buffer several messages to be flushed the same moment:
+WaterDrop producers support buffering messages in their internal buffers and on the `rdkafka` level via `queue.buffering.*` set of settings.
+
+This means that depending on your use case, you can achieve both granular buffering and flushing control when needed with context awareness and periodic and size-based flushing functionalities.
+
+#### Using WaterDrop to buffer messages based on the application logic
 
 ```ruby
 producer = WaterDrop::Producer.new
@@ -153,16 +157,19 @@ producer.setup do |config|
   config.kafka = { 'bootstrap.servers': 'localhost:9092' }
 end
 
-time = Time.now - 10
+# Simulating some events states of a transaction - notice, that the messages will be flushed to
+# kafka only upon arrival of the `finished` state.
+%w[
+  started
+  processed
+  finished
+].each do |state|
+  producer.buffer(topic: 'events', payload: state)
 
-while time < Time.now
-  time += 1
-  producer.buffer(topic: 'times', payload: Time.now.to_s)
+  puts "The messages buffer size #{producer.messages.size}"
+  producer.flush_sync if state == 'finished'
+  puts "The messages buffer size #{producer.messages.size}"
 end
-
-puts "The messages buffer size #{producer.messages.size}"
-producer.flush_sync
-puts "The messages buffer size #{producer.message.size}"
 
 producer.close
 ```
