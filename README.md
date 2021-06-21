@@ -22,6 +22,25 @@ It:
  - Supports multiple delivery policies
  - Works with Kafka 1.0+ and Ruby 2.5+
 
+## Table of contents
+
+- [WaterDrop](#waterdrop)
+  * [Table of contents](#table-of-contents)
+  * [Installation](#installation)
+  * [Setup](#setup)
+    + [WaterDrop configuration options](#waterdrop-configuration-options)
+    + [Kafka configuration options](#kafka-configuration-options)
+  * [Usage](#usage)
+    + [Basic usage](#basic-usage)
+    + [Buffering](#buffering)
+      - [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
+      - [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
+  * [Instrumentation](#instrumentation)
+    + [Usage statistics](#usage-statistics)
+    + [Forking and potential memory problems](#forking-and-potential-memory-problems)
+  * [References](#references)
+  * [Note on contributions](#note-on-contributions)
+
 ## Installation
 
 ```ruby
@@ -169,6 +188,28 @@ end
   puts "The messages buffer size #{producer.messages.size}"
   producer.flush_sync if state == 'finished'
   puts "The messages buffer size #{producer.messages.size}"
+end
+
+producer.close
+```
+
+#### Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    # Accumulate messages for at most 10 seconds
+    'queue.buffering.max.ms' => 10_000
+  }
+end
+
+# WaterDrop will flush messages minimum once every 10 seconds
+30.times do |i|
+  producer.buffer(topic: 'events', payload: i.to_s)
+  sleep(1)
 end
 
 producer.close
