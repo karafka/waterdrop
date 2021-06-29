@@ -208,7 +208,7 @@ end
 
 # WaterDrop will flush messages minimum once every 10 seconds
 30.times do |i|
-  producer.buffer(topic: 'events', payload: i.to_s)
+  producer.produce_async(topic: 'events', payload: i.to_s)
   sleep(1)
 end
 
