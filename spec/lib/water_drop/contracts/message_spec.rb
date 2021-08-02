@@ -15,6 +15,7 @@ RSpec.describe WaterDrop::Contracts::Message do
       payload: 'data',
       key: rand.to_s,
       partition: 0,
+      partition_key: rand.to_s,
       timestamp: Time.now,
       headers: {}
     }
@@ -176,6 +177,43 @@ RSpec.describe WaterDrop::Contracts::Message do
 
       it { expect(contract_result).not_to be_success }
       it { expect(errors[:partition]).not_to be_empty }
+    end
+  end
+
+  context 'when we run partition_key validations' do
+    context 'when partition_key is nil but present in options' do
+      before { message[:partition_key] = nil }
+
+      it { expect(contract_result).to be_success }
+      it { expect(errors).to be_empty }
+    end
+
+    context 'when partition_key is not a string' do
+      before { message[:partition_key] = rand }
+
+      it { expect(contract_result).not_to be_success }
+      it { expect(errors[:partition_key]).not_to be_empty }
+    end
+
+    context 'when partition_key is empty' do
+      before { message[:partition_key] = '' }
+
+      it { expect(contract_result).not_to be_success }
+      it { expect(errors[:partition_key]).not_to be_empty }
+    end
+
+    context 'when partition_key is valid' do
+      before { message[:partition_key] = rand.to_s }
+
+      it { expect(contract_result).to be_success }
+      it { expect(errors).to be_empty }
+    end
+
+    context 'when partition_key is not present in options' do
+      before { message.delete(:partition_key) }
+
+      it { expect(contract_result).to be_success }
+      it { expect(errors).to be_empty }
     end
   end
 
