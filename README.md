@@ -150,15 +150,15 @@ Each message that you want to publish, will have its value checked.
 
 Here are all the things you can provide in the message hash:
 
-| Option          | Required | Value type    | Description                                             |
-|-----------------|----------|---------------|---------------------------------------------------------|
-| `topic`         | true     | String        | The Kafka topic that should be written to               |
-| `payload`       | true     | String        | Data you want to send to Kafka                          |
-| `key`           | false    | String        | The key that should be set in the Kafka message         |
-| `partition`     | false    | Integer       | A specific partition number that should be written to   |
-| `partition_key` | false    | String        | Keyto indicate the destination partition of the message |
-| `timestamp`     | false    | Time, Integer | The timestamp that should be set on the message         |
-| `headers`       | false    | Hash          | Headers for the message                                 |
+| Option          | Required | Value type    | Description                                              |
+|-----------------|----------|---------------|----------------------------------------------------------|
+| `topic`         | true     | String        | The Kafka topic that should be written to                |
+| `payload`       | true     | String        | Data you want to send to Kafka                           |
+| `key`           | false    | String        | The key that should be set in the Kafka message          |
+| `partition`     | false    | Integer       | A specific partition number that should be written to    |
+| `partition_key` | false    | String        | Key to indicate the destination partition of the message |
+| `timestamp`     | false    | Time, Integer | The timestamp that should be set on the message          |
+| `headers`       | false    | Hash          | Headers for the message                                  |
 
 Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
 

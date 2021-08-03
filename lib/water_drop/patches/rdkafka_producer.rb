@@ -31,7 +31,7 @@ module WaterDrop
         raise unless RETRYABLES.any? { |message| e.message.to_s.include?(message) }
         raise if attempt > MAX_ATTEMPTS
 
-        max_sleep = 2 ** attempt / 10.0
+        max_sleep = 2**attempt / 10.0
         sleep rand(0.01..max_sleep)
 
         retry
