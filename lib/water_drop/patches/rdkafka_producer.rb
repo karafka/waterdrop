@@ -11,6 +11,7 @@ module WaterDrop
         err_not_leader_for_partition
         invalid_replication_factor
         transport
+        timed_out
       ].freeze
 
       # How many attempts do we want to make before re-raising the error
