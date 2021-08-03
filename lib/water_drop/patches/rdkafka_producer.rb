@@ -28,7 +28,7 @@ module WaterDrop
       rescue Rdkafka::RdkafkaError => e
         # We care only about specific errors
         # https://docs.confluent.io/platform/current/clients/librdkafka/html/md_INTRODUCTION.html
-        raise unless RETRYABLES.any? { |message| e.message.to_s.include?(message) }
+        # raise unless RETRYABLES.any? { |message| e.message.to_s.include?(message) }
         raise if attempt > MAX_ATTEMPTS
 
         max_sleep = 2**attempt / 10.0
