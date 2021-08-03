@@ -6,6 +6,8 @@ module WaterDrop
     # `Rdkafka::Producer` patches
     module RdkafkaProducer
       # Errors upon which we want to retry message production
+      # @note Since production happens async, those errors should only occur when using
+      #   partition_key, thus only then we handle them
       RETRYABLES = %w[
         leader_not_available
         err_not_leader_for_partition
@@ -29,6 +31,7 @@ module WaterDrop
 
         super
       rescue Rdkafka::RdkafkaError => e
+        raise unless args.key?(:partition_key)
         # We care only about specific errors
         # https://docs.confluent.io/platform/current/clients/librdkafka/html/md_INTRODUCTION.html
         raise unless RETRYABLES.any? { |message| e.message.to_s.include?(message) }
