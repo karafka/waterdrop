@@ -1,8 +1,9 @@
 # WaterDrop changelog
 
-## 2.0.2 (Unreleased)
+## 2.0.2 (2021-08-13)
 - Add support for `partition_key`
-- Switch license from `LGPL-3.0` to  `MIT`.
+- Switch license from `LGPL-3.0` to  `MIT`
+- Switch flushing on close to sync and add `0.2` of a second to finalize rdkafka producer
 
 ## 2.0.1 (2021-06-05)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
