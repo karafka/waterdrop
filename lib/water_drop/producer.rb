@@ -109,9 +109,6 @@ module WaterDrop
           # It is safe to run it several times but not exactly the same moment
           client.close
 
-          # Give rdkafka enough time to close background producer
-          sleep(0.2)
-
           @status.closed!
         end
       end

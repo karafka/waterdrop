@@ -18,6 +18,8 @@ RSpec.describe WaterDrop::Producer::Builder do
     producer_config.config
   end
 
+  after { producer.close }
+
   it { expect(client).to be_a(Rdkafka::Producer) }
   it { expect(client.delivery_callback).to be_a(Proc) }
 
