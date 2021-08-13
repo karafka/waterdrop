@@ -3,6 +3,8 @@
 RSpec.describe WaterDrop::Producer::Sync do
   subject(:producer) { build(:producer) }
 
+  after { producer.close }
+
   describe '#produce_sync' do
     subject(:delivery) { producer.produce_sync(message) }
 

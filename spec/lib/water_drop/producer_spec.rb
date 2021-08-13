@@ -3,6 +3,8 @@
 RSpec.describe WaterDrop::Producer do
   subject(:producer) { described_class.new }
 
+  after { producer.close }
+
   describe '#initialize' do
     context 'when we initialize without a setup' do
       it { expect { producer }.not_to raise_error }

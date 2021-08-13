@@ -3,6 +3,8 @@
 RSpec.describe WaterDrop::Producer::Buffer do
   subject(:producer) { build(:producer) }
 
+  after { producer.close }
+
   describe '#buffer' do
     subject(:buffering) { producer.buffer(message) }
 
