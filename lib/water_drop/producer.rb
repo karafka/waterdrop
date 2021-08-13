@@ -103,14 +103,14 @@ module WaterDrop
 
           # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
-          flush(false)
+          flush(true)
 
           # We should not close the client in several threads the same time
           # It is safe to run it several times but not exactly the same moment
           client.close
 
           # Give rdkafka enough time to close background producer
-          sleep(0.1)
+          sleep(0.2)
 
           @status.closed!
         end
