@@ -20,7 +20,7 @@ It:
  - Supports buffering
  - Supports producing messages to multiple clusters
  - Supports multiple delivery policies
- - Works with Kafka 1.0+ and Ruby 2.5+
+ - Works with Kafka 1.0+ and Ruby 2.6+
 
 ## Table of contents
 
