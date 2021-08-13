@@ -1,7 +1,8 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.0.2 (Unreleased)
 - Add support for `partition_key`
+- Switch license from `LGPL-3.0` to  `MIT`.
 
 ## 2.0.1 (2021-06-05)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
