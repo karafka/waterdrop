@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.0.2 (Unreleased)
+- Switch license from `LGPL-3.0` to  `MIT`.
+
 ## 2.0.1 (2021-06-05)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
 - Fix the `finalizer references object to be finalized` warning issued with 3.0
