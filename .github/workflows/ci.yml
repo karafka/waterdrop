@@ -40,6 +40,7 @@ jobs:
       - name: Run Kafka with docker-compose
         run: |
           docker-compose up -d
+          echo 'Sleeping'
           sleep 2
       - name: Run all tests
         env:
