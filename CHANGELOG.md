@@ -2,6 +2,7 @@
 
 ## 2.0.3 (Unreleased)
 - Remove rdkafka patch in favour of spec topic pre-creation
+- Do not close client that was never used upon closing producer
 
 ## 2.0.2 (2021-08-13)
 - Add support for `partition_key`

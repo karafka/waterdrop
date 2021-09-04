@@ -92,9 +92,11 @@ RSpec.describe WaterDrop::Producer do
   end
 
   describe '#close' do
-    subject(:producer) { build(:producer).tap(&:client) }
+    before { allow(producer).to receive(:client).and_call_original }
 
     context 'when producer is already closed' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
       before { producer.close }
 
       it { expect { producer.close }.not_to raise_error }
@@ -102,14 +104,54 @@ RSpec.describe WaterDrop::Producer do
     end
 
     context 'when producer was not yet closed' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
       it { expect { producer.close }.not_to raise_error }
       it { expect(producer.tap(&:close).status.closed?).to eq(true) }
     end
 
     context 'when there were messages in the buffer' do
-      before { producer.buffer(build(:valid_message)) }
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      before do
+        producer.buffer(build(:valid_message))
+        allow(producer.client).to receive(:close).and_call_original
+      end
 
       it { expect { producer.close }.to change { producer.messages.size }.from(1).to(0) }
+
+      it 'expect to close client since was open' do
+        producer.close
+        expect(producer.client).to have_received(:close)
+      end
+    end
+
+    context 'when producer was configured but not connected' do
+      subject(:producer) { build(:producer) }
+
+      it { expect(producer.status.configured?).to eq(true) }
+      it { expect { producer.close }.not_to raise_error }
+      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+
+      it 'expect not to close client since was not open' do
+        producer.close
+        expect(producer).not_to have_received(:client)
+      end
+    end
+
+    context 'when producer was configured and connected' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      before { allow(producer.client).to receive(:close).and_call_original }
+
+      it { expect(producer.status.connected?).to eq(true) }
+      it { expect { producer.close }.not_to raise_error }
+      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+
+      it 'expect to close client since was open' do
+        producer.close
+        expect(producer.client).to have_received(:close)
+      end
     end
   end
 
