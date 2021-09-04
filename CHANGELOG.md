@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.0.3 (Unreleased)
+- Remove rdkafka patch in favour of spec topic pre-creation
+
 ## 2.0.2 (2021-08-13)
 - Add support for `partition_key`
 - Switch license from `LGPL-3.0` to  `MIT`

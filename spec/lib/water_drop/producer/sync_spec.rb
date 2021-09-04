@@ -21,6 +21,25 @@ RSpec.describe WaterDrop::Producer::Sync do
     end
   end
 
+  describe '#produce_sync with partition key' do
+    subject(:delivery) { producer.produce_sync(message) }
+
+    before do
+      # There is a bug in rdkafka that causes error when sending first message with partition key
+      # to a non-existing partition, that's why for this particular case we crete it before
+      # @see https://github.com/appsignal/rdkafka-ruby/issues/163
+      Rdkafka::Config.new(
+        producer.config.kafka.to_h
+      ).admin.create_topic(message[:topic], 1, 1)
+
+      sleep(0.5)
+    end
+
+    let(:message) { build(:valid_message, partition_key: rand.to_s) }
+
+    it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+  end
+
   describe '#produce_many_sync' do
     subject(:delivery) { producer.produce_many_sync(messages) }
 
