@@ -6,13 +6,13 @@ FactoryBot.define do
 
     topic { rand.to_s }
     payload { rand.to_s }
-    partition_key { rand.to_s }
+    partition_key { nil }
 
     initialize_with do
       message = new
       message[:topic] = topic
       message[:payload] = payload
-      message[:partition_key] = partition_key
+      message[:partition_key] = partition_key if partition_key
       message
     end
   end

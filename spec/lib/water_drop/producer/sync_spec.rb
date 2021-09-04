@@ -21,6 +21,14 @@ RSpec.describe WaterDrop::Producer::Sync do
     end
   end
 
+  describe '#produce_sync with partition key' do
+    subject(:delivery) { producer.produce_sync(message) }
+
+    let(:message) { build(:valid_message, partition_key: rand.to_s, topic: 'example_topic') }
+
+    it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+  end
+
   describe '#produce_many_sync' do
     subject(:delivery) { producer.produce_many_sync(messages) }
 
