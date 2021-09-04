@@ -38,6 +38,7 @@ jobs:
           bundle config set without development
           bundle install --jobs 4 --retry 3
       - name: Run Kafka with docker-compose
+        # We need to give Kafka enough time to start and create all the needed topics
         run: |
           docker-compose up -d
           sleep 10
