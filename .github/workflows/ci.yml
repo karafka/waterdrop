@@ -30,8 +30,8 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
       - name: Run Kafka with docker-compose
-        # We need to give Kafka enough time to start and create all the needed topics and start
-        # if anyone has a better idea on how to do it smart and easily, please contact me
+        # We need to give Kafka enough time to start and create all the needed topics, etc
+        # If anyone has a better idea on how to do it smart and easily, please contact me
         run: |
           docker-compose up -d
           sleep 5
