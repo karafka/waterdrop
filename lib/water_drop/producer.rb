@@ -107,7 +107,9 @@ module WaterDrop
 
           # We should not close the client in several threads the same time
           # It is safe to run it several times but not exactly the same moment
-          client.close
+          # We also mark it as closed only if it was connected, if not, it would trigger a new
+          # connection that anyhow would be immediately closed
+          client.close if @client
 
           @status.closed!
         end
