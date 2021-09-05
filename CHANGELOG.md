@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.0.3 (Unreleased)
+## 2.0.3 (2021-09-05)
 - Remove rdkafka patch in favour of spec topic pre-creation
 - Do not close client that was never used upon closing producer
 
