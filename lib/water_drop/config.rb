@@ -11,29 +11,41 @@ module WaterDrop
     #
     # option [String] id of the producer. This can be helpful when building producer specific
     #   instrumentation or loggers. It is not the kafka producer id
-    setting(:id, false) { |id| id || SecureRandom.uuid }
+    setting(
+      :id,
+      default: false,
+      constructor: ->(id) { id || SecureRandom.uuid }
+    )
     # option [Instance] logger that we want to use
     # @note Due to how rdkafka works, this setting is global for all the producers
-    setting(:logger, false) { |logger| logger || Logger.new($stdout, level: Logger::WARN) }
+    setting(
+      :logger,
+      default: false,
+      constructor: ->(logger) { logger || Logger.new($stdout, level: Logger::WARN) }
+    )
     # option [Instance] monitor that we want to use. See instrumentation part of the README for
     #   more details
-    setting(:monitor, false) { |monitor| monitor || WaterDrop::Instrumentation::Monitor.new }
+    setting(
+      :monitor,
+      default: false,
+      constructor: ->(monitor) { monitor || WaterDrop::Instrumentation::Monitor.new }
+    )
     # option [Integer] max payload size allowed for delivery to Kafka
-    setting :max_payload_size, 1_000_012
+    setting :max_payload_size, default: 1_000_012
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
     #   longer than the timeout.
-    setting :max_wait_timeout, 5
+    setting :max_wait_timeout, default: 5
     # option [Numeric] how long should we wait between re-checks on the availability of the
     #   delivery report. In a really robust systems, this describes the min-delivery time
     #   for a single sync message when produced in isolation
-    setting :wait_timeout, 0.005 # 5 milliseconds
+    setting :wait_timeout, default: 0.005 # 5 milliseconds
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc
-    setting :deliver, true
+    setting :deliver, default: true
     # rdkafka options
     # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
-    setting :kafka, {}
+    setting :kafka, default: {}
 
     # Configuration method
     # @yield Runs a block of code providing a config singleton instance to it

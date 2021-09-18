@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.0.4 (Unreleased)
+- Update `dry-*` to the recent versions and update settings syntax to match it
+- Update Zeitwerk requirement
+
 ## 2.0.3 (2021-09-05)
 - Remove rdkafka patch in favour of spec topic pre-creation
 - Do not close client that was never used upon closing producer
