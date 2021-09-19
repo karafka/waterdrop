@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.0.4 (Unreleased)
+## 2.0.4 (2021-09-19)
 - Update `dry-*` to the recent versions and update settings syntax to match it
 - Update Zeitwerk requirement
 
