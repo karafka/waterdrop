@@ -296,13 +296,6 @@ If you work with forked processes, make sure you **don't** use the producer befo
 
 To tackle this [obstacle](https://github.com/appsignal/rdkafka-ruby/issues/15) related to rdkafka, WaterDrop adds finalizer to each of the producers to close the rdkafka client before the Ruby process is shutdown. Due to the [nature of the finalizers](https://www.mikeperham.com/2010/02/24/the-trouble-with-ruby-finalizers/), this implementation prevents producers from being GCed (except upon VM shutdown) and can cause memory leaks if you don't use persistent/long-lived producers in a long-running process or if you don't use the `#close` method of a producer when it is no longer needed. Creating a producer instance for each message is anyhow a rather bad idea, so we recommend not to.
 
-## References
-
-* [WaterDrop code documentation](https://www.rubydoc.info/github/karafka/waterdrop)
-* [Karafka framework](https://github.com/karafka/karafka)
-* [WaterDrop Actions CI](https://github.com/karafka/waterdrop/actions?query=workflow%3Ac)
-* [WaterDrop Coditsu](https://app.coditsu.io/karafka/repositories/waterdrop)
-
 ## Note on contributions
 
 First, thank you for considering contributing to the Karafka ecosystem! It's people like you that make the open source community such a great community!
