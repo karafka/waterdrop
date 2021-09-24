@@ -24,22 +24,19 @@ It:
 
 ## Table of contents
 
-- [WaterDrop](#waterdrop)
-  * [Table of contents](#table-of-contents)
-  * [Installation](#installation)
-  * [Setup](#setup)
-    + [WaterDrop configuration options](#waterdrop-configuration-options)
-    + [Kafka configuration options](#kafka-configuration-options)
-  * [Usage](#usage)
-    + [Basic usage](#basic-usage)
-    + [Buffering](#buffering)
-      - [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
-      - [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
-  * [Instrumentation](#instrumentation)
-    + [Usage statistics](#usage-statistics)
-    + [Forking and potential memory problems](#forking-and-potential-memory-problems)
-  * [References](#references)
-  * [Note on contributions](#note-on-contributions)
+- [Installation](#installation)
+- [Setup](#setup)
+  * [WaterDrop configuration options](#waterdrop-configuration-options)
+  * [Kafka configuration options](#kafka-configuration-options)
+- [Usage](#usage)
+  * [Basic usage](#basic-usage)
+  * [Buffering](#buffering)
+      + [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
+      + [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
+- [Instrumentation](#instrumentation)
+  * [Usage statistics](#usage-statistics)
+  * [Forking and potential memory problems](#forking-and-potential-memory-problems)
+- [Note on contributions](#note-on-contributions)
 
 ## Installation
 
