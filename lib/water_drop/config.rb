@@ -15,20 +15,20 @@ module WaterDrop
 
     # WaterDrop options
     # option client_id [String] identifier of this producer
-    setting :client_id, 'waterdrop'
+    setting :client_id, default: 'waterdrop'
     # option [Instance, nil] logger that we want to use or nil to fallback to ruby-kafka logger
-    setting :logger, Logger.new($stdout, level: Logger::WARN)
+    setting :logger, default: Logger.new($stdout, level: Logger::WARN)
     # option [Instance] monitor that we want to use. See instrumentation part of the README for
     #   more details
-    setting :monitor, WaterDrop::Instrumentation::Monitor.new
+    setting :monitor, default: WaterDrop::Instrumentation::Monitor.new
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka
-    setting :deliver, true
+    setting :deliver, default: true
     # option [Boolean] if you're producing messages faster than the framework or the network can
     #   send them off, ruby-kafka might reject them. If that happens, WaterDrop will either raise
     #   or ignore - this setting manages that behavior. This only applies to async producer as
     #   sync producer will always raise upon problems
-    setting :raise_on_buffer_overflow, true
+    setting :raise_on_buffer_overflow, default: true
 
     # Settings directly related to the Kafka driver
     setting :kafka do
@@ -39,99 +39,99 @@ module WaterDrop
       # option connect_timeout [Integer] Sets the number of seconds to wait while connecting to
       # a broker for the first time. When ruby-kafka initializes, it needs to connect to at
       # least one host.
-      setting :connect_timeout, 10
+      setting :connect_timeout, default: 10
       # option socket_timeout [Integer] Sets the number of seconds to wait when reading from or
       # writing to a socket connection to a broker. After this timeout expires the connection
       # will be killed. Note that some Kafka operations are by definition long-running, such as
       # waiting for new messages to arrive in a partition, so don't set this value too low
-      setting :socket_timeout, 30
+      setting :socket_timeout, default: 30
 
       # Buffering for async producer
       # @option [Integer] The maximum number of bytes allowed in the buffer before new messages
       #   are rejected.
-      setting :max_buffer_bytesize, 10_000_000
+      setting :max_buffer_bytesize, default: 10_000_000
       # @option [Integer] The maximum number of messages allowed in the buffer before new messages
       #   are rejected.
-      setting :max_buffer_size, 1000
+      setting :max_buffer_size, default: 1000
       # @option [Integer] The maximum number of messages allowed in the queue before new messages
       #   are rejected. The queue is used to ferry messages from the foreground threads of your
       #   application to the background thread that buffers and delivers messages.
-      setting :max_queue_size, 1000
+      setting :max_queue_size, default: 1000
 
       # option [Integer] A timeout executed by a broker when the client is sending messages to it.
       #   It defines the number of seconds the broker should wait for replicas to acknowledge the
       #   write before responding to the client with an error. As such, it relates to the
       #   required_acks setting. It should be set lower than socket_timeout.
-      setting :ack_timeout, 5
+      setting :ack_timeout, default: 5
       # option [Integer] The number of seconds between background message
       #   deliveries. Default is 10 seconds. Disable timer-based background deliveries by
       #   setting this to 0.
-      setting :delivery_interval, 10
+      setting :delivery_interval, default: 10
       # option [Integer] The number of buffered messages that will trigger a background message
       #   delivery. Default is 100 messages. Disable buffer size based background deliveries by
       #   setting this to 0.
-      setting :delivery_threshold, 100
+      setting :delivery_threshold, default: 100
       # option [Boolean]
-      setting :idempotent, false
+      setting :idempotent, default: false
       # option [Boolean]
-      setting :transactional, false
+      setting :transactional, default: false
       # option [Integer]
-      setting :transactional_timeout, 60
+      setting :transactional_timeout, default: 60
 
       # option [Integer] The number of retries when attempting to deliver messages.
-      setting :max_retries, 2
+      setting :max_retries, default: 2
       # option [Integer]
-      setting :required_acks, -1
+      setting :required_acks, default: -1
       # option [Integer]
-      setting :retry_backoff, 1
+      setting :retry_backoff, default: 1
 
       # option [Integer] The minimum number of messages that must be buffered before compression is
       #   attempted. By default only one message is required. Only relevant if compression_codec
       #   is set.
-      setting :compression_threshold, 1
+      setting :compression_threshold, default: 1
       # option [Symbol] The codec used to compress messages. Must be either snappy or gzip.
-      setting :compression_codec, nil
+      setting :compression_codec, default: nil
 
       # SSL authentication related settings
       # option ca_cert [String, nil] SSL CA certificate
-      setting :ssl_ca_cert, nil
+      setting :ssl_ca_cert, default: nil
       # option ssl_ca_cert_file_path [String, nil] SSL CA certificate file path
-      setting :ssl_ca_cert_file_path, nil
+      setting :ssl_ca_cert_file_path, default: nil
       # option ssl_ca_certs_from_system [Boolean] Use the CA certs from your system's default
       #   certificate store
-      setting :ssl_ca_certs_from_system, false
+      setting :ssl_ca_certs_from_system, default: false
       # option ssl_verify_hostname [Boolean] Verify the hostname for client certs
-      setting :ssl_verify_hostname, true
+      setting :ssl_verify_hostname, default: true
       # option ssl_client_cert [String, nil] SSL client certificate
-      setting :ssl_client_cert, nil
+      setting :ssl_client_cert, default: nil
       # option ssl_client_cert_key [String, nil] SSL client certificate password
-      setting :ssl_client_cert_key, nil
+      setting :ssl_client_cert_key, default: nil
       # option sasl_gssapi_principal [String, nil] sasl principal
-      setting :sasl_gssapi_principal, nil
+      setting :sasl_gssapi_principal, default: nil
       # option sasl_gssapi_keytab [String, nil] sasl keytab
-      setting :sasl_gssapi_keytab, nil
+      setting :sasl_gssapi_keytab, default: nil
       # option sasl_plain_authzid [String] The authorization identity to use
-      setting :sasl_plain_authzid, ''
+      setting :sasl_plain_authzid, default: ''
       # option sasl_plain_username [String, nil] The username used to authenticate
-      setting :sasl_plain_username, nil
+      setting :sasl_plain_username, default: nil
       # option sasl_plain_password [String, nil] The password used to authenticate
-      setting :sasl_plain_password, nil
+      setting :sasl_plain_password, default: nil
       # option sasl_scram_username [String, nil] The username used to authenticate
-      setting :sasl_scram_username, nil
+      setting :sasl_scram_username, default: nil
       # option sasl_scram_password [String, nil] The password used to authenticate
-      setting :sasl_scram_password, nil
+      setting :sasl_scram_password, default: nil
       # option sasl_scram_mechanism [String, nil] Scram mechanism, either 'sha256' or 'sha512'
-      setting :sasl_scram_mechanism, nil
+      setting :sasl_scram_mechanism, default: nil
       # option sasl_over_ssl [Boolean] whether to enforce SSL with SASL
-      setting :sasl_over_ssl, true
+      setting :sasl_over_ssl, default: true
       # option ssl_client_cert_chain [String, nil] client cert chain or nil if not used
-      setting :ssl_client_cert_chain, nil
+      setting :ssl_client_cert_chain, default: nil
       # option ssl_client_cert_key_password [String, nil] the password required to read
       #   the ssl_client_cert_key
-      setting :ssl_client_cert_key_password, nil
+      setting :ssl_client_cert_key_password, default: nil
       # @param sasl_oauth_token_provider [Object, nil] OAuthBearer Token Provider instance that
       #   implements method token.
-      setting :sasl_oauth_token_provider, nil
+      setting :sasl_oauth_token_provider, default: nil
     end
 
     class << self

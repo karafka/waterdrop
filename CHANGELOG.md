@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
+- fix `dry-configurable` deprecation warnings for default value as positional argument
 
 ## 1.4.2 (2021-03-30)
 - Additional 3.0 fixes (ojab)
