@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## master
+- minimum version of ruby-kafka is now 1.3
+- update gems requirements in the gemspec
+
 ## 1.4.3 (2021-09-29)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
 - fix `dry-configurable` deprecation warnings for default value as positional argument
