@@ -1,8 +1,8 @@
 # WaterDrop changelog
 
-## master
+## 1.4.4 (2021-10-30)
 - minimum version of ruby-kafka is now 1.3
-- update gems requirements in the gemspec
+- update gems requirements in the gemspec (nijikon)
 
 ## 1.4.3 (2021-09-29)
 - Remove Ruby 2.5 support and update minimum Ruby requirement to 2.6
