@@ -73,7 +73,7 @@ GEM
     rspec-mocks (3.10.2)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.10.0)
-    rspec-support (3.10.2)
+    rspec-support (3.10.3)
     ruby-kafka (1.4.0)
       digest-crc
     simplecov (0.21.2)
