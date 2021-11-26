@@ -35,4 +35,6 @@ RSpec.configure do |config|
   end
 end
 
+RSpec.extend RSpecLocator.new(__FILE__)
+
 require 'water_drop'

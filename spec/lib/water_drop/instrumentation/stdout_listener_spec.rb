@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Instrumentation::StdoutListener do
+RSpec.describe_current do
   subject(:logged_data) { buffer.tap(&:rewind).read.split("\n") }
 
   let(:listener) { described_class.new(logger) }

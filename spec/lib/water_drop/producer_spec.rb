@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer do
+RSpec.describe_current do
   subject(:producer) { described_class.new }
 
   after { producer.close }

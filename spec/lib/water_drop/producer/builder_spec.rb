@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::Builder do
+RSpec.describe_current do
   subject(:client) { described_class.new.call(producer, config) }
 
   let(:producer) { WaterDrop::Producer.new }
@@ -21,7 +21,7 @@ RSpec.describe WaterDrop::Producer::Builder do
   after { producer.close }
 
   it { expect(client).to be_a(Rdkafka::Producer) }
-  it { expect(client.delivery_callback).to be_a(WaterDrop::Callbacks::Delivery) }
+  it { expect(client.delivery_callback).to be_a(WaterDrop::Instrumentation::Callbacks::Delivery) }
 
   context 'when the delivery is off' do
     let(:deliver) { false }

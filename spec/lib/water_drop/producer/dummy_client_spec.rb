@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::DummyClient do
+RSpec.describe_current do
   subject(:client) { described_class.new }
 
   describe 'publishing interface' do

@@ -84,7 +84,7 @@ module WaterDrop
         # Register statistics runner for this particular type of callbacks
         ::WaterDrop::Instrumentation.statistics_callbacks.add(
           @id,
-          Callbacks::Statistics.new(@id, @client.name, @config.monitor)
+          Instrumentation::Callbacks::Statistics.new(@id, @client.name, @config.monitor)
         )
 
         @status.connected!

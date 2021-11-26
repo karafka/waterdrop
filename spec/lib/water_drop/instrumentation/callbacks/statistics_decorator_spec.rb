@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Callbacks::StatisticsDecorator do
+RSpec.describe_current do
   subject(:decorator) { described_class.new }
 
   let(:emited_stats1) do

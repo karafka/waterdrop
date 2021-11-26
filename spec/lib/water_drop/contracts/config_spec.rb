@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Contracts::Config do
+RSpec.describe_current do
   subject(:contract_result) { described_class.new.call(config) }
 
   let(:contract_errors) { contract_result.errors.to_h }

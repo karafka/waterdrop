@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::Async do
+RSpec.describe_current do
   subject(:producer) { build(:producer) }
 
   after { producer.close }

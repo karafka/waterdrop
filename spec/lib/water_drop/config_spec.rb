@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Config do
+RSpec.describe_current do
   subject(:config) { described_class.new }
 
   describe '#setup' do

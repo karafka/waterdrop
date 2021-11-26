@@ -13,9 +13,14 @@ module WaterDrop
         return DummyClient.new unless config.deliver
 
         client = Rdkafka::Config.new(config.kafka.to_h).producer
+
         # This callback is not global and is per client, thus we do not have to wrap it with a
         # callbacks manager to make it work
-        client.delivery_callback = Callbacks::Delivery.new(producer.id, config.monitor)
+        client.delivery_callback = Instrumentation::Callbacks::Delivery.new(
+          producer.id,
+          config.monitor
+        )
+
         client
       end
     end
