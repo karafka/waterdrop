@@ -7,7 +7,7 @@ module WaterDrop
     module Rdkafka
       # Rdkafka::Producer patches
       module Producer
-        # Adds a method that allows us to get the nativ kafka producer name
+        # Adds a method that allows us to get the native kafka producer name
         # @return [String] producer instance name
         def name
           ::Rdkafka::Bindings.rd_kafka_name(@native_kafka)

@@ -63,7 +63,8 @@ module WaterDrop
 
         merge_kafka_defaults!(config)
         validate!(config.to_h)
-        configure_rdkafka!
+
+        ::Rdkafka::Config.logger = config.logger
       end
     end
 
@@ -89,11 +90,6 @@ module WaterDrop
       return true if result.success?
 
       raise Errors::ConfigurationInvalidError, result.errors.to_h
-    end
-
-    def configure_rdkafka!
-      ::Rdkafka::Config.logger = config.logger
-      ::Rdkafka::Config.statistics_callback ||= CallbacksRunner.new
     end
   end
 end

@@ -18,7 +18,7 @@ module WaterDrop
       def call(delivery_report)
         @monitor.instrument(
           'message.acknowledged',
-          producer_id: @producer_od,
+          producer_id: @producer_id,
           offset: delivery_report.offset,
           partition: delivery_report.partition
         )

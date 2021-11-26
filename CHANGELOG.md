@@ -1,5 +1,13 @@
 # WaterDrop changelog
 
+## 2.0.5 (Unreleased)
+- Fixes an issue where emited statistics from various producers would be publised to monitors of all the producers.
+- Introduces support for error callbacks instrumentation notifications
+- Removes the `:producer` key from `statistics.emitted` and replaces it with `:producer_id`
+- Removes the `:producer` key from `message.acknowledged` and replaces it with `:producer_id`
+- Cleanup and refactor of callbacks support
+- Introduces a callbacks manager concept that will also be within in Karafka `2.0`
+
 ## 2.0.4 (2021-09-19)
 - Update `dry-*` to the recent versions and update settings syntax to match it
 - Update Zeitwerk requirement
