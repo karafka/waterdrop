@@ -7,6 +7,13 @@ module WaterDrop
   class Config
     include Dry::Configurable
 
+    # Defaults for kafka settings, that will be overwritten only if not present already
+    KAFKA_DEFAULTS = {
+      'client.id' => 'waterdrop'
+    }.freeze
+
+    private_constant :KAFKA_DEFAULTS
+
     # WaterDrop options
     #
     # option [String] id of the producer. This can be helpful when building producer specific
@@ -53,11 +60,25 @@ module WaterDrop
     def setup
       configure do |config|
         yield(config)
+
+        merge_kafka_defaults!(config)
         validate!(config.to_h)
+        configure_rdkafka!
       end
     end
 
     private
+
+    # Propagates the kafka setting defaults unless they are already present
+    # This makes it easier to set some values that users usually don't change but still allows them
+    # to overwrite the whole hash if they want to
+    def merge_kafka_defaults!(config)
+      KAFKA_DEFAULTS.each do |key, value|
+        next if config.kafka.key?(key)
+
+        config.kafka[key] = value
+      end
+    end
 
     # Validates the configuration and if anything is wrong, will raise an exception
     # @param config_hash [Hash] config hash with setup details
@@ -68,6 +89,11 @@ module WaterDrop
       return true if result.success?
 
       raise Errors::ConfigurationInvalidError, result.errors.to_h
+    end
+
+    def configure_rdkafka!
+      ::Rdkafka::Config.logger = config.logger
+      ::Rdkafka::Config.statistics_callback ||= CallbacksRunner.new
     end
   end
 end

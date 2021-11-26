@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  class Producer
+  module Callbacks
     # Many of the librdkafka statistics are absolute values instead of a gauge.
     # This means, that for example number of messages sent is an absolute growing value
     # instead of being a value of messages sent from the last statistics report.
@@ -63,6 +63,7 @@ module WaterDrop
       # @param result [Object] diff result
       def append(current, key, result)
         return unless result.is_a?(Numeric)
+        return if current.frozen?
 
         current["#{key}_d"] = result
       end

@@ -21,7 +21,7 @@ RSpec.describe WaterDrop::Producer::Builder do
   after { producer.close }
 
   it { expect(client).to be_a(Rdkafka::Producer) }
-  it { expect(client.delivery_callback).to be_a(Proc) }
+  it { expect(client.delivery_callback).to be_a(WaterDrop::Callbacks::Delivery) }
 
   context 'when the delivery is off' do
     let(:deliver) { false }
@@ -44,7 +44,7 @@ RSpec.describe WaterDrop::Producer::Builder do
 
     it { expect(callback_event[:offset]).to eq(delivery_report.offset) }
     it { expect(callback_event[:partition]).to eq(delivery_report.partition) }
-    it { expect(callback_event[:producer]).to eq(producer) }
+    it { expect(callback_event[:producer_id]).to eq(producer.id) }
   end
 
   context 'when the statistics_callback is executed' do

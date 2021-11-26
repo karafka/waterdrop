@@ -10,6 +10,7 @@ FactoryBot.define do
     kafka do
       {
         'bootstrap.servers' => 'localhost:9092',
+        'statistics.interval.ms' => 100,
         'request.required.acks' => 1
       }
     end

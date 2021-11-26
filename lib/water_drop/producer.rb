@@ -80,6 +80,13 @@ module WaterDrop
 
         @pid = Process.pid
         @client = Builder.new.call(self, @config)
+
+        # Register statistics runner for this particular type of callbacks
+        ::WaterDrop::Instrumentation.statistics_runners.add(
+          @id,
+          Callbacks::Statistics.new(@id, @client.rd_kafka_name, @config.monitor)
+        )
+
         @status.connected!
       end
 
@@ -110,6 +117,9 @@ module WaterDrop
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
           client.close if @client
+
+          # Remove statistics runner that was registered
+          ::WaterDrop::Instrumentation.statistics_runners.delete(@id)
 
           @status.closed!
         end

@@ -28,3 +28,5 @@ Zeitwerk::Loader
   .tap { |loader| loader.ignore("#{__dir__}/waterdrop.rb") }
   .tap(&:setup)
   .tap(&:eager_load)
+
+Rdkafka::Config.statistics_callback = WaterDrop::Instrumentation.statistics_runners
