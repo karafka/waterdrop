@@ -16,8 +16,8 @@ module WaterDrop
         # @param emited_stats [Hash] original emited statistics
         # @return [Hash] emited statistics extended with the diff data
         # @note We modify the emited statistics, instead of creating new. Since we don't expose
-        #   any API to get raw data, users can just assume that the result of this decoration is the
-        #   proper raw stats that they can use
+        #   any API to get raw data, users can just assume that the result of this decoration is
+        #   the proper raw stats that they can use
         def call(emited_stats)
           diff(
             @previous,

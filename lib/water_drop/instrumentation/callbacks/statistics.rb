@@ -25,8 +25,8 @@ module WaterDrop
         def call(statistics)
           # Emit only statistics related to our client
           # rdkafka does not have per-instance statistics hook, thus we need to make sure that we
-          # emit only stats that are related to current producer. Otherwise we would emit all of all
-          # the time.
+          # emit only stats that are related to current producer. Otherwise we would emit all of
+          # all the time.
           return unless @client_name == statistics['name']
 
           @monitor.instrument(

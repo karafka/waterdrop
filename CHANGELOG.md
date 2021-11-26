@@ -10,6 +10,7 @@
 - Sets default kafka `client.id` to `waterdrop`
 - Updates specs to always emit statistics for better test coverage
 - Adds statistics and errors integration specs running against Kafka
+- Replace direct `RSpec.describe` reference with auto-discovery
 
 ## 2.0.4 (2021-09-19)
 - Update `dry-*` to the recent versions and update settings syntax to match it
