@@ -82,9 +82,9 @@ module WaterDrop
         @client = Builder.new.call(self, @config)
 
         # Register statistics runner for this particular type of callbacks
-        ::WaterDrop::Instrumentation.statistics_runners.add(
+        ::WaterDrop::Instrumentation.statistics_callbacks.add(
           @id,
-          Callbacks::Statistics.new(@id, @client.rd_kafka_name, @config.monitor)
+          Callbacks::Statistics.new(@id, @client.name, @config.monitor)
         )
 
         @status.connected!
@@ -119,7 +119,7 @@ module WaterDrop
           client.close if @client
 
           # Remove statistics runner that was registered
-          ::WaterDrop::Instrumentation.statistics_runners.delete(@id)
+          ::WaterDrop::Instrumentation.statistics_callbacks.delete(@id)
 
           @status.closed!
         end

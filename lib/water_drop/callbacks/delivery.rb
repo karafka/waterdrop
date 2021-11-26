@@ -14,7 +14,7 @@ module WaterDrop
       end
 
       # Emits delivery details to the monitor
-      # @param [Rdkafka::Producer::DeliveryReport] delivery report
+      # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
       def call(delivery_report)
         @monitor.instrument(
           'message.acknowledged',
