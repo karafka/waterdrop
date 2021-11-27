@@ -13,7 +13,7 @@ RSpec.describe_current do
 
     before do
       monitor.subscribe('error.emitted') do |event|
-        changed << event.payload[:error]
+        changed << event[:error]
       end
 
       callback.call(client_name, error)
@@ -47,7 +47,7 @@ RSpec.describe_current do
     end
 
     it { expect(event.id).to eq('error.emitted') }
-    it { expect(event.payload[:producer_id]).to eq(producer_id) }
-    it { expect(event.payload[:error]).to eq(error) }
+    it { expect(event[:producer_id]).to eq(producer_id) }
+    it { expect(event[:error]).to eq(error) }
   end
 end

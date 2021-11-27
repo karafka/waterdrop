@@ -13,7 +13,7 @@ RSpec.describe_current do
 
     before do
       monitor.subscribe('statistics.emitted') do |event|
-        changed << event.payload[:statistics]
+        changed << event[:statistics]
       end
 
       callback.call(statistics)
@@ -64,8 +64,8 @@ RSpec.describe_current do
     end
 
     it { expect(event.id).to eq('statistics.emitted') }
-    it { expect(event.payload[:producer_id]).to eq(producer_id) }
-    it { expect(event.payload[:statistics]).to eq(statistics) }
-    it { expect(event.payload[:statistics]['val_d']).to eq(0) }
+    it { expect(event[:producer_id]).to eq(producer_id) }
+    it { expect(event[:statistics]).to eq(statistics) }
+    it { expect(event[:statistics]['val_d']).to eq(0) }
   end
 end

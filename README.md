@@ -35,6 +35,7 @@ It:
       + [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
+  * [Error notifications](#error-notifications)
   * [Forking and potential memory problems](#forking-and-potential-memory-problems)
 - [Note on contributions](#note-on-contributions)
 
@@ -286,6 +287,36 @@ producer.close
 ```
 
 Note: The metrics returned may not be completely consistent between brokers, toppars and totals, due to the internal asynchronous nature of librdkafka. E.g., the top level tx total may be less than the sum of the broker tx values which it represents.
+
+### Error notifications
+
+WaterDrop allows you to listed to errors that occur in its internal background threads. Things like reconnecting to Kafka upon network errors and others unrelated to publishing messages are all available under `error.emitted` notification key. You can subscribe to this event to ensure your setup is healthy and without any problems that would otherwise go unnoticed as long as messages are delivered.
+
+```ruby
+producer = WaterDrop::Producer.new do |config|
+  # Note invalid connection port...
+  config.kafka = { 'bootstrap.servers': 'localhost:9090' }
+end
+
+producer.monitor.subscribe('error.emitted') do |event|
+  error = event[:error]
+
+  p "Internal error occurred: #{error}"
+end
+
+# Run this code without Kafka cluster
+loop do
+  producer.produce_async(topic: 'events', payload: 'data')
+
+  sleep(1)
+end
+
+# After you stop your Kafka cluster, you will see a lot of those:
+#
+# Internal error occurred: Local: Broker transport failure (transport)
+#
+# Internal error occurred: Local: Broker transport failure (transport)
+```
 
 ### Forking and potential memory problems
 

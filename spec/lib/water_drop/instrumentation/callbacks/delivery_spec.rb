@@ -20,8 +20,8 @@ RSpec.describe_current do
     end
 
     it { expect(event.id).to eq('message.acknowledged') }
-    it { expect(event.payload[:producer_id]).to eq(producer_id) }
-    it { expect(event.payload[:offset]).to eq(delivery_report.offset) }
-    it { expect(event.payload[:partition]).to eq(delivery_report.partition) }
+    it { expect(event[:producer_id]).to eq(producer_id) }
+    it { expect(event[:offset]).to eq(delivery_report.offset) }
+    it { expect(event[:partition]).to eq(delivery_report.partition) }
   end
 end

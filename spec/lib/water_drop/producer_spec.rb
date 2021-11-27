@@ -192,9 +192,9 @@ RSpec.describe_current do
       end
 
       it { expect(events.last.id).to eq('statistics.emitted') }
-      it { expect(events.last.payload[:producer_id]).to eq(producer.id) }
-      it { expect(events.last.payload[:statistics]['msg_cnt']).to eq(1) }
-      it { expect(events.last.payload[:statistics]['msg_cnt_d']).to eq(0) }
+      it { expect(events.last[:producer_id]).to eq(producer.id) }
+      it { expect(events.last[:statistics]['msg_cnt']).to eq(1) }
+      it { expect(events.last[:statistics]['msg_cnt_d']).to eq(0) }
     end
 
     context 'when we have more producers' do
@@ -251,8 +251,8 @@ RSpec.describe_current do
 
       it 'expect to emit proper stats' do
         expect(events.first.id).to eq('error.emitted')
-        expect(events.first.payload[:producer_id]).to eq(producer.id)
-        expect(events.first.payload[:error]).to be_a(Rdkafka::RdkafkaError)
+        expect(events.first[:producer_id]).to eq(producer.id)
+        expect(events.first[:error]).to be_a(Rdkafka::RdkafkaError)
       end
     end
 
