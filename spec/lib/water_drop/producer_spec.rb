@@ -198,9 +198,8 @@ RSpec.describe_current do
     end
 
     context 'when we have more producers' do
-      subject(:producer1) { build(:producer) }
-      subject(:producer2) { build(:producer) }
-
+      let(:producer1) { build(:producer) }
+      let(:producer2) { build(:producer) }
       let(:events1) { [] }
       let(:events2) { [] }
 
@@ -258,9 +257,8 @@ RSpec.describe_current do
     end
 
     context 'when we have more producers' do
-      subject(:producer1) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
-      subject(:producer2) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
-
+      let(:producer1) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+      let(:producer2) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
       let(:events1) { [] }
       let(:events2) { [] }
 
