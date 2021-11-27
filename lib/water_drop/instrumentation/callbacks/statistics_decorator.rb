@@ -50,14 +50,14 @@ module WaterDrop
             end
           end
 
-          if current.is_a?(Numeric) && previous.is_a?(Numeric)
-            current - previous
+          # Diff can be computed only for numerics
+          return current unless current.is_a?(Numeric)
           # If there was no previous value, delta is always zero
-          elsif current.is_a?(Numeric)
-            0
-          else
-            current
-          end
+          return 0 unless previous
+          # Should never happen but just in case, a type changed in between stats
+          return current unless previous.is_a?(Numeric)
+
+          current - previous
         end
 
         # Appends the result of the diff to a given key as long as the result is numeric
