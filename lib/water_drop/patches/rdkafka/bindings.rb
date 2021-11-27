@@ -24,7 +24,7 @@ module WaterDrop
             FFI::Function.new(
               :void, %i[pointer int string pointer]
             ) do |client_prr, err_code, reason, _opaque|
-              return false unless ::Rdkafka::Config.error_callback
+              return nil unless ::Rdkafka::Config.error_callback
 
               name = ::Rdkafka::Bindings.rd_kafka_name(client_prr)
 
