@@ -87,6 +87,12 @@ module WaterDrop
           Instrumentation::Callbacks::Statistics.new(@id, @client.name, @config.monitor)
         )
 
+        # Register error tracking callback
+        ::WaterDrop::Instrumentation.error_callbacks.add(
+          @id,
+          Instrumentation::Callbacks::Error.new(@id, @client.name, @config.monitor)
+        )
+
         @status.connected!
       end
 
@@ -118,8 +124,9 @@ module WaterDrop
           # connection that anyhow would be immediately closed
           client.close if @client
 
-          # Remove statistics runner that was registered
+          # Remove callbacks runners that were registered
           ::WaterDrop::Instrumentation.statistics_callbacks.delete(@id)
+          ::WaterDrop::Instrumentation.error_callbacks.delete(@id)
 
           @status.closed!
         end
