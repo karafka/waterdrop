@@ -2,7 +2,7 @@
 
 ## 2.0.5 (Unreleased)
 - Fixes an issue where emited statistics from various producers would be published to monitors of all the producers.
-- Introduces support for error callbacks instrumentation notifications
+- Introduces support for error callbacks instrumentation notifications with `error.emitted` key
 - Removes the `:producer` key from `statistics.emitted` and replaces it with `:producer_id`
 - Removes the `:producer` key from `message.acknowledged` and replaces it with `:producer_id`
 - Cleanup and refactor of callbacks support

@@ -13,18 +13,24 @@ module WaterDrop
       # @note The non-error once support timestamp benchmarking
       EVENTS = %w[
         producer.closed
+
         message.produced_async
         message.produced_sync
+        message.acknowledged
+        message.buffered
+
         messages.produced_async
         messages.produced_sync
-        message.buffered
         messages.buffered
-        message.acknowledged
+
         buffer.flushed_async
         buffer.flushed_async.error
         buffer.flushed_sync
         buffer.flushed_sync.error
+
         statistics.emitted
+
+        error.emitted
       ].freeze
 
       private_constant :EVENTS

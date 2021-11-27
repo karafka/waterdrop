@@ -172,4 +172,36 @@ RSpec.describe_current do
       it { expect { producer.send(:ensure_active!) }.to raise_error(expected_error) }
     end
   end
+
+  describe 'statistics callback hook' do
+    subject(:producer) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+
+    let(:message) { build(:valid_message) }
+
+    it 'expect to emit proper stats' do
+#      producer.produce_async(message)
+    end
+
+    context 'when we have more producers' do
+      pending
+
+      it 'expect their stats not to interact with each other' do
+      end
+    end
+  end
+
+  describe 'error callback hook' do
+    pending
+
+    it 'expect to emit proper error data' do
+#      subject(:producer)
+    end
+
+    context 'when we have more producers' do
+      pending
+
+      it 'expect their errors not to interact with each other' do
+      end
+    end
+  end
 end
