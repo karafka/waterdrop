@@ -1,7 +1,9 @@
 # WaterDrop changelog
 
 ## 2.0.5 (Unreleased)
-- Fixes an issue where emited statistics from various producers would be published to monitors of all the producers.
+- Fixes an issue where emited statistics from various producers would be published to monitors of all the producers
+- Fixes a bug where first statistics emitted would contain first values as their delta values
+- Fixes a bug where decorated statistics would include a delta field for non numerics in some cases
 - Introduces support for error callbacks instrumentation notifications with `error.emitted` key
 - Removes the `:producer` key from `statistics.emitted` and replaces it with `:producer_id`
 - Removes the `:producer` key from `message.acknowledged` and replaces it with `:producer_id`

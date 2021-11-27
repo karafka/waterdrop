@@ -49,4 +49,23 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'emitted event data format' do
+    let(:changed) { [] }
+    let(:event) { changed.first }
+    let(:statistics) { { 'name' => client_name, 'val' => 1, 'str' => 1 } }
+
+    before do
+      monitor.subscribe('statistics.emitted') do |stat|
+        changed << stat
+      end
+
+      callback.call(statistics)
+    end
+
+    it { expect(event.id).to eq('statistics.emitted') }
+    it { expect(event.payload[:producer_id]).to eq(producer_id) }
+    it { expect(event.payload[:statistics]).to eq(statistics) }
+    it { expect(event.payload[:statistics]['val_d']).to eq(0) }
+  end
 end

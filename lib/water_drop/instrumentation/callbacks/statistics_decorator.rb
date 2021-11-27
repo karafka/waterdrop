@@ -52,6 +52,9 @@ module WaterDrop
 
           if current.is_a?(Numeric) && previous.is_a?(Numeric)
             current - previous
+          # If there was no previous value, delta is always zero
+          elsif current.is_a?(Numeric)
+            0
           else
             current
           end
