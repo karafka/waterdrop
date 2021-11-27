@@ -15,18 +15,18 @@ module WaterDrop
             # Default rdkafka setup for errors doest not propagate client details, thus it always
             # publishes all the stuff for all rdkafka instances. We change that by providing
             # function that fetches the instance name, allowing us to have better notifications
-            mod.send(:remove_const,:ErrorCallback)
+            mod.send(:remove_const, :ErrorCallback)
             mod.const_set(:ErrorCallback, build_error_callback)
           end
 
           # @return [FFI::Function] overwritten callback function
           def build_error_callback
             FFI::Function.new(
-              :void, [:pointer, :int, :string, :pointer]
-            ) do |_client_prr, err_code, reason, _opaque|
-              return unless ::Rdkafka::Config.error_callback
+              :void, %i[pointer int string pointer]
+            ) do |client_prr, err_code, reason, _opaque|
+              return false unless ::Rdkafka::Config.error_callback
 
-              name = ::Rdkafka::Bindings.rd_kafka_name(_client_prr)
+              name = ::Rdkafka::Bindings.rd_kafka_name(client_prr)
 
               error = ::Rdkafka::RdkafkaError.new(err_code, broker_message: reason)
 
