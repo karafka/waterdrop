@@ -1,18 +1,24 @@
 # WaterDrop changelog
 
 ## 2.0.5 (Unreleased)
-- Fixes an issue where emited statistics from various producers would be published to monitors of all the producers
-- Fixes a bug where first statistics emitted would contain first values as their delta values
-- Fixes a bug where decorated statistics would include a delta field for non numerics in some cases
-- Introduces support for error callbacks instrumentation notifications with `error.emitted` key
-- Removes the `:producer` key from `statistics.emitted` and replaces it with `:producer_id`
-- Removes the `:producer` key from `message.acknowledged` and replaces it with `:producer_id`
-- Cleanup and refactor of callbacks support
-- Introduces a callbacks manager concept that will also be within in Karafka `2.0`
-- Sets default kafka `client.id` to `waterdrop`
-- Updates specs to always emit statistics for better test coverage
-- Adds statistics and errors integration specs running against Kafka
-- Replace direct `RSpec.describe` reference with auto-discovery
+
+### Bug fixes
+
+- Fixes an issue where multiple producers would emit stats of other producers causing the same stats to be published several times (as many times as a number of producers). This could cause invalid reporting for multi-kafka setups.
+- Fixes a bug where emitted statistics would contain their first value as the first delta value for first stats emitted.
+- Fixes a bug where decorated statistics would include a delta for a root field with non-numeric values.
+
+### Changes and features
+- Introduces support for error callbacks instrumentation notifications with `error.emitted` monitor emitted key for tracking background errors that would occur on the producer (disconnects, etc).
+- Removes the `:producer` key from `statistics.emitted` and replaces it with `:producer_id` not to inject whole producer into the payload
+- Removes the `:producer` key from `message.acknowledged` and replaces it with `:producer_id` not to inject whole producer into the payload
+- Cleanup and refactor of callbacks support to simplify the API and make it work with Rdkafka way of things.
+- Introduces a callbacks manager concept that will also be within in Karafka `2.0` for both statistics and errors tracking per client.
+- Sets default Kafka `client.id` to `waterdrop` when not set.
+- Updates specs to always emit statistics for better test coverage.
+- Adds statistics and errors integration specs running against Kafka.
+- Replaces direct `RSpec.describe` reference with auto-discovery
+- Patches `rdkafka` to provide functionalities that are needed for granular callback support.
 
 ## 2.0.4 (2021-09-19)
 - Update `dry-*` to the recent versions and update settings syntax to match it

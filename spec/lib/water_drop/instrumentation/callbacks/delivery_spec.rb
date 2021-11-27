@@ -19,11 +19,9 @@ RSpec.describe_current do
       callback.call(delivery_report)
     end
 
-    it 'expect to emit proper event with details' do
-      expect(event.id).to eq('message.acknowledged')
-      expect(event.payload[:producer_id]).to eq(producer_id)
-      expect(event.payload[:offset]).to eq(delivery_report.offset)
-      expect(event.payload[:partition]).to eq(delivery_report.partition)
-    end
+    it { expect(event.id).to eq('message.acknowledged') }
+    it { expect(event.payload[:producer_id]).to eq(producer_id) }
+    it { expect(event.payload[:offset]).to eq(delivery_report.offset) }
+    it { expect(event.payload[:partition]).to eq(delivery_report.partition) }
   end
 end

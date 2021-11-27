@@ -12,8 +12,8 @@ RSpec.describe_current do
     let(:statistics) { {} }
 
     before do
-      monitor.subscribe('statistics.emitted') do |stat|
-        changed << stat.payload[:statistics]
+      monitor.subscribe('statistics.emitted') do |event|
+        changed << event.payload[:statistics]
       end
 
       callback.call(statistics)
@@ -51,13 +51,13 @@ RSpec.describe_current do
   end
 
   describe 'emitted event data format' do
-    let(:changed) { [] }
-    let(:event) { changed.first }
+    let(:events) { [] }
+    let(:event) { events.first }
     let(:statistics) { { 'name' => client_name, 'val' => 1, 'str' => 1 } }
 
     before do
-      monitor.subscribe('statistics.emitted') do |stat|
-        changed << stat
+      monitor.subscribe('statistics.emitted') do |event|
+        events << event
       end
 
       callback.call(statistics)
