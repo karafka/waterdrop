@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer do
+RSpec.describe_current do
   subject(:producer) { described_class.new }
 
   after { producer.close }
@@ -170,6 +170,122 @@ RSpec.describe WaterDrop::Producer do
       end
 
       it { expect { producer.send(:ensure_active!) }.to raise_error(expected_error) }
+    end
+  end
+
+  describe 'statistics callback hook' do
+    let(:message) { build(:valid_message) }
+
+    context 'when stats are emitted' do
+      subject(:producer) { build(:producer) }
+
+      let(:events) { [] }
+
+      before do
+        producer.monitor.subscribe('statistics.emitted') do |event|
+          events << event
+        end
+
+        producer.produce_sync(message)
+
+        sleep(0.001) while events.size < 2
+      end
+
+      it { expect(events.last.id).to eq('statistics.emitted') }
+      it { expect(events.last[:producer_id]).to eq(producer.id) }
+      it { expect(events.last[:statistics]['msg_cnt']).to eq(1) }
+      it { expect(events.last[:statistics]['msg_cnt_d']).to eq(0) }
+    end
+
+    context 'when we have more producers' do
+      let(:producer1) { build(:producer) }
+      let(:producer2) { build(:producer) }
+      let(:events1) { [] }
+      let(:events2) { [] }
+
+      before do
+        producer1.monitor.subscribe('statistics.emitted') do |event|
+          events1 << event
+        end
+
+        producer2.monitor.subscribe('statistics.emitted') do |event|
+          events2 << event
+        end
+
+        producer1.produce_sync(message)
+        producer2.produce_sync(message)
+
+        # Wait for the error to occur
+        sleep(0.001) while events1.size < 2
+        sleep(0.001) while events2.size < 2
+      end
+
+      it 'expect not to have same statistics from both producers' do
+        ids1 = events1.map(&:payload).map { |payload| payload[:statistics] }.map(&:object_id)
+        ids2 = events2.map(&:payload).map { |payload| payload[:statistics] }.map(&:object_id)
+
+        expect(ids1 & ids2).to be_empty
+      end
+    end
+  end
+
+  describe 'error callback hook' do
+    let(:message) { build(:valid_message) }
+
+    context 'when error occurs' do
+      subject(:producer) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+
+      let(:events) { [] }
+
+      before do
+        producer.monitor.subscribe('error.emitted') do |event|
+          events << event
+        end
+
+        # Forceful creation of a client will trigger a connection attempt
+        producer.client
+
+        # Wait for the error to occur
+        sleep(0.001) while events.empty?
+      end
+
+      it 'expect to emit proper stats' do
+        expect(events.first.id).to eq('error.emitted')
+        expect(events.first[:producer_id]).to eq(producer.id)
+        expect(events.first[:error]).to be_a(Rdkafka::RdkafkaError)
+      end
+    end
+
+    context 'when we have more producers' do
+      let(:producer1) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+      let(:producer2) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+      let(:events1) { [] }
+      let(:events2) { [] }
+
+      before do
+        producer1.monitor.subscribe('error.emitted') do |event|
+          events1 << event
+        end
+
+        producer2.monitor.subscribe('error.emitted') do |event|
+          events2 << event
+        end
+
+        # Forceful creation of a client will trigger a connection attempt
+        producer1.client
+        producer2.client
+
+        # Wait for the error to occur
+        sleep(0.001) while events1.empty?
+        sleep(0.001) while events2.empty?
+      end
+
+      it 'expect not to have same errors from both producers' do
+        ids1 = events1.map(&:payload).map { |payload| payload[:error] }.map(&:object_id)
+        ids2 = events2.map(&:payload).map { |payload| payload[:error] }.map(&:object_id)
+
+        expect(ids1 & ids2).to be_empty
+      end
     end
   end
 end

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::StatisticsDecorator do
+RSpec.describe_current do
   subject(:decorator) { described_class.new }
 
   let(:emited_stats1) do
@@ -54,9 +54,10 @@ RSpec.describe WaterDrop::Producer::StatisticsDecorator do
     subject(:decorated) { decorator.call(emited_stats1) }
 
     it { expect(decorated['string']).to eq('value1') }
-    it { expect(decorated['float_d']).to eq(10.4) }
-    it { expect(decorated['int_d']).to eq(112) }
-    it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(123) }
+    it { expect(decorated.key?('string_d')).to eq(false) }
+    it { expect(decorated['float_d']).to eq(0) }
+    it { expect(decorated['int_d']).to eq(0) }
+    it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(0) }
     it { expect(decorated).to be_frozen }
   end
 
@@ -67,6 +68,7 @@ RSpec.describe WaterDrop::Producer::StatisticsDecorator do
     end
 
     it { expect(decorated['string']).to eq('value2') }
+    it { expect(decorated.key?('string_d')).to eq(false) }
     it { expect(decorated['float_d'].round(10)).to eq(0.4) }
     it { expect(decorated['int_d']).to eq(18) }
     it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(30) }
@@ -81,6 +83,7 @@ RSpec.describe WaterDrop::Producer::StatisticsDecorator do
     end
 
     it { expect(decorated['string']).to eq('value3') }
+    it { expect(decorated.key?('string_d')).to eq(false) }
     it { expect(decorated['float_d'].round(10)).to eq(1.0) }
     it { expect(decorated['int_d']).to eq(-120) }
     it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(-151) }
@@ -96,6 +99,7 @@ RSpec.describe WaterDrop::Producer::StatisticsDecorator do
     before { emited_stats2['nested'] = {} }
 
     it { expect(decorated['string']).to eq('value2') }
+    it { expect(decorated.key?('string_d')).to eq(false) }
     it { expect(decorated['float_d'].round(10)).to eq(0.4) }
     it { expect(decorated['int_d']).to eq(18) }
     it { expect(decorated['nested']).to eq({}) }
@@ -111,9 +115,10 @@ RSpec.describe WaterDrop::Producer::StatisticsDecorator do
     before { emited_stats1['nested'] = {} }
 
     it { expect(decorated['string']).to eq('value2') }
+    it { expect(decorated.key?('string_d')).to eq(false) }
     it { expect(decorated['float_d'].round(10)).to eq(0.4) }
     it { expect(decorated['int_d']).to eq(18) }
-    it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(153) }
+    it { expect(decorated.dig(*broker_scope)['txbytes_d']).to eq(0) }
     it { expect(decorated).to be_frozen }
   end
 end

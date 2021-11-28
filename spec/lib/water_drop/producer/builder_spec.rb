@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::Builder do
+RSpec.describe_current do
   subject(:client) { described_class.new.call(producer, config) }
 
   let(:producer) { WaterDrop::Producer.new }
@@ -21,7 +21,7 @@ RSpec.describe WaterDrop::Producer::Builder do
   after { producer.close }
 
   it { expect(client).to be_a(Rdkafka::Producer) }
-  it { expect(client.delivery_callback).to be_a(Proc) }
+  it { expect(client.delivery_callback).to be_a(WaterDrop::Instrumentation::Callbacks::Delivery) }
 
   context 'when the delivery is off' do
     let(:deliver) { false }
@@ -44,23 +44,6 @@ RSpec.describe WaterDrop::Producer::Builder do
 
     it { expect(callback_event[:offset]).to eq(delivery_report.offset) }
     it { expect(callback_event[:partition]).to eq(delivery_report.partition) }
-    it { expect(callback_event[:producer]).to eq(producer) }
-  end
-
-  context 'when the statistics_callback is executed' do
-    let(:statistics) { { rand => rand } }
-    let(:callback_event) do
-      client
-      callback_event = nil
-
-      config.monitor.subscribe('statistics.emitted') do |event|
-        callback_event = event
-      end
-
-      Rdkafka::Config.statistics_callback.call(statistics)
-      callback_event
-    end
-
-    it { expect(callback_event[:statistics]).to eq(statistics) }
+    it { expect(callback_event[:producer_id]).to eq(producer.id) }
   end
 end

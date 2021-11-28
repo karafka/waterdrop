@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Contracts::Message do
+RSpec.describe_current do
   subject(:contract_result) do
     described_class.new(
       max_payload_size: max_payload_size

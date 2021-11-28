@@ -28,3 +28,9 @@ Zeitwerk::Loader
   .tap { |loader| loader.ignore("#{__dir__}/waterdrop.rb") }
   .tap(&:setup)
   .tap(&:eager_load)
+
+# Rdkafka uses a single global callback for things. We bypass that by injecting a manager for
+# each callback type. Callback manager allows us to register more than one callback
+# @note Those managers are also used by Karafka for consumer related statistics
+Rdkafka::Config.statistics_callback = WaterDrop::Instrumentation.statistics_callbacks
+Rdkafka::Config.error_callback = WaterDrop::Instrumentation.error_callbacks

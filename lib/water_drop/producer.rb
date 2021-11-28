@@ -80,6 +80,19 @@ module WaterDrop
 
         @pid = Process.pid
         @client = Builder.new.call(self, @config)
+
+        # Register statistics runner for this particular type of callbacks
+        ::WaterDrop::Instrumentation.statistics_callbacks.add(
+          @id,
+          Instrumentation::Callbacks::Statistics.new(@id, @client.name, @config.monitor)
+        )
+
+        # Register error tracking callback
+        ::WaterDrop::Instrumentation.error_callbacks.add(
+          @id,
+          Instrumentation::Callbacks::Error.new(@id, @client.name, @config.monitor)
+        )
+
         @status.connected!
       end
 
@@ -110,6 +123,10 @@ module WaterDrop
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
           client.close if @client
+
+          # Remove callbacks runners that were registered
+          ::WaterDrop::Instrumentation.statistics_callbacks.delete(@id)
+          ::WaterDrop::Instrumentation.error_callbacks.delete(@id)
 
           @status.closed!
         end

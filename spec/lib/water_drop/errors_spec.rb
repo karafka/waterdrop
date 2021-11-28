@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Errors do
+RSpec.describe_current do
   describe 'BaseError' do
     subject(:error) { described_class::BaseError }
 

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop do
+RSpec.describe_current do
   subject(:water_drop) { described_class }
 
   describe '#gem_root' do

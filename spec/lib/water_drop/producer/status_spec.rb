@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe WaterDrop::Producer::Status do
+RSpec.describe_current do
   subject(:status) { described_class.new }
 
   it { expect(status.initial?).to eq(true) }
