@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.0.5 (Unreleased)
+## 2.0.5 (2021-11-28)
 
 ### Bug fixes
 
