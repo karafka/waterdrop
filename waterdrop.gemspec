@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld']
   spec.email         = %w[maciej@mensfeld.pl]
-  spec.homepage      = 'https://github.com/karafka/waterdrop'
+  spec.homepage      = 'https://karafka.io'
   spec.summary       = 'Kafka messaging made easy!'
   spec.description   = spec.summary
   spec.license       = 'MIT'
