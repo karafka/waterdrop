@@ -2,7 +2,6 @@
 
 module WaterDrop
   # Namespace for all the things related with WaterDrop instrumentation process
-  # @note We do not
   module Instrumentation
     class << self
       # Builds a manager for statistics callbacks
