@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.0.6 (2021-11-30)
+- #218 - Fixes a case, where dispatch of callbacks the same moment a new producer was created could cause a concurrency issue in the manager.
+
 ## 2.0.5 (2021-11-28)
 
 ### Bug fixes
