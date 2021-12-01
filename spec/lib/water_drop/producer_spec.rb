@@ -188,13 +188,15 @@ RSpec.describe_current do
 
         producer.produce_sync(message)
 
-        sleep(0.001) while events.size < 2
+        sleep(0.001) while events.size < 3
       end
 
       it { expect(events.last.id).to eq('statistics.emitted') }
       it { expect(events.last[:producer_id]).to eq(producer.id) }
-      it { expect(events.last[:statistics]['msg_cnt']).to eq(1) }
-      it { expect(events.last[:statistics]['msg_cnt_d']).to eq(0) }
+      it { expect(events.last[:statistics]['ts']).to be > 0 }
+      # This is in microseconds. We needed a stable value for comparison, and the distance in
+      # between statistics events should always be within 1ms
+      it { expect(events.last[:statistics]['ts_d']).to be_between(90_000, 200_000) }
     end
 
     context 'when we have more producers' do
