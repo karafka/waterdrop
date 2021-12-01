@@ -13,8 +13,12 @@ module WaterDrop
       # Invokes all the callbacks registered one after another
       #
       # @param args [Object] any args that should go to the callbacks
+      # @note We do not use `#each_value` here on purpose. With it being used, we cannot dispatch
+      #   callbacks and add new at the same time. Since we don't know when and in what thread
+      #   things are going to be added to the manager, we need to extract values into an array and
+      #   run it. That way we can add new things the same time.
       def call(*args)
-        @callbacks.each_value { |a| a.call(*args) }
+        @callbacks.values.each { |callback| callback.call(*args) }
       end
 
       # Adds a callback to the manager
