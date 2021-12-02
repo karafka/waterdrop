@@ -17,7 +17,8 @@ module WaterDrop
     # WaterDrop options
     #
     # option [String] id of the producer. This can be helpful when building producer specific
-    #   instrumentation or loggers. It is not the kafka producer id
+    #   instrumentation or loggers. It is not the kafka client id. It is an id that should be
+    #   unique for each of the producers
     setting(
       :id,
       default: false,
