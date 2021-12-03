@@ -21,7 +21,7 @@ module WaterDrop
 
         @monitor.instrument(
           'message.produced_sync',
-          producer: self,
+          producer_id: id,
           message: message
         ) do
           client
@@ -49,7 +49,7 @@ module WaterDrop
         ensure_active!
         messages.each { |message| validate_message!(message) }
 
-        @monitor.instrument('messages.produced_sync', producer: self, messages: messages) do
+        @monitor.instrument('messages.produced_sync', producer_id: id, messages: messages) do
           messages
             .map { |message| client.produce(**message) }
             .map! do |handler|

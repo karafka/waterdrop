@@ -17,7 +17,7 @@ module WaterDrop
         # Runs the instrumentation monitor with error
         # @param client_name [String] rdkafka client name
         # @param error [Rdkafka::Error] error that occurred
-        # @note If will only instrument on errors of the client of our producer
+        # @note It will only instrument on errors of the client of our producer
         def call(client_name, error)
           # Emit only errors related to our client
           # Same as with statistics (mor explanation there)

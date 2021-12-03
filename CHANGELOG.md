@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+## 2.0.7 (Unreleased)
+- Replace `:producer` with `:producer_id` in events and update `StdoutListener` accordingly. This change aligns all the events in terms of not publishing the whole producer object in the events.
+- Add `error.emitted` into the `StdoutListener`.
+- Enable `StdoutLogger` in specs for additional integration coverage.
+
 ## 2.0.6 (2021-12-01)
 - #218 - Fixes a case, where dispatch of callbacks the same moment a new producer was created could cause a concurrency issue in the manager.
 - Fix some unstable specs.

@@ -106,7 +106,7 @@ module WaterDrop
 
         @monitor.instrument(
           'producer.closed',
-          producer: self
+          producer_id: id
         ) do
           @status.closing!
 
