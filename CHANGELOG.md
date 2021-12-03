@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
-## 2.0.7 (Unreleased)
+## 2.0.7 (2021-12-03)
+- Source code metadata url added to the gemspec
 - Replace `:producer` with `:producer_id` in events and update `StdoutListener` accordingly. This change aligns all the events in terms of not publishing the whole producer object in the events.
 - Add `error.emitted` into the `StdoutListener`.
 - Enable `StdoutLogger` in specs for additional integration coverage.
