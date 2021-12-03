@@ -14,7 +14,7 @@ RSpec.describe_current do
     {
       message: message,
       messages: messages,
-      producer: producer,
+      producer_id: producer.id,
       time: rand(100),
       error: Rdkafka::RdkafkaError,
       dispatched: [messages[0]]
@@ -145,6 +145,16 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
     it { expect(logged_data[0]).to include('Closing producer') }
+    it { expect(logged_data[1]).to include(producer.id) }
+    it { expect(logged_data[1]).to include('DEBUG') }
+  end
+
+  describe '#on_error_emitted' do
+    before { listener.on_error_emitted(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('ERROR') }
+    it { expect(logged_data[0]).to include('Background thread error emitted') }
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
   end

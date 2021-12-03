@@ -5,7 +5,7 @@ FactoryBot.define do
     skip_create
 
     deliver { true }
-    logger { Logger.new($stdout, level: Logger::INFO) }
+    logger { Logger.new('/dev/null', level: Logger::DEBUG) }
     max_wait_timeout { 30 }
     kafka do
       {
@@ -17,12 +17,16 @@ FactoryBot.define do
     end
 
     initialize_with do
-      new do |config|
+      instance = new do |config|
         config.deliver = deliver
         config.logger = logger
         config.kafka = kafka
         config.max_wait_timeout = max_wait_timeout
       end
+
+      instance.monitor.subscribe(::WaterDrop::Instrumentation::StdoutListener.new(logger))
+
+      instance
     end
   end
 end

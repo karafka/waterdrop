@@ -23,7 +23,7 @@ module WaterDrop
 
         @monitor.instrument(
           'message.buffered',
-          producer: self,
+          producer_id: id,
           message: message
         ) { @messages << message }
       end
@@ -40,7 +40,7 @@ module WaterDrop
 
         @monitor.instrument(
           'messages.buffered',
-          producer: self,
+          producer_id: id,
           messages: messages
         ) do
           messages.each { |message| @messages << message }
@@ -56,7 +56,7 @@ module WaterDrop
 
         @monitor.instrument(
           'buffer.flushed_async',
-          producer: self,
+          producer_id: id,
           messages: @messages
         ) { flush(false) }
       end
@@ -69,7 +69,7 @@ module WaterDrop
 
         @monitor.instrument(
           'buffer.flushed_sync',
-          producer: self,
+          producer_id: id,
           messages: @messages
         ) { flush(true) }
       end
@@ -104,7 +104,7 @@ module WaterDrop
         end
       rescue *RESCUED_ERRORS => e
         key = sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async.error'
-        @monitor.instrument(key, producer: self, error: e, dispatched: dispatched)
+        @monitor.instrument(key, producer_id: id, error: e, dispatched: dispatched)
 
         raise Errors::FlushFailureError.new(dispatched)
       end

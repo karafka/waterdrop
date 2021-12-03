@@ -19,7 +19,7 @@ module WaterDrop
 
         @monitor.instrument(
           'message.produced_async',
-          producer: self,
+          producer_id: id,
           message: message
         ) { client.produce(**message) }
       end
@@ -40,7 +40,7 @@ module WaterDrop
 
         @monitor.instrument(
           'messages.produced_async',
-          producer: self,
+          producer_id: id,
           messages: messages
         ) do
           messages.map { |message| client.produce(**message) }
