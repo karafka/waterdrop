@@ -69,9 +69,9 @@ GEM
     mini_portile2 (2.7.1)
     minitest (5.14.4)
     rake (13.0.6)
-    rdkafka (0.11.0)
+    rdkafka (0.11.1)
       ffi (~> 1.15)
-      mini_portile2 (~> 2.7)
+      mini_portile2 (~> 2.6)
       rake (> 12)
     rspec (3.10.0)
       rspec-core (~> 3.10.0)
@@ -109,4 +109,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   2.2.31
+   2.2.32
