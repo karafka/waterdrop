@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (1.4.4)
+    waterdrop (1.4.5)
       delivery_boy (>= 0.2, < 2.x)
       dry-configurable (~> 0.13)
       dry-monitor (~> 0.5)
@@ -94,4 +94,4 @@ DEPENDENCIES
   waterdrop!
 
 BUNDLED WITH
-   2.2.31
+   2.2.32

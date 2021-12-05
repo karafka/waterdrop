@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 1.4.5 (2021-12-05)
+- Source code metadata url added to the gemspec
+
 ## 1.4.4 (2021-10-30)
 - minimum version of ruby-kafka is now 1.3
 - update gems requirements in the gemspec (nijikon)
