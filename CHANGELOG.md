@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- Ruby 3.1 support
+
 ## 1.4.5 (2021-12-05)
 - Source code metadata url added to the gemspec
 
