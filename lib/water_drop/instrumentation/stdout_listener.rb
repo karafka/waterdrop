@@ -71,28 +71,10 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
-      def on_buffer_flushed_async_error(event)
-        messages = event[:messages]
-        error = event[:error]
-
-        error(event, "Async flushing of #{messages.size} failed due to: #{error}")
-        debug(event, messages)
-      end
-
-      # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_flushed_sync(event)
         messages = event[:messages]
 
         info(event, "Sync flushing of #{messages.size} messages from the buffer")
-        debug(event, messages)
-      end
-
-      # @param event [Dry::Events::Event] event that happened with the details
-      def on_buffer_flushed_sync_error(event)
-        messages = event[:dispatched]
-        error = event[:error]
-
-        error(event, "Sync flushing of #{messages.size} failed due to: #{error}")
         debug(event, messages)
       end
 
@@ -103,10 +85,11 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the error details
-      def on_error_emitted(event)
+      def on_error_occurred(event)
         error = event[:error]
+        type = event[:type]
 
-        error(event, "Background thread error emitted: #{error}")
+        error(event, "Error occurred: #{error} - #{type}")
         debug(event, '')
       end
 
