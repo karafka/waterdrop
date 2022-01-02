@@ -290,7 +290,7 @@ Note: The metrics returned may not be completely consistent between brokers, top
 
 ### Error notifications
 
-Aside from errors related to publishing messages like `buffer.flushed_async.error`, WaterDrop allows you to listen to errors that occur in its internal background threads. Things like reconnecting to Kafka upon network errors and others unrelated to publishing messages are all available under `error.emitted` notification key. You can subscribe to this event to ensure your setup is healthy and without any problems that would otherwise go unnoticed as long as messages are delivered.
+WaterDrop allows you to listen to all errors that occur while producing messages and in its internal background threads. Things like reconnecting to Kafka upon network errors and others unrelated to publishing messages are all available under `error.occurred` notification key. You can subscribe to this event to ensure your setup is healthy and without any problems that would otherwise go unnoticed as long as messages are delivered.
 
 ```ruby
 producer = WaterDrop::Producer.new do |config|
@@ -298,10 +298,10 @@ producer = WaterDrop::Producer.new do |config|
   config.kafka = { 'bootstrap.servers': 'localhost:9090' }
 end
 
-producer.monitor.subscribe('error.emitted') do |event|
+producer.monitor.subscribe('error.occurred') do |event|
   error = event[:error]
 
-  p "Internal error occurred: #{error}"
+  p "WaterDrop error occurred: #{error}"
 end
 
 # Run this code without Kafka cluster
