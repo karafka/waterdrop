@@ -313,9 +313,9 @@ end
 
 # After you stop your Kafka cluster, you will see a lot of those:
 #
-# Internal error occurred: Local: Broker transport failure (transport)
+# WaterDrop error occurred: Local: Broker transport failure (transport)
 #
-# Internal error occurred: Local: Broker transport failure (transport)
+# WaterDrop error occurred: Local: Broker transport failure (transport)
 ```
 
 ### Forking and potential memory problems
