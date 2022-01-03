@@ -1,9 +1,10 @@
 # WaterDrop changelog
 
-## 2.0.8 (Unreleased)
+## 2.1.0 (Unreleased)
 - Ruby 3.1 support
 - Change the error notification key from `error.emitted` to `error.occurred`.
 - Normalize error tracking and make all the places publish errors into the same notification endpoint (`error.occurred`).
+- Start semantic versioning WaterDrop.
 
 ## 2.0.7 (2021-12-03)
 - Source code metadata url added to the gemspec
