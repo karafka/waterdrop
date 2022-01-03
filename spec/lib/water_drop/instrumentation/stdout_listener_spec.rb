@@ -103,18 +103,6 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(messages[1].to_s) }
   end
 
-  describe '#on_buffer_flushed_async_error' do
-    before { listener.on_buffer_flushed_async_error(event) }
-
-    it { expect(logged_data[0]).to include(producer.id) }
-    it { expect(logged_data[0]).to include('ERROR') }
-    it { expect(logged_data[0]).to include('Async flushing of 2 failed') }
-    it { expect(logged_data[0]).to include(event[:error].to_s) }
-    it { expect(logged_data[1]).to include(producer.id) }
-    it { expect(logged_data[1]).to include('DEBUG') }
-    it { expect(logged_data[1]).to include(message.to_s) }
-  end
-
   describe '#on_buffer_flushed_sync' do
     before { listener.on_buffer_flushed_sync(event) }
 
@@ -127,18 +115,6 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(messages[1].to_s) }
   end
 
-  describe '#on_buffer_flushed_sync_error' do
-    before { listener.on_buffer_flushed_sync_error(event) }
-
-    it { expect(logged_data[0]).to include(producer.id) }
-    it { expect(logged_data[0]).to include('ERROR') }
-    it { expect(logged_data[0]).to include('Sync flushing of 1 failed') }
-    it { expect(logged_data[0]).to include(event[:error].to_s) }
-    it { expect(logged_data[1]).to include(producer.id) }
-    it { expect(logged_data[1]).to include('DEBUG') }
-    it { expect(logged_data[1]).to include(message.to_s) }
-  end
-
   describe '#on_producer_closed' do
     before { listener.on_producer_closed(event) }
 
@@ -149,12 +125,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include('DEBUG') }
   end
 
-  describe '#on_error_emitted' do
-    before { listener.on_error_emitted(event) }
+  describe '#on_error_occurred' do
+    before do
+      details[:type] = 'error.type'
+      listener.on_error_occurred(event)
+    end
 
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('ERROR') }
-    it { expect(logged_data[0]).to include('Background thread error emitted') }
+    it { expect(logged_data[0]).to include('Error occurred') }
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
   end

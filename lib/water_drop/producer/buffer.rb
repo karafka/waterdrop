@@ -103,8 +103,13 @@ module WaterDrop
           )
         end
       rescue *RESCUED_ERRORS => e
-        key = sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async.error'
-        @monitor.instrument(key, producer_id: id, error: e, dispatched: dispatched)
+        @monitor.instrument(
+          'error.occurred',
+          error: e,
+          producer_id: id,
+          dispatched: dispatched,
+          type: sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async.error'
+        )
 
         raise Errors::FlushFailureError.new(dispatched)
       end

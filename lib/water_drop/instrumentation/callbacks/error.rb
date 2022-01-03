@@ -24,9 +24,10 @@ module WaterDrop
           return unless @client_name == client_name
 
           @monitor.instrument(
-            'error.emitted',
+            'error.occurred',
+            error: error,
             producer_id: @producer_id,
-            error: error
+            type: 'librdkafka.error'
           )
         end
       end
