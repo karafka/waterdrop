@@ -240,7 +240,7 @@ RSpec.describe_current do
       let(:events) { [] }
 
       before do
-        producer.monitor.subscribe('error.emitted') do |event|
+        producer.monitor.subscribe('error.occurred') do |event|
           events << event
         end
 
@@ -252,7 +252,7 @@ RSpec.describe_current do
       end
 
       it 'expect to emit proper stats' do
-        expect(events.first.id).to eq('error.emitted')
+        expect(events.first.id).to eq('error.occurred')
         expect(events.first[:producer_id]).to eq(producer.id)
         expect(events.first[:error]).to be_a(Rdkafka::RdkafkaError)
       end
@@ -265,11 +265,11 @@ RSpec.describe_current do
       let(:events2) { [] }
 
       before do
-        producer1.monitor.subscribe('error.emitted') do |event|
+        producer1.monitor.subscribe('error.occurred') do |event|
           events1 << event
         end
 
-        producer2.monitor.subscribe('error.emitted') do |event|
+        producer2.monitor.subscribe('error.occurred') do |event|
           events2 << event
         end
 

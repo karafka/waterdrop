@@ -24,13 +24,11 @@ module WaterDrop
         messages.buffered
 
         buffer.flushed_async
-        buffer.flushed_async.error
         buffer.flushed_sync
-        buffer.flushed_sync.error
 
         statistics.emitted
 
-        error.emitted
+        error.occurred
       ].freeze
 
       private_constant :EVENTS

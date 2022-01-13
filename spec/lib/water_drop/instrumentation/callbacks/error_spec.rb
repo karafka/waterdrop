@@ -12,14 +12,14 @@ RSpec.describe_current do
     let(:changed) { [] }
 
     before do
-      monitor.subscribe('error.emitted') do |event|
+      monitor.subscribe('error.occurred') do |event|
         changed << event[:error]
       end
 
       callback.call(client_name, error)
     end
 
-    context 'when emitted error refer different producer' do
+    context 'when occurred error refer different producer' do
       subject(:callback) { described_class.new(producer_id, 'other', monitor) }
 
       it 'expect not to emit them' do
@@ -27,27 +27,28 @@ RSpec.describe_current do
       end
     end
 
-    context 'when emitted error refer to expected producer' do
+    context 'when occurred error refer to expected producer' do
       it 'expects to emit them' do
         expect(changed).to eq([error])
       end
     end
   end
 
-  describe 'emitted event data format' do
+  describe 'occurred event data format' do
     let(:changed) { [] }
     let(:event) { changed.first }
 
     before do
-      monitor.subscribe('error.emitted') do |stat|
+      monitor.subscribe('error.occurred') do |stat|
         changed << stat
       end
 
       callback.call(client_name, error)
     end
 
-    it { expect(event.id).to eq('error.emitted') }
+    it { expect(event.id).to eq('error.occurred') }
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:error]).to eq(error) }
+    it { expect(event[:type]).to eq('librdkafka.error') }
   end
 end
