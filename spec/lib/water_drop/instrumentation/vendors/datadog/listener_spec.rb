@@ -65,7 +65,7 @@ RSpec.describe_current do
     it 'expect to have proper metrics in place' do
       # count
       expect(counts['waterdrop.calls']).to include([0, {}])
-      expect(counts['waterdrop.calls']).to include([1, {}])
+      expect(counts['waterdrop.calls'].uniq.size).to be > 1
       expect(counts['waterdrop.deliver.attempts']).to include([0, broker_tag])
       expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag])
       expect(counts['waterdrop.receive.errors']).to include([0, broker_tag])
@@ -162,5 +162,13 @@ RSpec.describe_current do
     it 'expect to have proper metrics data in place' do
       expect(dummy_client.buffer[:increment]['waterdrop.producer.flushed_async'].size).to eq(1)
     end
+  end
+
+  context 'when we encounter a node with id -1' do
+    pending
+  end
+
+  context 'when we try to publish a non-existing metric' do
+    pending
   end
 end
