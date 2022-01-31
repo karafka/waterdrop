@@ -101,7 +101,6 @@ PLATFORMS
 DEPENDENCIES
   byebug
   factory_bot
-  rdkafka
   rspec
   simplecov
   waterdrop!

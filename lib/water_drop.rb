@@ -26,6 +26,8 @@ end
 Zeitwerk::Loader
   .for_gem
   .tap { |loader| loader.ignore("#{__dir__}/waterdrop.rb") }
+  # Do not load vendors instrumentation components. Those need to be required manually if needed
+  .tap { |loader| loader.ignore("#{__dir__}/water_drop/instrumentation/vendors/**/*.rb") }
   .tap(&:setup)
   .tap(&:eager_load)
 

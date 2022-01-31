@@ -6,8 +6,6 @@ plugin 'diffend'
 
 gemspec
 
-gem 'rdkafka'
-
 group :development do
   gem 'byebug'
 end
