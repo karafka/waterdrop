@@ -64,7 +64,7 @@ module WaterDrop
             produced_async
             buffered
           ].each do |event_scope|
-            class_eval <<~METHODS, __FILE__, __LINE__
+            class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Dry::Events::Event]
               def on_message_#{event_scope}(event)
                 report_message(event[:message][:topic], :#{event_scope})
@@ -84,7 +84,7 @@ module WaterDrop
             flushed_sync
             flushed_async
           ].each do |event_scope|
-            class_eval <<~METHODS, __FILE__, __LINE__
+            class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Dry::Events::Event]
               def on_buffer_#{event_scope}(event)
                 event[:messages].each do |message|
