@@ -53,7 +53,7 @@ RSpec.describe_current do
       producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
 
       # Give it some time to emit the stats
-      sleep(0.1)
+      sleep(0.2)
     end
 
     let(:counts) { dummy_client.buffer[:count] }
@@ -61,31 +61,33 @@ RSpec.describe_current do
     let(:guages) { dummy_client.buffer[:gauge] }
     let(:broker_tag) { { tags: %w[broker:localhost:9092] } }
 
-    # count
-    it { expect(counts['waterdrop.calls']).to include([0, {}]) }
-    it { expect(counts['waterdrop.calls']).to include([1, {}]) }
-    it { expect(counts['waterdrop.deliver.attempts']).to include([0, broker_tag]) }
-    it { expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag]) }
-    it { expect(counts['waterdrop.receive.errors']).to include([0, broker_tag]) }
+    it 'expect to have proper metrics in place' do
+      # count
+      expect(counts['waterdrop.calls']).to include([0, {}])
+      expect(counts['waterdrop.calls']).to include([1, {}])
+      expect(counts['waterdrop.deliver.attempts']).to include([0, broker_tag])
+      expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag])
+      expect(counts['waterdrop.receive.errors']).to include([0, broker_tag])
 
-    # histogram
-    it { expect(histograms['waterdrop.queue.size']).to include([0, {}]) }
-    # -1 here means, one message was removed from the queue as we use histogram for tracking
-    it { expect(histograms['waterdrop.queue.size']).to include([-1, {}]) }
+      # histogram
+      expect(histograms['waterdrop.queue.size']).to include([0, {}])
+      # -1 here means, one message was removed from the queue as we use histogram for tracking
+      expect(histograms['waterdrop.queue.size']).to include([-1, {}])
 
-    # gauge
-    it { expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.queue.latency.avg']).to include([0, broker_tag]) }
-    it { expect(guages['waterdrop.queue.latency.p95'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.queue.latency.p95']).to include([0, broker_tag]) }
-    it { expect(guages['waterdrop.queue.latency.p99'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.queue.latency.p99']).to include([0, broker_tag]) }
-    it { expect(guages['waterdrop.network.latency.avg'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.network.latency.avg']).to include([0, broker_tag]) }
-    it { expect(guages['waterdrop.network.latency.p95'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.network.latency.p95']).to include([0, broker_tag]) }
-    it { expect(guages['waterdrop.network.latency.p99'].uniq.size).to be > 1 }
-    it { expect(guages['waterdrop.network.latency.p99']).to include([0, broker_tag]) }
+      # gauge
+      expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1
+      expect(guages['waterdrop.queue.latency.avg']).to include([0, broker_tag])
+      expect(guages['waterdrop.queue.latency.p95'].uniq.size).to be > 1
+      expect(guages['waterdrop.queue.latency.p95']).to include([0, broker_tag])
+      expect(guages['waterdrop.queue.latency.p99'].uniq.size).to be > 1
+      expect(guages['waterdrop.queue.latency.p99']).to include([0, broker_tag])
+      expect(guages['waterdrop.network.latency.avg'].uniq.size).to be > 1
+      expect(guages['waterdrop.network.latency.avg']).to include([0, broker_tag])
+      expect(guages['waterdrop.network.latency.p95'].uniq.size).to be > 1
+      expect(guages['waterdrop.network.latency.p95']).to include([0, broker_tag])
+      expect(guages['waterdrop.network.latency.p99'].uniq.size).to be > 1
+      expect(guages['waterdrop.network.latency.p99']).to include([0, broker_tag])
+    end
   end
 
   context 'when producing sync' do
