@@ -2,11 +2,13 @@
 
 module WaterDrop
   module Instrumentation
+    # Namespace for vendor specific instrumentation
     module Vendors
+      # Datadog specific instrumentation
       module Datadog
         # Listener that can be used to subscribe to WaterDrop producer to receive stats in DataDog
         #
-        # @note You need to setup the datadog/statsd client and assign it
+        # @note You need to setup the `dogstatsd-ruby` client and assign it
         class Listener
           include Dry::Configurable
 
@@ -62,7 +64,7 @@ module WaterDrop
             produced_async
             buffered
           ].each do |event_scope|
-            class_eval <<~METHODS
+            class_eval <<~METHODS, __FILE__, __LINE__
               # @param event [Dry::Events::Event]
               def on_message_#{event_scope}(event)
                 report_message(event[:message][:topic], :#{event_scope})
@@ -82,7 +84,7 @@ module WaterDrop
             flushed_sync
             flushed_async
           ].each do |event_scope|
-            class_eval <<~METHODS
+            class_eval <<~METHODS, __FILE__, __LINE__
               # @param event [Dry::Events::Event]
               def on_buffer_#{event_scope}(event)
                 event[:messages].each do |message|
@@ -96,9 +98,10 @@ module WaterDrop
 
           # Report that a message has been produced to a topic.
           # @param topic [String] Kafka topic
-          def report_message(topic, type)
+          # @param method_name [Symbol] method from which this message operation comes
+          def report_message(topic, method_name)
             client.increment(
-              namespaced_metric("producer.#{type}"),
+              namespaced_metric("producer.#{method_name}"),
               tags: ["topic:#{topic}"]
             )
           end
@@ -122,10 +125,7 @@ module WaterDrop
                 statistics.fetch(*metric.key_location)
               )
             when :brokers
-              statistics
-                .fetch('brokers')
-                .values
-                .each do |broker_statistics|
+              statistics.fetch('brokers').each_value do |broker_statistics|
                 # Skip bootstrap nodes
                 # Bootstrap nodes have nodeid -1, other nodes have positive
                 # node ids
