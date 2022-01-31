@@ -53,7 +53,7 @@ RSpec.describe_current do
       producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
 
       # Give it some time to emit the stats
-      sleep(0.2)
+      sleep(1)
     end
 
     let(:counts) { dummy_client.buffer[:count] }
@@ -61,6 +61,7 @@ RSpec.describe_current do
     let(:guages) { dummy_client.buffer[:gauge] }
     let(:broker_tag) { { tags: %w[broker:localhost:9092] } }
 
+    # We add all expectations in one example not to sleep each time
     it 'expect to have proper metrics in place' do
       # count
       expect(counts['waterdrop.calls']).to include([0, {}])

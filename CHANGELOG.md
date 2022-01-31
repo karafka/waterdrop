@@ -1,7 +1,9 @@
 # WaterDrop changelog
 
 ## 2.1.1 (Unreleased)
-- Add DataDog listener for metrics + errors publishing
+- Add Datadog listener for metrics + errors publishing
+- Add Datadog example dashboard template
+- Update Readme to show Dd instrumentation usage
 
 ## 2.1.0 (2022-01-03)
 - Ruby 3.1 support
