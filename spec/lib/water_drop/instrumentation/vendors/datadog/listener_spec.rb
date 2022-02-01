@@ -164,6 +164,26 @@ RSpec.describe_current do
     end
   end
 
+  context 'when error occurred' do
+    let(:producer) do
+      producer = create(
+        :producer,
+        kafka: { 'bootstrap.servers' => 'localhost:9093', 'statistics.interval.ms' => 100 }
+      )
+      producer.monitor.subscribe listener
+      producer
+    end
+
+    before do
+      producer.produce_async(topic: rand.to_s, payload: rand.to_s)
+      sleep(0.1)
+    end
+
+    it 'expect error count to increase' do
+      expect(dummy_client.buffer[:count]['waterdrop.producer.error_occurred']).not_to be_empty
+    end
+  end
+
   context 'when we encounter a node with id -1' do
     let(:metric) { described_class.new.rd_kafka_metrics.last }
 
