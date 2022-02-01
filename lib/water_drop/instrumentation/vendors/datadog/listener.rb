@@ -61,7 +61,7 @@ module WaterDrop
 
           # Increases the errors count by 1
           #
-          # @param event [Dry::Events::Event]
+          # @param _event [Dry::Events::Event]
           def on_error_occurred(_event)
             client.count(
               namespaced_metric('producer.error_occurred'),
