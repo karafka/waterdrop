@@ -13,7 +13,7 @@ module WaterDrop
           include Dry::Configurable
 
           # Value object for storing a single rdkafka metric publishing details
-          RdkafkaMetric = Struct.new(:type, :scope, :name, :key_location)
+          RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
 
           # Namespace under which the DD metrics should be published
           setting :namespace, default: 'waterdrop', reader: true
@@ -25,21 +25,21 @@ module WaterDrop
           #
           # By default we publish quite a lot so this can be tuned
           # Note, that the once with `_d` come from WaterDrop, not rdkafka or Kafka
-          setting :rdkafka_metrics, reader: true, default: [
+          setting :rd_kafka_metrics, reader: true, default: [
             # Client metrics
-            RdkafkaMetric.new(:count, :root, 'calls', 'tx_d'),
-            RdkafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt_d'),
+            RdKafkaMetric.new(:count, :root, 'calls', 'tx_d'),
+            RdKafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt_d'),
 
             # Broker metrics
-            RdkafkaMetric.new(:count, :brokers, 'deliver.attempts', 'txretries_d'),
-            RdkafkaMetric.new(:count, :brokers, 'deliver.errors', 'txerrs_d'),
-            RdkafkaMetric.new(:count, :brokers, 'receive.errors', 'rxerrs_d'),
-            RdkafkaMetric.new(:gauge, :brokers, 'queue.latency.avg', %w[outbuf_latency avg]),
-            RdkafkaMetric.new(:gauge, :brokers, 'queue.latency.p95', %w[outbuf_latency p95]),
-            RdkafkaMetric.new(:gauge, :brokers, 'queue.latency.p99', %w[outbuf_latency p99]),
-            RdkafkaMetric.new(:gauge, :brokers, 'network.latency.avg', %w[rtt avg]),
-            RdkafkaMetric.new(:gauge, :brokers, 'network.latency.p95', %w[rtt p95]),
-            RdkafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99])
+            RdKafkaMetric.new(:count, :brokers, 'deliver.attempts', 'txretries_d'),
+            RdKafkaMetric.new(:count, :brokers, 'deliver.errors', 'txerrs_d'),
+            RdKafkaMetric.new(:count, :brokers, 'receive.errors', 'rxerrs_d'),
+            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.avg', %w[outbuf_latency avg]),
+            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.p95', %w[outbuf_latency p95]),
+            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.p99', %w[outbuf_latency p99]),
+            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.avg', %w[rtt avg]),
+            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p95', %w[rtt p95]),
+            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99])
           ].freeze
 
           # @param block [Proc] configuration block
@@ -54,7 +54,7 @@ module WaterDrop
           def on_statistics_emitted(event)
             statistics = event[:statistics]
 
-            rdkafka_metrics.each do |metric|
+            rd_kafka_metrics.each do |metric|
               report_metric(metric, statistics)
             end
           end
@@ -107,14 +107,14 @@ module WaterDrop
           end
 
           # Wraps metric name in listener's namespace
-          # @param metric_name [String] RdkafkaMetric name
+          # @param metric_name [String] RdKafkaMetric name
           # @return [String]
           def namespaced_metric(metric_name)
             "#{namespace}.#{metric_name}"
           end
 
           # Reports a given metric statistics to Datadog
-          # @param metric [RdkafkaMetric] metric value object
+          # @param metric [RdKafkaMetric] metric value object
           # @param statistics [Hash] hash with all the statistics emitted
           def report_metric(metric, statistics)
             case metric.scope

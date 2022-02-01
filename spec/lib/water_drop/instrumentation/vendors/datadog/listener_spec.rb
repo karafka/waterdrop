@@ -165,10 +165,27 @@ RSpec.describe_current do
   end
 
   context 'when we encounter a node with id -1' do
-    pending
+    let(:metric) { described_class.new.rd_kafka_metrics.last }
+
+    let(:statistics) do
+      {
+        'brokers' => {
+          'node_name' => { 'nodeid' => -1 }
+        }
+      }
+    end
+
+    it 'expect not to publish metrics on it' do
+      expect { listener.send(:report_metric, metric, statistics) }.not_to raise_error
+    end
   end
 
   context 'when we try to publish a non-existing metric' do
-    pending
+    let(:metric) { described_class::RdKafkaMetric.new(:count, :na, 'na') }
+    let(:statistics) { {} }
+
+    it do
+      expect { listener.send(:report_metric, metric, statistics) }.to raise_error(ArgumentError)
+    end
   end
 end
