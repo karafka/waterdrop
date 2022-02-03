@@ -43,6 +43,11 @@ module WaterDrop
           ].freeze
 
           # @param block [Proc] configuration block
+          def initialize(&block)
+            setup(&block) if block
+          end
+
+          # @param block [Proc] configuration block
           # @note We define this alias to be consistent with `WaterDrop#setup`
           def setup(&block)
             configure(&block)

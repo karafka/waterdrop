@@ -45,6 +45,18 @@ RSpec.describe_current do
     producer
   end
 
+  context 'configuring upon initialization' do
+    let(:listener) do
+      described_class.new do |config|
+        config.client = dummy_client
+      end
+    end
+
+    it 'expect to work' do
+      expect(listener.client).to eq(dummy_client)
+    end
+  end
+
   # Here we focus on metrics coming from rdkafka, we dispatch this single message just to have
   # some fluctuation
   context 'when expecting emitted stats DD dispatch' do
