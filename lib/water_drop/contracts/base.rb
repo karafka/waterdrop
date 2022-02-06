@@ -8,7 +8,6 @@ module WaterDrop
 
       # @param data [Hash] data for validation
       # @param error_class [Class] error class that should be used when validation fails
-      # @return [Boolean] true if all good or exception is raised
       def validate!(data, error_class)
         result = call(data)
 
