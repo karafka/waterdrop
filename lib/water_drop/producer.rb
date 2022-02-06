@@ -150,13 +150,7 @@ module WaterDrop
     # @param message [Hash] message we want to send
     # @raise [Karafka::Errors::MessageInvalidError]
     def validate_message!(message)
-      result = @contract.call(message)
-      return if result.success?
-
-      raise Errors::MessageInvalidError, [
-        result.errors.to_h,
-        message
-      ]
+      @contract.validate!(message, Errors::MessageInvalidError)
     end
   end
 end

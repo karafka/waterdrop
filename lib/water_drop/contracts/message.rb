@@ -4,7 +4,7 @@ module WaterDrop
   module Contracts
     # Contract with validation rules for validating that all the message options that
     # we provide to producer ale valid and usable
-    class Message < Dry::Validation::Contract
+    class Message < Base
       # Regex to check that topic has a valid format
       TOPIC_REGEXP = /\A(\w|-|\.)+\z/.freeze
 
@@ -12,8 +12,6 @@ module WaterDrop
       STRING_ASSERTION = ->(value) { value.is_a?(String) }.to_proc
 
       private_constant :TOPIC_REGEXP, :STRING_ASSERTION
-
-      config.messages.load_paths << File.join(WaterDrop.gem_root, 'config', 'errors.yml')
 
       option :max_payload_size
 
