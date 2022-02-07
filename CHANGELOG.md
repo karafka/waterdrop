@@ -1,7 +1,8 @@
 # WaterDrop changelog
 
-## 2.1.1 (Unreleased)
+## 2.2.0 (Unreleased)
 - Introduce a common base for validation contracts
+- Drop support for ruby 2.6
 
 ## 2.1.0 (2022-01-03)
 - Ruby 3.1 support
