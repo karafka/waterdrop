@@ -3,9 +3,9 @@
 module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
-    class Config < Dry::Validation::Contract
+    class Config < Base
       # Ensure valid format of each seed broker so that rdkafka doesn't fail silently
-      SEED_BROKER_FORMAT_REGEXP = %r{\A([^:/,]+:[0-9]+)(,[^:/,]+:[0-9]+)*\z}.freeze
+      SEED_BROKER_FORMAT_REGEXP = %r{\A([^:/,]+:[0-9]+)(,[^:/,]+:[0-9]+)*\z}
 
       private_constant :SEED_BROKER_FORMAT_REGEXP
 
