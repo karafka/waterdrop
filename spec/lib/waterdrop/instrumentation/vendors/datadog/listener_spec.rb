@@ -150,7 +150,7 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.producer.buffered'].size).to eq(3)
+      expect(dummy_client.buffer[:histogram]['waterdrop.producer.buffer.size'].size).to eq(2)
     end
   end
 

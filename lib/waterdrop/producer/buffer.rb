@@ -24,7 +24,8 @@ module WaterDrop
         @monitor.instrument(
           'message.buffered',
           producer_id: id,
-          message: message
+          message: message,
+          buffer: @messages
         ) { @messages << message }
       end
 
@@ -41,7 +42,8 @@ module WaterDrop
         @monitor.instrument(
           'messages.buffered',
           producer_id: id,
-          messages: messages
+          messages: messages,
+          buffer: @messages
         ) do
           messages.each { |message| @messages << message }
           messages

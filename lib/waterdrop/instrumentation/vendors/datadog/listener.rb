@@ -77,7 +77,6 @@ module WaterDrop
           %i[
             produced_sync
             produced_async
-            buffered
           ].each do |event_scope|
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Dry::Events::Event]
@@ -94,7 +93,24 @@ module WaterDrop
             METHODS
           end
 
+          # Reports the buffer usage when anything is added to the buffer
+          %i[
+            message_buffered
+            messages_buffered
+          ].each do |event_scope|
+            class_eval <<~METHODS, __FILE__, __LINE__ + 1
+              # @param event [Dry::Events::Event]
+              def on_#{event_scope}(event)
+                client.histogram(
+                  namespaced_metric('producer.buffer.size'),
+                  event[:buffer].size
+                )
+              end
+            METHODS
+          end
+
           # Events that support many messages only
+          # Reports data flushing operation (production from the buffer)
           %i[
             flushed_sync
             flushed_async
