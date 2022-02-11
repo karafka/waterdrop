@@ -36,7 +36,7 @@ It:
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
   * [Error notifications](#error-notifications)
-  * [Datadog integration](#datadog-integration)
+  * [Datadog and StatsD integration](#datadog-and-statsd-integration)
   * [Forking and potential memory problems](#forking-and-potential-memory-problems)
 - [Note on contributions](#note-on-contributions)
 
@@ -289,9 +289,9 @@ producer.close
 
 Note: The metrics returned may not be completely consistent between brokers, toppars and totals, due to the internal asynchronous nature of librdkafka. E.g., the top level tx total may be less than the sum of the broker tx values which it represents.
 
-### Datadog integration
+### Datadog and StatsD integration
 
-WaterDrop comes with (optional) full Datadog integration that you can use. To use it:
+WaterDrop comes with (optional) full Datadog and StatsD integration that you can use. To use it:
 
 ```ruby
 # require datadog/statsd and the listener as it is not loaded by default
@@ -315,6 +315,8 @@ end
 # Subscribe with your listener to your producer and you should be ready to go!
 producer.monitor.subscribe(listener)
 ```
+
+You can also find a ready to import DataDog dashboard cofiguration file that you can use to monitor all of your producer.
 
 ### Error notifications
 
