@@ -1,8 +1,12 @@
 # WaterDrop changelog
 
 ## 2.2.0 (Unreleased)
+- Add Datadog listener for metrics + errors publishing
+- Add Datadog example dashboard template
+- Update Readme to show Dd instrumentation usage
+- Align the directory namespace convention with gem name (waterdrop => WaterDrop)
 - Introduce a common base for validation contracts
-- Drop support for ruby 2.6
+- Drop CI support for ruby 2.6
 
 ## 2.1.0 (2022-01-03)
 - Ruby 3.1 support

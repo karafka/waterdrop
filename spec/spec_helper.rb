@@ -37,4 +37,5 @@ end
 
 RSpec.extend RSpecLocator.new(__FILE__)
 
-require 'water_drop'
+require 'waterdrop'
+require 'waterdrop/instrumentation/vendors/datadog/listener'

@@ -36,6 +36,7 @@ It:
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
   * [Error notifications](#error-notifications)
+  * [Datadog and StatsD integration](#datadog-and-statsd-integration)
   * [Forking and potential memory problems](#forking-and-potential-memory-problems)
 - [Note on contributions](#note-on-contributions)
 
@@ -287,6 +288,37 @@ producer.close
 ```
 
 Note: The metrics returned may not be completely consistent between brokers, toppars and totals, due to the internal asynchronous nature of librdkafka. E.g., the top level tx total may be less than the sum of the broker tx values which it represents.
+
+### Datadog and StatsD integration
+
+WaterDrop comes with (optional) full Datadog and StatsD integration that you can use. To use it:
+
+```ruby
+# require datadog/statsd and the listener as it is not loaded by default
+require 'datadog/statsd'
+require 'waterdrop/instrumentation/vendors/datadog/listener'
+
+# initialize your producer with statistics.interval.ms enabled so the metrics are published
+producer = WaterDrop::Producer.new do |config|
+  config.deliver = true
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'statistics.interval.ms': 1_000
+  }
+end
+
+# initialize the listener with statsd client
+listener = ::WaterDrop::Instrumentation::Vendors::Datadog::Listener.new do |config|
+  config.client = Datadog::Statsd.new('localhost', 8125)
+  # Publish host as a tag alongside the rest of tags
+  config.default_tags = ["host:#{Socket.gethostname}"]
+end
+
+# Subscribe with your listener to your producer and you should be ready to go!
+producer.monitor.subscribe(listener)
+```
+
+You can also find a ready to import DataDog dashboard configuration file that you can use to monitor all of your producer.
 
 ### Error notifications
 

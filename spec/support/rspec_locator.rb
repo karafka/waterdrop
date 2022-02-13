@@ -45,6 +45,7 @@ class RSpecLocator < Module
       .itself[1..]
       .join('/')
       .camelize
+      .gsub('Waterdrop', 'WaterDrop')
       .constantize
   end
 end
