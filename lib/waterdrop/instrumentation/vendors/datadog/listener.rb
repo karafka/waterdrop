@@ -77,7 +77,7 @@ module WaterDrop
 
           # Increases acknowledged messages counter
           # @param _event [Dry::Events::Event]
-          def on_message_acknowledged(event)
+          def on_message_acknowledged(_event)
             client.increment(
               namespaced_metric('acknowledged')
             )

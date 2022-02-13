@@ -316,7 +316,7 @@ end
 producer.monitor.subscribe(listener)
 ```
 
-You can also find a ready to import DataDog dashboard cofiguration file that you can use to monitor all of your producer.
+You can also find a ready to import DataDog dashboard configuration file that you can use to monitor all of your producer.
 
 ### Error notifications
 

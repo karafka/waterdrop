@@ -45,7 +45,7 @@ RSpec.describe_current do
     producer
   end
 
-  context 'configuring upon initialization' do
+  context 'when setting up a listener upon initialization' do
     let(:listener) do
       described_class.new do |config|
         config.client = dummy_client
