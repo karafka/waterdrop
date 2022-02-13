@@ -32,7 +32,7 @@ RSpec.describe_current do
         gauge
         increment
       ].each do |method_name|
-        define_method method_name do |metric, value, details = {}|
+        define_method method_name do |metric, value = nil, details = {}|
           @buffer[method_name][metric] << [value, details]
         end
       end
@@ -116,7 +116,7 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.producer.produced_sync'].size).to eq(3)
+      expect(dummy_client.buffer[:increment]['waterdrop.produced_sync'].size).to eq(3)
     end
   end
 
@@ -133,7 +133,7 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.producer.produced_async'].size).to eq(3)
+      expect(dummy_client.buffer[:increment]['waterdrop.produced_async'].size).to eq(3)
     end
   end
 
@@ -150,7 +150,7 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:histogram]['waterdrop.producer.buffer.size'].size).to eq(2)
+      expect(dummy_client.buffer[:histogram]['waterdrop.buffer.size'].size).to eq(2)
     end
   end
 
@@ -161,7 +161,7 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.producer.flushed_sync'].size).to eq(1)
+      expect(dummy_client.buffer[:increment]['waterdrop.flushed_sync'].size).to eq(1)
     end
   end
 
@@ -172,7 +172,17 @@ RSpec.describe_current do
     end
 
     it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.producer.flushed_async'].size).to eq(1)
+      expect(dummy_client.buffer[:increment]['waterdrop.flushed_async'].size).to eq(1)
+    end
+  end
+
+  context 'when message is acknowledged' do
+    before do
+      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+    end
+
+    it 'expect to have a proper metric in place' do
+      expect(dummy_client.buffer[:increment]['waterdrop.acknowledged'].size).to eq(1)
     end
   end
 
@@ -192,7 +202,7 @@ RSpec.describe_current do
     end
 
     it 'expect error count to increase' do
-      expect(dummy_client.buffer[:count]['waterdrop.producer.error_occurred']).not_to be_empty
+      expect(dummy_client.buffer[:count]['waterdrop.error_occurred']).not_to be_empty
     end
   end
 

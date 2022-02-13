@@ -6,7 +6,8 @@ module WaterDrop
     module Vendors
       # Datadog specific instrumentation
       module Datadog
-        # Listener that can be used to subscribe to WaterDrop producer to receive stats in DataDog
+        # Listener that can be used to subscribe to WaterDrop producer to receive stats via StatsD
+        # and/or Datadog
         #
         # @note You need to setup the `dogstatsd-ruby` client and assign it
         class Listener
@@ -69,8 +70,16 @@ module WaterDrop
           # @param _event [Dry::Events::Event]
           def on_error_occurred(_event)
             client.count(
-              namespaced_metric('producer.error_occurred'),
+              namespaced_metric('error_occurred'),
               1
+            )
+          end
+
+          # Increases acknowledged messages counter
+          # @param _event [Dry::Events::Event]
+          def on_message_acknowledged(event)
+            client.increment(
+              namespaced_metric('acknowledged')
             )
           end
 
@@ -102,7 +111,7 @@ module WaterDrop
               # @param event [Dry::Events::Event]
               def on_#{event_scope}(event)
                 client.histogram(
-                  namespaced_metric('producer.buffer.size'),
+                  namespaced_metric('buffer.size'),
                   event[:buffer].size
                 )
               end
@@ -132,7 +141,7 @@ module WaterDrop
           # @param method_name [Symbol] method from which this message operation comes
           def report_message(topic, method_name)
             client.increment(
-              namespaced_metric("producer.#{method_name}"),
+              namespaced_metric(method_name),
               tags: ["topic:#{topic}"]
             )
           end
