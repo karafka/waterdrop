@@ -179,6 +179,8 @@ RSpec.describe_current do
   context 'when message is acknowledged' do
     before do
       producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      # We need to give the async callback a bit of time to kick in
+      sleep(0.1)
     end
 
     it 'expect to have a proper metric in place' do
