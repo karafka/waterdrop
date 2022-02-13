@@ -2,7 +2,7 @@
 
 **Note**: Documentation presented here refers to WaterDrop `2.0.0`.
 
-WaterDrop `2.0` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of not yet released Karafka `2.0.*`.
+WaterDrop `2.0` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of soon to be released Karafka `2.0.*`.
 
 Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and its documentation for details about WaterDrop `1.*` usage.
 
