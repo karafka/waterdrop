@@ -45,6 +45,28 @@ RSpec.describe_current do
     producer
   end
 
+  context 'when having some default tags present' do
+    subject(:listener) do
+      client = described_class.new
+
+      client.setup do |config|
+        config.client = dummy_client
+        config.default_tags = %w[test:me]
+      end
+
+      client
+    end
+
+    context 'when publishing, default tags should be included' do
+      before { producer.produce_sync(topic: rand.to_s, payload: rand.to_s) }
+
+      it 'expect to have proper metrics data in place' do
+        published_tags = dummy_client.buffer[:increment]['waterdrop.produced_sync'][0][0][:tags]
+        expect(published_tags).to include('test:me')
+      end
+    end
+  end
+
   context 'when setting up a listener upon initialization' do
     let(:listener) do
       described_class.new do |config|
@@ -76,16 +98,16 @@ RSpec.describe_current do
     # We add all expectations in one example not to sleep each time
     it 'expect to have proper metrics in place' do
       # count
-      expect(counts['waterdrop.calls']).to include([0, {}])
+      expect(counts['waterdrop.calls']).to include([0, { tags: [] }])
       expect(counts['waterdrop.calls'].uniq.size).to be > 1
       expect(counts['waterdrop.deliver.attempts']).to include([0, broker_tag])
       expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag])
       expect(counts['waterdrop.receive.errors']).to include([0, broker_tag])
 
       # histogram
-      expect(histograms['waterdrop.queue.size']).to include([0, {}])
+      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
       # -1 here means, one message was removed from the queue as we use histogram for tracking
-      expect(histograms['waterdrop.queue.size']).to include([-1, {}])
+      expect(histograms['waterdrop.queue.size']).to include([-1, { tags: [] }])
 
       # gauge
       expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1

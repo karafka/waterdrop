@@ -22,6 +22,10 @@ module WaterDrop
           # Datadog client that we should use to publish the metrics
           setting :client, reader: true
 
+          # Default tags we want to publish (for example hostname)
+          # Format as followed (example for hostname): `["host:#{Socket.gethostname}"]`
+          setting :default_tags, default: [], reader: true
+
           # All the rdkafka metrics we want to publish
           #
           # By default we publish quite a lot so this can be tuned
@@ -71,7 +75,8 @@ module WaterDrop
           def on_error_occurred(_event)
             client.count(
               namespaced_metric('error_occurred'),
-              1
+              1,
+              tags: default_tags
             )
           end
 
@@ -79,7 +84,8 @@ module WaterDrop
           # @param _event [Dry::Events::Event]
           def on_message_acknowledged(_event)
             client.increment(
-              namespaced_metric('acknowledged')
+              namespaced_metric('acknowledged'),
+              tags: default_tags
             )
           end
 
@@ -112,7 +118,8 @@ module WaterDrop
               def on_#{event_scope}(event)
                 client.histogram(
                   namespaced_metric('buffer.size'),
-                  event[:buffer].size
+                  event[:buffer].size,
+                  tags: default_tags
                 )
               end
             METHODS
@@ -142,7 +149,7 @@ module WaterDrop
           def report_message(topic, method_name)
             client.increment(
               namespaced_metric(method_name),
-              tags: ["topic:#{topic}"]
+              tags: default_tags + ["topic:#{topic}"]
             )
           end
 
@@ -162,7 +169,8 @@ module WaterDrop
               client.public_send(
                 metric.type,
                 namespaced_metric(metric.name),
-                statistics.fetch(*metric.key_location)
+                statistics.fetch(*metric.key_location),
+                tags: default_tags
               )
             when :brokers
               statistics.fetch('brokers').each_value do |broker_statistics|
@@ -175,7 +183,7 @@ module WaterDrop
                   metric.type,
                   namespaced_metric(metric.name),
                   broker_statistics.dig(*metric.key_location),
-                  tags: ["broker:#{broker_statistics['nodename']}"]
+                  tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
                 )
               end
             else

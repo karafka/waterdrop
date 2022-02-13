@@ -310,6 +310,8 @@ end
 # initialize the listener with statsd client
 listener = ::WaterDrop::Instrumentation::Vendors::Datadog::Listener.new do |config|
   config.client = Datadog::Statsd.new('localhost', 8125)
+  # Publish host as a tag alongside the rest of tags
+  config.default_tags = ["host:#{Socket.gethostname}"]
 end
 
 # Subscribe with your listener to your producer and you should be ready to go!
