@@ -42,11 +42,7 @@ It:
 
 ## Installation
 
-```ruby
-gem install waterdrop
-```
-
-or add this to your Gemfile:
+Add this to your Gemfile:
 
 ```ruby
 gem 'waterdrop'
