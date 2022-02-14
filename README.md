@@ -202,7 +202,7 @@ producer.setup do |config|
   config.kafka = {
     'bootstrap.servers': 'localhost:9092',
     # Accumulate messages for at most 10 seconds
-    'queue.buffering.max.ms' => 10_000
+    'queue.buffering.max.ms': 10_000
   }
 end
 

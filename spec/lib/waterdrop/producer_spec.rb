@@ -15,7 +15,7 @@ RSpec.describe_current do
       subject(:producer) do
         described_class.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
         end
       end
 
@@ -38,7 +38,7 @@ RSpec.describe_current do
       let(:setup) do
         lambda { |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers' => 'localhost:9092' }
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
         }
       end
 
@@ -235,7 +235,7 @@ RSpec.describe_current do
     let(:message) { build(:valid_message) }
 
     context 'when error occurs' do
-      subject(:producer) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+      subject(:producer) { build(:producer, kafka: { 'bootstrap.servers': 'localhost:9090' }) }
 
       let(:events) { [] }
 
@@ -259,8 +259,8 @@ RSpec.describe_current do
     end
 
     context 'when we have more producers' do
-      let(:producer1) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
-      let(:producer2) { build(:producer, kafka: { 'bootstrap.servers' => 'localhost:9090' }) }
+      let(:producer1) { build(:producer, kafka: { 'bootstrap.servers': 'localhost:9090' }) }
+      let(:producer2) { build(:producer, kafka: { 'bootstrap.servers': 'localhost:9090' }) }
       let(:events1) { [] }
       let(:events2) { [] }
 

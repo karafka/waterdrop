@@ -93,73 +93,10 @@ RSpec.describe_current do
   end
 
   context 'when kafka hash is present' do
-    let(:invalid_format) { 'is in invalid format' }
+    context 'when there is a non-symbol key setting' do
+      before { config[:kafka] = { 'not_a_symbol' => true } }
 
-    context 'when validating bootstrap.servers scope' do
-      before { config[:kafka] = { 'bootstrap.servers': bootstrap_servers } }
-
-      context 'when nil' do
-        let(:bootstrap_servers) { nil }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq ['must be filled'] }
-      end
-
-      context 'when an empty string' do
-        let(:bootstrap_servers) { '' }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq ['must be filled'] }
-      end
-
-      context 'when single seed broker with a non URI' do
-        let(:bootstrap_servers) { 1234 }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq(['must be a string']) }
-      end
-
-      context 'when single seed broker with explicit URI scheme' do
-        let(:bootstrap_servers) { 'kafka://127.0.0.1:9092' }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq [invalid_format] }
-      end
-
-      context 'when single seed broker without a port' do
-        let(:bootstrap_servers) { '127.0.0.1' }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq [invalid_format] }
-      end
-
-      context 'when a valid single seed broker' do
-        let(:bootstrap_servers) { '127.0.0.1:9092' }
-
-        it { expect(contract_result).to be_success }
-        it { expect(contract_errors).to be_empty }
-      end
-
-      context 'when multiple seed brokers with at one of them with explicit URI scheme' do
-        let(:bootstrap_servers) { '127.0.0.1:9092,kafka://127.0.0.1:9093' }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq [invalid_format] }
-      end
-
-      context 'when multiple seed brokers with at least one of them missing a port' do
-        let(:bootstrap_servers) { '127.0.0.1,kafka:9092' }
-
-        it { expect(contract_result).not_to be_success }
-        it { expect(contract_errors[:kafka][:'bootstrap.servers']).to eq [invalid_format] }
-      end
-
-      context 'when seed brokers separated by a comma, without explicit URI scheme, with port' do
-        let(:bootstrap_servers) { '127.0.0.1:9093,kafka:9092' }
-
-        it { expect(contract_result).to be_success }
-        it { expect(contract_errors).to be_empty }
-      end
+      it { expect(contract_result).not_to be_success }
     end
   end
 
