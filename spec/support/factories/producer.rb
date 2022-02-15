@@ -9,10 +9,10 @@ FactoryBot.define do
     max_wait_timeout { 30 }
     kafka do
       {
-        'bootstrap.servers' => 'localhost:9092',
+        'bootstrap.servers': 'localhost:9092',
         # We emit statistics as it is a great way to check they actually always work
-        'statistics.interval.ms' => 100,
-        'request.required.acks' => 1
+        'statistics.interval.ms': 100,
+        'request.required.acks': 1
       }
     end
 

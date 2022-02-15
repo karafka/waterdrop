@@ -9,7 +9,7 @@ module WaterDrop
 
     # Defaults for kafka settings, that will be overwritten only if not present already
     KAFKA_DEFAULTS = {
-      'client.id' => 'waterdrop'
+      'client.id': 'waterdrop'
     }.freeze
 
     private_constant :KAFKA_DEFAULTS

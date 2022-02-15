@@ -4,3 +4,4 @@ en:
       invalid_key_type: all keys need to be of type String
       invalid_value_type: all values need to be of type String
       max_payload_size: is more than `max_payload_size` config value
+      kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols

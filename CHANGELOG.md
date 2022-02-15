@@ -7,6 +7,7 @@
 - Align the directory namespace convention with gem name (waterdrop => WaterDrop)
 - Introduce a common base for validation contracts
 - Drop CI support for ruby 2.6
+- Require all `kafka` settings to have symbol keys (compatibility with Karafka 2.0 and rdkafka)
 
 ## 2.1.0 (2022-01-03)
 - Ruby 3.1 support
