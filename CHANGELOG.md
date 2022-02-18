@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.2.0 (Unreleased)
+## 2.2.0 (2022-02-18)
 - Add Datadog listener for metrics + errors publishing
 - Add Datadog example dashboard template
 - Update Readme to show Dd instrumentation usage
