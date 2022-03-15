@@ -314,7 +314,7 @@ end
 producer.monitor.subscribe(listener)
 ```
 
-You can also find a ready to import DataDog dashboard configuration file that you can use to monitor all of your producer.
+You can also find [here](https://github.com/karafka/waterdrop/blob/master/lib/waterdrop/instrumentation/vendors/datadog/dashboard.json) a ready to import DataDog dashboard configuration file that you can use to monitor all of your producers.
 
 ### Error notifications
 
