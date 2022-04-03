@@ -6,8 +6,8 @@ module WaterDrop
     # It can be removed/replaced or anything without any harm to the Waterdrop flow
     # @note It is a module as we can use it then as a part of the Karafka framework listener
     #   as well as we can use it standalone
-    class StdoutListener
-      # @param logger [Object] stdout logger we want to use
+    class LoggerListener
+      # @param logger [Object] logger we want to use
       def initialize(logger)
         @logger = logger
       end
