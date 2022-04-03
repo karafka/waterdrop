@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.3.0 (Unreleased)
+## 2.3.0 (2022-04-03)
 -  Rename StdoutListener to LoggerListener (#240)
 
 ## 2.2.0 (2022-02-18)
