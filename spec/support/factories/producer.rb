@@ -24,7 +24,7 @@ FactoryBot.define do
         config.max_wait_timeout = max_wait_timeout
       end
 
-      instance.monitor.subscribe(::WaterDrop::Instrumentation::StdoutListener.new(logger))
+      instance.monitor.subscribe(::WaterDrop::Instrumentation::LoggerListener.new(logger))
 
       instance
     end
