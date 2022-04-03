@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
-## 2.2.0 (Unreleased)
+## 2.3.0 (Unreleased)
+-  Rename StdoutListener to LoggerListener (#240)
 
 ## 2.2.0 (2022-02-18)
 - Add Datadog listener for metrics + errors publishing
