@@ -12,9 +12,10 @@ module WaterDrop
         def name
           unless @_native
             version = ::Gem::Version.new(::Rdkafka::VERSION)
+            change = ::Gem::Version.new('0.12.0')
             # 0.12.0 changed how the native producer client reference works.
             # This code supports both older and newer versions of rdkafka
-            @_native = version >= '0.12.0' ? @client.native : @native_kafka
+            @_native = version >= change ? @client.native : @native_kafka
           end
 
           ::Rdkafka::Bindings.rd_kafka_name(@_native)
