@@ -10,10 +10,12 @@ module WaterDrop
         # Adds a method that allows us to get the native kafka producer name
         # @return [String] producer instance name
         def name
-          @_gem_version ||= ::Gem::Version.new(::Rdkafka::VERSION)
-          # 0.12.0 changed how the native producer client reference works.
-          # This code supports both older and newer versions of rdkafka
-          @_native ||=  @_gem_version >= '0.12.0' ? @client.native : @native_kafka
+          unless @_native
+            version = ::Gem::Version.new(::Rdkafka::VERSION)
+            # 0.12.0 changed how the native producer client reference works.
+            # This code supports both older and newer versions of rdkafka
+            @_native ||= version >= '0.12.0' ? @client.native : @native_kafka
+          end
 
           ::Rdkafka::Bindings.rd_kafka_name(@_native)
         end
