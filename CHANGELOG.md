@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.3.1 (2022-06-17)
+- Update rdkafka patches to align with `0.12.0` and `0.11.1` support.
+
 ## 2.3.0 (2022-04-03)
 -  Rename StdoutListener to LoggerListener (#240)
 
