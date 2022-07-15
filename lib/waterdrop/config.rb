@@ -5,7 +5,7 @@
 module WaterDrop
   # Configuration object for setting up all options required by WaterDrop
   class Config
-    include Dry::Configurable
+    include Configurable
 
     # Defaults for kafka settings, that will be overwritten only if not present already
     KAFKA_DEFAULTS = {
@@ -68,6 +68,8 @@ module WaterDrop
 
         ::Rdkafka::Config.logger = config.logger
       end
+
+      self
     end
 
     private
