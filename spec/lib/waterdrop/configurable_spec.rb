@@ -22,18 +22,6 @@ RSpec.describe_current do
 
     let(:config) { configurable_class.config }
 
-    it 'expect double compile to indicate that it is already frozen' do
-      expect { 2.times { configurable_class.configure } }.to raise_error(FrozenError)
-    end
-
-    context 'when trying to redefine a node' do
-      it do
-        expect do
-          configurable_class.configure { |config| config.nested1 = 1 }
-        end.to raise_error(NoMethodError)
-      end
-    end
-
     context 'when we do not override any settings' do
       before { configurable_class.configure }
 
@@ -42,7 +30,6 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
     end
 
     context 'when we do override some settings' do
@@ -58,7 +45,6 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
     end
 
     context 'when we inherit and alter settings' do
@@ -82,13 +68,11 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
       it { expect(config_sub.with_default).to eq(123) }
       it { expect(config_sub.nested1.nested2.leaf).to eq(6) }
       it { expect(config_sub.nested1.nested1).to eq(1) }
       it { expect(config_sub.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config_sub.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config_sub).to be_frozen }
     end
 
     context 'when we inherit and change values' do
@@ -110,6 +94,17 @@ RSpec.describe_current do
 
       it { expect(config.with_default).to eq(123) }
       it { expect(config_sub.with_default).to eq(0) }
+    end
+
+    context 'when we run configuration once again' do
+      before do
+        config.configure { |node| node.with_default = 555 }
+        config.configure { |node| node.nested1.nested1 = 123 }
+      end
+
+      it 'expect not to update values that are set' do
+        expect(config.with_default).to eq(555)
+      end
     end
 
     describe '#to_h' do
@@ -146,10 +141,6 @@ RSpec.describe_current do
     let(:configurable) { configurable_class.new }
     let(:config) { configurable.config }
 
-    it 'expect double compile to indicate that it is already frozen' do
-      expect { 2.times { configurable.configure } }.to raise_error(FrozenError)
-    end
-
     context 'when we do not override any settings' do
       before { configurable.configure }
 
@@ -158,7 +149,6 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
     end
 
     context 'when we have two instances' do
@@ -190,7 +180,6 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
     end
 
     context 'when we inherit and alter settings' do
@@ -214,13 +203,11 @@ RSpec.describe_current do
       it { expect(config.nested1.nested1).to eq(1) }
       it { expect(config.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config).to be_frozen }
       it { expect(config_sub.with_default).to eq(123) }
       it { expect(config_sub.nested1.nested2.leaf).to eq(6) }
       it { expect(config_sub.nested1.nested1).to eq(1) }
       it { expect(config_sub.nested1.nested2.with_constructor).to eq(5) }
       it { expect(config_sub.nested1.nested2.ov_constructor).to eq(true) }
-      it { expect(config_sub).to be_frozen }
     end
 
     context 'when we inherit and change values' do

@@ -39,12 +39,11 @@ module WaterDrop
 
       # Allows for the configuration and setup of the settings
       #
-      # Compile settings, allow for overrides via yielding and deep freeze the settings tree
+      # Compile settings, allow for overrides via yielding
       # @return [Node] returns self after configuration
       def configure
         compile
         yield(self) if block_given?
-        deep_freeze
         self
       end
 
@@ -61,19 +60,6 @@ module WaterDrop
         end
 
         config.freeze
-      end
-
-      # Freezes all the sub-nodes and the current one
-      # It will deep freeze all the children
-      # It does not freeze the setting values
-      def deep_freeze
-        @children.each do |value|
-          next unless value.is_a?(Node)
-
-          public_send(value.name).deep_freeze
-        end
-
-        freeze
       end
 
       # Deep copies all the children nodes to allow us for templates building on a class level and
@@ -93,6 +79,10 @@ module WaterDrop
       # @note It runs once, after things are compiled, they will not be recompiled again
       def compile
         @children.each do |value|
+          # Do not redefine something that was already set during compilation
+          # This will allow us to reconfigure things and skip override with defaults
+          next if respond_to?(value.name)
+
           singleton_class.attr_accessor value.name
 
           initialized = if value.is_a?(Leaf)
