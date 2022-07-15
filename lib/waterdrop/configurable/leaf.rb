@@ -3,7 +3,6 @@
 module WaterDrop
   module Configurable
     # Single end config value representation
-    class Leaf < Struct.new(:name, :default, :constructor)
-    end
+    Leaf = Struct.new(:name, :default, :constructor)
   end
 end

@@ -9,13 +9,14 @@ module WaterDrop
     # only compile/initialize the values prior to user running the `#configure` API. This API needs
     # to run prior to using the result stuff even if there is nothing to configure
     class Node
-      attr_reader :name, :children, :nestings
+      attr_reader :name, :nestings
 
+      # We need to be able to redefine children for deep copy
       attr_accessor :children
 
       # @param name [Symbol] node name
-      # @param block [Proc] block for nested settings
-      def initialize(name, nestings = ->(_){})
+      # @param nestings [Proc] block for nested settings
+      def initialize(name, nestings = ->(_) {})
         @name = name
         @children = []
         @nestings = nestings
@@ -30,10 +31,10 @@ module WaterDrop
       # @param block [Proc] block for nested settings
       def setting(name, default: nil, constructor: nil, &block)
         @children << if block
-          Node.new(name, block)
-        else
-          Leaf.new(name, default, constructor)
-        end
+                        Node.new(name, block)
+                      else
+                        Leaf.new(name, default, constructor)
+                      end
       end
 
       # Allows for the configuration and setup of the settings
@@ -75,7 +76,7 @@ module WaterDrop
         freeze
       end
 
-      # Deep copies all the children nodes to allow us for templates buidling on a class level and
+      # Deep copies all the children nodes to allow us for templates building on a class level and
       # non-side-effect usage on an instance/inherited.
       # @return [Node] duplicated node
       def deep_dup

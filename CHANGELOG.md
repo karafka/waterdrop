@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.3.2 (Unreleased)
+- Replace `dry-configurable` with homebrew config and drop direct dependency on `dry-configurable`.
+
 ## 2.3.1 (2022-06-17)
 - Update rdkafka patches to align with `0.12.0` and `0.11.1` support.
 

@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 module WaterDrop
+  # A simple dry-configuration API compatible module for defining settings with defaults and a
+  # constructor.
   module Configurable
     # A simple settings layer that works similar to dry-configurable
     # It allows us to define settings on a class and per instance level with templating on a class
@@ -10,6 +12,7 @@ module WaterDrop
     class << self
       # Sets up all the class methods and inits the core root node.
       # Useful when only per class settings are needed as does not include instance methods
+      # @param base [Class] class that we extend
       def extended(base)
         base.extend ClassMethods
       end
@@ -47,10 +50,10 @@ module WaterDrop
 
         # This will handle inheritance
         @config = if superclass.respond_to?(:config)
-          superclass.config.deep_dup
-        else
-          Node.new(:root)
-        end
+                    superclass.config.deep_dup
+                  else
+                    Node.new(:root)
+                  end
       end
 
       # Allows for a per class configuration (if needed)
