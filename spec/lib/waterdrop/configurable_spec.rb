@@ -111,6 +111,17 @@ RSpec.describe_current do
       it { expect(config.with_default).to eq(123) }
       it { expect(config_sub.with_default).to eq(0) }
     end
+
+    describe '#to_h' do
+      before { config.configure }
+
+      it 'expect to map with correct values' do
+        expect(config.to_h).to eq(
+          with_default: 123,
+          nested1: { nested1: 1, nested2: { leaf: 6, ov_constructor: true, with_constructor: 5 } }
+        )
+      end
+    end
   end
 
   context 'when we define settings on an instance level' do

@@ -31,10 +31,10 @@ module WaterDrop
       # @param block [Proc] block for nested settings
       def setting(name, default: nil, constructor: nil, &block)
         @children << if block
-                        Node.new(name, block)
-                      else
-                        Leaf.new(name, default, constructor)
-                      end
+                       Node.new(name, block)
+                     else
+                       Leaf.new(name, default, constructor)
+                     end
       end
 
       # Allows for the configuration and setup of the settings
