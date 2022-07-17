@@ -6,10 +6,10 @@ module WaterDrop
     class Config < Contractable::Contract
       required(:id) { |id| id.is_a?(String) && !id.empty? }
       required(:logger) { |logger| !logger.nil? }
-      required(:deliver) { |deliver| deliver == false || deliver == true }
+      required(:deliver) { |deliver| [true, false].include?(deliver) }
       required(:max_payload_size) { |ps| ps.is_a?(Integer) && ps >= 1 }
       required(:max_wait_timeout) { |mwt| mwt.is_a?(Numeric) && mwt >= 0 }
-      required(:wait_timeout) { |wt| wt.is_a?(Numeric) && wt > 0 }
+      required(:wait_timeout) { |wt| wt.is_a?(Numeric) && wt.positive? }
       required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings

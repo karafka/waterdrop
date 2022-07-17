@@ -3,6 +3,7 @@
 # External components
 # delegate should be removed because we don't need it, we just add it because of ruby-kafka
 %w[
+  forwardable
   concurrent/array
   yaml
   dry/monitor/notifications

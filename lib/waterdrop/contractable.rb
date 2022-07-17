@@ -2,7 +2,7 @@
 
 module WaterDrop
   # Contract layer for WaterDrop and Karafka
-  # It aims to be "dry-validation" like but smaller and easier to handle + without deps
+  # It aims to be "dry-validation" like but smaller and easier to handle + without dependencies
   #
   # It allows for nested validations, etc
   #

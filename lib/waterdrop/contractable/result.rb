@@ -30,7 +30,9 @@ module WaterDrop
         errors.each do |error|
           scope = error.first.map(&:to_s).join('.').to_sym
 
-          hashed[scope.to_sym] = messages[error.last.to_s] || messages.fetch("#{scope}_#{error.last}")
+          hashed[scope.to_sym] = messages.fetch(error.last.to_s) do
+            messages.fetch("#{scope}_#{error.last}")
+          end
         end
 
         @errors = hashed

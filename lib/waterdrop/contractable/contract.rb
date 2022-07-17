@@ -9,9 +9,7 @@ module WaterDrop
       # Class level API definitions
       class << self
         # @return [Array<Rule>] all the validation rules defined for a given contract
-        def rules
-          @rules
-        end
+        attr_reader :rules
 
         # Allows for definition of a scope/namespace for nested validations
         #
