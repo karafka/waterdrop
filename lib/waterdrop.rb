@@ -4,8 +4,8 @@
 # delegate should be removed because we don't need it, we just add it because of ruby-kafka
 %w[
   concurrent/array
+  yaml
   dry/monitor/notifications
-  dry-validation
   rdkafka
   json
   zeitwerk

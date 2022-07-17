@@ -3,9 +3,7 @@
 RSpec.describe_current do
   subject(:validator_class) do
     Class.new(described_class) do
-      params do
-        required(:id).filled(:str?)
-      end
+      required(:id) { |id| id.is_a?(String) }
     end
   end
 

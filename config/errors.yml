@@ -1,7 +1,28 @@
 en:
-  dry_validation:
-    errors:
-      invalid_key_type: all keys need to be of type String
-      invalid_value_type: all values need to be of type String
-      max_payload_size: is more than `max_payload_size` config value
-      kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+  validations:
+    missing: must be present
+    #format: has invalid format
+
+    id_format: must be a non-empty string
+
+    logger_format: must be present
+    deliver_format: must be boolean
+
+    # config contract
+    max_payload_size_format: must be an integer that is equal or bigger than 1
+    wait_timeout_format: must be a numeric that is bigger than 0
+    max_wait_timeout_format: must be an integer that is equal or bigger than 0
+    kafka_format: must be a hash with symbol based keys
+    kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+
+    # message contract
+    partition_format: must be an integer greater or equal to -1
+    topic_format: 'does not match the topic allowed format'
+    partition_key_format: must be a non-empty string
+    timestamp_format: must be either time or integer
+    payload_format: must be string
+    headers_format: must be a hash
+    key_format: must be a non-empty string
+    payload_max_size: is more than `max_payload_size` config value
+    headers_invalid_key_type: all headers keys need to be of type String
+    headers_invalid_value_type: all headers values need to be of type String

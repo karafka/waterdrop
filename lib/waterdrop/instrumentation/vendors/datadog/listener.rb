@@ -11,26 +11,29 @@ module WaterDrop
         #
         # @note You need to setup the `dogstatsd-ruby` client and assign it
         class Listener
-          include Dry::Configurable
+          include WaterDrop::Configurable
+          extend Forwardable
+
+          def_delegators :config, :client, :rd_kafka_metrics, :namespace, :default_tags
 
           # Value object for storing a single rdkafka metric publishing details
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
 
           # Namespace under which the DD metrics should be published
-          setting :namespace, default: 'waterdrop', reader: true
+          setting :namespace, default: 'waterdrop'
 
           # Datadog client that we should use to publish the metrics
-          setting :client, reader: true
+          setting :client
 
           # Default tags we want to publish (for example hostname)
           # Format as followed (example for hostname): `["host:#{Socket.gethostname}"]`
-          setting :default_tags, default: [], reader: true
+          setting :default_tags, default: []
 
           # All the rdkafka metrics we want to publish
           #
           # By default we publish quite a lot so this can be tuned
           # Note, that the once with `_d` come from WaterDrop, not rdkafka or Kafka
-          setting :rd_kafka_metrics, reader: true, default: [
+          setting :rd_kafka_metrics, default: [
             # Client metrics
             RdKafkaMetric.new(:count, :root, 'calls', 'tx_d'),
             RdKafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt_d'),
@@ -47,8 +50,11 @@ module WaterDrop
             RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99])
           ].freeze
 
+          configure
+
           # @param block [Proc] configuration block
           def initialize(&block)
+            configure
             setup(&block) if block
           end
 

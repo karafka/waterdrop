@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.3.3 (Unreleased)
+- Replace `dry-validation` with home-brew validation layer and drop direct dependency on `dry-validation`.
+- Remove indirect dependency on dry-configurable from DataDog listener (no changes required).
+
 ## 2.3.2 (2022-07-17)
 - Replace `dry-configurable` with home-brew config and drop direct dependency on `dry-configurable`.
 
