@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.3.2 (Unreleased)
+## 2.3.2 (2022-07-17)
 - Replace `dry-configurable` with home-brew config and drop direct dependency on `dry-configurable`.
 
 ## 2.3.1 (2022-06-17)
