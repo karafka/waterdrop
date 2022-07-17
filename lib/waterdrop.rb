@@ -4,7 +4,6 @@
 # delegate should be removed because we don't need it, we just add it because of ruby-kafka
 %w[
   concurrent/array
-  dry-configurable
   dry/monitor/notifications
   dry-validation
   rdkafka
