@@ -14,7 +14,7 @@ module WaterDrop
 
       # @param max_payload_size [Integer] max payload size
       def initialize(max_payload_size:)
-        super
+        super()
         @max_payload_size = max_payload_size
       end
 
