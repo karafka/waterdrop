@@ -5,6 +5,7 @@
 %w[
   forwardable
   concurrent/array
+  concurrent/hash
   yaml
   dry/monitor/notifications
   rdkafka
