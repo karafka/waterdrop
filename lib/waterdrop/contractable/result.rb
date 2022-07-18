@@ -12,11 +12,7 @@ module WaterDrop
       # @param contract [Object] contract that generated the error
       def initialize(errors, contract)
         # Short track to skip object allocation for the happy path
-        if errors.empty?
-          @errors = errors
-          return
-        end
-
+        return if errors.empty?
 
         hashed = {}
 
@@ -24,14 +20,10 @@ module WaterDrop
           scope = error.first.map(&:to_s).join('.').to_sym
 
           # This will allow for usage of custom messages instead of yaml keys if needed
-          hashed[scope.to_sym] = if error.last.is_a?(String)
+          hashed[scope] = if error.last.is_a?(String)
                                    error.last
                                  else
-                                   messages = contract.class.config.error_messages
-
-                                   messages.fetch(error.last.to_s) do
-                                     messages.fetch("#{scope}_#{error.last}")
-                                   end
+                                   build_message(contract, scope, error.last)
                                  end
         end
 
@@ -40,7 +32,22 @@ module WaterDrop
 
       # @return [Boolean] true if no errors
       def success?
-        errors.empty?
+        errors.nil? || errors.empty?
+      end
+
+      private
+
+      # Builds message based on the error messages
+      # @param contract [Object] contract for which we build the result
+      # @param scope [Symbol] path to the key that has an error
+      # @param error_key [Symbol] error key for yaml errors lookup
+      # @return [String] error message
+      def build_message(contract, scope, error_key)
+        messages = contract.class.config.error_messages
+
+        messages.fetch(error_key.to_s) do
+          messages.fetch("#{scope}_#{error_key}")
+        end
       end
     end
   end

@@ -29,7 +29,6 @@ RSpec.describe_current do
 
       it { expect { validation }.to raise_error(ArgumentError) }
     end
-
   end
 
   context 'when there are nested values in a contract' do
