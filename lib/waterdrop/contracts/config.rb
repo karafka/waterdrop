@@ -12,13 +12,13 @@ module WaterDrop
         ).fetch('en').fetch('validations').fetch('config')
       end
 
-      required(:id) { |id| id.is_a?(String) && !id.empty? }
-      required(:logger) { |logger| !logger.nil? }
-      required(:deliver) { |deliver| [true, false].include?(deliver) }
-      required(:max_payload_size) { |ps| ps.is_a?(Integer) && ps >= 1 }
-      required(:max_wait_timeout) { |mwt| mwt.is_a?(Numeric) && mwt >= 0 }
-      required(:wait_timeout) { |wt| wt.is_a?(Numeric) && wt.positive? }
-      required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
+      required(:id) { |val| val.is_a?(String) && !val.empty? }
+      required(:logger) { |val| !val.nil? }
+      required(:deliver) { |val| [true, false].include?(val) }
+      required(:max_payload_size) { |val| val.is_a?(Integer) && val >= 1 }
+      required(:max_wait_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:wait_timeout) { |val| val.is_a?(Numeric) && val.positive? }
+      required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
       # This can be confusing, so we expect all keys to be symbolized
