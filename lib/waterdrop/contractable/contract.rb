@@ -165,17 +165,17 @@ module WaterDrop
       # @return [Array<Symbol, Object>] array where the first element is `:match` or `:miss` and
       #   the digged value or nil if not found
       def dig(data, keys)
-        current = nil
+        current = data
         result = :match
 
         keys.each do |nesting|
-          unless data.key?(nesting)
+          unless current.key?(nesting)
             result = :miss
 
             break
           end
 
-          current = data[nesting]
+          current = current[nesting]
         end
 
         [result, current]

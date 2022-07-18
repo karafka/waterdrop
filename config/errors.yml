@@ -1,6 +1,5 @@
 en:
   validations:
-
     config:
       missing: must be present
       logger_format: must be present
@@ -24,3 +23,8 @@ en:
       payload_max_size: is more than `max_payload_size` config value
       headers_invalid_key_type: all headers keys need to be of type String
       headers_invalid_value_type: all headers values need to be of type String
+
+    test:
+      missing: must be present
+      nested.id_format: 'is invalid'
+      nested.id2_format: 'is invalid'
