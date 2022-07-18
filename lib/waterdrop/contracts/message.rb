@@ -26,13 +26,13 @@ module WaterDrop
         @max_payload_size = max_payload_size
       end
 
-      required(:topic) { |topic| topic.is_a?(String) && TOPIC_REGEXP.match?(topic) }
-      required(:payload) { |payload| payload.is_a?(String) }
-      optional(:key) { |key| key.nil? || (key.is_a?(String) && !key.empty?) }
-      optional(:partition) { |partition| partition.is_a?(Integer) && partition >= -1 }
-      optional(:partition_key) { |p_key| p_key.nil? || (p_key.is_a?(String) && !p_key.empty?) }
-      optional(:timestamp) { |ts| ts.nil? || (ts.is_a?(Time) || ts.is_a?(Integer)) }
-      optional(:headers) { |headers| headers.nil? || headers.is_a?(Hash) }
+      required(:topic) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
+      required(:payload) { |val| val.is_a?(String) }
+      optional(:key) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
+      optional(:partition) { |val| val.is_a?(Integer) && val >= -1 }
+      optional(:partition_key) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
+      optional(:timestamp) { |val| val.nil? || (val.is_a?(Time) || val.is_a?(Integer)) }
+      optional(:headers) { |val| val.nil? || val.is_a?(Hash) }
 
       virtual do |config, errors|
         next true unless errors.empty?
