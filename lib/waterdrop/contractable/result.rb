@@ -12,7 +12,10 @@ module WaterDrop
       # @param contract [Object] contract that generated the error
       def initialize(errors, contract)
         # Short track to skip object allocation for the happy path
-        return if errors.empty?
+        if errors.empty?
+          @errors = errors
+          return
+        end
 
         hashed = {}
 
@@ -32,7 +35,7 @@ module WaterDrop
 
       # @return [Boolean] true if no errors
       def success?
-        errors.nil? || errors.empty?
+        errors.empty?
       end
 
       private
