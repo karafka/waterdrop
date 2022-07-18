@@ -21,10 +21,10 @@ module WaterDrop
 
           # This will allow for usage of custom messages instead of yaml keys if needed
           hashed[scope] = if error.last.is_a?(String)
-                                   error.last
-                                 else
-                                   build_message(contract, scope, error.last)
-                                 end
+                            error.last
+                          else
+                            build_message(contract, scope, error.last)
+                          end
         end
 
         @errors = hashed
