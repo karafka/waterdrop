@@ -29,7 +29,7 @@ module WaterDrop
           init_accu
           @nested << path
           instance_eval(&block)
-          @nested = []
+          @nested.pop
         end
 
         # Defines a rule for a required field (required means, that will automatically create an
