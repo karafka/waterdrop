@@ -3,27 +3,37 @@
 module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
-    class Config < Base
-      params do
-        required(:id).filled(:str?)
-        required(:logger).filled
-        required(:deliver).filled(:bool?)
-        required(:max_payload_size).filled(:int?, gteq?: 1)
-        required(:max_wait_timeout).filled(:number?, gteq?: 0)
-        required(:wait_timeout).filled(:number?, gt?: 0)
-        required(:kafka).filled(:hash?)
+    class Config < Contractable::Contract
+      configure do |config|
+        config.error_messages = YAML.safe_load(
+          File.read(
+            File.join(WaterDrop.gem_root, 'config', 'errors.yml')
+          )
+        ).fetch('en').fetch('validations').fetch('config')
       end
+
+      required(:id) { |id| id.is_a?(String) && !id.empty? }
+      required(:logger) { |logger| !logger.nil? }
+      required(:deliver) { |deliver| [true, false].include?(deliver) }
+      required(:max_payload_size) { |ps| ps.is_a?(Integer) && ps >= 1 }
+      required(:max_wait_timeout) { |mwt| mwt.is_a?(Numeric) && mwt >= 0 }
+      required(:wait_timeout) { |wt| wt.is_a?(Numeric) && wt.positive? }
+      required(:kafka) { |kafka| kafka.is_a?(Hash) && !kafka.empty? }
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
       # This can be confusing, so we expect all keys to be symbolized
-      rule(:kafka) do
-        next unless value.is_a?(Hash)
+      virtual do |config, errors|
+        next true unless errors.empty?
 
-        value.each_key do |key|
-          next if key.is_a?(Symbol)
+        errors = []
 
-          key(:"kafka.#{key}").failure(:kafka_key_must_be_a_symbol)
-        end
+        config
+          .fetch(:kafka)
+          .keys
+          .reject { |key| key.is_a?(Symbol) }
+          .each { |key| errors << [[:kafka, key], :kafka_key_must_be_a_symbol] }
+
+        errors
       end
     end
   end
