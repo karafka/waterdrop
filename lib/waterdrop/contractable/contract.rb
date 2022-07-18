@@ -6,6 +6,11 @@ module WaterDrop
     #
     # @note This contract does NOT support rules inheritance as it was never needed in Karafka
     class Contract
+      extend Configurable
+
+      # Yaml based error messages data
+      setting(:error_messages)
+
       # Class level API definitions
       class << self
         # @return [Array<Rule>] all the validation rules defined for a given contract
@@ -14,17 +19,17 @@ module WaterDrop
         # Allows for definition of a scope/namespace for nested validations
         #
         # @param path [Symbol] path in the hash for nesting
-        # @param block [Proc] nested rule code or more scopes inside
+        # @param block [Proc] nested rule code or more nestings inside
         #
         # @example
-        #   scope(:key) do
+        #   nested(:key) do
         #     required(:inside) { |inside| inside.is_a?(String) }
         #   end
-        def scope(path, &block)
+        def nested(path, &block)
           init_accu
-          @scope << path
+          @nested << path
           instance_eval(&block)
-          @scope = []
+          @nested = []
         end
 
         # Defines a rule for a required field (required means, that will automatically create an
@@ -34,14 +39,14 @@ module WaterDrop
         # @param block [Proc] validation rule
         def required(*keys, &block)
           init_accu
-          @rules << Rule.new(@scope + keys, :required, block).freeze
+          @rules << Rule.new(@nested + keys, :required, block).freeze
         end
 
         # @param keys [Array<Symbol>] single or full path
         # @param block [Proc] validation rule
         def optional(*keys, &block)
           init_accu
-          @rules << Rule.new(@scope + keys, :optional, block).freeze
+          @rules << Rule.new(@nested + keys, :optional, block).freeze
         end
 
         # @param block [Proc] validation rule
@@ -55,9 +60,9 @@ module WaterDrop
 
         private
 
-        # Initializes scopes and rules building accumulator
+        # Initializes nestings and rules building accumulator
         def init_accu
-          @scope ||= []
+          @nested ||= []
           @rules ||= []
         end
       end
@@ -82,7 +87,7 @@ module WaterDrop
           end
         end
 
-        Result.new(errors)
+        Result.new(errors, self)
       end
 
       # @param data [Hash] data for validation

@@ -4,6 +4,14 @@ module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
     class Config < Contractable::Contract
+      configure do |config|
+        config.error_messages = YAML.safe_load(
+          File.read(
+            File.join(WaterDrop.gem_root, 'config', 'errors.yml')
+          )
+        ).fetch('en').fetch('validations').fetch('config')
+      end
+
       required(:id) { |id| id.is_a?(String) && !id.empty? }
       required(:logger) { |logger| !logger.nil? }
       required(:deliver) { |deliver| [true, false].include?(deliver) }
