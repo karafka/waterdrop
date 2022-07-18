@@ -82,8 +82,6 @@ module WaterDrop
             validate_optional(data, rule, errors)
           when :virtual
             validate_virtual(data, rule, errors)
-          else
-            raise ArgumentError, rule.type
           end
         end
 
