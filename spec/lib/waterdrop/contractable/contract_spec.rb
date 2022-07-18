@@ -29,6 +29,7 @@ RSpec.describe_current do
 
       it { expect { validation }.to raise_error(ArgumentError) }
     end
+
   end
 
   context 'when there are nested values in a contract' do
@@ -75,6 +76,24 @@ RSpec.describe_current do
 
         it { expect { validation }.to raise_error(ArgumentError) }
       end
+    end
+  end
+
+  context 'when contract has its own error reported' do
+    let(:validator_class) do
+      Class.new(described_class) do
+        virtual do
+          [[%i[id], 'String error']]
+        end
+      end
+    end
+
+    subject(:validation) { validator_class.new.validate!(data, ArgumentError) }
+
+    context 'when data is valid without optional' do
+      let(:data) { { nested: { id: '1' } } }
+
+      it { expect { validation }.to raise_error(ArgumentError) }
     end
   end
 end

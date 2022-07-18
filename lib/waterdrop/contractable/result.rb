@@ -17,16 +17,22 @@ module WaterDrop
           return
         end
 
-        messages = contract.class.config.error_messages
 
         hashed = {}
 
         errors.each do |error|
           scope = error.first.map(&:to_s).join('.').to_sym
 
-          hashed[scope.to_sym] = messages.fetch(error.last.to_s) do
-            messages.fetch("#{scope}_#{error.last}")
-          end
+          # This will allow for usage of custom messages instead of yaml keys if needed
+          hashed[scope.to_sym] = if error.last.is_a?(String)
+                                   error.last
+                                 else
+                                   messages = contract.class.config.error_messages
+
+                                   messages.fetch(error.last.to_s) do
+                                     messages.fetch("#{scope}_#{error.last}")
+                                   end
+                                 end
         end
 
         @errors = hashed
