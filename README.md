@@ -2,7 +2,7 @@
 
 **Note**: Documentation presented here refers to WaterDrop `2.x`.
 
-WaterDrop `2.x` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of soon to be released Karafka `2.0.*`.
+WaterDrop `2.x` works with Karafka `2.*` and aims to either work as a standalone producer or as a part of the Karafka `2.*`.
 
 Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and its documentation for details about WaterDrop `1.*` usage.
 
@@ -10,11 +10,11 @@ Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and
 [![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-Gem used to send messages to Kafka in an easy way with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
+A gem to send messages to Kafka easily with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
 
 It:
 
- - Is thread safe
+ - Is thread-safe
  - Supports sync producing
  - Supports async producing
  - Supports buffering
@@ -58,7 +58,7 @@ bundle install
 
 ## Setup
 
-WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
+WaterDrop is a complex tool that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
 
 - WaterDrop options - options directly related to WaterDrop and its components
 - Kafka driver options - options related to `rdkafka`
