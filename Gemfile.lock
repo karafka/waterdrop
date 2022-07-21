@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.3.3)
+    waterdrop (2.3.4)
       concurrent-ruby (>= 1.1)
       dry-monitor (~> 0.5)
       rdkafka (>= 0.10)

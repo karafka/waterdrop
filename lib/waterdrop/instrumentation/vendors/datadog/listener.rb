@@ -79,20 +79,13 @@ module WaterDrop
           #
           # @param _event [Dry::Events::Event]
           def on_error_occurred(_event)
-            client.count(
-              namespaced_metric('error_occurred'),
-              1,
-              tags: default_tags
-            )
+            count('error_occurred', 1, tags: default_tags)
           end
 
           # Increases acknowledged messages counter
           # @param _event [Dry::Events::Event]
           def on_message_acknowledged(_event)
-            client.increment(
-              namespaced_metric('acknowledged'),
-              tags: default_tags
-            )
+            increment('acknowledged', tags: default_tags)
           end
 
           %i[
@@ -122,8 +115,8 @@ module WaterDrop
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Dry::Events::Event]
               def on_#{event_scope}(event)
-                client.histogram(
-                  namespaced_metric('buffer.size'),
+                histogram(
+                  'buffer.size',
                   event[:buffer].size,
                   tags: default_tags
                 )
@@ -149,14 +142,28 @@ module WaterDrop
 
           private
 
+          %i[
+            count
+            gauge
+            histogram
+            increment
+            decrement
+          ].each do |metric_type|
+            class_eval <<~METHODS, __FILE__, __LINE__ + 1
+              def #{metric_type}(key, *args)
+                client.#{metric_type}(
+                  namespaced_metric(key),
+                  *args
+                )
+              end
+            METHODS
+          end
+
           # Report that a message has been produced to a topic.
           # @param topic [String] Kafka topic
           # @param method_name [Symbol] method from which this message operation comes
           def report_message(topic, method_name)
-            client.increment(
-              namespaced_metric(method_name),
-              tags: default_tags + ["topic:#{topic}"]
-            )
+            increment(method_name, tags: default_tags + ["topic:#{topic}"])
           end
 
           # Wraps metric name in listener's namespace
@@ -172,9 +179,9 @@ module WaterDrop
           def report_metric(metric, statistics)
             case metric.scope
             when :root
-              client.public_send(
+              public_send(
                 metric.type,
-                namespaced_metric(metric.name),
+                metric.name,
                 statistics.fetch(*metric.key_location),
                 tags: default_tags
               )
@@ -185,9 +192,9 @@ module WaterDrop
                 # node ids
                 next if broker_statistics['nodeid'] == -1
 
-                client.public_send(
+                public_send(
                   metric.type,
-                  namespaced_metric(metric.name),
+                  metric.name,
                   broker_statistics.dig(*metric.key_location),
                   tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
                 )
