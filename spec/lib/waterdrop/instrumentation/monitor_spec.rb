@@ -26,7 +26,10 @@ RSpec.describe_current do
       context 'when we try to subscribe to an unsupported event' do
         let(:event_name) { 'unsupported' }
 
-        it { expect { subscription }.to raise_error Dry::Events::InvalidSubscriberError }
+        it do
+          expected_error = WaterDrop::Monitor::Notifications::EventNotRegistered
+          expect { subscription }.to raise_error expected_error
+        end
       end
 
       context 'when we try to subscribe to a supported event' do

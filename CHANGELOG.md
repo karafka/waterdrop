@@ -2,6 +2,7 @@
 
 ## 2.3.4 (Unreleased)
 - Small refactor of the DataDog/Statsd listener to align for future extraction to `karafka-common`.
+- Replace `dry-monitor` with home-brew notification layer (API compatible).
 
 ## 2.3.3 (2022-07-18)
 - Replace `dry-validation` with home-brew validation layer and drop direct dependency on `dry-validation`.

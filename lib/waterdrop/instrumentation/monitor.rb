@@ -8,7 +8,7 @@ module WaterDrop
     # time
     # @note This class acts as a singleton because we are only permitted to have single monitor
     #   per running process (just as logger)
-    class Monitor < Dry::Monitor::Notifications
+    class Monitor < WaterDrop::Monitor::Notifications
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
       EVENTS = %w[
@@ -35,8 +35,8 @@ module WaterDrop
 
       # @return [WaterDrop::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize
-        super(:waterdrop)
-        EVENTS.each(&method(:register_event))
+        super
+        EVENTS.each { |event| register_event(event) }
       end
     end
   end
