@@ -29,7 +29,7 @@ module WaterDrop
       # @param event_id [String, Symbol] event id
       def register_event(event_id)
         @listeners[event_id]
-        @events_methods_map[event_id] = :"on_#{event_id.to_s.gsub('.', '_')}"
+        @events_methods_map[event_id] = :"on_#{event_id.to_s.tr('.', '_')}"
       end
 
       # Allows for subscription to an event
@@ -37,6 +37,7 @@ module WaterDrop
       #
       # @param event_id_or_listener [Object] event id when we want to subscribe to a particular
       #   event with a block or listener if we want to subscribe with general listener
+      # @param block [Proc] block of code if we want to subscribe with it
       #
       # @example Subscribe using listener
       #   subscribe(MyListener.new)
@@ -55,10 +56,10 @@ module WaterDrop
         else
           listener = event_id_or_listener
 
-          @listeners.keys.each do |event_id|
-            next unless listener.respond_to?(@events_methods_map[event_id])
+          @listeners.each_key do |reg_event_id|
+            next unless listener.respond_to?(@events_methods_map[reg_event_id])
 
-            @listeners[event_id] << listener
+            @listeners[reg_event_id] << listener
           end
         end
       end

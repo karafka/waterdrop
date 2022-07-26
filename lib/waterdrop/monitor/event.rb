@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module WaterDrop
+  # Namespace for Monitor used by WaterDrop and Karafka
   module Monitor
     # Single notification event wrapping payload with id
     class Event
