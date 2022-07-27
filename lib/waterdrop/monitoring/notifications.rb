@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  module Monitor
+  module Monitoring
     # A simple notifications layer for WaterDrop and Karafka that aims to provide API compatible
     # with both `ActiveSupport::Notifications` and `dry-monitor`.
     #

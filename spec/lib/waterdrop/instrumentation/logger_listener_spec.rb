@@ -4,7 +4,7 @@ RSpec.describe_current do
   subject(:logged_data) { buffer.tap(&:rewind).read.split("\n") }
 
   let(:listener) { described_class.new(logger) }
-  let(:event) { WaterDrop::Monitor::Event.new('event', details) }
+  let(:event) { WaterDrop::Monitoring::Event.new('event', details) }
   let(:logger) { Logger.new(buffer) }
   let(:buffer) { StringIO.new }
   let(:producer) { build(:producer) }

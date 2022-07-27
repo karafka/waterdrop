@@ -2,7 +2,7 @@
 
 module WaterDrop
   # Namespace for Monitor used by WaterDrop and Karafka
-  module Monitor
+  module Monitoring
     # Single notification event wrapping payload with id
     class Event
       attr_reader :id, :payload

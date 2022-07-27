@@ -27,7 +27,7 @@ RSpec.describe_current do
         let(:event_name) { 'unsupported' }
 
         it do
-          expected_error = WaterDrop::Monitor::Notifications::EventNotRegistered
+          expected_error = WaterDrop::Monitoring::Notifications::EventNotRegistered
           expect { subscription }.to raise_error expected_error
         end
       end
