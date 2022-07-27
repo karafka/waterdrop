@@ -8,7 +8,10 @@ module WaterDrop
     # It provides abstraction layer that allows us to use both our internal notifications as well
     # as `ActiveSupport::Notifications`.
     class Monitor
+      # Empty has to save on objects allocation
       EMPTY_HASH = {}.freeze
+
+      private_constant :EMPTY_HASH
 
       # @param notifications_bus [Object] either our internal notifications bus or
       #   `ActiveSupport::Notifications`
