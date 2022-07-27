@@ -6,8 +6,8 @@
   forwardable
   concurrent/array
   concurrent/hash
+  concurrent/map
   yaml
-  dry/monitor/notifications
   rdkafka
   json
   zeitwerk

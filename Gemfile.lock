@@ -1,9 +1,8 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.3.4)
+    waterdrop (2.4.0)
       concurrent-ruby (>= 1.1)
-      dry-monitor (~> 0.5)
       rdkafka (>= 0.10)
       zeitwerk (~> 2.3)
 
@@ -19,19 +18,6 @@ GEM
     concurrent-ruby (1.1.10)
     diff-lcs (1.5.0)
     docile (1.4.0)
-    dry-configurable (0.15.0)
-      concurrent-ruby (~> 1.0)
-      dry-core (~> 0.6)
-    dry-core (0.8.0)
-      concurrent-ruby (~> 1.0)
-    dry-events (0.3.0)
-      concurrent-ruby (~> 1.0)
-      dry-core (~> 0.5, >= 0.5)
-    dry-monitor (0.6.1)
-      dry-configurable (~> 0.13, >= 0.13.0)
-      dry-core (~> 0.5, >= 0.5)
-      dry-events (~> 0.2)
-      zeitwerk (~> 2.5)
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     ffi (1.15.5)

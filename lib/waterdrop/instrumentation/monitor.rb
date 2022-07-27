@@ -2,41 +2,18 @@
 
 module WaterDrop
   module Instrumentation
-    # Monitor is used to hookup external monitoring services to monitor how WaterDrop works
-    # Since it is a pub-sub based on dry-monitor, you can use as many subscribers/loggers at the
-    # same time, which means that you might have for example file logging and NewRelic at the same
-    # time
-    # @note This class acts as a singleton because we are only permitted to have single monitor
-    #   per running process (just as logger)
-    class Monitor < Dry::Monitor::Notifications
-      # List of events that we support in the system and to which a monitor client can hook up
-      # @note The non-error once support timestamp benchmarking
-      EVENTS = %w[
-        producer.closed
-
-        message.produced_async
-        message.produced_sync
-        message.acknowledged
-        message.buffered
-
-        messages.produced_async
-        messages.produced_sync
-        messages.buffered
-
-        buffer.flushed_async
-        buffer.flushed_sync
-
-        statistics.emitted
-
-        error.occurred
-      ].freeze
-
-      private_constant :EVENTS
-
-      # @return [WaterDrop::Instrumentation::Monitor] monitor instance for system instrumentation
-      def initialize
-        super(:waterdrop)
-        EVENTS.each(&method(:register_event))
+    # WaterDrop instrumentation monitor that we use to publish events
+    # By default uses our internal notifications bus but can be used with
+    # `ActiveSupport::Notifications` as well
+    class Monitor < WaterDrop::Monitoring::Monitor
+      # @param notifications_bus [Object] either our internal notifications bus or
+      #   `ActiveSupport::Notifications`
+      # @param namespace [String, nil] namespace for events or nil if no namespace
+      def initialize(
+        notifications_bus = WaterDrop::Instrumentation::Notifications.new,
+        namespace = nil
+      )
+        super(notifications_bus, namespace)
       end
     end
   end
