@@ -44,6 +44,8 @@ It:
 
 ## Installation
 
+**Note**: If you want to both produce and consume messages, please use [Karafka](https://github.com/karafka/karafka/). It integrates WaterDrop automatically.
+
 Add this to your Gemfile:
 
 ```ruby
