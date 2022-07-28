@@ -3,7 +3,7 @@
 module WaterDrop
   module Instrumentation
     # Instrumented is used to hookup external monitoring services to monitor how WaterDrop works
-    class Notifications < WaterDrop::Monitoring::Notifications
+    class Notifications < ::Karafka::Core::Monitoring::Notifications
       # List of events that we support in the system and to which a monitor client can hook up
       # @note The non-error once support timestamp benchmarking
       EVENTS = %w[

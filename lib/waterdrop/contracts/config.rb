@@ -3,7 +3,7 @@
 module WaterDrop
   module Contracts
     # Contract with validation rules for WaterDrop configuration details
-    class Config < Contractable::Contract
+    class Config < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load(
           File.read(
