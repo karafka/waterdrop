@@ -16,9 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'concurrent-ruby', '>= 1.1'
-  spec.add_dependency 'dry-monitor', '~> 0.5'
-  spec.add_dependency 'dry-validation', '~> 1.7'
+  spec.add_dependency 'karafka-core', '~> 2.0'
   spec.add_dependency 'rdkafka', '>= 0.10'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 

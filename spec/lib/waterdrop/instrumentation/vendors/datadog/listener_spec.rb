@@ -31,6 +31,7 @@ RSpec.describe_current do
         histogram
         gauge
         increment
+        decrement
       ].each do |method_name|
         define_method method_name do |metric, value = nil, details = {}|
           @buffer[method_name][metric] << [value, details]

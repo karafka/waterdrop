@@ -2,7 +2,7 @@
 
 **Note**: Documentation presented here refers to WaterDrop `2.x`.
 
-WaterDrop `2.x` does **not** work with Karafka `1.*` and aims to either work as a standalone producer outside of Karafka `1.*` ecosystem or as a part of soon to be released Karafka `2.0.*`.
+WaterDrop `2.x` works with Karafka `2.*` and aims to either work as a standalone producer or as a part of the Karafka `2.*`.
 
 Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and its documentation for details about WaterDrop `1.*` usage.
 
@@ -10,17 +10,17 @@ Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and
 [![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
-Gem used to send messages to Kafka in an easy way with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
+A gem to send messages to Kafka easily with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
 
 It:
 
- - Is thread safe
+ - Is thread-safe
  - Supports sync producing
  - Supports async producing
  - Supports buffering
  - Supports producing messages to multiple clusters
  - Supports multiple delivery policies
- - Works with Kafka 1.0+ and Ruby 2.6+
+ - Works with Kafka `1.0+` and Ruby `2.7+`
 
 ## Table of contents
 
@@ -30,6 +30,8 @@ It:
   * [Kafka configuration options](#kafka-configuration-options)
 - [Usage](#usage)
   * [Basic usage](#basic-usage)
+  * [Using WaterDrop across the application and with Ruby on Rails](#using-waterdrop-across-the-application-and-with-ruby-on-rails)
+  * [Using WaterDrop with a connection-pool](#using-waterdrop-with-a-connection-pool)
   * [Buffering](#buffering)
       + [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
       + [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
@@ -41,6 +43,8 @@ It:
 - [Note on contributions](#note-on-contributions)
 
 ## Installation
+
+**Note**: If you want to both produce and consume messages, please use [Karafka](https://github.com/karafka/karafka/). It integrates WaterDrop automatically.
 
 Add this to your Gemfile:
 
@@ -56,7 +60,7 @@ bundle install
 
 ## Setup
 
-WaterDrop is a complex tool, that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
+WaterDrop is a complex tool that contains multiple configuration options. To keep everything organized, all the configuration options were divided into two groups:
 
 - WaterDrop options - options directly related to WaterDrop and its components
 - Kafka driver options - options related to `rdkafka`
@@ -102,8 +106,6 @@ end
 You can create producers with different `kafka` settings. Documentation of the available configuration options is available on https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md.
 
 ## Usage
-
-Please refer to the [documentation](https://www.rubydoc.info/gems/waterdrop) in case you're interested in the more advanced API.
 
 ### Basic usage
 
@@ -156,6 +158,41 @@ Here are all the things you can provide in the message hash:
 | `headers`       | false    | Hash          | Headers for the message                                  |
 
 Keep in mind, that message you want to send should be either binary or stringified (to_s, to_json, etc).
+
+### Using WaterDrop across the application and with Ruby on Rails
+
+If you plan to both produce and consume messages using Kafka, you should install and use [Karafka](https://github.com/karafka/karafka). It integrates automatically with Ruby on Rails applications and auto-configures WaterDrop producer to make it accessible via `Karafka#producer` method.
+
+If you want to only produce messages from within your application, since WaterDrop is thread-safe you can create a single instance in an initializer like so:
+
+```ruby
+KAFKA_PRODUCER = WaterDrop::Producer.new
+
+KAFKA_PRODUCER.setup do |config|
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+end
+
+# And just dispatch messages
+KAFKA_PRODUCER.produce_sync(topic: 'my-topic', payload: 'my message')
+```
+
+### Using WaterDrop with a connection-pool
+
+While WaterDrop is thread-safe, there is no problem in using it with a connection pool inside high-intensity applications. The only thing worth keeping in mind, is that WaterDrop instances should be shutdown before the application is closed.
+
+```ruby
+KAFKA_PRODUCERS_CP = ConnectionPool.new do
+  WaterDrop::Producer.new do |config|
+    config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+  end
+end
+
+KAFKA_PRODUCERS_CP.with do |producer|
+  producer.produce_async(topic: 'my-topic', payload: 'my message')
+end
+
+KAFKA_PRODUCERS_CP.shutdown { |producer| producer.close }
+```
 
 ### Buffering
 
@@ -315,6 +352,8 @@ producer.monitor.subscribe(listener)
 ```
 
 You can also find [here](https://github.com/karafka/waterdrop/blob/master/lib/waterdrop/instrumentation/vendors/datadog/dashboard.json) a ready to import DataDog dashboard configuration file that you can use to monitor all of your producers.
+
+![Example WaterDrop DD dashboard](https://raw.githubusercontent.com/karafka/misc/master/printscreens/waterdrop_dd_dashboard_example.png)
 
 ### Error notifications
 
