@@ -1,9 +1,9 @@
 # WaterDrop changelog
 
-## 2.4.0 (Unreleased)
+## 2.4.0 (2022-07-28)
 - Small refactor of the DataDog/Statsd listener to align for future extraction to `karafka-common`.
 - Replace `dry-monitor` with home-brew notification layer (API compatible) and allow for usage with `ActiveSupport::Notifications`.
-- Remove all the common code into `karafka-core` and add it as a requirement.
+- Remove all the common code into `karafka-core` and add it as a dependency.
 
 ## 2.3.3 (2022-07-18)
 - Replace `dry-validation` with home-brew validation layer and drop direct dependency on `dry-validation`.
