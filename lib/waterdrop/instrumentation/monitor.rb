@@ -5,7 +5,7 @@ module WaterDrop
     # WaterDrop instrumentation monitor that we use to publish events
     # By default uses our internal notifications bus but can be used with
     # `ActiveSupport::Notifications` as well
-    class Monitor < WaterDrop::Monitoring::Monitor
+    class Monitor < ::Karafka::Core::Monitoring::Monitor
       # @param notifications_bus [Object] either our internal notifications bus or
       #   `ActiveSupport::Notifications`
       # @param namespace [String, nil] namespace for events or nil if no namespace

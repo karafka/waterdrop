@@ -5,7 +5,7 @@
 module WaterDrop
   # Configuration object for setting up all options required by WaterDrop
   class Config
-    include Configurable
+    include ::Karafka::Core::Configurable
 
     # Defaults for kafka settings, that will be overwritten only if not present already
     KAFKA_DEFAULTS = {

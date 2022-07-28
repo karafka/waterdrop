@@ -2,14 +2,14 @@ PATH
   remote: .
   specs:
     waterdrop (2.4.0)
-      concurrent-ruby (>= 1.1)
+      karafka-core (~> 2.0)
       rdkafka (>= 0.10)
       zeitwerk (~> 2.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.3)
+    activesupport (7.0.3.1)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -21,10 +21,12 @@ GEM
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     ffi (1.15.5)
-    i18n (1.10.0)
+    i18n (1.12.0)
       concurrent-ruby (~> 1.0)
+    karafka-core (2.0.0)
+      concurrent-ruby (>= 1.1)
     mini_portile2 (2.8.0)
-    minitest (5.16.0)
+    minitest (5.16.2)
     rake (13.0.6)
     rdkafka (0.12.0)
       ffi (~> 1.15)
@@ -49,12 +51,11 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    tzinfo (2.0.4)
+    tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
     zeitwerk (2.6.0)
 
 PLATFORMS
-  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES

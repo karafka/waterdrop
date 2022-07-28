@@ -3,11 +3,8 @@
 # External components
 # delegate should be removed because we don't need it, we just add it because of ruby-kafka
 %w[
+  karafka-core
   forwardable
-  concurrent/array
-  concurrent/hash
-  concurrent/map
-  yaml
   rdkafka
   json
   zeitwerk
