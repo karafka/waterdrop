@@ -66,7 +66,7 @@ module WaterDrop
 
           # Hooks up to WaterDrop instrumentation for emitted statistics
           #
-          # @param event [WaterDrop::Monitor::Event]
+          # @param event [Karafka::Core::Monitoring::Event]
           def on_statistics_emitted(event)
             statistics = event[:statistics]
 
@@ -77,13 +77,13 @@ module WaterDrop
 
           # Increases the errors count by 1
           #
-          # @param _event [WaterDrop::Monitor::Event]
+          # @param _event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(_event)
             count('error_occurred', 1, tags: default_tags)
           end
 
           # Increases acknowledged messages counter
-          # @param _event [WaterDrop::Monitor::Event]
+          # @param _event [Karafka::Core::Monitoring::Event]
           def on_message_acknowledged(_event)
             increment('acknowledged', tags: default_tags)
           end
@@ -93,12 +93,12 @@ module WaterDrop
             produced_async
           ].each do |event_scope|
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
-              # @param event [WaterDrop::Monitor::Event]
+              # @param event [Karafka::Core::Monitoring::Event]
               def on_message_#{event_scope}(event)
                 report_message(event[:message][:topic], :#{event_scope})
               end
 
-              # @param event [WaterDrop::Monitor::Event]
+              # @param event [Karafka::Core::Monitoring::Event]
               def on_messages_#{event_scope}(event)
                 event[:messages].each do |message|
                   report_message(message[:topic], :#{event_scope})
@@ -113,7 +113,7 @@ module WaterDrop
             messages_buffered
           ].each do |event_scope|
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
-              # @param event [WaterDrop::Monitor::Event]
+              # @param event [Karafka::Core::Monitoring::Event]
               def on_#{event_scope}(event)
                 histogram(
                   'buffer.size',
@@ -131,7 +131,7 @@ module WaterDrop
             flushed_async
           ].each do |event_scope|
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
-              # @param event [WaterDrop::Monitor::Event]
+              # @param event [Karafka::Core::Monitoring::Event]
               def on_buffer_#{event_scope}(event)
                 event[:messages].each do |message|
                   report_message(message[:topic], :#{event_scope})
