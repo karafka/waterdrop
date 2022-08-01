@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.1 (2022-08-01)
+- Replace local statistics decorator with the one extracted to `karafka-core`.
+
 ## 2.4.0 (2022-07-28)
 - Small refactor of the DataDog/Statsd listener to align for future extraction to `karafka-common`.
 - Replace `dry-monitor` with home-brew notification layer (API compatible) and allow for usage with `ActiveSupport::Notifications`.
