@@ -17,7 +17,7 @@ module WaterDrop
           @producer_id = producer_id
           @client_name = client_name
           @monitor = monitor
-          @statistics_decorator = StatisticsDecorator.new
+          @statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
         end
 
         # Emits decorated statistics to the monitor
