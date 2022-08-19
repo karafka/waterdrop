@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.version       = ::WaterDrop::VERSION
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld']
-  spec.email         = %w[maciej@mensfeld.pl]
+  spec.email         = %w[contact@karafka.io]
   spec.homepage      = 'https://karafka.io'
   spec.summary       = 'Kafka messaging made easy!'
   spec.description   = spec.summary
@@ -26,7 +26,7 @@ Gem::Specification.new do |spec|
     spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
   end
 
-  spec.cert_chain    = %w[certs/mensfeld.pem]
+  spec.cert_chain    = %w[certs/cert_chain.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.require_paths = %w[lib]
