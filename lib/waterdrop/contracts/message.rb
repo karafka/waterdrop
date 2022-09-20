@@ -3,7 +3,7 @@
 module WaterDrop
   module Contracts
     # Contract with validation rules for validating that all the message options that
-    # we provide to producer ale valid and usable
+    # we provide to producer are valid and usable
     class Message < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load(
