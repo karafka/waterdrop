@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.2 (Unreleased)
+- Allow sending tombstone messages (#267)
+
 ## 2.4.1 (2022-08-01)
 - Replace local statistics decorator with the one extracted to `karafka-core`.
 
