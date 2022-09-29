@@ -17,7 +17,7 @@ en:
       topic_format: 'does not match the topic allowed format'
       partition_key_format: must be a non-empty string
       timestamp_format: must be either time or integer
-      payload_format: must be string
+      payload_format: must be string or nil
       headers_format: must be a hash
       key_format: must be a non-empty string
       payload_max_size: is more than `max_payload_size` config value
