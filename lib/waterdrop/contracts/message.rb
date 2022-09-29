@@ -27,7 +27,7 @@ module WaterDrop
       end
 
       required(:topic) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
-      required(:payload) { |val| val.is_a?(String) }
+      required(:payload) { |val| val.nil? || val.is_a?(String) }
       optional(:key) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
       optional(:partition) { |val| val.is_a?(Integer) && val >= -1 }
       optional(:partition_key) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
@@ -51,6 +51,7 @@ module WaterDrop
 
       virtual do |config, errors, validator|
         next true unless errors.empty?
+        next if config[:payload].nil? # tombstone payload
         next true if config[:payload].bytesize <= validator.max_payload_size
 
         [[%i[payload], :max_size]]

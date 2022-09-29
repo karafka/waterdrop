@@ -19,6 +19,12 @@ RSpec.describe_current do
 
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
     end
+
+    context 'when sending a tombstone message' do
+      let(:message) { build(:valid_message, payload: nil) }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
+    end
   end
 
   describe '#produce_many_async' do
