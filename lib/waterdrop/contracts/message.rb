@@ -34,14 +34,14 @@ module WaterDrop
       optional(:timestamp) { |val| val.nil? || (val.is_a?(Time) || val.is_a?(Integer)) }
       optional(:headers) { |val| val.nil? || val.is_a?(Hash) }
 
-      virtual do |config, errors|
+      virtual do |message, errors|
         next true unless errors.empty?
-        next true unless config.key?(:headers)
-        next true if config[:headers].nil?
+        next true unless message.key?(:headers)
+        next true if message[:headers].nil?
 
         errors = []
 
-        config.fetch(:headers).each do |key, value|
+        message.fetch(:headers).each do |key, value|
           errors << [%i[headers], :invalid_key_type] unless key.is_a?(String)
           errors << [%i[headers], :invalid_value_type] unless value.is_a?(String)
         end
@@ -49,10 +49,10 @@ module WaterDrop
         errors
       end
 
-      virtual do |config, errors, validator|
+      virtual do |message, errors, validator|
         next true unless errors.empty?
-        next if config[:payload].nil? # tombstone payload
-        next true if config[:payload].bytesize <= validator.max_payload_size
+        next if message[:payload].nil? # tombstone payload
+        next true if message[:payload].bytesize <= validator.max_payload_size
 
         [[%i[payload], :max_size]]
       end
