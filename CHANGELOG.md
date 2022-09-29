@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.2 (Unreleased)
+## 2.4.2 (2022-09-29)
 - Allow sending tombstone messages (#267)
 
 ## 2.4.1 (2022-08-01)
