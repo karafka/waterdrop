@@ -1,11 +1,5 @@
 # WaterDrop
 
-**Note**: Documentation presented here refers to WaterDrop `2.x`.
-
-WaterDrop `2.x` works with Karafka `2.*` and aims to either work as a standalone producer or as a part of the Karafka `2.*`.
-
-Please refer to [this](https://github.com/karafka/waterdrop/tree/1.4) branch and its documentation for details about WaterDrop `1.*` usage.
-
 [![Build Status](https://github.com/karafka/waterdrop/workflows/ci/badge.svg)](https://github.com/karafka/waterdrop/actions?query=workflow%3Aci)
 [![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
