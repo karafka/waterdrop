@@ -16,6 +16,7 @@ if coverage
     add_filter '/.bundle/'
     add_filter '/doc/'
     add_filter '/config/'
+    add_filter '/lib/waterdrop/patches/'
 
     merge_timeout 600
     minimum_coverage 100
