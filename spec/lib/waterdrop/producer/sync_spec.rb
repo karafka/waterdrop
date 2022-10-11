@@ -58,4 +58,44 @@ RSpec.describe_current do
       end
     end
   end
+
+  context 'when using compression.codec' do
+    subject(:delivery) { producer.produce_sync(message) }
+
+    let(:producer) do
+      build(
+        :producer,
+        kafka: {
+          'bootstrap.servers': 'localhost:9092',
+          'compression.codec': codec
+        }
+      )
+    end
+
+    let(:message) { build(:valid_message) }
+
+    context 'when it is gzip' do
+      let(:codec) { 'gzip' }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+    end
+
+    context 'when it is not installed zstd' do
+      let(:codec) { 'zstd' }
+
+      it { expect { delivery }.to raise_error(Rdkafka::Config::ConfigError) }
+    end
+
+    context 'when it is installed lz4' do
+      let(:codec) { 'lz4' }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+    end
+
+    context 'when it is installed snappy' do
+      let(:codec) { 'snappy' }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+    end
+  end
 end
