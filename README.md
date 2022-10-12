@@ -35,6 +35,7 @@ It:
   * [Buffering](#buffering)
       + [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
       + [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
+  * [Compression](#compression)
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
   * [Error notifications](#error-notifications)
@@ -199,6 +200,35 @@ KAFKA_PRODUCERS_CP.shutdown { |producer| producer.close }
 WaterDrop producers support buffering messages in their internal buffers and on the `rdkafka` level via `queue.buffering.*` set of settings.
 
 This means that depending on your use case, you can achieve both granular buffering and flushing control when needed with context awareness and periodic and size-based flushing functionalities.
+
+### Compression
+
+WaterDrop supports following compression types:
+
+- `gzip`
+- `zstd`
+- `lz4`
+- `snappy`
+
+To use compression, set `kafka` scope `compression.codec` setting. You can also optionally indicate the `compression.level`:
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'compression.codec': 'gzip',
+    'compression.level': 6
+  }
+end
+```
+
+**Note**: In order to use `zstd`, you need to install `libzstd-dev`:
+
+```bash
+apt-get install -y libzstd-dev
+```
 
 #### Using WaterDrop to buffer messages based on the application logic
 
