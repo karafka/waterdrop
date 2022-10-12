@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- Support for librdkafka 0.13
+
 ## 2.4.2 (2022-09-29)
 - Allow sending tombstone messages (#267)
 
