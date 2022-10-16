@@ -156,9 +156,14 @@ Keep in mind, that message you want to send should be either binary or stringifi
 
 ### Using WaterDrop across the application and with Ruby on Rails
 
-If you plan to both produce and consume messages using Kafka, you should install and use [Karafka](https://github.com/karafka/karafka). It integrates automatically with Ruby on Rails applications and auto-configures WaterDrop producer to make it accessible via `Karafka#producer` method.
+If you plan to both produce and consume messages using Kafka, you should install and use [Karafka](https://github.com/karafka/karafka). It integrates automatically with Ruby on Rails applications and auto-configures WaterDrop producer to make it accessible via `Karafka#producer` method:
 
-If you want to only produce messages from within your application, since WaterDrop is thread-safe you can create a single instance in an initializer like so:
+```ruby
+event = Events.last
+Karafka.producer.produce_async(topic: 'events', payload: event.to_json)
+```
+
+If you want to only produce messages from within your application without consuming with Karafka, since WaterDrop is thread-safe you can create a single instance in an initializer like so:
 
 ```ruby
 KAFKA_PRODUCER = WaterDrop::Producer.new
