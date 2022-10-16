@@ -1,5 +1,11 @@
 # WaterDrop changelog
 
+## Unreleased
+- Support for librdkafka 0.13
+
+## 2.4.2 (2022-09-29)
+- Allow sending tombstone messages (#267)
+
 ## 2.4.1 (2022-08-01)
 - Replace local statistics decorator with the one extracted to `karafka-core`.
 

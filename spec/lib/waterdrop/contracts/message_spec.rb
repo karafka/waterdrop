@@ -64,11 +64,11 @@ RSpec.describe_current do
   end
 
   context 'when we run payload validations' do
-    context 'when payload is nil but present in options' do
+    context 'when payload is nil but present (tombstone)' do
       before { message[:payload] = nil }
 
-      it { expect(contract_result).not_to be_success }
-      it { expect(errors[:payload]).not_to be_empty }
+      it { expect(contract_result).to be_success }
+      it { expect(errors).to be_empty }
     end
 
     context 'when payload is not a string' do
