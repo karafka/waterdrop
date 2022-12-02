@@ -2,6 +2,7 @@
 
 ## Unreleased
 - Support for librdkafka 0.13
+- Update Github Actions
 
 ## 2.4.2 (2022-09-29)
 - Allow sending tombstone messages (#267)
