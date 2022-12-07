@@ -4,6 +4,7 @@
 - Support for librdkafka 0.13
 - Update Github Actions
 - Change auto-generated id from `SecureRandom#uuid` to `SecureRandom#hex(6)`
+- Remove shared components that were moved to `karafka-core` from WaterDrop
 
 ## 2.4.2 (2022-09-29)
 - Allow sending tombstone messages (#267)
