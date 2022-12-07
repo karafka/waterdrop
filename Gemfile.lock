@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.4.2)
+    waterdrop (2.4.3)
       karafka-core (>= 2.0.6, < 3.0.0)
       zeitwerk (~> 2.3)
 

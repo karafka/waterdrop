@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.4.3 (2022-12-07)
 - Support for librdkafka 0.13
 - Update Github Actions
 - Change auto-generated id from `SecureRandom#uuid` to `SecureRandom#hex(6)`
