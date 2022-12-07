@@ -22,7 +22,7 @@ module WaterDrop
     setting(
       :id,
       default: false,
-      constructor: ->(id) { id || SecureRandom.uuid }
+      constructor: ->(id) { id || SecureRandom.hex(6) }
     )
     # option [Instance] logger that we want to use
     # @note Due to how rdkafka works, this setting is global for all the producers
