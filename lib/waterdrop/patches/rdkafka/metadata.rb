@@ -18,14 +18,15 @@ module WaterDrop
 
           super(*args)
         rescue Rdkafka::RdkafkaError => e
+          raise unless e.code == :timed_out
+          raise if attempt > 10
+
           backoff_factor = 2 ** attempt
           timeout = backoff_factor * 0.1
 
           sleep(attempt)
 
-          raise if attempt > 10
-          retry if e.code == :timed_out
-          raise(e)
+          retry
         end
       end
     end
