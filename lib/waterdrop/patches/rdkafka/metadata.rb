@@ -24,7 +24,7 @@ module WaterDrop
           backoff_factor = 2**attempt
           timeout = backoff_factor * 0.1
 
-          sleep(attempt)
+          sleep(timeout)
 
           retry
         end
