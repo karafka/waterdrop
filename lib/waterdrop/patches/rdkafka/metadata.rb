@@ -8,8 +8,9 @@ module WaterDrop
       # Rdkafka::Metadata patches
       module Metadata
         # We overwrite this method because there were reports of metadata operation timing out
-        # when Kafka was under stress. While the messages dispatch will be retried, this was not
-        # and was causing problems.
+        # when Kafka was under stress. While the messages dispatch will be retried, metadata
+        # fetch happens prior to that, effectively crashing the process. Metadata fetch was not
+        # being retried at all.
         #
         # @param args [Array<Object>] all the metadata original arguments
         def initialize(*args)

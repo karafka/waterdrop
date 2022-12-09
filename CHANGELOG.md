@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.4.4 (2022-12-09)
 - Add temporary patch on top of `rdkafka-ruby` to mitigate metadata fetch timeout failures.
 
 ## 2.4.3 (2022-12-07)
