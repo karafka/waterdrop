@@ -21,7 +21,7 @@ module WaterDrop
           raise unless e.code == :timed_out
           raise if attempt > 10
 
-          backoff_factor = 2 ** attempt
+          backoff_factor = 2**attempt
           timeout = backoff_factor * 0.1
 
           sleep(attempt)
