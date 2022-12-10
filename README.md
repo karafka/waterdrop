@@ -301,7 +301,7 @@ See the `WaterDrop::Instrumentation::Monitor::EVENTS` for the list of all the su
 
 ### Usage statistics
 
-WaterDrop is configured to emit internal `librdkafka` metrics every five seconds. You can change this by setting the `kafka` `statistics.interval.ms` configuration property to a value > `0`. Once that is done, emitted statistics are available after subscribing to the `statistics.emitted` publisher event. If set to `0`, metrics will not be published.
+WaterDrop is configured to emit internal `librdkafka` metrics every five seconds. You can change this by setting the `kafka` `statistics.interval.ms` configuration property to a value greater of equal `0`. Emitted statistics are available after subscribing to the `statistics.emitted` publisher event. If set to `0`, metrics will not be published.
 
 The statistics include all of the metrics from `librdkafka` (complete list [here](https://github.com/edenhill/librdkafka/blob/master/STATISTICS.md)) as well as the diff of those against the previously emitted values.
 
