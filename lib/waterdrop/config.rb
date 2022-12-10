@@ -9,7 +9,10 @@ module WaterDrop
 
     # Defaults for kafka settings, that will be overwritten only if not present already
     KAFKA_DEFAULTS = {
-      'client.id': 'waterdrop'
+      'client.id': 'waterdrop',
+      # emit librdkafka statistics every five seconds. This is used in instrumentation.
+      # When disabled, part of metrics will not be published and available.
+      'statistics.interval.ms': 5_000
     }.freeze
 
     private_constant :KAFKA_DEFAULTS

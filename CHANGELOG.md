@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- Set `statistics.interval.ms` to 5 seconds by default, so the defaults cover all the instrumentation out of the box.
+
 ## 2.4.5 (2022-12-10)
 - Fix invalid error scope visibility.
 - Cache partition count to improve messages production and lower stress on Kafka when `partition_key` is on.
