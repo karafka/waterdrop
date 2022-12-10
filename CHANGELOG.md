@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.5 (Unreleased)
+## 2.4.5 (2022-12-10)
 - Fix invalid error scope visibility.
 - Cache partition count to improve messages production and lower stress on Kafka when `partition_key` is on.
 
