@@ -12,10 +12,11 @@ module WaterDrop
 
         private_constant :PARTITIONS_COUNT_TTL
 
+        # @param args [Object] arguments accepted by the original rdkafka producer
         def initialize(*args)
           super
 
-          @partitions_count_cache = Concurrent::Hash.new do |cache, topic|
+          @_partitions_count_cache = Concurrent::Hash.new do |cache, topic|
             cache[topic] = [
               now,
               ::Rdkafka::Metadata.new(inner_kafka, topic).topics&.first[:partition_count]
@@ -41,11 +42,11 @@ module WaterDrop
         def partition_count(topic)
           closed_producer_check(__method__)
 
-          @partitions_count_cache.delete_if do |topic, cached|
+          @_partitions_count_cache.delete_if do |topic, cached|
             now - cached.first > PARTITIONS_COUNT_TTL
           end
 
-          @partitions_count_cache[topic].last
+          @_partitions_count_cache[topic].last
         end
 
         # @return [FFI::Pointer] pointer to the raw librdkafka
