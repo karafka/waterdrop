@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.4.5 (Unreleased)
+- Fix invalid error scope visibility.
+- Cache partition count to improve messages production and lower stress on Kafka when `partition_key` is on.
+
 ## 2.4.4 (2022-12-09)
 - Add temporary patch on top of `rdkafka-ruby` to mitigate metadata fetch timeout failures.
 

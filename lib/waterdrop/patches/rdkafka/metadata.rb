@@ -18,7 +18,7 @@ module WaterDrop
           attempt += 1
 
           super(*args)
-        rescue Rdkafka::RdkafkaError => e
+        rescue ::Rdkafka::RdkafkaError => e
           raise unless e.code == :timed_out
           raise if attempt > 10
 
