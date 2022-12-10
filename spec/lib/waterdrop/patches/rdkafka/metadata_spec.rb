@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:partition_count) do
+  subject(:partition_count) { producer.client.partition_count('example_topic') }
+
+  let(:producer) do
     WaterDrop::Producer.new do |config|
       config.deliver = true
       config.kafka = { 'bootstrap.servers': '127.0.0.1:9092' }
-    end.client.partition_count('topic')
+    end
   end
+
+  after { producer.close }
 
   describe 'metadata initialization recovery' do
     context 'when all good' do
