@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.6 (Unreleased)
+## 2.4.6 (2022-12-10)
 - Set `statistics.interval.ms` to 5 seconds by default, so the defaults cover all the instrumentation out of the box.
 
 ### Upgrade notes
