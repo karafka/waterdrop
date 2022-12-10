@@ -1,7 +1,23 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.4.6 (Unreleased)
 - Set `statistics.interval.ms` to 5 seconds by default, so the defaults cover all the instrumentation out of the box.
+
+### Upgrade notes
+
+If you want to disable `librdkafka` statistics because you do not use them at all, update the `kafka` `statistics.interval.ms` setting and set it to `0`:
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.deliver = true
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'statistics.interval.ms': 0
+  }
+end
+```
 
 ## 2.4.5 (2022-12-10)
 - Fix invalid error scope visibility.
