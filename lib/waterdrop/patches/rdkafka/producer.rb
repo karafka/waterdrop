@@ -17,9 +17,11 @@ module WaterDrop
           super
 
           @_partitions_count_cache = Concurrent::Hash.new do |cache, topic|
+            topic_metadata = ::Rdkafka::Metadata.new(inner_kafka, topic).topics&.first
+
             cache[topic] = [
               now,
-              ::Rdkafka::Metadata.new(inner_kafka, topic).topics&.first[:partition_count]
+              topic_metadata ? topic_metadata[:partition_count] : nil
             ]
           end
         end
@@ -38,11 +40,12 @@ module WaterDrop
         # This prevents us in case someone uses `partition_key` from querying for the count with
         # each message. Instead we query once every 30 seconds at most
         #
+        # @param topic [String] topic name
         # @return [Integer] partition count for a given topic
         def partition_count(topic)
           closed_producer_check(__method__)
 
-          @_partitions_count_cache.delete_if do |topic, cached|
+          @_partitions_count_cache.delete_if do |_, cached|
             now - cached.first > PARTITIONS_COUNT_TTL
           end
 
