@@ -11,10 +11,12 @@ RSpec.describe_current do
 
   context 'when morphing middleware' do
     before do
-      middleware.prepend -> (msg)
+      mid1 = lambda do |msg|
         msg[:test] = 1
         msg
       end
+
+      middleware.prepend mid1
     end
 
     it { expect { middleware.run(message) }.to(change { message[:test] }.from(nil).to(1)) }
@@ -22,15 +24,18 @@ RSpec.describe_current do
 
   context 'when morphing middlewares' do
     before do
-      middleware.prepend -> (msg)
+      mid = lambda do |msg|
         msg[:test] = 1
         msg
       end
 
-      middleware.prepend -> (msg)
+      mid = lambda do |msg|
         msg[:test2] = 2
         msg
       end
+
+      middleware.prepend mid1
+      middleware.prepend mid2
     end
 
     it { expect { middleware.run(message) }.to(change { message[:test] }.from(nil).to(1)) }
@@ -39,11 +44,13 @@ RSpec.describe_current do
 
   context 'when non-morphing middleware' do
     before do
-      middleware.prepend -> (msg)
+      mid1 = lambda do |msg|
         msg = msg.dup
         msg[:test] = 1
         msg
       end
+
+      middleware.prepend mid1
     end
 
     it { expect { middleware.run(message) }.not_to(change { message }) }
@@ -52,19 +59,22 @@ RSpec.describe_current do
 
   context 'when non-morphing middlewares' do
     before do
-      middleware.prepend -> (msg)
+      mid1 = lambda do |msg|
         msg = msg.dup
 
         msg[:test] = 1
         msg
       end
 
-      middleware.prepend -> (msg)
+      mid2 = lambda do |msg|
         msg = msg.dup
 
         msg[:test2] = 2
         msg
       end
+
+      middleware.prepend mid1
+      middleware.prepend mid2
     end
 
     it { expect { middleware.run(message) }.not_to(change { message }) }
@@ -74,10 +84,12 @@ RSpec.describe_current do
 
   context 'when morphing middleware on many' do
     before do
-      middleware.append -> (msg)
+      mid1 = lambda do |msg|
         msg[:test] = 1
         msg
       end
+
+      middleware.append mid1
     end
 
     it { expect { middleware.run_many([message]) }.to(change { message[:test] }.from(nil).to(1)) }
@@ -85,15 +97,18 @@ RSpec.describe_current do
 
   context 'when morphing middlewares on many' do
     before do
-      middleware.append -> (msg)
+      mid1 = lambda do |msg|
         msg[:test] = 1
         msg
       end
 
-      middleware.append -> (msg)
+      mid2 = lambda do |msg|
         msg[:test2] = 2
         msg
       end
+
+      middleware.append mid1
+      middleware.append mid2
     end
 
     it { expect { middleware.run_many([message]) }.to(change { message[:test] }.from(nil).to(1)) }
@@ -102,11 +117,13 @@ RSpec.describe_current do
 
   context 'when non-morphing middleware on many' do
     before do
-      middleware.append -> (msg)
+      mid1 = lambda do |msg|
         msg = msg.dup
         msg[:test] = 1
         msg
       end
+
+      middleware.append mid1
     end
 
     it { expect { middleware.run_many([message]) }.not_to(change { message }) }
