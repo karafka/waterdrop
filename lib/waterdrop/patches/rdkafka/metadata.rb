@@ -7,6 +7,7 @@ module WaterDrop
     module Rdkafka
       # Rdkafka::Metadata patches
       module Metadata
+        # Errors upon which we retry the metadata fetch
         RETRIED_ERRORS = %i[
           timed_out
           leader_not_available

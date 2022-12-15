@@ -6,7 +6,7 @@ RSpec.describe_current do
   let(:message) { build(:valid_message) }
 
   context 'when no middlewares' do
-    it { expect { middleware.run(message) }.not_to change { message } }
+    it { expect { middleware.run(message) }.not_to(change { message }) }
   end
 
   context 'when morphing middleware' do
@@ -46,7 +46,7 @@ RSpec.describe_current do
       end
     end
 
-    it { expect { middleware.run(message) }.not_to change { message } }
+    it { expect { middleware.run(message) }.not_to(change { message }) }
     it { expect(middleware.run(message)[:test]).to eq(1) }
   end
 
@@ -67,7 +67,7 @@ RSpec.describe_current do
       end
     end
 
-    it { expect { middleware.run(message) }.not_to change { message } }
+    it { expect { middleware.run(message) }.not_to(change { message }) }
     it { expect(middleware.run(message)[:test]).to eq(1) }
     it { expect(middleware.run(message)[:test2]).to eq(2) }
   end
@@ -109,7 +109,7 @@ RSpec.describe_current do
       end
     end
 
-    it { expect { middleware.run_many([message]) }.not_to change { message } }
+    it { expect { middleware.run_many([message]) }.not_to(change { message }) }
     it { expect(middleware.run_many([message]).first[:test]).to eq(1) }
   end
 end
