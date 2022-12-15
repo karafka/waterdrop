@@ -24,12 +24,12 @@ RSpec.describe_current do
 
   context 'when morphing middlewares' do
     before do
-      mid = lambda do |msg|
+      mid1 = lambda do |msg|
         msg[:test] = 1
         msg
       end
 
-      mid = lambda do |msg|
+      mid2 = lambda do |msg|
         msg[:test2] = 2
         msg
       end
