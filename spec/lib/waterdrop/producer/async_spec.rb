@@ -25,6 +25,32 @@ RSpec.describe_current do
 
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
     end
+
+    context 'when producing with good middleware' do
+      before do
+        producer.middleware.append ->(msg) do
+          msg[:partition_key] = '1'
+          msg
+        end
+      end
+
+      let(:message) { build(:valid_message, payload: nil) }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
+    end
+
+    context 'when producing with corrupted middleware' do
+      before do
+        producer.middleware.append ->(msg) do
+          msg[:partition_key] = -1
+          msg
+        end
+      end
+
+      let(:message) { build(:valid_message, payload: nil) }
+
+      it { expect { delivery }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
+    end
   end
 
   describe '#produce_many_async' do

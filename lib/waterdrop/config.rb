@@ -57,6 +57,12 @@ module WaterDrop
     # rdkafka options
     # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     setting :kafka, default: {}
+    # Middleware chain that can be expanded with useful middleware steps
+    setting(
+      :middleware,
+      default: false,
+      constructor: ->(middleware) { middleware || WaterDrop::Middleware.new }
+    )
 
     # Configuration method
     # @yield Runs a block of code providing a config singleton instance to it

@@ -15,6 +15,8 @@ module WaterDrop
       #   message could not be sent to Kafka
       def produce_async(message)
         ensure_active!
+
+        message = middleware.run(message)
         validate_message!(message)
 
         @monitor.instrument(
@@ -36,6 +38,8 @@ module WaterDrop
       #   and the message could not be sent to Kafka
       def produce_many_async(messages)
         ensure_active!
+
+        messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
