@@ -439,7 +439,7 @@ Below you can find an example middleware that converts the incoming payload into
 ```ruby
 class AutoMapper
   def call(message)
-    message[:payload] = message[:payload].to_s
+    message[:payload] = message[:payload].to_json
     message
   end
 end
