@@ -28,7 +28,7 @@ RSpec.describe_current do
 
     context 'when producing with good middleware' do
       before do
-        producer.middleware.append ->(msg) do
+        producer.middleware.append lambda do |msg|
           msg[:partition_key] = '1'
           msg
         end
@@ -41,7 +41,7 @@ RSpec.describe_current do
 
     context 'when producing with corrupted middleware' do
       before do
-        producer.middleware.append ->(msg) do
+        producer.middleware.append lambda do |msg|
           msg[:partition_key] = -1
           msg
         end
