@@ -11,7 +11,7 @@ RSpec.describe_current do
 
   context 'when morphing middleware' do
     before do
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg[:test] = 1
         msg
       end
@@ -22,12 +22,12 @@ RSpec.describe_current do
 
   context 'when morphing middlewares' do
     before do
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg[:test] = 1
         msg
       end
 
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg[:test2] = 2
         msg
       end
@@ -39,7 +39,7 @@ RSpec.describe_current do
 
   context 'when non-morphing middleware' do
     before do
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg = msg.dup
         msg[:test] = 1
         msg
@@ -52,14 +52,14 @@ RSpec.describe_current do
 
   context 'when non-morphing middlewares' do
     before do
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg = msg.dup
 
         msg[:test] = 1
         msg
       end
 
-      middleware.prepend lambda do |msg|
+      middleware.prepend -> (msg)
         msg = msg.dup
 
         msg[:test2] = 2
@@ -74,7 +74,7 @@ RSpec.describe_current do
 
   context 'when morphing middleware on many' do
     before do
-      middleware.append lambda do |msg|
+      middleware.append -> (msg)
         msg[:test] = 1
         msg
       end
@@ -85,12 +85,12 @@ RSpec.describe_current do
 
   context 'when morphing middlewares on many' do
     before do
-      middleware.append lambda do |msg|
+      middleware.append -> (msg)
         msg[:test] = 1
         msg
       end
 
-      middleware.append lambda do |msg|
+      middleware.append -> (msg)
         msg[:test2] = 2
         msg
       end
@@ -102,7 +102,7 @@ RSpec.describe_current do
 
   context 'when non-morphing middleware on many' do
     before do
-      middleware.append lambda do |msg|
+      middleware.append -> (msg)
         msg = msg.dup
         msg[:test] = 1
         msg
