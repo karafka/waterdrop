@@ -3,9 +3,12 @@
 module WaterDrop
   # Main WaterDrop messages producer
   class Producer
+    extend Forwardable
     include Sync
     include Async
     include Buffer
+
+    def_delegators :config, :middleware
 
     # @return [String] uuid of the current producer
     attr_reader :id

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module WaterDrop
+  # WaterDrop instrumentation related module
   module Instrumentation
     # Default listener that hooks up to our instrumentation and uses its events for logging
     # It can be removed/replaced or anything without any harm to the Waterdrop flow

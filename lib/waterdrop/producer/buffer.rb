@@ -19,6 +19,7 @@ module WaterDrop
       #   message could not be sent to Kafka
       def buffer(message)
         ensure_active!
+        message = middleware.run(message)
         validate_message!(message)
 
         @monitor.instrument(
@@ -37,6 +38,8 @@ module WaterDrop
       #   and the message could not be sent to Kafka
       def buffer_many(messages)
         ensure_active!
+
+        messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
