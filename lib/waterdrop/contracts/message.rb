@@ -8,7 +8,7 @@ module WaterDrop
       configure do |config|
         config.error_messages = YAML.safe_load(
           File.read(
-            File.join(WaterDrop.gem_root, 'config', 'errors.yml')
+            File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
           )
         ).fetch('en').fetch('validations').fetch('message')
       end
