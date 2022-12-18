@@ -3,6 +3,7 @@
 ## 2.4.7 (2022-12-18)
 - Add support to customizable middlewares that can modify message hash prior to validation and dispatch.
 - Fix a case where upon not-available leader, metadata request would not be retried
+- Require `karafka-core` 2.0.7.
 
 ## 2.4.6 (2022-12-10)
 - Set `statistics.interval.ms` to 5 seconds by default, so the defaults cover all the instrumentation out of the box.
