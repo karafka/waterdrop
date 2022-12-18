@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.7 (Unreleased)
+## 2.4.7 (2022-12-18)
 - Add support to customizable middlewares that can modify message hash prior to validation and dispatch.
 - Fix a case where upon not-available leader, metadata request would not be retried
 
