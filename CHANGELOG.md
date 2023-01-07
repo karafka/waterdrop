@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.8 (Unreleased)
+## 2.4.8 (2023-01-07)
 - Use monotonic time from Karafka core.
 
 ## 2.4.7 (2022-12-18)
