@@ -7,6 +7,8 @@ module WaterDrop
     module Rdkafka
       # Rdkafka::Producer patches
       module Producer
+        include ::Karafka::Core::Helpers::Time
+
         # Cache partitions count for 30 seconds
         PARTITIONS_COUNT_TTL = 30_000
 
@@ -20,7 +22,7 @@ module WaterDrop
             topic_metadata = ::Rdkafka::Metadata.new(inner_kafka, topic).topics&.first
 
             cache[topic] = [
-              now,
+              monotonic_now,
               topic_metadata ? topic_metadata[:partition_count] : nil
             ]
           end
@@ -46,7 +48,7 @@ module WaterDrop
           closed_producer_check(__method__)
 
           @_partitions_count_cache.delete_if do |_, cached|
-            now - cached.first > PARTITIONS_COUNT_TTL
+            monotonic_now - cached.first > PARTITIONS_COUNT_TTL
           end
 
           @_partitions_count_cache[topic].last
@@ -67,11 +69,6 @@ module WaterDrop
           end
 
           @_inner_kafka
-        end
-
-        # @return [Float] current clock time
-        def now
-          ::Process.clock_gettime(::Process::CLOCK_MONOTONIC) * 1_000
         end
       end
     end
