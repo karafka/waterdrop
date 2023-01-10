@@ -122,13 +122,14 @@ module WaterDrop
           flush(true)
 
           # Flush the internal buffers in librdkafka
-          client.flush if @client && !@client.closed?
-
-          # We should not close the client in several threads the same time
-          # It is safe to run it several times but not exactly the same moment
-          # We also mark it as closed only if it was connected, if not, it would trigger a new
-          # connection that anyhow would be immediately closed
-          client.close if @client
+          if @client && !@client.closed?
+            client.flush
+            # We should not close the client in several threads the same time
+            # It is safe to run it several times but not exactly the same moment
+            # We also mark it as closed only if it was connected, if not, it would trigger a new
+            # connection that anyhow would be immediately closed
+            client.close
+          end
 
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
