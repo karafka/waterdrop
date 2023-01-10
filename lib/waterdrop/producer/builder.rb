@@ -21,6 +21,11 @@ module WaterDrop
           config.monitor
         )
 
+        # Initialize the name so it is cached
+        # This will prevent us from building the name on a producer client that is already closed
+        # and does not exist
+        client.name
+
         client
       end
     end
