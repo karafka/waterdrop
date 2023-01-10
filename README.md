@@ -33,6 +33,7 @@ It:
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
   * [Error notifications](#error-notifications)
+  * [Acknowledgment notifications](#acknowledgment-notifications)
   * [Datadog and StatsD integration](#datadog-and-statsd-integration)
   * [Forking and potential memory problems](#forking-and-potential-memory-problems)
 - [Middleware](#middleware)
@@ -352,6 +353,65 @@ producer.close
 
 Note: The metrics returned may not be completely consistent between brokers, toppars and totals, due to the internal asynchronous nature of librdkafka. E.g., the top level tx total may be less than the sum of the broker tx values which it represents.
 
+### Error notifications
+
+WaterDrop allows you to listen to all errors that occur while producing messages and in its internal background threads. Things like reconnecting to Kafka upon network errors and others unrelated to publishing messages are all available under `error.occurred` notification key. You can subscribe to this event to ensure your setup is healthy and without any problems that would otherwise go unnoticed as long as messages are delivered.
+
+```ruby
+producer = WaterDrop::Producer.new do |config|
+  # Note invalid connection port...
+  config.kafka = { 'bootstrap.servers': 'localhost:9090' }
+end
+
+producer.monitor.subscribe('error.occurred') do |event|
+  error = event[:error]
+
+  p "WaterDrop error occurred: #{error}"
+end
+
+# Run this code without Kafka cluster
+loop do
+  producer.produce_async(topic: 'events', payload: 'data')
+
+  sleep(1)
+end
+
+# After you stop your Kafka cluster, you will see a lot of those:
+#
+# WaterDrop error occurred: Local: Broker transport failure (transport)
+#
+# WaterDrop error occurred: Local: Broker transport failure (transport)
+```
+
+### Acknowledgment notifications
+
+WaterDrop allows you to listen to Kafka messages' acknowledgment events. This will enable you to monitor deliveries of messages from WaterDrop even when using asynchronous dispatch methods.
+
+That way, you can make sure, that dispatched messages are acknowledged by Kafka.
+
+```ruby
+producer = WaterDrop::Producer.new do |config|
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+end
+
+producer.monitor.subscribe('message.acknowledged') do |event|
+  producer_id = event[:producer_id]
+  offset = event[:offset]
+
+  p "WaterDrop [#{producer_id}] delivered message with offset: #{offset}"
+end
+
+loop do
+  producer.produce_async(topic: 'events', payload: 'data')
+
+  sleep(1)
+end
+
+# WaterDrop [dd8236fff672] delivered message with offset: 32
+# WaterDrop [dd8236fff672] delivered message with offset: 33
+# WaterDrop [dd8236fff672] delivered message with offset: 34
+```
+
 ### Datadog and StatsD integration
 
 WaterDrop comes with (optional) full Datadog and StatsD integration that you can use. To use it:
@@ -384,36 +444,6 @@ producer.monitor.subscribe(listener)
 You can also find [here](https://github.com/karafka/waterdrop/blob/master/lib/waterdrop/instrumentation/vendors/datadog/dashboard.json) a ready to import DataDog dashboard configuration file that you can use to monitor all of your producers.
 
 ![Example WaterDrop DD dashboard](https://raw.githubusercontent.com/karafka/misc/master/printscreens/waterdrop_dd_dashboard_example.png)
-
-### Error notifications
-
-WaterDrop allows you to listen to all errors that occur while producing messages and in its internal background threads. Things like reconnecting to Kafka upon network errors and others unrelated to publishing messages are all available under `error.occurred` notification key. You can subscribe to this event to ensure your setup is healthy and without any problems that would otherwise go unnoticed as long as messages are delivered.
-
-```ruby
-producer = WaterDrop::Producer.new do |config|
-  # Note invalid connection port...
-  config.kafka = { 'bootstrap.servers': 'localhost:9090' }
-end
-
-producer.monitor.subscribe('error.occurred') do |event|
-  error = event[:error]
-
-  p "WaterDrop error occurred: #{error}"
-end
-
-# Run this code without Kafka cluster
-loop do
-  producer.produce_async(topic: 'events', payload: 'data')
-
-  sleep(1)
-end
-
-# After you stop your Kafka cluster, you will see a lot of those:
-#
-# WaterDrop error occurred: Local: Broker transport failure (transport)
-#
-# WaterDrop error occurred: Local: Broker transport failure (transport)
-```
 
 ### Forking and potential memory problems
 
