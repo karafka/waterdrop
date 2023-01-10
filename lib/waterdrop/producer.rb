@@ -84,6 +84,11 @@ module WaterDrop
         @pid = Process.pid
         @client = Builder.new.call(self, @config)
 
+        # We use our own finalziers, this finalizer is not stable enough and there seems to be a
+        # race condition in between finalizers
+        # Removing this allows us to use our own finalizer
+        ObjectSpace.undefine_finalizer(@client)
+
         # Register statistics runner for this particular type of callbacks
         ::Karafka::Core::Instrumentation.statistics_callbacks.add(
           @id,
