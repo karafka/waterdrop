@@ -39,10 +39,8 @@ module WaterDrop
         #
         # @return [String] producer instance name
         def name
-          @_name ||= begin
-            @native_kafka.with_inner do |inner|
-              ::Rdkafka::Bindings.rd_kafka_name(inner)
-            end
+          @_name ||= @native_kafka.with_inner do |inner|
+            ::Rdkafka::Bindings.rd_kafka_name(inner)
           end
         end
 
