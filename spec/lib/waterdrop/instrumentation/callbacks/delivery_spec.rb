@@ -23,5 +23,6 @@ RSpec.describe_current do
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:offset]).to eq(delivery_report.offset) }
     it { expect(event[:partition]).to eq(delivery_report.partition) }
+    it { expect(event[:topic]).to eq(delivery_report.topic_name) }
   end
 end

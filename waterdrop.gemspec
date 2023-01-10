@@ -18,6 +18,8 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'karafka-core', '>= 2.0.8', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
+  # @note Remove this once 0.13 is released and lock the core
+  spec.add_dependency 'rdkafka', '>= 0.13.0.beta.4'
 
   spec.required_ruby_version = '>= 2.7'
 

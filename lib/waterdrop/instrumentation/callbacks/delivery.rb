@@ -21,7 +21,8 @@ module WaterDrop
             'message.acknowledged',
             producer_id: @producer_id,
             offset: delivery_report.offset,
-            partition: delivery_report.partition
+            partition: delivery_report.partition,
+            topic: delivery_report.topic_name
           )
         end
       end

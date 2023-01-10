@@ -2,6 +2,9 @@
 
 ## 2.4.9 (Unreleased)
 - Remove empty debug logging out of `LoggerListener`.
+- Drop support for rdkafka earlier than `0.13.0` due to API changes.
+- Add `topic` to message acknowledgement events.
+- Force flush librdkafka prior to closing it.
 
 ## 2.4.8 (2023-01-07)
 - Use monotonic time from Karafka core.

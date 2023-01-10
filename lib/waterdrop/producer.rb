@@ -121,6 +121,9 @@ module WaterDrop
           # as we close the client after the flushing (even if blocked by the mutex)
           flush(true)
 
+          # Flush the internal buffers in librdkafka
+          client.flush if @client && !@client.closed?
+
           # We should not close the client in several threads the same time
           # It is safe to run it several times but not exactly the same moment
           # We also mark it as closed only if it was connected, if not, it would trigger a new

@@ -19,7 +19,11 @@ module WaterDrop
           super
 
           @_partitions_count_cache = Concurrent::Hash.new do |cache, topic|
-            topic_metadata = ::Rdkafka::Metadata.new(inner_kafka, topic).topics&.first
+            topic_metadata = nil
+
+            @native_kafka.with_inner do |inner|
+              topic_metadata = ::Rdkafka::Metadata.new(inner, topic).topics&.first
+            end
 
             cache[topic] = [
               monotonic_now,
@@ -35,7 +39,11 @@ module WaterDrop
         #
         # @return [String] producer instance name
         def name
-          @_name ||= ::Rdkafka::Bindings.rd_kafka_name(inner_kafka)
+          @_name ||= begin
+            @native_kafka.with_inner do |inner|
+              ::Rdkafka::Bindings.rd_kafka_name(inner)
+            end
+          end
         end
 
         # This patch makes sure we cache the partition count for a given topic for given time
@@ -52,23 +60,6 @@ module WaterDrop
           end
 
           @_partitions_count_cache[topic].last
-        end
-
-        # @return [FFI::Pointer] pointer to the raw librdkafka
-        def inner_kafka
-          unless @_inner_kafka
-            version = ::Gem::Version.new(::Rdkafka::VERSION)
-
-            if version < ::Gem::Version.new('0.12.0')
-              @_inner_kafka = @native_kafka
-            elsif version < ::Gem::Version.new('0.13.0.beta.1')
-              @_inner_kafka = @client.native
-            else
-              @_inner_kafka = @native_kafka.inner
-            end
-          end
-
-          @_inner_kafka
         end
       end
     end
