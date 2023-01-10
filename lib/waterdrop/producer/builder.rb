@@ -14,6 +14,11 @@ module WaterDrop
 
         client = Rdkafka::Config.new(config.kafka.to_h).producer
 
+        # We use our own finalizers, this finalizer is not stable enough and there seems to be a
+        # race condition in between finalizers
+        # Removing this allows us to use our own finalizer
+        ObjectSpace.undefine_finalizer(client)
+
         # This callback is not global and is per client, thus we do not have to wrap it with a
         # callbacks manager to make it work
         client.delivery_callback = Instrumentation::Callbacks::Delivery.new(
