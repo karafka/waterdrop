@@ -82,7 +82,6 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_closed(event)
         info event, 'Closing producer'
-        debug event, ''
       end
 
       # @param event [Dry::Events::Event] event that happened with the error details
@@ -91,7 +90,6 @@ module WaterDrop
         type = event[:type]
 
         error(event, "Error occurred: #{error} - #{type}")
-        debug(event, '')
       end
 
       private

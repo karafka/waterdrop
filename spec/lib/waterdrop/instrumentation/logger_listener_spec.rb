@@ -121,8 +121,6 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
     it { expect(logged_data[0]).to include('Closing producer') }
-    it { expect(logged_data[1]).to include(producer.id) }
-    it { expect(logged_data[1]).to include('DEBUG') }
   end
 
   describe '#on_error_occurred' do
@@ -134,7 +132,5 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('ERROR') }
     it { expect(logged_data[0]).to include('Error occurred') }
-    it { expect(logged_data[1]).to include(producer.id) }
-    it { expect(logged_data[1]).to include('DEBUG') }
   end
 end

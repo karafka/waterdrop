@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.9 (Unreleased)
+- Remove empty debug logging out of `LoggerListener`.
+
 ## 2.4.8 (2023-01-07)
 - Use monotonic time from Karafka core.
 
