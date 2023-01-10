@@ -2,6 +2,7 @@
 
 ## 2.4.9 (Unreleased)
 - Remove empty debug logging out of `LoggerListener`.
+- Do not lock Ruby version in Karafka in favour of `karafka-core`.
 
 ## 2.4.8 (2023-01-07)
 - Use monotonic time from Karafka core.
