@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'karafka-core', '>= 2.0.8', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.0.9', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   if $PROGRAM_NAME.end_with?('gem')
