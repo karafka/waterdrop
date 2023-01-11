@@ -1,8 +1,9 @@
 # WaterDrop changelog
 
-## 2.4.9 (Unreleased)
+## 2.4.9 (2023-01-11)
 - Remove empty debug logging out of `LoggerListener`.
 - Do not lock Ruby version in Karafka in favour of `karafka-core`.
+- Make sure `karafka-core` version is at least `2.0.9` to make sure we run `karafka-rdkafka`.
 
 ## 2.4.8 (2023-01-07)
 - Use monotonic time from Karafka core.
