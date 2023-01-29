@@ -110,6 +110,7 @@ module WaterDrop
       rescue *RESCUED_ERRORS => e
         @monitor.instrument(
           'error.occurred',
+          caller: self,
           error: e,
           producer_id: id,
           dispatched: dispatched,

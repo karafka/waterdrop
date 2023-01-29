@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.4.9)
+    waterdrop (2.4.10)
       karafka-core (>= 2.0.9, < 3.0.0)
       zeitwerk (~> 2.3)
 
@@ -51,7 +51,7 @@ GEM
       simplecov_json_formatter (~> 0.1)
     simplecov-html (0.12.3)
     simplecov_json_formatter (0.1.4)
-    tzinfo (2.0.5)
+    tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     zeitwerk (2.6.6)
 

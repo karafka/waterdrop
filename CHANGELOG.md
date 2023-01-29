@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.10 (Unreleased)
+- Include `caller` in the error instrumentation to align with Karafka.
+
 ## 2.4.9 (2023-01-11)
 - Remove empty debug logging out of `LoggerListener`.
 - Do not lock Ruby version in Karafka in favour of `karafka-core`.
