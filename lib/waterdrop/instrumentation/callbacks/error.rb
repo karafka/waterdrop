@@ -25,6 +25,7 @@ module WaterDrop
 
           @monitor.instrument(
             'error.occurred',
+            caller: self,
             error: error,
             producer_id: @producer_id,
             type: 'librdkafka.error'
