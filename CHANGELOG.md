@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.10 (Unreleased)
+## 2.4.10 (2023-01-30)
 - Include `caller` in the error instrumentation to align with Karafka.
 
 ## 2.4.9 (2023-01-11)
