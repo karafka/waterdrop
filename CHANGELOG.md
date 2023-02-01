@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.11 (Unreleased)
+- Replace the local rspec locator with generalized core one.
+
 ## 2.4.10 (2023-01-30)
 - Include `caller` in the error instrumentation to align with Karafka.
 
