@@ -26,8 +26,6 @@ module WaterDrop
         error.occurred
       ].freeze
 
-      private_constant :EVENTS
-
       # @return [WaterDrop::Instrumentation::Monitor] monitor instance for system instrumentation
       def initialize
         super

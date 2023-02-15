@@ -2,6 +2,7 @@
 
 ## 2.4.11 (Unreleased)
 - Replace the local rspec locator with generalized core one.
+- Make `::WaterDrop::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 
 ## 2.4.10 (2023-01-30)
 - Include `caller` in the error instrumentation to align with Karafka.
