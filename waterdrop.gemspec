@@ -29,7 +29,12 @@ Gem::Specification.new do |spec|
   spec.require_paths = %w[lib]
 
   spec.metadata = {
+    'funding_uri' => 'https://karafka.io/#become-pro',
+    'homepage_uri' => 'https://karafka.io',
+    'changelog_uri' => 'https://github.com/karafka/waterdrop/blob/master/CHANGELOG.md',
+    'bug_tracker_uri' => 'https://github.com/karafka/waterdrop/issues',
     'source_code_uri' => 'https://github.com/karafka/waterdrop',
+    'documentation_uri' => 'https://github.com/karafka/waterdrop#readme',
     'rubygems_mfa_required' => 'true'
   }
 end
