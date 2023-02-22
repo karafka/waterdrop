@@ -303,7 +303,7 @@ producer.produce_async(topic: 'events', payload: 'data')
 producer.close
 ```
 
-See the `WaterDrop::Instrumentation::Monitor::EVENTS` for the list of all the supported events.
+See the `WaterDrop::Instrumentation::Notifications::EVENTS` for the list of all the supported events.
 
 ### Usage statistics
 
