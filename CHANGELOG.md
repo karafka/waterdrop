@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.4.11 (Unreleased)
+## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
 - Make `::WaterDrop::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
 
