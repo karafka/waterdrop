@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     waterdrop (2.4.11)
-      karafka-core (>= 2.0.10, < 3.0.0)
+      karafka-core (>= 2.0.12, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
@@ -22,7 +22,7 @@ GEM
     ffi (1.15.5)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.0.11)
+    karafka-core (2.0.12)
       concurrent-ruby (>= 1.1)
       karafka-rdkafka (>= 0.12.1)
     karafka-rdkafka (0.12.1)
