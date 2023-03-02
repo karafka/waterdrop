@@ -43,7 +43,7 @@ RSpec.describe_current do
       it { expect(event.payload[:offset]).to eq(0) }
     end
 
-    context 'when there is a message that was not successfully delivered' do
+    context 'when there is a message that was not successfully delivered async' do
       let(:changed) { [] }
       let(:event) { changed.first }
 
@@ -55,6 +55,30 @@ RSpec.describe_current do
         # We force it to bypass the validations, so we trigger an error on delivery
         # otherwise we would be stopped by WaterDrop itself
         producer.send(:client).produce(topic: '$%^&*', payload: '1')
+
+        sleep(0.01) until changed.size.positive?
+      end
+
+      it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(event.payload[:partition]).to eq(-1) }
+      it { expect(event.payload[:offset]).to eq(-1001) }
+    end
+
+    context 'when there is a message that was not successfully delivered sync' do
+      let(:changed) { [] }
+      let(:event) { changed.first }
+
+      before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          changed << event
+        end
+
+        # Intercept the error so it won't bubble up as we want to check the notifications pipeline
+        begin
+          producer.send(:client).produce(topic: '$%^&*', payload: '1').wait
+        rescue => e
+          nil
+        end
 
         sleep(0.01) until changed.size.positive?
       end
