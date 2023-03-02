@@ -48,18 +48,4 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
-
-  describe 'FlushFailureError' do
-    subject(:error) { described_class::FlushFailureError }
-
-    let(:messages) { [{ rand => rand }] }
-
-    specify { expect(error).to be < described_class::BaseError }
-
-    describe '#dispatched_messages' do
-      subject(:error) { described_class::FlushFailureError.new(messages) }
-
-      it { expect(error.dispatched_messages).to eq(messages) }
-    end
-  end
 end

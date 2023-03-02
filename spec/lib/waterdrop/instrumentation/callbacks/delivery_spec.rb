@@ -85,5 +85,42 @@ RSpec.describe_current do
       it { expect(event.payload[:partition]).to eq(-1) }
       it { expect(event.payload[:offset]).to eq(-1001) }
     end
+
+    context 'when there is an inline thrown erorrs' do
+      let(:changed) { [] }
+      let(:errors) { [] }
+      let(:event) { changed.first }
+      let(:producer) do
+        build(
+          :producer,
+          kafka: {
+            'bootstrap.servers': 'localhost:9092',
+            'request.required.acks': 1,
+            # Those will cause inline buffer overflow
+            'queue.buffering.max.messages': 1,
+            'queue.buffering.max.ms': 10_000
+          }
+        )
+      end
+
+      before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          changed << event
+        end
+
+        # Intercept the error so it won't bubble up as we want to check the notifications pipeline
+        begin
+          msg = build(:valid_message)
+          100.times { producer.produce_async(msg) }
+        rescue WaterDrop::Errors::ProduceError => e
+          errors << e
+        end
+      end
+
+      it { expect(errors.first).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(errors.first.cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(event[:error]).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(event[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+    end
   end
 end

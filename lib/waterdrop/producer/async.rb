@@ -23,7 +23,19 @@ module WaterDrop
           'message.produced_async',
           producer_id: id,
           message: message
-        ) { client.produce(**message) }
+        ) { produce(message) }
+      rescue *SUPPORTED_FLOW_ERRORS
+        re_raised = Errors::ProduceError.new
+
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          message: message,
+          error: re_raised,
+          type: 'message.produce_async'
+        )
+
+        raise re_raised
       end
 
       # Produces many messages to Kafka and does not wait for them to be delivered
@@ -39,6 +51,7 @@ module WaterDrop
       def produce_many_async(messages)
         ensure_active!
 
+        dispatched = []
         messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }
 
@@ -47,8 +60,25 @@ module WaterDrop
           producer_id: id,
           messages: messages
         ) do
-          messages.map { |message| client.produce(**message) }
+          messages.each do |message|
+            dispatched << produce(message)
+          end
+
+          dispatched
         end
+      rescue *SUPPORTED_FLOW_ERRORS
+        re_raised = Errors::ProduceManyError.new(dispatched)
+
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          messages: messages,
+          dispatched: dispatched,
+          error: re_raised,
+          type: 'messages.produce_many_async'
+        )
+
+        raise re_raised
       end
     end
   end

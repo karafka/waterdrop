@@ -35,7 +35,7 @@ module WaterDrop
             producer_id: @producer_id,
             offset: delivery_report.offset,
             partition: delivery_report.partition,
-            type: 'librdkafka.produce_error'
+            type: 'librdkafka.dispatch_error'
           )
         end
 

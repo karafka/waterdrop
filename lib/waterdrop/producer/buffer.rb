@@ -4,14 +4,6 @@ module WaterDrop
   class Producer
     # Component for buffered operations
     module Buffer
-      # Exceptions we catch when dispatching messages from a buffer
-      RESCUED_ERRORS = [
-        Rdkafka::RdkafkaError,
-        Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
-      ].freeze
-
-      private_constant :RESCUED_ERRORS
-
       # Adds given message into the internal producer buffer without flushing it to Kafka
       #
       # @param message [Hash] hash that complies with the {Contracts::Message} contract
@@ -85,39 +77,21 @@ module WaterDrop
       # @param sync [Boolean] should it flush in a sync way
       # @return [Array<Rdkafka::Producer::DeliveryHandle, Rdkafka::Producer::DeliveryReport>]
       #   delivery handles for async or delivery reports for sync
-      # @raise [Errors::FlushFailureError] when there was a failure in flushing
+      # @raise [Errors::ProduceManyError] when there was a failure in flushing
       # @note We use this method underneath to provide a different instrumentation for sync and
       #   async flushing within the public API
       def flush(sync)
         data_for_dispatch = nil
-        dispatched = []
 
         @buffer_mutex.synchronize do
           data_for_dispatch = @messages
           @messages = Concurrent::Array.new
         end
 
-        dispatched = data_for_dispatch.map { |message| client.produce(**message) }
+        # Do nothing if nothing to flush
+        return data_for_dispatch if data_for_dispatch.empty?
 
-        return dispatched unless sync
-
-        dispatched.map do |handler|
-          handler.wait(
-            max_wait_timeout: @config.max_wait_timeout,
-            wait_timeout: @config.wait_timeout
-          )
-        end
-      rescue *RESCUED_ERRORS => e
-        @monitor.instrument(
-          'error.occurred',
-          caller: self,
-          error: e,
-          producer_id: id,
-          dispatched: dispatched,
-          type: sync ? 'buffer.flushed_sync.error' : 'buffer.flush_async.error'
-        )
-
-        raise Errors::FlushFailureError.new(dispatched)
+        sync ? produce_many_sync(data_for_dispatch) : produce_many_async(data_for_dispatch)
       end
     end
   end

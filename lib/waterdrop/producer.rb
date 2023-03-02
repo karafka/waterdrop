@@ -8,6 +8,14 @@ module WaterDrop
     include Async
     include Buffer
 
+    # Which of the inline flow errors do we want to intercept and re-bind
+    SUPPORTED_FLOW_ERRORS = [
+      Rdkafka::RdkafkaError,
+      Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
+    ].freeze
+
+    private_constant :SUPPORTED_FLOW_ERRORS
+
     def_delegators :config, :middleware
 
     # @return [String] uuid of the current producer
@@ -117,6 +125,10 @@ module WaterDrop
           # This should be used only in case a producer was not closed properly and forgotten
           ObjectSpace.undefine_finalizer(id)
 
+          # We save this thread id because we need to bypass the activity verification on the
+          # producer for final flush of buffers.
+          @closing_thread_id = Thread.current.object_id
+
           # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
           flush(true)
@@ -154,6 +166,23 @@ module WaterDrop
     # @raise [Karafka::Errors::MessageInvalidError]
     def validate_message!(message)
       @contract.validate!(message, Errors::MessageInvalidError)
+    end
+
+    # Runs the client produce method with a given message
+    #
+    # @param message [Hash] message we want to send
+    def produce(message)
+      client.produce(**message)
+    end
+
+    # Waits on a given handler
+    #
+    # @param handler [Rdkafka::Producer::DeliveryHandle]
+    def wait(handler)
+      handler.wait(
+        max_wait_timeout: @config.max_wait_timeout,
+        wait_timeout: @config.wait_timeout
+      )
     end
   end
 end

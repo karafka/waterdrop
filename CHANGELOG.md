@@ -1,7 +1,11 @@
 # WaterDrop changelog
 
-## 2.4.12 (Unreleased)
+## 2.5.0 (Unreleased)
 - Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.
+- Pipe **all** the errors including synchronous errors via the `error.occurred`.
+- Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
+- Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
+- Do **not** flush when there is no data to flush in the internal buffer.
 
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
