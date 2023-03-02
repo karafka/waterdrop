@@ -18,6 +18,8 @@ module WaterDrop
         # @param client_name [String] rdkafka client name
         # @param error [Rdkafka::Error] error that occurred
         # @note It will only instrument on errors of the client of our producer
+        # @note When there is a particular message produce error (not internal error), the error
+        #   is shipped via the delivery callback, not via error callback.
         def call(client_name, error)
           # Emit only errors related to our client
           # Same as with statistics (mor explanation there)

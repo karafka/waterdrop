@@ -3,6 +3,7 @@
 RSpec.describe_current do
   subject(:callback) { described_class.new(producer_id, monitor) }
 
+  let(:producer) { build(:producer) }
   let(:producer_id) { SecureRandom.uuid }
   let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
   let(:delivery_report) { OpenStruct.new(offset: rand(100), partition: rand(100)) }
@@ -23,5 +24,44 @@ RSpec.describe_current do
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:offset]).to eq(delivery_report.offset) }
     it { expect(event[:partition]).to eq(delivery_report.partition) }
+  end
+
+  describe '#when we do an end-to-end delivery report check' do
+    context 'when there is a message that was successfully delivered' do
+      let(:changed) { [] }
+      let(:event) { changed.first }
+
+      before do
+        producer.monitor.subscribe('message.acknowledged') do |event|
+          changed << event
+        end
+
+        producer.produce_sync(build(:valid_message))
+      end
+
+      it { expect(event.payload[:partition]).to eq(0) }
+      it { expect(event.payload[:offset]).to eq(0) }
+    end
+
+    context 'when there is a message that was not successfully delivered' do
+      let(:changed) { [] }
+      let(:event) { changed.first }
+
+      before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          changed << event
+        end
+
+        # We force it to bypass the validations, so we trigger an error on delivery
+        # otherwise we would be stopped by WaterDrop itself
+        producer.send(:client).produce(topic: '$%^&*', payload: '1')
+
+        sleep(0.01) until changed.size.positive?
+      end
+
+      it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(event.payload[:partition]).to eq(-1) }
+      it { expect(event.payload[:offset]).to eq(-1001) }
+    end
   end
 end

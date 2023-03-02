@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.4.12 (Unreleased)
+- Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.
+
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
 - Make `::WaterDrop::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.
