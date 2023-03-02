@@ -79,8 +79,6 @@ RSpec.describe_current do
         rescue Rdkafka::RdkafkaError
           nil
         end
-
-        sleep(0.01) until changed.size.positive?
       end
 
       it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
