@@ -76,7 +76,7 @@ RSpec.describe_current do
         # Intercept the error so it won't bubble up as we want to check the notifications pipeline
         begin
           producer.send(:client).produce(topic: '$%^&*', payload: '1').wait
-        rescue => e
+        rescue Rdkafka::RdkafkaError
           nil
         end
 
