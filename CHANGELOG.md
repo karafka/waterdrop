@@ -7,7 +7,7 @@
 - [Improvement] Include `#dispatched` messages handler in the `WaterDrop::Errors::ProduceManyError` error, to be able to understand which of the messages were delegated to `librdkafka` prior to the failure.
 - [Maintenance] Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
 - [Fix] Do **not** flush when there is no data to flush in the internal buffer.
-- [Fix] Wait on last dispatched message for super short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
+- [Fix] Wait on the final data flush for short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
 
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.

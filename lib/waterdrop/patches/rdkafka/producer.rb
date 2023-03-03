@@ -70,9 +70,22 @@ module WaterDrop
 
           @_inner_kafka
         end
+
+        # Flushes the buffered data and waits for its dispatch
+        # @param timeout_ms [Integer] wait time in ms
+        def flush(timeout_ms = 5_000)
+          ::Rdkafka::Bindings.rd_kafka_flush(inner_kafka, timeout_ms)
+        end
       end
     end
   end
 end
+
+::Rdkafka::Bindings.attach_function(
+  :rd_kafka_flush,
+  %i[pointer int],
+  :void,
+  blocking: true
+)
 
 ::Rdkafka::Producer.prepend ::WaterDrop::Patches::Rdkafka::Producer

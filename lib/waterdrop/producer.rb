@@ -133,17 +133,14 @@ module WaterDrop
           # as we close the client after the flushing (even if blocked by the mutex)
           flush(true)
 
-          # Ensures that the last dispatched message is delivered or failed prior to us finishing
-          # all the operations. This tackles a potential edge case, where we would have a super
-          # short-lived producer that would dispatch the message but close client fast enough
-          # for the last message to be lost
-          wait(@last_produced) if @last_produced
-
           # We should not close the client in several threads the same time
           # It is safe to run it several times but not exactly the same moment
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
-          client.close if @client
+          if @client
+            client.flush(@config.max_wait_timeout)
+            client.close
+          end
 
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
@@ -178,7 +175,7 @@ module WaterDrop
     #
     # @param message [Hash] message we want to send
     def produce(message)
-      @last_produced = client.produce(**message)
+      client.produce(**message)
     end
 
     # Waits on a given handler
