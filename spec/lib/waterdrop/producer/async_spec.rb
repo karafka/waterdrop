@@ -58,10 +58,15 @@ RSpec.describe_current do
 
     context 'when inline error occurs in librdkafka' do
       let(:errors) { [] }
+      let(:occurred) { [] }
       let(:error) { errors.first }
       let(:producer) { build(:limited_producer) }
 
       before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
         begin
           message = build(:valid_message)
           100.times { producer.produce_async(message) }
@@ -72,6 +77,8 @@ RSpec.describe_current do
 
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:type]).to eq('message.produce_async') }
     end
   end
 

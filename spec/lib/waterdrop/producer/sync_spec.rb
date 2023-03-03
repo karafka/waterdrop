@@ -23,9 +23,14 @@ RSpec.describe_current do
     context 'when inline error occurs in librdkafka' do
       let(:errors) { [] }
       let(:error) { errors.first }
+      let(:occurred) { [] }
       let(:producer) { build(:limited_producer) }
 
       before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
         message = build(:valid_message)
         threads = Array.new(20) do
           Thread.new do
@@ -40,6 +45,8 @@ RSpec.describe_current do
 
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:type]).to eq('message.produce_sync') }
     end
   end
 
