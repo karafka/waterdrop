@@ -1,12 +1,13 @@
 # WaterDrop changelog
 
 ## 2.5.0 (Unreleased)
-- Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.
-- Pipe **all** the errors including synchronous errors via the `error.occurred`.
-- Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
-- Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
-- Do **not** flush when there is no data to flush in the internal buffer.
-- Include `#dispatched` messages handler in the `WaterDrop::Errors::ProduceManyError` error, to be able to understand which of the messages were delegated to `librdkafka` prior to the failure.
+- [Feature] Pipe **all** the errors including synchronous errors via the `error.occurred`.
+- [Improvement] Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.
+- [Improvement] Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
+- [Improvement] Include `#dispatched` messages handler in the `WaterDrop::Errors::ProduceManyError` error, to be able to understand which of the messages were delegated to `librdkafka` prior to the failure.
+- [Maintenance] Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
+- [Fix] Do **not** flush when there is no data to flush in the internal buffer.
+- [Fix] Wait on last dispatched message for super short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
 
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
