@@ -70,6 +70,14 @@ module WaterDrop
 
           @_inner_kafka
         end
+
+        # Closes our librdkafka instance with the flush patch
+        # @param timeout_ms [Integer] flush timeout
+        def close(timeout_ms = 5_000)
+          ObjectSpace.undefine_finalizer(self)
+
+          @client.close(nil, timeout_ms)
+        end
       end
     end
   end

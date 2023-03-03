@@ -26,13 +26,20 @@ module WaterDrop
           producer_id: id,
           message: message
         ) do
-          client
-            .produce(**message)
-            .wait(
-              max_wait_timeout: @config.max_wait_timeout,
-              wait_timeout: @config.wait_timeout
-            )
+          wait(produce(message))
         end
+      rescue *SUPPORTED_FLOW_ERRORS
+        re_raised = Errors::ProduceError.new
+
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          message: message,
+          error: re_raised,
+          type: 'message.produce_sync'
+        )
+
+        raise re_raised
       end
 
       # Produces many messages to Kafka and waits for them to be delivered
@@ -48,21 +55,37 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_sync(messages)
-        ensure_active!
+        ensure_active! unless @closing_thread_id && @closing_thread_id == Thread.current.object_id
 
         messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }
 
+        dispatched = []
+
         @monitor.instrument('messages.produced_sync', producer_id: id, messages: messages) do
-          messages
-            .map { |message| client.produce(**message) }
-            .map! do |handler|
-              handler.wait(
-                max_wait_timeout: @config.max_wait_timeout,
-                wait_timeout: @config.wait_timeout
-              )
-            end
+          messages.each do |message|
+            dispatched << produce(message)
+          end
+
+          dispatched.map! do |handler|
+            wait(handler)
+          end
+
+          dispatched
         end
+      rescue *SUPPORTED_FLOW_ERRORS
+        re_raised = Errors::ProduceManyError.new(dispatched)
+
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          messages: messages,
+          dispatched: dispatched,
+          error: re_raised,
+          type: 'messages.produce_many_sync'
+        )
+
+        raise re_raised
       end
     end
   end

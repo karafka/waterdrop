@@ -29,15 +29,18 @@ module WaterDrop
     # contact us as it is an error.
     StatusInvalidError = Class.new(BaseError)
 
-    # Raised when during messages flushing something bad happened
-    class FlushFailureError < BaseError
-      attr_reader :dispatched_messages
+    # Raised when there is an inline error during single message produce operations
+    ProduceError = Class.new(BaseError)
 
-      # @param dispatched_messages [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the
+    # Raised when during messages producing something bad happened inline
+    class ProduceManyError < ProduceError
+      attr_reader :dispatched
+
+      # @param dispatched [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the
       #   messages that we've dispatched
-      def initialize(dispatched_messages)
+      def initialize(dispatched)
         super()
-        @dispatched_messages = dispatched_messages
+        @dispatched = dispatched
       end
     end
   end

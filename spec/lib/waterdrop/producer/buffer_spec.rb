@@ -95,7 +95,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
         producer.buffer(create(:valid_message))
       end
 
-      it { expect { flushing }.to raise_error(WaterDrop::Errors::FlushFailureError) }
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProduceManyError) }
     end
   end
 
@@ -127,7 +127,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
         producer.buffer(create(:valid_message))
       end
 
-      it { expect { flushing }.to raise_error(WaterDrop::Errors::FlushFailureError) }
+      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProduceManyError) }
     end
   end
 end

@@ -29,4 +29,16 @@ FactoryBot.define do
       instance
     end
   end
+
+  factory :limited_producer, parent: :producer do
+    kafka do
+      {
+        'bootstrap.servers': 'localhost:9092',
+        'request.required.acks': 1,
+        # Those will cause inline buffer overflow
+        'queue.buffering.max.messages': 1,
+        'queue.buffering.max.ms': 10_000
+      }
+    end
+  end
 end

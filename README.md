@@ -387,6 +387,8 @@ end
 # WaterDrop error occurred: Local: Broker transport failure (transport)
 ```
 
+**Note:** `error.occurred` will also include any errors originating from `librdkafka` for synchronous operations, including those that are raised back to the end user.
+
 ### Acknowledgment notifications
 
 WaterDrop allows you to listen to Kafka messages' acknowledgment events. This will enable you to monitor deliveries of messages from WaterDrop even when using asynchronous dispatch methods.
