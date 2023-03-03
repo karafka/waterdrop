@@ -9,6 +9,14 @@
 - [Fix] Do **not** flush when there is no data to flush in the internal buffer.
 - [Fix] Wait on the final data flush for short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
 
+### Upgrade notes
+
+Please note, this **is** a **breaking** release, hence `2.5.0`.
+
+1. If you used to catch `WaterDrop::Errors::FlushFailureError` now you need to catch `WaterDrop::Errors::ProduceError`. `WaterDrop::Errors::ProduceManyError` is based on the `ProduceError`, hence it should be enough.
+2. Prior to `2.5.0` there was always a chance of partial dispatches via `produce_many_` methods. Now you can get the info on all the errors via `error.occurred`.
+3. Inline `Rdkafka::RdkafkaError` are now re-raised via `WaterDrop::Errors::ProduceError` and available under `#cause`. Async `Rdkafka::RdkafkaError` errors are still directly available and you can differentiate between errors using the event `type`.
+
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
 - Make `::WaterDrop::Instrumentation::Notifications::EVENTS` list public for anyone wanting to re-bind those into a different notification bus.

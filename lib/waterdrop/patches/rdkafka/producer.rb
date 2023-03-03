@@ -84,8 +84,7 @@ end
 ::Rdkafka::Bindings.attach_function(
   :rd_kafka_flush,
   %i[pointer int],
-  :void,
-  blocking: true
+  :void
 )
 
 ::Rdkafka::Producer.prepend ::WaterDrop::Patches::Rdkafka::Producer
