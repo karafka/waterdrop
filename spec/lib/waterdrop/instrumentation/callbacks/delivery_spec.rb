@@ -90,18 +90,7 @@ RSpec.describe_current do
       let(:changed) { [] }
       let(:errors) { [] }
       let(:event) { changed.first }
-      let(:producer) do
-        build(
-          :producer,
-          kafka: {
-            'bootstrap.servers': 'localhost:9092',
-            'request.required.acks': 1,
-            # Those will cause inline buffer overflow
-            'queue.buffering.max.messages': 1,
-            'queue.buffering.max.ms': 10_000
-          }
-        )
-      end
+      let(:producer) { build(:limited_producer) }
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|

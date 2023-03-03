@@ -55,6 +55,24 @@ RSpec.describe_current do
 
       it { expect { delivery }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
     end
+
+    context 'when inline error occurs in librdkafka' do
+      let(:errors) { [] }
+      let(:error) { errors.first }
+      let(:producer) { build(:limited_producer) }
+
+      before do
+        begin
+          message = build(:valid_message)
+          100.times { producer.produce_async(message) }
+        rescue WaterDrop::Errors::ProduceError => e
+          errors << e
+        end
+      end
+
+      it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
+    end
   end
 
   describe '#produce_many_async' do
@@ -90,18 +108,7 @@ RSpec.describe_current do
       let(:errors) { [] }
       let(:error) { errors.first }
       let(:messages) { Array.new(100) { build(:valid_message) } }
-      let(:producer) do
-        build(
-          :producer,
-          kafka: {
-            'bootstrap.servers': 'localhost:9092',
-            'request.required.acks': 1,
-            # Those will cause inline buffer overflow
-            'queue.buffering.max.messages': 1,
-            'queue.buffering.max.ms': 10_000
-          }
-        )
-      end
+      let(:producer) { build(:limited_producer) }
 
       before do
         # Intercept the error so it won't bubble up as we want to check the notifications pipeline
