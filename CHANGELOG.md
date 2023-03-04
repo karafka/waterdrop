@@ -6,7 +6,7 @@
 - [Improvement] Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
 - [Improvement] Include `#dispatched` messages handler in the `WaterDrop::Errors::ProduceManyError` error, to be able to understand which of the messages were delegated to `librdkafka` prior to the failure.
 - [Maintenance] Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
-- [Maintenance] Renam `Datadog::Listener` to `Datadog::MetricsListener` to align with Karafka (#329).
+- [Maintenance] Rename `Datadog::Listener` to `Datadog::MetricsListener` to align with Karafka (#329).
 - [Fix] Do **not** flush when there is no data to flush in the internal buffer.
 - [Fix] Wait on the final data flush for short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
 
