@@ -425,7 +425,7 @@ WaterDrop comes with (optional) full Datadog and StatsD integration that you can
 ```ruby
 # require datadog/statsd and the listener as it is not loaded by default
 require 'datadog/statsd'
-require 'waterdrop/instrumentation/vendors/datadog/listener'
+require 'waterdrop/instrumentation/vendors/datadog/metrics_listener'
 
 # initialize your producer with statistics.interval.ms enabled so the metrics are published
 producer = WaterDrop::Producer.new do |config|
@@ -437,7 +437,7 @@ producer = WaterDrop::Producer.new do |config|
 end
 
 # initialize the listener with statsd client
-listener = ::WaterDrop::Instrumentation::Vendors::Datadog::Listener.new do |config|
+listener = ::WaterDrop::Instrumentation::Vendors::Datadog::MetricsListener.new do |config|
   config.client = Datadog::Statsd.new('localhost', 8125)
   # Publish host as a tag alongside the rest of tags
   config.default_tags = ["host:#{Socket.gethostname}"]

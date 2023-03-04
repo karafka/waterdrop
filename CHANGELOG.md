@@ -6,6 +6,7 @@
 - [Improvement] Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
 - [Improvement] Include `#dispatched` messages handler in the `WaterDrop::Errors::ProduceManyError` error, to be able to understand which of the messages were delegated to `librdkafka` prior to the failure.
 - [Maintenance] Remove the `WaterDrop::Errors::FlushFailureError` in favour of correct error that occurred to unify the error handling.
+- [Maintenance] Rename `Datadog::Listener` to `Datadog::MetricsListener` to align with Karafka (#329).
 - [Fix] Do **not** flush when there is no data to flush in the internal buffer.
 - [Fix] Wait on the final data flush for short-lived producers to make sure, that the message is actually dispatched by `librdkafka` or timeout.
 
@@ -16,6 +17,19 @@ Please note, this **is** a **breaking** release, hence `2.5.0`.
 1. If you used to catch `WaterDrop::Errors::FlushFailureError` now you need to catch `WaterDrop::Errors::ProduceError`. `WaterDrop::Errors::ProduceManyError` is based on the `ProduceError`, hence it should be enough.
 2. Prior to `2.5.0` there was always a chance of partial dispatches via `produce_many_` methods. Now you can get the info on all the errors via `error.occurred`.
 3. Inline `Rdkafka::RdkafkaError` are now re-raised via `WaterDrop::Errors::ProduceError` and available under `#cause`. Async `Rdkafka::RdkafkaError` errors are still directly available and you can differentiate between errors using the event `type`.
+4. If you are using the Datadog listener, you need to:
+
+```ruby
+# Replace require:
+require 'waterdrop/instrumentation/vendors/datadog/listener'
+# With
+require 'waterdrop/instrumentation/vendors/datadog/metrics_listener'
+
+# Replace references of
+::WaterDrop::Instrumentation::Vendors::Datadog::Listener.new
+# With
+::WaterDrop::Instrumentation::Vendors::Datadog::MetricsListener.new
+```
 
 ## 2.4.11 (2023-02-24)
 - Replace the local rspec locator with generalized core one.
