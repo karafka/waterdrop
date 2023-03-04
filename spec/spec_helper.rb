@@ -40,4 +40,4 @@ require 'karafka/core/helpers/rspec_locator'
 RSpec.extend Karafka::Core::Helpers::RSpecLocator.new(__FILE__, 'Waterdrop' => 'WaterDrop')
 
 require 'waterdrop'
-require 'waterdrop/instrumentation/vendors/datadog/listener'
+require 'waterdrop/instrumentation/vendors/datadog/metrics_listener'
