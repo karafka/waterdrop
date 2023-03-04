@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.5.0 (Unreleased)
+## 2.5.0 (2023-03-04)
 - [Feature] Pipe **all** the errors including synchronous errors via the `error.occurred`.
 - [Improvement] Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.
 - [Improvement] Introduce `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` for any inline raised errors that occur. You can get the original error by using the `#cause`.
