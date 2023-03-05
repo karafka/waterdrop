@@ -52,8 +52,9 @@ module WaterDrop
     setting :wait_timeout, default: 0.005 # 5 milliseconds
     # option [Boolean] should we upon detecting full librdkafka queue backoff and retry or should
     #   we raise an exception.
-    #   When this is set to `true`, upon full queue, we won't raise an error. There will be no
-    #   error in the `error.occurred` notification pipeline.
+    #   When this is set to `true`, upon full queue, we won't raise an error. There will be error
+    #   in the `error.occurred` notification pipeline with a proper type as while this is
+    #   recoverable, in a high number it still may mean issues.
     #   Waiting is one of the recommended strategies.
     setting :wait_on_queue_full, default: false
     # option [Integer] how long (in seconds) should we backoff before a retry when queue is full

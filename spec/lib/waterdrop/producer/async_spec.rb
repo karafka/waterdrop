@@ -102,9 +102,9 @@ RSpec.describe_current do
         end
       end
 
-      # We should not have any errors here, neither inline nor in the pipeline
       it { expect(errors).to be_empty }
-      it { expect(occurred).to be_empty }
+      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:type]).to eq('message.produce') }
     end
   end
 
