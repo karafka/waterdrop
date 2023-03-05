@@ -173,6 +173,37 @@ module WaterDrop
     # @param message [Hash] message we want to send
     def produce(message)
       client.produce(**message)
+    rescue SUPPORTED_FLOW_ERRORS.first => e
+      # Unless we want to wait and retry and it's a full queue, we raise normally
+      raise unless @config.wait_on_queue_full
+      raise unless e.code == :queue_full
+
+      # We use this syntax here because we want to preserve the original `#cause` when we
+      # instrument the error and there is no way to manually assign `#cause` value. We want to keep
+      # the original cause to maintain the same API across all the errors dispatched to the
+      # notifications pipeline.
+      begin
+        raise Errors::ProduceError
+      rescue Errors::ProduceError => e
+        # We want to instrument on this event even when we restart it.
+        # The reason is simple: instrumentation and visibility.
+        # We can recover from this, but despite that we should be able to instrument this.
+        # If this type of event happens too often, it may indicate that the buffer settings are not
+        # well configured.
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          message: message,
+          error: e,
+          type: 'message.produce'
+        )
+
+        # We do not poll the producer because polling happens in a background thread
+        # It also should not be a frequent case (queue full), hence it's ok to just throttle.
+        sleep @config.wait_on_queue_full_timeout
+      end
+
+      retry
     end
 
     # Waits on a given handler

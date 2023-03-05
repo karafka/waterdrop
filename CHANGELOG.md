@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.5.1 (Unreleased)
+- [Feature] Introduce a configurable backoff upon `librdkafka` queue full (false by default).
+
 ## 2.5.0 (2023-03-04)
 - [Feature] Pipe **all** the errors including synchronous errors via the `error.occurred`.
 - [Improvement] Pipe delivery errors that occurred not via the error callback using the `error.occurred` channel.

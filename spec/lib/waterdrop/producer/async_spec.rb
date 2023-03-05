@@ -56,7 +56,7 @@ RSpec.describe_current do
       it { expect { delivery }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
     end
 
-    context 'when inline error occurs in librdkafka' do
+    context 'when inline error occurs in librdkafka and we do not retry on queue full' do
       let(:errors) { [] }
       let(:occurred) { [] }
       let(:error) { errors.first }
@@ -79,6 +79,32 @@ RSpec.describe_current do
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.last.payload[:type]).to eq('message.produce_async') }
+    end
+
+    context 'when inline error occurs in librdkafka and we retry on queue full' do
+      let(:errors) { [] }
+      let(:occurred) { [] }
+      let(:error) { errors.first }
+      let(:producer) { build(:slow_producer) }
+
+      before do
+        producer.config.wait_on_queue_full = true
+
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
+        begin
+          message = build(:valid_message)
+          5.times { producer.produce_async(message) }
+        rescue WaterDrop::Errors::ProduceError => e
+          errors << e
+        end
+      end
+
+      it { expect(errors).to be_empty }
+      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.last.payload[:type]).to eq('message.produce') }
     end
   end
 

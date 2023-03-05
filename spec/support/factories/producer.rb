@@ -41,4 +41,15 @@ FactoryBot.define do
       }
     end
   end
+
+  factory :slow_producer, parent: :producer do
+    kafka do
+      {
+        'bootstrap.servers': 'localhost:9092',
+        'request.required.acks': 1,
+        'queue.buffering.max.messages': 1,
+        'queue.buffering.max.ms': 1_000
+      }
+    end
+  end
 end

@@ -50,6 +50,17 @@ module WaterDrop
     #   delivery report. In a really robust systems, this describes the min-delivery time
     #   for a single sync message when produced in isolation
     setting :wait_timeout, default: 0.005 # 5 milliseconds
+    # option [Boolean] should we upon detecting full librdkafka queue backoff and retry or should
+    #   we raise an exception.
+    #   When this is set to `true`, upon full queue, we won't raise an error. There will be error
+    #   in the `error.occurred` notification pipeline with a proper type as while this is
+    #   recoverable, in a high number it still may mean issues.
+    #   Waiting is one of the recommended strategies.
+    setting :wait_on_queue_full, default: false
+    # option [Integer] how long (in seconds) should we backoff before a retry when queue is full
+    #   The retry will happen with the same message and backoff should give us some time to
+    #   dispatch previously buffered messages.
+    setting :wait_on_queue_full_timeout, default: 0.1
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc
