@@ -173,6 +173,16 @@ module WaterDrop
     # @param message [Hash] message we want to send
     def produce(message)
       client.produce(**message)
+    rescue SUPPORTED_FLOW_ERRORS.first => e
+      if @config.wait_on_queue_full && e.code == :queue_full
+        # We do not poll the producer because polling happens in a background thread
+        # It also should not be a frequent case (queue full), hence it's ok to just throttle.
+        sleep @config.wait_on_queue_full_timeout
+
+        retry
+      end
+
+      raise
     end
 
     # Waits on a given handler
