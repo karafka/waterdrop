@@ -29,6 +29,7 @@ It:
   * [Buffering](#buffering)
       + [Using WaterDrop to buffer messages based on the application logic](#using-waterdrop-to-buffer-messages-based-on-the-application-logic)
       + [Using WaterDrop with rdkafka buffers to achieve periodic auto-flushing](#using-waterdrop-with-rdkafka-buffers-to-achieve-periodic-auto-flushing)
+  * [Idempotence](#idempotence)
   * [Compression](#compression)
 - [Instrumentation](#instrumentation)
   * [Usage statistics](#usage-statistics)
@@ -207,6 +208,30 @@ KAFKA_PRODUCERS_CP.shutdown { |producer| producer.close }
 WaterDrop producers support buffering messages in their internal buffers and on the `rdkafka` level via `queue.buffering.*` set of settings.
 
 This means that depending on your use case, you can achieve both granular buffering and flushing control when needed with context awareness and periodic and size-based flushing functionalities.
+
+### Idempotence
+
+When idempotence is enabled, the producer will ensure that messages are successfully produced exactly once and in the original production order.
+
+To enable idempotence, you need to set the `enable.idempotence` kafka scope setting to `true`:
+
+```ruby
+WaterDrop::Producer.new do |config|
+  config.deliver = true
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'enable.idempotence': true
+  }
+end
+```
+
+The following Kafka configuration properties are adjusted automatically (if not modified by the user) when idempotence is enabled:
+
+- `max.in.flight.requests.per.connection` set to `5`
+- `retries` set to `2147483647`
+- `acks` set to `all`
+
+The idempotent producer ensures that messages are always delivered in the correct order and without duplicates. In other words, when an idempotent producer sends a message, the messaging system ensures that the message is only delivered once to the message broker and subsequently to the consumers, even if the producer tries to send the message multiple times.
 
 ### Compression
 

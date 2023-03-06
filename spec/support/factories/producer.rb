@@ -52,4 +52,15 @@ FactoryBot.define do
       }
     end
   end
+
+  factory :idempotent_producer, parent: :producer do
+    kafka do
+      {
+        'bootstrap.servers': 'localhost:9092',
+        'statistics.interval.ms': 100,
+        'request.required.acks': 'all',
+        'enable.idempotence': true
+      }
+    end
+  end
 end
