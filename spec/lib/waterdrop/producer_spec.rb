@@ -290,4 +290,14 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'producer with enable.idempotence true' do
+    subject(:producer) { build(:idempotent_producer) }
+
+    let(:message) { build(:valid_message) }
+
+    it 'expect to work as any producer without any exceptions' do
+      expect { producer.produce_sync(message) }.not_to raise_error
+    end
+  end
 end
