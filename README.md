@@ -213,6 +213,18 @@ This means that depending on your use case, you can achieve both granular buffer
 
 When idempotence is enabled, the producer will ensure that messages are successfully produced exactly once and in the original production order.
 
+To enable idempotence, you need to set the `enable.idempotence` kafka scope setting to `true`:
+
+```ruby
+WaterDrop::Producer.new do |config|
+  config.deliver = true
+  config.kafka = {
+    'bootstrap.servers': 'localhost:9092',
+    'enable.idempotence': true
+  }
+end
+```
+
 The following Kafka configuration properties are adjusted automatically (if not modified by the user) when idempotence is enabled:
 
 - `max.in.flight.requests.per.connection` set to `5`
