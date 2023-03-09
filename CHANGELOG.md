@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.5.1 (Unreleased)
+## 2.5.1 (2023-03-09)
 - [Feature] Introduce a configurable backoff upon `librdkafka` queue full (false by default).
 
 ## 2.5.0 (2023-03-04)
