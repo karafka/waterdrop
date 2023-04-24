@@ -8,6 +8,7 @@
   zeitwerk
   securerandom
   karafka-core
+  pathname
 ].each { |lib| require lib }
 
 # WaterDrop library
