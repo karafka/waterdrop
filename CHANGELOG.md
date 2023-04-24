@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.5.2 (2023-04-24)
+- [Fix] Require missing Pathname (#345)
+
 ## 2.5.1 (2023-03-09)
 - [Feature] Introduce a configurable backoff upon `librdkafka` queue full (false by default).
 
