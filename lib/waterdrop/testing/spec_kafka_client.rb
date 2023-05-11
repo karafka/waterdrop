@@ -1,4 +1,6 @@
- module WaterDrop
+# frozen_string_literal: true
+
+module WaterDrop
   module Testing
     # Spec producer client used to buffer messages that we send out in specs
     class SpecKafkaClient < Producer::DummyClient
@@ -18,7 +20,7 @@
         @topics = Hash.new { |k, v| k[v] = [] }
       end
 
-      # "Produces" message to Kafka. That is, it acknowledges it locally, adds it to the internal buffer
+      # "Produces" message to Kafka: it acknowledges it locally, adds it to the internal buffer
       # @param message [Hash] `WaterDrop::Producer#produce_sync` message hash
       def produce(message)
         topic = message.fetch(:topic) { raise ArgumentError, ':topic is missing' }
