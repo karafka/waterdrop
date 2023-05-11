@@ -52,8 +52,8 @@ RSpec.describe_current do
         expect(client.messages_for('buzz')).to be_empty
       end
     end
-
   end
+
   describe '#reset' do
     it 'clears all buffers' do
       client.reset
