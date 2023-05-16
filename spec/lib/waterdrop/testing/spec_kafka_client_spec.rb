@@ -10,6 +10,27 @@ RSpec.describe_current do
     end
   end
 
+  let(:all_messages) do
+    [
+      { payload: 'one', topic: 'foo' },
+      { payload: 'one', topic: 'bar' },
+      { payload: 'two', topic: 'foo' }
+    ]
+  end
+
+  let(:foo_messages) do
+    [
+      { payload: 'one', topic: 'foo' },
+      { payload: 'two', topic: 'foo' }
+    ]
+  end
+
+  let(:bar_messages) do
+    [
+      { payload: 'one', topic: 'bar' },
+    ]
+  end
+
   before do
     allow(producer).to receive(:client).and_return(client)
 
@@ -20,30 +41,15 @@ RSpec.describe_current do
 
   describe '#messages' do
     it 'yields all produced messages' do
-      expect(client.messages).to match(
-        [
-          { payload: 'one', topic: 'foo' },
-          { payload: 'one', topic: 'bar' },
-          { payload: 'two', topic: 'foo' }
-        ]
-      )
+      expect(client.messages).to match(all_messages)
     end
   end
 
   describe '#messages_for' do
     context 'with topic that has messages produced to' do
       it 'yields corresponding messages' do
-        expect(client.messages_for('foo')).to match(
-          [
-            { payload: 'one', topic: 'foo' },
-            { payload: 'two', topic: 'foo' }
-          ]
-        )
-        expect(client.messages_for('bar')).to match(
-          [
-            { payload: 'one', topic: 'bar' }
-          ]
-        )
+        expect(client.messages_for('foo')).to match(foo_messages)
+        expect(client.messages_for('bar')).to match(bar_messages)
       end
     end
 
