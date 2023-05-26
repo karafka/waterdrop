@@ -6,7 +6,13 @@ RSpec.describe_current do
   let(:producer) { build(:producer) }
   let(:producer_id) { SecureRandom.uuid }
   let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
-  let(:delivery_report) { OpenStruct.new(offset: rand(100), partition: rand(100)) }
+  let(:delivery_report) do
+    OpenStruct.new(
+      offset: rand(100),
+      partition: rand(100),
+      topic_name: rand(100).to_s
+    )
+  end
 
   describe '#call' do
     let(:changed) { [] }
@@ -24,23 +30,26 @@ RSpec.describe_current do
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:offset]).to eq(delivery_report.offset) }
     it { expect(event[:partition]).to eq(delivery_report.partition) }
+    it { expect(event[:topic]).to eq(delivery_report.topic_name) }
   end
 
   describe '#when we do an end-to-end delivery report check' do
     context 'when there is a message that was successfully delivered' do
       let(:changed) { [] }
       let(:event) { changed.first }
+      let(:message) { build(:valid_message) }
 
       before do
         producer.monitor.subscribe('message.acknowledged') do |event|
           changed << event
         end
 
-        producer.produce_sync(build(:valid_message))
+        producer.produce_sync(message)
       end
 
       it { expect(event.payload[:partition]).to eq(0) }
       it { expect(event.payload[:offset]).to eq(0) }
+      it { expect(event[:topic]).to eq(message[:topic]) }
     end
 
     context 'when there is a message that was not successfully delivered async' do
@@ -62,6 +71,7 @@ RSpec.describe_current do
       it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
       it { expect(event.payload[:partition]).to eq(-1) }
       it { expect(event.payload[:offset]).to eq(-1001) }
+      it { expect(event.payload[:topic]).to eq('$%^&*') }
     end
 
     context 'when there is a message that was not successfully delivered sync' do
