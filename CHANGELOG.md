@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+## 2.5.3 (2023-05-26)
+- Require `karafka-core` `2.0.13`
+- Include topic name in the `error.occurred` notification payload.
+- Include topic name in the `message.acknowledged` notification payload.
+
 ## 2.5.2 (2023-04-24)
 - [Fix] Require missing Pathname (#345)
 
