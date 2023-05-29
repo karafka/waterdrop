@@ -27,7 +27,7 @@ RSpec.describe_current do
 
   let(:bar_messages) do
     [
-      { payload: 'one', topic: 'bar' },
+      { payload: 'one', topic: 'bar' }
     ]
   end
 
