@@ -40,32 +40,26 @@ RSpec.describe_current do
   end
 
   describe '#messages' do
-    it 'yields all produced messages' do
-      expect(client.messages).to match(all_messages)
-    end
+    subject { client.messages }
+
+    it { is_expected.to match(all_messages) }
   end
 
   describe '#messages_for' do
-    context 'with topic that has messages produced to' do
-      it 'yields corresponding messages' do
-        expect(client.messages_for('foo')).to match(foo_messages)
-        expect(client.messages_for('bar')).to match(bar_messages)
-      end
+    context 'with topic that has messages produced to it' do
+      it { expect(client.messages_for('foo')).to match(foo_messages) }
+      it { expect(client.messages_for('bar')).to match(bar_messages) }
     end
 
-    context 'when topic that was not produced to' do
-      it 'yields no messages' do
-        expect(client.messages_for('buzz')).to be_empty
-      end
+    context 'with topic that has no messages produced to it' do
+      it { expect(client.messages_for('buzz')).to be_empty }
     end
   end
 
   describe '#reset' do
-    it 'clears all buffers' do
-      client.reset
+    before { client.reset }
 
-      expect(client.messages).to be_empty
-      expect(client.messages_for('foo')).to be_empty
-    end
+    it { expect(client.messages).to be_empty }
+    it { expect(client.messages_for('foo')).to be_empty }
   end
 end
