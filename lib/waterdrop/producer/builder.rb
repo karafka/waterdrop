@@ -10,18 +10,13 @@ module WaterDrop
       # @return [Rdkafka::Producer, Producer::DummyClient] raw rdkafka producer or a dummy producer
       #   when we don't want to dispatch any messages
       def call(producer, config)
-        return DummyClient.new unless config.deliver
+        klass = config.client_class
+        # This allows us to have backwards compatibility.
+        # If it is the default client and delivery is set to false, we use dummy as we used to
+        # before `client_class` was introduced
+        klass = Clients::Dummy if klass == Clients::Rdkafka && !config.deliver
 
-        client = Rdkafka::Config.new(config.kafka.to_h).producer
-
-        # This callback is not global and is per client, thus we do not have to wrap it with a
-        # callbacks manager to make it work
-        client.delivery_callback = Instrumentation::Callbacks::Delivery.new(
-          producer.id,
-          config.monitor
-        )
-
-        client
+        klass.new(producer)
       end
     end
   end

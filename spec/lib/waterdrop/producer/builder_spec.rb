@@ -18,6 +18,8 @@ RSpec.describe_current do
     producer_config.config
   end
 
+  before { allow(producer).to receive(:config).and_return(config) }
+
   after { producer.close }
 
   it { expect(client).to be_a(Rdkafka::Producer) }
@@ -26,7 +28,7 @@ RSpec.describe_current do
   context 'when the delivery is off' do
     let(:deliver) { false }
 
-    it { expect(client).to be_a(WaterDrop::Producer::DummyClient) }
+    it { expect(client).to be_a(WaterDrop::Clients::Dummy) }
   end
 
   context 'when the delivery_callback is executed' do

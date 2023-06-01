@@ -1,12 +1,15 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  class Producer
+  module Clients
     # A dummy client that is supposed to be used instead of Rdkafka::Producer in case we don't
-    # want to dispatch anything to Kafka
-    class DummyClient
-      # @return [DummyClient] dummy instance
-      def initialize
+    # want to dispatch anything to Kafka.
+    #
+    # It does not store anything and just ignores messages.
+    class Dummy
+      # @param _producer [WaterDrop::Producer]
+      # @return [Dummy] dummy instance
+      def initialize(_producer)
         @counter = -1
       end
 
