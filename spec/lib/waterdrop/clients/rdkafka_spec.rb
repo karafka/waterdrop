@@ -3,5 +3,12 @@
 RSpec.describe_current do
   subject(:client) { described_class.new(producer) }
 
-  pending
+  let(:producer) do
+    WaterDrop::Producer.new do |config|
+      config.deliver = false
+      config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+    end
+  end
+
+  it { expect(client).to be_a(Rdkafka::Producer) }
 end
