@@ -93,15 +93,16 @@ end
 
 Some of the options are:
 
-| Option                       | Description                                                      |
-|------------------------------|------------------------------------------------------------------|
-| `id`                         | id of the producer for instrumentation and logging               |
-| `logger`                     | Logger that we want to use                                       |
-| `deliver`                    | Should we send messages to Kafka or just fake the delivery       |
-| `max_wait_timeout`           | Waits that long for the delivery report or raises an error       |
-| `wait_timeout`               | Waits that long before re-check of delivery report availability  |
-| `wait_on_queue_full`         | Should be wait on queue full or raise an error when that happens |
-| `wait_on_queue_full_timeout` | Waits that long before retry when queue is full                  |
+| Option                       | Description                                                               |
+|------------------------------|---------------------------------------------------------------------------|
+| `id`                         | id of the producer for instrumentation and logging                        |
+| `logger`                     | Logger that we want to use                                                |
+| `deliver`                    | Should we send messages to Kafka or just fake the delivery                |
+| `max_wait_timeout`           | Waits that long for the delivery report or raises an error                |
+| `wait_timeout`               | Waits that long before re-check of delivery report availability           |
+| `wait_on_queue_full`         | Should be wait on queue full or raise an error when that happens          |
+| `wait_on_queue_full_backoff` | Waits that long before retry when queue is full                           |
+| `wait_on_queue_full_timeout` | If backoffs and attempts that that much time, error won't be retried more |
 
 Full list of the root configuration options is available [here](https://github.com/karafka/waterdrop/blob/master/lib/waterdrop/config.rb#L25).
 

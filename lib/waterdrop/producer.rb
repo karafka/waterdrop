@@ -7,6 +7,7 @@ module WaterDrop
     include Sync
     include Async
     include Buffer
+    include ::Karafka::Core::Helpers::Time
 
     # Which of the inline flow errors do we want to intercept and re-bind
     SUPPORTED_FLOW_ERRORS = [
@@ -168,15 +169,35 @@ module WaterDrop
       @contract.validate!(message, Errors::MessageInvalidError)
     end
 
+    # Waits on a given handler
+    #
+    # @param handler [Rdkafka::Producer::DeliveryHandle]
+    def wait(handler)
+      handler.wait(
+        max_wait_timeout: @config.max_wait_timeout,
+        wait_timeout: @config.wait_timeout
+      )
+    end
+
+    private
+
     # Runs the client produce method with a given message
     #
     # @param message [Hash] message we want to send
     def produce(message)
+      produce_time ||= monotonic_now
+
       client.produce(**message)
     rescue SUPPORTED_FLOW_ERRORS.first => e
       # Unless we want to wait and retry and it's a full queue, we raise normally
       raise unless @config.wait_on_queue_full
       raise unless e.code == :queue_full
+      # If we're running for longer than the timeout, we need to re-raise the queue full.
+      # This will prevent from situation where cluster is down forever and we just retry and retry
+      # in an infinite loop, effectively hanging the processing
+      raise unless monotonic_now - produce_time < @config.wait_on_queue_full_timeout * 1_000
+
+      label = caller_locations(2,1)[0].label.split(' ').last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
@@ -195,25 +216,15 @@ module WaterDrop
           producer_id: id,
           message: message,
           error: e,
-          type: 'message.produce'
+          type: "message.#{label}"
         )
 
         # We do not poll the producer because polling happens in a background thread
         # It also should not be a frequent case (queue full), hence it's ok to just throttle.
-        sleep @config.wait_on_queue_full_timeout
+        sleep @config.wait_on_queue_full_backoff
       end
 
       retry
-    end
-
-    # Waits on a given handler
-    #
-    # @param handler [Rdkafka::Producer::DeliveryHandle]
-    def wait(handler)
-      handler.wait(
-        max_wait_timeout: @config.max_wait_timeout,
-        wait_timeout: @config.wait_timeout
-      )
     end
   end
 end

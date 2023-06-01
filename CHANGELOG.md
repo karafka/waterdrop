@@ -1,9 +1,16 @@
 # WaterDrop changelog
 
+### 2.6.0 (Unreleased)
+- [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
+- [Change] Change `wait_on_queue_full` from `false` to `true` as a default.
+- [Change] Rename `wait_on_queue_full_timeout` to `wait_on_queue_full_backoff` to match what it actually does.
+- [Enhancement] Reintroduce `wait_on_queue_full_timeout` with proper meaning. That is, this represents time after which despite backoff the error will be raised. This should allow to raise an error in case the backoff attempts were insufficient. This prevents from a case, where upon never deliverable messages we would end up with an invite loop.
+- [Fix] Provide `type` for queue full errors that references the appropriate public API method correctly.
+
 ## 2.5.3 (2023-05-26)
-- Require `karafka-core` `2.0.13`
-- Include topic name in the `error.occurred` notification payload.
-- Include topic name in the `message.acknowledged` notification payload.
+- [Enhancement] Include topic name in the `error.occurred` notification payload.
+- [Enhancement] Include topic name in the `message.acknowledged` notification payload.
+- [Maintenance] Require `karafka-core` `2.0.13`
 
 ## 2.5.2 (2023-04-24)
 - [Fix] Require missing Pathname (#345)
