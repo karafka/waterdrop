@@ -7,6 +7,7 @@ module WaterDrop
     #
     # It does not store anything and just ignores messages.
     class Dummy
+      # @param _producer [WaterDrop::Producer]
       # @return [Dummy] dummy instance
       def initialize(_producer)
         @counter = -1

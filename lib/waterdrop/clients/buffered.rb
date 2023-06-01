@@ -14,6 +14,7 @@ module WaterDrop
         end
       end
 
+      # @param args [Object] anything accepted by `Clients::Dummy`
       def initialize(*args)
         super
         @messages = []

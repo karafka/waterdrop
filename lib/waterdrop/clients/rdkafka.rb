@@ -5,7 +5,7 @@ module WaterDrop
   module Clients
     # Default Rdkafka client.
     # Since we use the ::Rdkafka::Producer under the hood, this is just a module that aligns with
-    # client building API for the convinience.
+    # client building API for the convenience.
     module Rdkafka
       class << self
         # @param producer [WaterDrop::Producer] producer instance with its config, etc
