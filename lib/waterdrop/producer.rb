@@ -197,7 +197,7 @@ module WaterDrop
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_on_queue_full_timeout * 1_000
 
-      label = caller_locations(2,1)[0].label.split(' ').last
+      label = caller_locations(2, 1)[0].label.split(' ').last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
