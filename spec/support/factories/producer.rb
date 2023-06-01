@@ -7,6 +7,9 @@ FactoryBot.define do
     deliver { true }
     logger { Logger.new('/dev/null', level: Logger::DEBUG) }
     max_wait_timeout { 30 }
+    wait_on_queue_full { false }
+    wait_timeout_on_queue_full { 1.0 }
+
     kafka do
       {
         'bootstrap.servers': 'localhost:9092',
@@ -22,6 +25,8 @@ FactoryBot.define do
         config.logger = logger
         config.kafka = kafka
         config.max_wait_timeout = max_wait_timeout
+        config.wait_on_queue_full = wait_on_queue_full
+        config.wait_timeout_on_queue_full = wait_timeout_on_queue_full
       end
 
       instance.monitor.subscribe(::WaterDrop::Instrumentation::LoggerListener.new(logger))
@@ -31,6 +36,8 @@ FactoryBot.define do
   end
 
   factory :limited_producer, parent: :producer do
+    wait_timeout_on_queue_full { 15 }
+
     kafka do
       {
         'bootstrap.servers': 'localhost:9092',
@@ -43,6 +50,8 @@ FactoryBot.define do
   end
 
   factory :slow_producer, parent: :producer do
+    wait_timeout_on_queue_full { 2 }
+
     kafka do
       {
         'bootstrap.servers': 'localhost:9092',

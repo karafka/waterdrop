@@ -12,6 +12,9 @@ RSpec.describe_current do
       max_payload_size: 1024 * 1024,
       max_wait_timeout: 1,
       wait_timeout: 0.1,
+      wait_on_queue_full: true,
+      wait_backoff_on_queue_full: 1,
+      wait_timeout_on_queue_full: 10,
       kafka: {
         'bootstrap.servers': 'localhost:9092,localhots:9092'
       }
@@ -230,5 +233,40 @@ RSpec.describe_current do
     before { config[:wait_timeout] = 1.1 }
 
     it { expect(contract_result).to be_success }
+  end
+
+  context 'when wait_on_queue_full is not a boolean' do
+    before { config[:wait_on_queue_full] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when wait_backoff_on_queue_full is not a numeric' do
+    before { config[:wait_backoff_on_queue_full] = 'na' }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_backoff_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when wait_backoff_on_queue_full is less than 0' do
+    before { config[:wait_backoff_on_queue_full] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_backoff_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when wait_timeout_on_queue_full is not a numeric' do
+    before { config[:wait_timeout_on_queue_full] = 'na' }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when wait_timeout_on_queue_full is less than 0' do
+    before { config[:wait_timeout_on_queue_full] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
   end
 end

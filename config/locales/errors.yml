@@ -10,6 +10,9 @@ en:
       max_wait_timeout_format: must be an integer that is equal or bigger than 0
       kafka_format: must be a hash with symbol based keys
       kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+      wait_on_queue_full_format: must be boolean
+      wait_backoff_on_queue_full_format: must be a numeric that is bigger or equal to 0
+      wait_timeout_on_queue_full_format: must be a numeric that is bigger or equal to 0
 
     message:
       missing: must be present

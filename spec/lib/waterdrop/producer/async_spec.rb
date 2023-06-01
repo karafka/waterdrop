@@ -77,15 +77,15 @@ RSpec.describe_current do
 
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(occurred.last.payload[:type]).to eq('message.produce_async') }
+      it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
     end
 
     context 'when inline error occurs in librdkafka and we retry on queue full' do
       let(:errors) { [] }
       let(:occurred) { [] }
       let(:error) { errors.first }
-      let(:producer) { build(:slow_producer) }
+      let(:producer) { build(:slow_producer, wait_on_queue_full: true) }
 
       before do
         producer.config.wait_on_queue_full = true
@@ -103,8 +103,40 @@ RSpec.describe_current do
       end
 
       it { expect(errors).to be_empty }
-      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(occurred.last.payload[:type]).to eq('message.produce') }
+      it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
+    end
+
+    context 'when inline error occurs in librdkafka and we go beyond max wait on queue full' do
+      let(:errors) { [] }
+      let(:occurred) { [] }
+      let(:error) { errors.first }
+      let(:producer) do
+        build(
+          :slow_producer,
+          wait_on_queue_full: true,
+          wait_timeout_on_queue_full: 0.5
+        )
+      end
+
+      before do
+        producer.config.wait_on_queue_full = true
+
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
+        begin
+          message = build(:valid_message)
+          5.times { producer.produce_async(message) }
+        rescue WaterDrop::Errors::ProduceError => e
+          errors << e
+        end
+      end
+
+      it { expect(errors).not_to be_empty }
+      it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
     end
   end
 
