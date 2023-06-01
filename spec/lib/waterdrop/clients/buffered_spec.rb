@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:client) { described_class.new }
+  subject(:client) { described_class.new(producer) }
 
   let(:producer) do
     WaterDrop::Producer.new do |config|

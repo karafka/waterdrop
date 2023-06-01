@@ -68,6 +68,8 @@ module WaterDrop
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc
     setting :deliver, default: true
+
+    setting :client_class, default: Clients::Rdkafka
     # rdkafka options
     # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     setting :kafka, default: {}

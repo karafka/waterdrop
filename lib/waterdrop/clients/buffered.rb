@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  module Testing
-    # Spec producer client used to buffer messages that we send out in specs
-    class SpecKafkaClient < Producer::DummyClient
+  module Clients
+    # Client used to buffer messages that we send out in specs and other places.
+    class Buffered < Clients::Dummy
       attr_accessor :messages
 
       # Sync fake response for the message delivery to Kafka, since we do not dispatch anything
@@ -14,8 +14,8 @@ module WaterDrop
         end
       end
 
-      def initialize
-        super()
+      def initialize(*args)
+        super
         @messages = []
         @topics = Hash.new { |k, v| k[v] = [] }
       end

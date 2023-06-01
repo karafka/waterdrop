@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:client) { described_class.new }
+  subject(:client) { described_class.new(nil) }
 
   describe 'publishing interface' do
     it 'expect to return self for further chaining' do

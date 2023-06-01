@@ -1,6 +1,8 @@
 # WaterDrop changelog
 
 ### 2.6.0 (Unreleased)
+- [Improvement] Introduce `client_class` setting for ability to replace underlying client with anything specific to a given env (dev, test, etc).
+- [Improvement] Introduce `Clients::Buffered` useful for writing specs that do not have to talk with Kafka (id-ilych)
 - [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
 - [Change] Change `wait_on_queue_full` from `false` to `true` as a default.
 - [Change] Rename `wait_on_queue_full_timeout` to `wait_backoff_on_queue_full` to match what it actually does.
