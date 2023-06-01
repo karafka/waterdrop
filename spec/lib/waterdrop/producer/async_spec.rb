@@ -115,7 +115,7 @@ RSpec.describe_current do
         build(
           :slow_producer,
           wait_on_queue_full: true,
-          wait_on_queue_full_timeout: 0.5
+          wait_timeout_on_queue_full: 0.5
         )
       end
 

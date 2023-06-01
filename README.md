@@ -101,8 +101,8 @@ Some of the options are:
 | `max_wait_timeout`           | Waits that long for the delivery report or raises an error                 |
 | `wait_timeout`               | Waits that long before re-check of delivery report availability            |
 | `wait_on_queue_full`         | Should be wait on queue full or raise an error when that happens           |
-| `wait_on_queue_full_backoff` | Waits that long before retry when queue is full                            |
-| `wait_on_queue_full_timeout` | If back-offs and attempts that that much time, error won't be retried more |
+| `wait_backoff_on_queue_full` | Waits that long before retry when queue is full                            |
+| `wait_timeout_on_queue_full` | If back-offs and attempts that that much time, error won't be retried more |
 
 Full list of the root configuration options is available [here](https://github.com/karafka/waterdrop/blob/master/lib/waterdrop/config.rb#L25).
 

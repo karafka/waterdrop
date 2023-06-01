@@ -20,8 +20,8 @@ module WaterDrop
       required(:wait_timeout) { |val| val.is_a?(Numeric) && val.positive? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
       required(:wait_on_queue_full) { |val| [true, false].include?(val) }
-      required(:wait_on_queue_full_backoff) { |val| val.is_a?(Numeric) && val >= 0 }
-      required(:wait_on_queue_full_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:wait_backoff_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:wait_timeout_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
       # This can be confusing, so we expect all keys to be symbolized

@@ -195,7 +195,7 @@ module WaterDrop
       # If we're running for longer than the timeout, we need to re-raise the queue full.
       # This will prevent from situation where cluster is down forever and we just retry and retry
       # in an infinite loop, effectively hanging the processing
-      raise unless monotonic_now - produce_time < @config.wait_on_queue_full_timeout * 1_000
+      raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full * 1_000
 
       label = caller_locations(2, 1)[0].label.split(' ').last
 
@@ -221,7 +221,7 @@ module WaterDrop
 
         # We do not poll the producer because polling happens in a background thread
         # It also should not be a frequent case (queue full), hence it's ok to just throttle.
-        sleep @config.wait_on_queue_full_backoff
+        sleep @config.wait_backoff_on_queue_full
       end
 
       retry
