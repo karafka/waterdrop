@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-### 2.6.0 (Unreleased)
+### 2.6.0 (2023-06-11)
 - [Improvement] Introduce `client_class` setting for ability to replace underlying client with anything specific to a given env (dev, test, etc).
 - [Improvement] Introduce `Clients::Buffered` useful for writing specs that do not have to talk with Kafka (id-ilych)
 - [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
