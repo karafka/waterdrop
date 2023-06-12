@@ -6,7 +6,7 @@
 - [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
 - [Change] Change `wait_on_queue_full` from `false` to `true` as a default.
 - [Change] Rename `wait_on_queue_full_timeout` to `wait_backoff_on_queue_full` to match what it actually does.
-- [Enhancement] Introduce `wait_timeout_on_queue_full` with proper meaning. That is, this represents time after which despite backoff the error will be raised. This should allow to raise an error in case the backoff attempts were insufficient. This prevents from a case, where upon never deliverable messages we would end up with an invite loop.
+- [Enhancement] Introduce `wait_timeout_on_queue_full` with proper meaning. That is, this represents time after which despite backoff the error will be raised. This should allow to raise an error in case the backoff attempts were insufficient. This prevents from a case, where upon never deliverable messages we would end up with an infinite loop.
 - [Fix] Provide `type` for queue full errors that references the appropriate public API method correctly.
 
 ### Upgrade notes
