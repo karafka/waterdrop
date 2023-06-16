@@ -307,8 +307,8 @@ RSpec.describe_current do
     context 'when producer not in use' do
       it 'expect to work correctly' do
         pid = fork { producer.produce_sync(topic: 'test', payload: '1') }
-        Process.wait(pid) unless $?.exited?
-        expect($?.to_i).to eq(0)
+        Process.wait(pid) unless $CHILD_STATUS.exited?
+        expect($CHILD_STATUS.to_i).to eq(0)
       end
     end
   end
