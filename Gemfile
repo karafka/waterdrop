@@ -6,6 +6,8 @@ plugin 'diffend'
 
 gemspec
 
+gem 'karafka-core', path: '/mnt/software/Karafka/karafka-core'
+
 group :development do
   gem 'byebug'
 end

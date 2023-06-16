@@ -1,9 +1,16 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.6.0)
-      karafka-core (>= 2.0.13, < 3.0.0)
+    waterdrop (2.6.1)
+      karafka-core (>= 2.1.0, < 3.0.0)
       zeitwerk (~> 2.3)
+
+PATH
+  remote: /mnt/software/Karafka/karafka-core
+  specs:
+    karafka-core (2.1.0)
+      concurrent-ruby (>= 1.1)
+      karafka-rdkafka (>= 0.13.0.beta1, < 0.14.0)
 
 GEM
   remote: https://rubygems.org/
@@ -22,10 +29,7 @@ GEM
     ffi (1.15.5)
     i18n (1.12.0)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.0.13)
-      concurrent-ruby (>= 1.1)
-      karafka-rdkafka (>= 0.12.3)
-    karafka-rdkafka (0.12.3)
+    karafka-rdkafka (0.13.0.beta1)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
@@ -62,6 +66,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   factory_bot
+  karafka-core!
   rspec
   simplecov
   waterdrop!

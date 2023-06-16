@@ -1,5 +1,10 @@
 # WaterDrop changelog
 
+### 2.6.1 (Unreleased)
+- [Refactor] Remove no longer needed patches.
+- [Change] Require `karafka-rdkafka` `>= 0.13.0.beta1`.
+- [Change] Require 'karafka-core' `>= 2.1.0`
+
 ### 2.6.0 (2023-06-11)
 - [Improvement] Introduce `client_class` setting for ability to replace underlying client with anything specific to a given env (dev, test, etc).
 - [Improvement] Introduce `Clients::Buffered` useful for writing specs that do not have to talk with Kafka (id-ilych)
