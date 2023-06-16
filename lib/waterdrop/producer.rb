@@ -76,6 +76,7 @@ module WaterDrop
       @connecting_mutex.synchronize do
         return @client if @client && @pid == Process.pid
 
+
         # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
         # process don't leak
         ObjectSpace.undefine_finalizer(id)

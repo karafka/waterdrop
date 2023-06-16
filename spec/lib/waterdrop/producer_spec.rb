@@ -59,10 +59,14 @@ RSpec.describe_current do
 
     context 'when client is already connected' do
       let(:producer) { build(:producer) }
+      let(:client) { producer.client }
 
-      before { producer.client }
+      before do
+        client
+        producer.client
+      end
 
-      after { producer.client.close }
+      after { client.close }
 
       context 'when called from a fork' do
         let(:expected_error) { WaterDrop::Errors::ProducerUsedInParentProcess }
@@ -70,7 +74,7 @@ RSpec.describe_current do
         # Simulates fork by changing the pid
         before { allow(Process).to receive(:pid).and_return(-1) }
 
-        it { expect { client }.to raise_error(expected_error) }
+        it { expect { producer.client }.to raise_error(expected_error) }
       end
 
       context 'when called from the main process' do
@@ -78,7 +82,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when client is not connected' do
+    context 'when client is not initialized' do
       let(:producer) { build(:producer) }
 
       context 'when called from a fork' do
