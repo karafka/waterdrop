@@ -329,8 +329,8 @@ RSpec.describe_current do
 
     context 'when producer not in use' do
       it 'expect to work correctly' do
-        pid = child_process
-        Process.wait(pid) unless $CHILD_STATUS.exited?
+        child_process
+        Process.wait
         expect($CHILD_STATUS.to_i).to eq(0)
       end
     end
