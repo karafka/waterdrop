@@ -46,6 +46,8 @@ RSpec.describe_current do
     producer
   end
 
+  after { producer.close }
+
   context 'when having some default tags present' do
     subject(:listener) do
       client = described_class.new

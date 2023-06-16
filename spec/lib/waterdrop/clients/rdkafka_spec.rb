@@ -10,5 +10,7 @@ RSpec.describe_current do
     end
   end
 
+  after { producer.close }
+
   it { expect(client).to be_a(Rdkafka::Producer) }
 end
