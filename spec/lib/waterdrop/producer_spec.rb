@@ -320,9 +320,16 @@ RSpec.describe_current do
   describe 'fork integration spec' do
     subject(:producer) { build(:producer) }
 
+    let(:child_process) do
+      fork do
+        producer.produce_sync(topic: 'test', payload: '1')
+        producer.close
+      end
+    end
+
     context 'when producer not in use' do
       it 'expect to work correctly' do
-        pid = fork { producer.produce_sync(topic: 'test', payload: '1'); producer.close }
+        pid = child_process
         Process.wait(pid) unless $CHILD_STATUS.exited?
         expect($CHILD_STATUS.to_i).to eq(0)
       end
