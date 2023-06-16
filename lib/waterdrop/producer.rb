@@ -76,13 +76,18 @@ module WaterDrop
       @connecting_mutex.synchronize do
         return @client if @client && @pid == Process.pid
 
-        # We should raise an error when trying to use a producer from a fork, that is already
-        # connected to Kafka. We allow forking producers only before they are used
-        raise Errors::ProducerUsedInParentProcess, Process.pid if @status.connected?
-
         # We undefine all the finalizers, in case it was a fork, so the finalizers from the parent
         # process don't leak
         ObjectSpace.undefine_finalizer(id)
+
+        # We should raise an error when trying to use a producer with client from a fork. Always.
+        if @client
+          # We need to reset the client, otherwise there might be attempt to close the parent
+          # client
+          @client = nil
+          raise Errors::ProducerUsedInParentProcess, Process.pid
+        end
+
         # Finalizer tracking is needed for handling shutdowns gracefully.
         # I don't expect everyone to remember about closing all the producers all the time, thus
         # this approach is better. Although it is still worth keeping in mind, that this will
@@ -138,7 +143,7 @@ module WaterDrop
           # It is safe to run it several times but not exactly the same moment
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
-          client.close(@config.max_wait_timeout) if @client
+          client.close if @client
 
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)

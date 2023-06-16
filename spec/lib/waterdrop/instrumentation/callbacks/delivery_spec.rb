@@ -14,6 +14,8 @@ RSpec.describe_current do
     )
   end
 
+  after { producer.close }
+
   describe '#call' do
     let(:changed) { [] }
     let(:event) { changed.first }

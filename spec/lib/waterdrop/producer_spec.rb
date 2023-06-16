@@ -59,8 +59,14 @@ RSpec.describe_current do
 
     context 'when client is already connected' do
       let(:producer) { build(:producer) }
+      let(:client) { producer.client }
 
-      before { producer.client }
+      before do
+        client
+        producer.client
+      end
+
+      after { client.close }
 
       context 'when called from a fork' do
         let(:expected_error) { WaterDrop::Errors::ProducerUsedInParentProcess }
@@ -68,7 +74,7 @@ RSpec.describe_current do
         # Simulates fork by changing the pid
         before { allow(Process).to receive(:pid).and_return(-1) }
 
-        it { expect { client }.to raise_error(expected_error) }
+        it { expect { producer.client }.to raise_error(expected_error) }
       end
 
       context 'when called from the main process' do
@@ -76,7 +82,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when client is not connected' do
+    context 'when client is not initialized' do
       let(:producer) { build(:producer) }
 
       context 'when called from a fork' do
@@ -156,7 +162,7 @@ RSpec.describe_current do
   end
 
   describe '#ensure_usable!' do
-    subject(:producer) { create(:producer) }
+    subject(:producer) { build(:producer) }
 
     context 'when status is invalid' do
       let(:expected_error) { WaterDrop::Errors::StatusInvalidError }
@@ -222,6 +228,11 @@ RSpec.describe_current do
         sleep(0.001) while events2.size < 2
       end
 
+      after do
+        producer1.close
+        producer2.close
+      end
+
       it 'expect not to have same statistics from both producers' do
         ids1 = events1.map(&:payload).map { |payload| payload[:statistics] }.map(&:object_id)
         ids2 = events2.map(&:payload).map { |payload| payload[:statistics] }.map(&:object_id)
@@ -282,6 +293,11 @@ RSpec.describe_current do
         sleep(0.001) while events2.empty?
       end
 
+      after do
+        producer1.close
+        producer2.close
+      end
+
       it 'expect not to have same errors from both producers' do
         ids1 = events1.map(&:payload).map { |payload| payload[:error] }.map(&:object_id)
         ids2 = events2.map(&:payload).map { |payload| payload[:error] }.map(&:object_id)
@@ -298,6 +314,25 @@ RSpec.describe_current do
 
     it 'expect to work as any producer without any exceptions' do
       expect { producer.produce_sync(message) }.not_to raise_error
+    end
+  end
+
+  describe 'fork integration spec' do
+    subject(:producer) { build(:producer) }
+
+    let(:child_process) do
+      fork do
+        producer.produce_sync(topic: 'test', payload: '1')
+        producer.close
+      end
+    end
+
+    context 'when producer not in use' do
+      it 'expect to work correctly' do
+        child_process
+        Process.wait
+        expect($CHILD_STATUS.to_i).to eq(0)
+      end
     end
   end
 end

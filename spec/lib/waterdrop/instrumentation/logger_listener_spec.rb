@@ -21,6 +21,8 @@ RSpec.describe_current do
     }
   end
 
+  after { producer.close }
+
   describe '#on_message_produced_async' do
     before { listener.on_message_produced_async(event) }
 

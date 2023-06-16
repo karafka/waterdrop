@@ -1,14 +1,14 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.6.0)
-      karafka-core (>= 2.0.13, < 3.0.0)
+    waterdrop (2.6.1)
+      karafka-core (>= 2.1.0.beta1, < 3.0.0)
       zeitwerk (~> 2.3)
 
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.0.4.3)
+    activesupport (7.0.5)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -20,25 +20,25 @@ GEM
     factory_bot (6.2.1)
       activesupport (>= 5.0.0)
     ffi (1.15.5)
-    i18n (1.12.0)
+    i18n (1.14.1)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.0.13)
+    karafka-core (2.1.0.beta1)
       concurrent-ruby (>= 1.1)
-      karafka-rdkafka (>= 0.12.3)
-    karafka-rdkafka (0.12.3)
+      karafka-rdkafka (>= 0.13.0.beta2, < 0.14.0)
+    karafka-rdkafka (0.13.0.beta2)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
-    mini_portile2 (2.8.1)
+    mini_portile2 (2.8.2)
     minitest (5.18.0)
     rake (13.0.6)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
       rspec-expectations (~> 3.12.0)
       rspec-mocks (~> 3.12.0)
-    rspec-core (3.12.1)
+    rspec-core (3.12.2)
       rspec-support (~> 3.12.0)
-    rspec-expectations (3.12.2)
+    rspec-expectations (3.12.3)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.12.0)
     rspec-mocks (3.12.5)
@@ -53,10 +53,9 @@ GEM
     simplecov_json_formatter (0.1.4)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
-    zeitwerk (2.6.7)
+    zeitwerk (2.6.8)
 
 PLATFORMS
-  arm64-darwin-21
   x86_64-linux
 
 DEPENDENCIES

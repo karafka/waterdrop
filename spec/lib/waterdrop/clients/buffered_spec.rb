@@ -39,6 +39,8 @@ RSpec.describe_current do
     producer.produce_sync(payload: 'two', topic: 'foo')
   end
 
+  after { producer.close }
+
   describe '#messages' do
     subject { client.messages }
 

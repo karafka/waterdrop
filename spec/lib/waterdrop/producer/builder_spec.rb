@@ -20,7 +20,10 @@ RSpec.describe_current do
 
   before { allow(producer).to receive(:config).and_return(config) }
 
-  after { producer.close }
+  after do
+    client.close
+    producer.close
+  end
 
   it { expect(client).to be_a(Rdkafka::Producer) }
   it { expect(client.delivery_callback).to be_a(WaterDrop::Instrumentation::Callbacks::Delivery) }

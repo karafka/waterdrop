@@ -333,6 +333,12 @@ producer.close
 
 See the `WaterDrop::Instrumentation::Notifications::EVENTS` for the list of all the supported events.
 
+### Karafka Web-UI
+
+Karafka [Web UI](https://karafka.io/docs/Web-UI-Getting-Started/) is a user interface for the Karafka framework. The Web UI provides a convenient way for monitor all producers related errors out of the box.
+
+![Example producer errors in Karafka Web-UI](https://raw.githubusercontent.com/karafka/misc/master/printscreens/web-ui/errors-producer.png)
+
 ### Usage statistics
 
 WaterDrop is configured to emit internal `librdkafka` metrics every five seconds. You can change this by setting the `kafka` `statistics.interval.ms` configuration property to a value greater of equal `0`. Emitted statistics are available after subscribing to the `statistics.emitted` publisher event. If set to `0`, metrics will not be published.
