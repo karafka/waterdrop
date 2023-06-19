@@ -1,9 +1,9 @@
 # WaterDrop changelog
 
-### 2.6.1 (Unreleased)
+### 2.6.1 (2023-06-19)
 - [Refactor] Remove no longer needed patches.
 - [Fix] Fork detection on a short lived processes seems to fail. Clear the used parent process client reference not to close it in the finalizer (#356).
-- [Change] Require `karafka-rdkafka` `>= 0.13.0.beta2`.
+- [Change] Require `karafka-rdkafka` `>= 0.13.0`.
 - [Change] Require 'karafka-core' `>= 2.1.0`
 
 ### 2.6.0 (2023-06-11)
