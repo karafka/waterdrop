@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-### 2.6.2 (Unreleased)
+### 2.6.2 (2023-06-21)
 - [Refactor] Introduce a counter-based locking approach to make sure, that we close the producer safely but at the same time not to limit messages production with producing lock.
 - [Refactor] Make private methods private.
 - [Refactor] Validate that producer is not closed only when attempting to produce.
