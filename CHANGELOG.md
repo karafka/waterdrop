@@ -1,5 +1,12 @@
 # WaterDrop changelog
 
+### 2.6.2 (Unreleased)
+- [Refactor] Introduce a counter-based locking approach to make sure, that we close the producer safely but at the same time not to limit messages production with producing lock.
+- [Refactor] Make private methods private.
+- [Refactor] Validate that producer is not closed only when attempting to produce.
+- [Refactor] Improve one 5 minute long spec to run in 10 seconds.
+- [Refactor] clear client assignment after closing.
+
 ### 2.6.1 (2023-06-19)
 - [Refactor] Remove no longer needed patches.
 - [Fix] Fork detection on a short lived processes seems to fail. Clear the used parent process client reference not to close it in the finalizer (#356).

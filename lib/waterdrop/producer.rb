@@ -34,9 +34,10 @@ module WaterDrop
     # @param block [Proc] configuration block
     # @return [Producer] producer instance
     def initialize(&block)
+      @operations_in_progress = 0
       @buffer_mutex = Mutex.new
       @connecting_mutex = Mutex.new
-      @closing_mutex = Mutex.new
+      @operating_mutex = Mutex.new
 
       @status = Status.new
       @messages = Concurrent::Array.new
@@ -118,7 +119,7 @@ module WaterDrop
 
     # Flushes the buffers in a sync way and closes the producer
     def close
-      @closing_mutex.synchronize do
+      @operating_mutex.synchronize do
         return unless @status.active?
 
         @monitor.instrument(
@@ -135,6 +136,10 @@ module WaterDrop
           # producer for final flush of buffers.
           @closing_thread_id = Thread.current.object_id
 
+          # Wait until all the outgoing operations are done. Only when no one is using the
+          # underlying client running operations we can close
+          sleep(0.001) until @operations_in_progress.zero?
+
           # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
           flush(true)
@@ -143,7 +148,10 @@ module WaterDrop
           # It is safe to run it several times but not exactly the same moment
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
-          client.close if @client
+          if @client
+            client.close
+            @client = nil
+          end
 
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
@@ -154,13 +162,17 @@ module WaterDrop
       end
     end
 
+    private
+
     # Ensures that we don't run any operations when the producer is not configured or when it
     # was already closed
     def ensure_active!
       return if @status.active?
+      return if @status.closing? && @operating_mutex.owned?
 
       raise Errors::ProducerNotConfiguredError, id if @status.initial?
-      raise Errors::ProducerClosedError, id if @status.closing? || @status.closed?
+      raise Errors::ProducerClosedError, id if @status.closing?
+      raise Errors::ProducerClosedError, id if @status.closed?
 
       # This should never happen
       raise Errors::StatusInvalidError, [id, @status.to_s]
@@ -184,13 +196,20 @@ module WaterDrop
       )
     end
 
-    private
-
     # Runs the client produce method with a given message
     #
     # @param message [Hash] message we want to send
     def produce(message)
       produce_time ||= monotonic_now
+
+      # This can happen only during flushing on closing, in case like this we don't have to
+      # synchronize because we already own the lock
+      if @operating_mutex.owned?
+        @operations_in_progress += 1
+      else
+        @operating_mutex.synchronize { @operations_in_progress += 1 }
+        ensure_active!
+      end
 
       client.produce(**message)
     rescue SUPPORTED_FLOW_ERRORS.first => e
@@ -229,7 +248,10 @@ module WaterDrop
         sleep @config.wait_backoff_on_queue_full
       end
 
+      @operations_in_progress -= 1
       retry
+    ensure
+      @operations_in_progress -= 1
     end
   end
 end

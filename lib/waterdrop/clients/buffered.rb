@@ -24,8 +24,8 @@ module WaterDrop
       # "Produces" message to Kafka: it acknowledges it locally, adds it to the internal buffer
       # @param message [Hash] `WaterDrop::Producer#produce_sync` message hash
       def produce(message)
-        topic = message.fetch(:topic) { raise ArgumentError, ':topic is missing' }
-        @topics[topic] << message
+        # We pre-validate the message payload, so topic is ensured to be present
+        @topics[message.fetch(:topic)] << message
         @messages << message
         SyncResponse.new
       end
