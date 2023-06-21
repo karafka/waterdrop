@@ -70,12 +70,6 @@ RSpec.describe WaterDrop::Producer::Buffer do
   describe '#flush_async' do
     subject(:flushing) { producer.flush_async }
 
-    context 'when producer is closed' do
-      before { producer.close }
-
-      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
-    end
-
     context 'when there are no messages in the buffer' do
       it { expect(flushing).to eq([]) }
     end
@@ -101,12 +95,6 @@ RSpec.describe WaterDrop::Producer::Buffer do
 
   describe '#flush_sync' do
     subject(:flushing) { producer.flush_sync }
-
-    context 'when producer is closed' do
-      before { producer.close }
-
-      it { expect { flushing }.to raise_error(WaterDrop::Errors::ProducerClosedError) }
-    end
 
     context 'when there are no messages in the buffer' do
       it { expect(flushing).to eq([]) }

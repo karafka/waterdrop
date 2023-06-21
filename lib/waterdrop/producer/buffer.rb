@@ -11,6 +11,7 @@ module WaterDrop
       #   message could not be sent to Kafka
       def buffer(message)
         ensure_active!
+
         message = middleware.run(message)
         validate_message!(message)
 
@@ -49,8 +50,6 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
       #   flushed
       def flush_async
-        ensure_active!
-
         @monitor.instrument(
           'buffer.flushed_async',
           producer_id: id,
@@ -62,8 +61,6 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports for messages that were
       #   flushed
       def flush_sync
-        ensure_active!
-
         @monitor.instrument(
           'buffer.flushed_sync',
           producer_id: id,

@@ -14,8 +14,6 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When provided message details are invalid and the
       #   message could not be sent to Kafka
       def produce_async(message)
-        ensure_active!
-
         message = middleware.run(message)
         validate_message!(message)
 
@@ -49,8 +47,6 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_async(messages)
-        ensure_active!
-
         dispatched = []
         messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }

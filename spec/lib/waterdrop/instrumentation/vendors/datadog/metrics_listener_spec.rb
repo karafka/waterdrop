@@ -217,7 +217,11 @@ RSpec.describe_current do
     let(:producer) do
       producer = create(
         :producer,
-        kafka: { 'bootstrap.servers': 'localhost:9093', 'statistics.interval.ms': 100 }
+        kafka: {
+          'bootstrap.servers': 'localhost:9093',
+          'statistics.interval.ms': 100,
+          'message.timeout.ms': 100
+        }
       )
       producer.monitor.subscribe listener
       producer

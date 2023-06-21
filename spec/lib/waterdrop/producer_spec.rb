@@ -119,16 +119,18 @@ RSpec.describe_current do
     context 'when there were messages in the buffer' do
       subject(:producer) { build(:producer).tap(&:client) }
 
+      let(:client) { producer.client }
+
       before do
         producer.buffer(build(:valid_message))
-        allow(producer.client).to receive(:close).and_call_original
+        allow(client).to receive(:close).and_call_original
       end
 
       it { expect { producer.close }.to change { producer.messages.size }.from(1).to(0) }
 
       it 'expect to close client since was open' do
         producer.close
-        expect(producer.client).to have_received(:close)
+        expect(client).to have_received(:close)
       end
     end
 
@@ -148,7 +150,9 @@ RSpec.describe_current do
     context 'when producer was configured and connected' do
       subject(:producer) { build(:producer).tap(&:client) }
 
-      before { allow(producer.client).to receive(:close).and_call_original }
+      let(:client) { producer.client }
+
+      before { allow(client).to receive(:close).and_call_original }
 
       it { expect(producer.status.connected?).to eq(true) }
       it { expect { producer.close }.not_to raise_error }
@@ -156,7 +160,7 @@ RSpec.describe_current do
 
       it 'expect to close client since was open' do
         producer.close
-        expect(producer.client).to have_received(:close)
+        expect(client).to have_received(:close)
       end
     end
   end
