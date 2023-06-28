@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+### 2.6.3 (Unreleased)
+- Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
+
 ### 2.6.2 (2023-06-21)
 - [Refactor] Introduce a counter-based locking approach to make sure, that we close the producer safely but at the same time not to limit messages production with producing lock.
 - [Refactor] Make private methods private.

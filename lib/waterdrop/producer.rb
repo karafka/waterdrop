@@ -34,7 +34,7 @@ module WaterDrop
     # @param block [Proc] configuration block
     # @return [Producer] producer instance
     def initialize(&block)
-      @operations_in_progress = 0
+      @operations_in_progress = Concurrent::AtomicFixnum.new(0)
       @buffer_mutex = Mutex.new
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
@@ -138,7 +138,7 @@ module WaterDrop
 
           # Wait until all the outgoing operations are done. Only when no one is using the
           # underlying client running operations we can close
-          sleep(0.001) until @operations_in_progress.zero?
+          sleep(0.001) until @operations_in_progress.value.zero?
 
           # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
           # as we close the client after the flushing (even if blocked by the mutex)
@@ -205,9 +205,9 @@ module WaterDrop
       # This can happen only during flushing on closing, in case like this we don't have to
       # synchronize because we already own the lock
       if @operating_mutex.owned?
-        @operations_in_progress += 1
+        @operations_in_progress.increment
       else
-        @operating_mutex.synchronize { @operations_in_progress += 1 }
+        @operating_mutex.synchronize { @operations_in_progress.increment }
         ensure_active!
       end
 
@@ -248,10 +248,10 @@ module WaterDrop
         sleep @config.wait_backoff_on_queue_full
       end
 
-      @operations_in_progress -= 1
+      @operations_in_progress.decrement
       retry
     ensure
-      @operations_in_progress -= 1
+      @operations_in_progress.decrement
     end
   end
 end
