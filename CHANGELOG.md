@@ -1,7 +1,9 @@
 # WaterDrop changelog
 
-### 2.6.3 (Unreleased)
+### 2.6.3 (2023-06-28)
 - Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
+- [Change] Require `karafka-rdkafka` `>= 0.13.2`.
+- [Change] Require 'karafka-core' `>= 2.1.1`
 
 ### 2.6.2 (2023-06-21)
 - [Refactor] Introduce a counter-based locking approach to make sure, that we close the producer safely but at the same time not to limit messages production with producing lock.
