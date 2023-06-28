@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ### 2.6.3 (2023-06-28)
-- Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
+- [Change] Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
 - [Change] Require `karafka-rdkafka` `>= 0.13.2`.
 - [Change] Require 'karafka-core' `>= 2.1.1`
 
