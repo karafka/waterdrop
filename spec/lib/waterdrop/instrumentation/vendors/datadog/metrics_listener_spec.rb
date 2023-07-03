@@ -229,7 +229,7 @@ RSpec.describe_current do
 
     before do
       producer.produce_async(topic: rand.to_s, payload: rand.to_s)
-      sleep(0.1)
+      sleep(0.2)
     end
 
     it 'expect error count to increase' do
