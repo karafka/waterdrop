@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-### 2.6.4 (Unreleased)
+### 2.6.4 (2023-07-11)
 - [Improvement] Use original error `#inspect` for `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` instead of the current empty string.
 
 ### 2.6.3 (2023-06-28)
