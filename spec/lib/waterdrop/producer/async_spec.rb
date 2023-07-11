@@ -76,6 +76,7 @@ RSpec.describe_current do
       end
 
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(error.message).to eq(error.cause.inspect) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
@@ -187,6 +188,7 @@ RSpec.describe_current do
       it { expect(error.dispatched.size).to eq(1) }
       it { expect(error.dispatched.first).to be_a(Rdkafka::Producer::DeliveryHandle) }
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(error.message).to eq(error.cause.inspect) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
     end
   end

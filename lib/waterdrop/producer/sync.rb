@@ -26,8 +26,8 @@ module WaterDrop
         ) do
           wait(produce(message))
         end
-      rescue *SUPPORTED_FLOW_ERRORS
-        re_raised = Errors::ProduceError.new
+      rescue *SUPPORTED_FLOW_ERRORS => e
+        re_raised = Errors::ProduceError.new(e.inspect)
 
         @monitor.instrument(
           'error.occurred',
@@ -69,8 +69,8 @@ module WaterDrop
 
           dispatched
         end
-      rescue *SUPPORTED_FLOW_ERRORS
-        re_raised = Errors::ProduceManyError.new(dispatched)
+      rescue *SUPPORTED_FLOW_ERRORS => e
+        re_raised = Errors::ProduceManyError.new(dispatched, e.inspect)
 
         @monitor.instrument(
           'error.occurred',

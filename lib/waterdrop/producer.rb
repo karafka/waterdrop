@@ -228,7 +228,7 @@ module WaterDrop
       # the original cause to maintain the same API across all the errors dispatched to the
       # notifications pipeline.
       begin
-        raise Errors::ProduceError
+        raise Errors::ProduceError, e.inspect
       rescue Errors::ProduceError => e
         # We want to instrument on this event even when we restart it.
         # The reason is simple: instrumentation and visibility.
