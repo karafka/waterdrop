@@ -44,6 +44,7 @@ RSpec.describe_current do
       end
 
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
+      it { expect(error.message).to eq(error.cause.inspect) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.last.payload[:type]).to eq('message.produce_sync') }

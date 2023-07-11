@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+### 2.6.4 (Unreleased)
+- [Improvement] Use original error `#inspect` for `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` instead of the current empty string.
+
 ### 2.6.3 (2023-06-28)
 - [Change] Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
 - [Change] Require `karafka-rdkafka` `>= 0.13.2`.

@@ -38,8 +38,9 @@ module WaterDrop
 
       # @param dispatched [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the
       #   messages that we've dispatched
-      def initialize(dispatched)
-        super()
+      # @param message [String] error message
+      def initialize(dispatched, message)
+        super(message)
         @dispatched = dispatched
       end
     end
