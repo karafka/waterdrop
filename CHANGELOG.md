@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+### 2.6.5 (Unreleased)
+- [Fix] Add cause to the errors that are passed into instrumentation (konalegi)
+
 ### 2.6.4 (2023-07-11)
 - [Improvement] Use original error `#inspect` for `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` instead of the current empty string.
 
