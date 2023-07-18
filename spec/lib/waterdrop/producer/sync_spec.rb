@@ -28,6 +28,8 @@ RSpec.describe_current do
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|
+          # Avoid side effects
+          event.payload[:error] = event[:error].dup
           occurred << event
         end
 
@@ -46,8 +48,8 @@ RSpec.describe_current do
       it { expect(error).to be_a(WaterDrop::Errors::ProduceError) }
       it { expect(error.message).to eq(error.cause.inspect) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(occurred.last.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(occurred.last.payload[:type]).to eq('message.produce_sync') }
+      it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(occurred.first.payload[:type]).to eq('message.produce_sync') }
     end
   end
 

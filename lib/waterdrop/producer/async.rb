@@ -23,17 +23,21 @@ module WaterDrop
           message: message
         ) { produce(message) }
       rescue *SUPPORTED_FLOW_ERRORS => e
-        re_raised = Errors::ProduceError.new(e.inspect)
+        # We use this syntax here because we want to preserve the original `#cause` when we
+        # instrument the error and there is no way to manually assign `#cause` value
+        begin
+          raise Errors::ProduceError, e.inspect
+        rescue Errors::ProduceError => ex
+          @monitor.instrument(
+            'error.occurred',
+            producer_id: id,
+            message: message,
+            error: ex,
+            type: 'message.produce_async'
+          )
 
-        @monitor.instrument(
-          'error.occurred',
-          producer_id: id,
-          message: message,
-          error: re_raised,
-          type: 'message.produce_async'
-        )
-
-        raise re_raised
+          raise ex
+        end
       end
 
       # Produces many messages to Kafka and does not wait for them to be delivered
