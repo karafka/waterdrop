@@ -64,6 +64,8 @@ RSpec.describe_current do
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|
+          # Avoid side effects
+          event.payload[:error] = event[:error].dup
           occurred << event
         end
 
