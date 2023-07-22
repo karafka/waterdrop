@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-### 2.6.5 (Unreleased)
+### 2.6.5 (2023-07-22)
 - [Fix] Add cause to the errors that are passed into instrumentation (konalegi)
 
 ### 2.6.4 (2023-07-11)
