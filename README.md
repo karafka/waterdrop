@@ -339,6 +339,35 @@ Karafka [Web UI](https://karafka.io/docs/Web-UI-Getting-Started/) is a user inte
 
 ![Example producer errors in Karafka Web-UI](https://raw.githubusercontent.com/karafka/misc/master/printscreens/web-ui/errors-producer.png)
 
+### Logger Listener
+
+WaterDrop comes equipped with a `LoggerListener`, a useful feature designed to facilitate the reporting of WaterDrop's operational details directly into the assigned logger. The `LoggerListener` provides a convenient way of tracking the events and operations that occur during the usage of WaterDrop, enhancing transparency and making debugging and issue tracking easier.
+
+However, it's important to note that this Logger Listener is not subscribed by default. This means that WaterDrop does not automatically send operation data to your logger out of the box. This design choice has been made to give users greater flexibility and control over their logging configuration.
+
+To use this functionality, you need to manually subscribe the `LoggerListener` to WaterDrop instrumentation. Below, you will find an example demonstrating how to perform this subscription.
+
+```ruby
+LOGGER = Logger.new($stdout)
+
+producer = WaterDrop::Producer.new do |config|
+  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+  config.logger = LOGGER
+end
+
+producer.monitor.subscribe(
+  WaterDrop::Instrumentation::LoggerListener.new(
+    # You can use a different logger than the one assigned to WaterDrop if you want
+    producer.config.logger,
+    # If this is set to false, the produced messages details will not be sent to logs
+    # You may set it to false if you find the level of reporting in the debug too extensive
+    log_messages: true
+  )
+)
+
+producer.produce_sync(topic: 'my.topic', payload: 'my.message')
+```
+
 ### Usage statistics
 
 WaterDrop is configured to emit internal `librdkafka` metrics every five seconds. You can change this by setting the `kafka` `statistics.interval.ms` configuration property to a value greater of equal `0`. Emitted statistics are available after subscribing to the `statistics.emitted` publisher event. If set to `0`, metrics will not be published.
