@@ -9,8 +9,17 @@ module WaterDrop
     #   as well as we can use it standalone
     class LoggerListener
       # @param logger [Object] logger we want to use
-      def initialize(logger)
+      # @param log_messages [Boolean] Should we report the messages content (payload and metadata)
+      #   with each message operation.
+      #
+      #   This can be extensive, especially when producing a lot of messages. We provide this
+      #   despite the fact that we only report payloads in debug, because Rails by default operates
+      #   with debug level. This means, that when working with Rails in development, every single
+      #   payload dispatched will go to logs. In majority of the cases this is extensive and simply
+      #   floods the end user.
+      def initialize(logger, log_messages: true)
         @logger = logger
+        @log_messages = log_messages
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -18,6 +27,9 @@ module WaterDrop
         message = event[:message]
 
         info(event, "Async producing of a message to '#{message[:topic]}' topic")
+
+        return unless log_messages?
+
         debug(event, message)
       end
 
@@ -26,6 +38,9 @@ module WaterDrop
         message = event[:message]
 
         info(event, "Sync producing of a message to '#{message[:topic]}' topic")
+
+        return unless log_messages?
+
         debug(event, message)
       end
 
@@ -35,6 +50,9 @@ module WaterDrop
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
         info(event, "Async producing of #{messages.size} messages to #{topics_count} topics")
+
+        return unless log_messages?
+
         debug(event, messages)
       end
 
@@ -44,6 +62,9 @@ module WaterDrop
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
         info(event, "Sync producing of #{messages.size} messages to #{topics_count} topics")
+
+        return unless log_messages?
+
         debug(event, messages)
       end
 
@@ -52,6 +73,9 @@ module WaterDrop
         message = event[:message]
 
         info(event, "Buffering of a message to '#{message[:topic]}' topic")
+
+        return unless log_messages?
+
         debug(event, [message])
       end
 
@@ -60,6 +84,9 @@ module WaterDrop
         messages = event[:messages]
 
         info(event, "Buffering of #{messages.size} messages")
+
+        return unless log_messages?
+
         debug(event, [messages, messages.size])
       end
 
@@ -68,6 +95,9 @@ module WaterDrop
         messages = event[:messages]
 
         info(event, "Async flushing of #{messages.size} messages from the buffer")
+
+        return unless log_messages?
+
         debug(event, messages)
       end
 
@@ -76,6 +106,9 @@ module WaterDrop
         messages = event[:messages]
 
         info(event, "Sync flushing of #{messages.size} messages from the buffer")
+
+        return unless log_messages?
+
         debug(event, messages)
       end
 
@@ -93,6 +126,11 @@ module WaterDrop
       end
 
       private
+
+      # @return [Boolean] should we report the messages details in the debug mode.
+      def log_messages?
+        @log_messages
+      end
 
       # @param event [Dry::Events::Event] event that happened with the details
       # @param log_message [String] message we want to publish

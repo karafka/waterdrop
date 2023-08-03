@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+### 2.6.6 (Unreleased)
+- [Improvement] Provide `log_messages` option to `LoggerListener` so the extensive messages data logging can disabled.
+
 ### 2.6.5 (2023-07-22)
 - [Fix] Add cause to the errors that are passed into instrumentation (konalegi)
 
