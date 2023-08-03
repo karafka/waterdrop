@@ -33,6 +33,16 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Async producing of a message to') }
+      it { expect(logged_data[0]).to include(message[:topic]) }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_message_produced_sync' do
@@ -45,6 +55,16 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Sync producing of a message to') }
+      it { expect(logged_data[0]).to include(message[:topic]) }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_messages_produced_async' do
@@ -56,6 +76,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Async producing of 2 messages to 2 topics') }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_messages_produced_sync' do
@@ -67,6 +96,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Sync producing of 2 messages to 2 topics') }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_message_buffered' do
@@ -79,6 +117,16 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Buffering of a message to ') }
+      it { expect(logged_data[0]).to include(message[:topic]) }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_messages_buffered' do
@@ -90,6 +138,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Buffering of 2 messages ') }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_buffer_flushed_async' do
@@ -103,6 +160,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include(message.to_s) }
     it { expect(logged_data[1]).to include(messages[0].to_s) }
     it { expect(logged_data[1]).to include(messages[1].to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Async flushing of 2 messages from the buffer') }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_buffer_flushed_sync' do
@@ -115,6 +181,15 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(messages[0].to_s) }
     it { expect(logged_data[1]).to include(messages[1].to_s) }
+
+    context 'when we do not want to log messages content' do
+      let(:listener) { described_class.new(logger, log_messages: false) }
+
+      it { expect(logged_data[0]).to include(producer.id) }
+      it { expect(logged_data[0]).to include('INFO') }
+      it { expect(logged_data[0]).to include('Sync flushing of 2 messages from the buffer') }
+      it { expect(logged_data[1]).to eq(nil) }
+    end
   end
 
   describe '#on_producer_closed' do
