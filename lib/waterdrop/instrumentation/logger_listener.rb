@@ -9,7 +9,9 @@ module WaterDrop
     #   as well as we can use it standalone
     class LoggerListener
       # @param logger [Object] logger we want to use
-      # @param log_messages [Boolean] should we report in debug the messages.
+      # @param log_messages [Boolean] Should we report the messages content (payload and metadata)
+      #   with each message operation.
+      #
       #   This can be extensive, especially when producing a lot of messages. We provide this
       #   despite the fact that we only report payloads in debug, because Rails by default operates
       #   with debug level. This means, that when working with Rails in development, every single
