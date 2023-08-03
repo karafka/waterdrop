@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-### 2.6.6 (Unreleased)
+### 2.6.6 (2023-08-03)
 - [Improvement] Provide `log_messages` option to `LoggerListener` so the extensive messages data logging can disabled.
 
 ### 2.6.5 (2023-07-22)
