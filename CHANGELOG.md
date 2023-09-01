@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+### 2.6.7 (2023-09-01)
+- [Improvement] early flush data from `librdkafka` internal buffer before closing.
+- [Maintenance] Update the signing cert as the old one expired.
+
 ### 2.6.6 (2023-08-03)
 - [Improvement] Provide `log_messages` option to `LoggerListener` so the extensive messages data logging can disabled.
 
