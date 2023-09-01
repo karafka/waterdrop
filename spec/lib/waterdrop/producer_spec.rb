@@ -163,6 +163,22 @@ RSpec.describe_current do
         expect(client).to have_received(:close)
       end
     end
+
+    context 'when flush timeouts' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      let(:message) { build(:valid_message) }
+
+      # This will be reached when we dispatch a lot of messages
+      before do
+        # Simulate flush failure
+        allow(producer.client).to receive(:flush).and_raise(::Rdkafka::RdkafkaError.new(1))
+      end
+
+      it 'expect to close and not to raise any errors' do
+        expect { producer.close }.not_to raise_error
+      end
+    end
   end
 
   describe '#ensure_usable!' do

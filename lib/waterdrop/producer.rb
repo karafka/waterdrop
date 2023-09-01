@@ -157,8 +157,7 @@ module WaterDrop
               @client.flush(@config.max_wait_timeout * 1_000) unless @client.closed?
             # We can safely ignore timeouts here because any left outstanding requests
             # will anyhow force wait on close
-            rescue ::Rdkafka::RdkafkaError => e
-              raise if e.is_a?(::Rdkafka::Config::ConfigError)
+            rescue ::Rdkafka::RdkafkaError, Rdkafka::AbstractHandle::WaitTimeoutError => e
               nil
             end
 
