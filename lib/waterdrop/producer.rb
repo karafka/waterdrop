@@ -149,7 +149,20 @@ module WaterDrop
           # We also mark it as closed only if it was connected, if not, it would trigger a new
           # connection that anyhow would be immediately closed
           if @client
-            client.close
+            # Why do we trigger it early instead of just having `#close` do it?
+            # The linger.ms time will be ignored for the duration of the call,
+            # queued messages will be sent to the broker as soon as possible.
+            begin
+              # `max_wait_timeout` is in seconds at the moment
+              @client.flush(@config.max_wait_timeout * 1_000) unless @client.closed?
+            # We can safely ignore timeouts here because any left outstanding requests
+            # will anyhow force wait on close
+            rescue ::Rdkafka::RdkafkaError => e
+              raise if e.is_a?(::Rdkafka::Config::ConfigError)
+              nil
+            end
+
+            @client.close
             @client = nil
           end
 
