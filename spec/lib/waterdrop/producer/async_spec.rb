@@ -27,7 +27,11 @@ RSpec.describe_current do
     end
 
     context 'when producing with good middleware' do
+      let(:message) { build(:valid_message, payload: nil) }
+
       before do
+        producer.produce_sync(topic: message[:topic], payload: nil)
+
         mid = lambda do |msg|
           msg[:partition_key] = '1'
           msg
@@ -36,12 +40,12 @@ RSpec.describe_current do
         producer.middleware.append mid
       end
 
-      let(:message) { build(:valid_message, payload: nil) }
-
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
     end
 
     context 'when producing with corrupted middleware' do
+      let(:message) { build(:valid_message, payload: nil) }
+
       before do
         mid = lambda do |msg|
           msg[:partition_key] = -1
@@ -50,8 +54,6 @@ RSpec.describe_current do
 
         producer.middleware.append mid
       end
-
-      let(:message) { build(:valid_message, payload: nil) }
 
       it { expect { delivery }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
     end

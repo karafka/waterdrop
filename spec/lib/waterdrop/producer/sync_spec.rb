@@ -58,6 +58,8 @@ RSpec.describe_current do
 
     let(:message) { build(:valid_message, partition_key: rand.to_s, topic: 'example_topic') }
 
+    before { producer.produce_sync(topic: 'example_topic', payload: '1') }
+
     it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
   end
 
