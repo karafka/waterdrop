@@ -96,7 +96,7 @@ RSpec.describe_current do
     let(:counts) { dummy_client.buffer[:count] }
     let(:histograms) { dummy_client.buffer[:histogram] }
     let(:guages) { dummy_client.buffer[:gauge] }
-    let(:broker_tag) { { tags: %w[broker:localhost:9092] } }
+    let(:broker_tag) { { tags: %w[broker:127.0.0.1:9092] } }
 
     # We add all expectations in one example not to sleep each time
     it 'expect to have proper metrics in place' do
@@ -229,7 +229,7 @@ RSpec.describe_current do
 
     before do
       producer.produce_async(topic: rand.to_s, payload: rand.to_s)
-      sleep(0.5)
+      sleep(1)
     end
 
     it 'expect error count to increase' do

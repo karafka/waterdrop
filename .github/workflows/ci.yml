@@ -25,28 +25,34 @@ jobs:
             coverage: 'true'
     steps:
       - uses: actions/checkout@v4
+
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{matrix.ruby}}
-      - name: Remove libzstd-dev to check no supported compressions
-        run: sudo apt-get -y remove libzstd-dev
+          bundler-cache: true
+
       - name: Run Kafka with docker-compose
-        # We need to give Kafka enough time to start and create all the needed topics, etc
-        # If anyone has a better idea on how to do it smart and easily, please contact me
         run: |
           docker-compose up -d
+
+      - name: Wait for Kafka
+        run: |
           sleep 5
+
       - name: Install latest bundler
         run: |
           gem install bundler --no-document
           bundle config set without 'tools benchmarks docs'
+
       - name: Bundle install
         run: |
           bundle config set without development
           bundle install --jobs 4 --retry 3
+
       - name: Run all tests
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}

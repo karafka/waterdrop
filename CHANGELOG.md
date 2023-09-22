@@ -1,37 +1,37 @@
 # WaterDrop changelog
 
-### 2.6.7 (2023-09-01)
+## 2.6.7 (2023-09-01)
 - [Improvement] early flush data from `librdkafka` internal buffer before closing.
 - [Maintenance] Update the signing cert as the old one expired.
 
-### 2.6.6 (2023-08-03)
+## 2.6.6 (2023-08-03)
 - [Improvement] Provide `log_messages` option to `LoggerListener` so the extensive messages data logging can disabled.
 
-### 2.6.5 (2023-07-22)
+## 2.6.5 (2023-07-22)
 - [Fix] Add cause to the errors that are passed into instrumentation (konalegi)
 
-### 2.6.4 (2023-07-11)
+## 2.6.4 (2023-07-11)
 - [Improvement] Use original error `#inspect` for `WaterDrop::Errors::ProduceError` and `WaterDrop::Errors::ProduceManyError` instead of the current empty string.
 
-### 2.6.3 (2023-06-28)
+## 2.6.3 (2023-06-28)
 - [Change] Use `Concurrent::AtomicFixnum` to track operations in progress to prevent potential race conditions on JRuby and TruffleRuby (not yet supported but this is for future usage).
 - [Change] Require `karafka-rdkafka` `>= 0.13.2`.
 - [Change] Require 'karafka-core' `>= 2.1.1`
 
-### 2.6.2 (2023-06-21)
+## 2.6.2 (2023-06-21)
 - [Refactor] Introduce a counter-based locking approach to make sure, that we close the producer safely but at the same time not to limit messages production with producing lock.
 - [Refactor] Make private methods private.
 - [Refactor] Validate that producer is not closed only when attempting to produce.
 - [Refactor] Improve one 5 minute long spec to run in 10 seconds.
 - [Refactor] clear client assignment after closing.
 
-### 2.6.1 (2023-06-19)
+## 2.6.1 (2023-06-19)
 - [Refactor] Remove no longer needed patches.
 - [Fix] Fork detection on a short lived processes seems to fail. Clear the used parent process client reference not to close it in the finalizer (#356).
 - [Change] Require `karafka-rdkafka` `>= 0.13.0`.
 - [Change] Require 'karafka-core' `>= 2.1.0`
 
-### 2.6.0 (2023-06-11)
+## 2.6.0 (2023-06-11)
 - [Improvement] Introduce `client_class` setting for ability to replace underlying client with anything specific to a given env (dev, test, etc).
 - [Improvement] Introduce `Clients::Buffered` useful for writing specs that do not have to talk with Kafka (id-ilych)
 - [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
