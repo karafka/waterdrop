@@ -24,7 +24,7 @@ jobs:
           - ruby: '3.2'
             coverage: 'true'
     steps:
-      - uses: actions/checkout@3df4ab11eba7bda6032a0b82a6bb43b11571feac # v4
+      - uses: actions/checkout@v4
 
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
@@ -41,7 +41,7 @@ jobs:
 
       - name: Wait for Kafka
         run: |
-          sleep 5
+          sleep 15
 
       - name: Install latest bundler
         run: |
