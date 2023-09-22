@@ -41,7 +41,7 @@ jobs:
 
       - name: Wait for Kafka
         run: |
-          sleep 5
+          sleep 15
 
       - name: Install latest bundler
         run: |
