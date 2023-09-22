@@ -2,7 +2,7 @@ version: '2'
 
 services:
   kafka:
-    container_name: rdkafka_kafka
+    container_name: waterdrop_kafka
     image: confluentinc/cp-kafka:7.5.0
 
     ports:
