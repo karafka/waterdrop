@@ -112,10 +112,10 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
-    context 'when it is not installed zstd' do
+    context 'when it is installed zstd' do
       let(:codec) { 'zstd' }
 
-      it { expect { delivery }.to raise_error(Rdkafka::Config::ConfigError) }
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
     context 'when it is installed lz4' do

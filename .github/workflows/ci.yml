@@ -35,9 +35,6 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
 
-      - name: Remove libzstd-dev to check no supported compressions
-        run: sudo apt-get -y remove libzstd-dev
-
       - name: Run Kafka with docker-compose
         run: |
           docker-compose up -d
