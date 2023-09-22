@@ -9,7 +9,7 @@ services:
       ZOOKEEPER_TICK_TIME: 100
 
   kafka:
-    container_name: waterdrop_zookeeper
+    container_name: waterdrop_kafka
     image: confluentinc/cp-kafka:7.5.0
     depends_on:
       - zookeeper
