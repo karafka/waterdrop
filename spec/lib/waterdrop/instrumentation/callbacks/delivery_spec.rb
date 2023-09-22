@@ -56,7 +56,7 @@ RSpec.describe_current do
 
     context 'when there is a message that was not successfully delivered async' do
       let(:changed) { [] }
-      let(:event) { changed.first }
+      let(:event) { changed.last }
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|
