@@ -37,7 +37,7 @@ jobs:
 
       - name: Run Kafka with docker-compose
         run: |
-          docker-compose up -d
+          docker-compose up -d || (sleep 5 && docker-compose up -d)
 
       - name: Wait for Kafka
         run: |
