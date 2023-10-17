@@ -64,6 +64,11 @@ module WaterDrop
     # option [Numeric] how many seconds should we wait with the backoff on queue having space for
     # more messages before re-raising the error.
     setting :wait_timeout_on_queue_full, default: 10
+
+    setting :wait_backoff_on_transaction_command, default: 0.5
+
+    setting :max_attempts_on_transaction_command, default: 5
+
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc

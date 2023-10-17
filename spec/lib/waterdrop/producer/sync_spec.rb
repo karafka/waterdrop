@@ -20,6 +20,16 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
+    context 'when producing with topic as a symbol' do
+      let(:message) do
+        msg = build(:valid_message)
+        msg[:topic] = msg[:topic].to_sym
+        msg
+      end
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+    end
+
     context 'when inline error occurs in librdkafka' do
       let(:errors) { [] }
       let(:error) { errors.first }

@@ -17,10 +17,10 @@ module WaterDrop
         # Emits delivery details to the monitor
         # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
         def call(delivery_report)
-          if delivery_report.error.to_i.positive?
-            instrument_error(delivery_report)
-          else
+          if delivery_report.error.to_i.zero?
             instrument_acknowledged(delivery_report)
+          else
+            instrument_error(delivery_report)
           end
         end
 
@@ -36,6 +36,7 @@ module WaterDrop
             offset: delivery_report.offset,
             partition: delivery_report.partition,
             topic: delivery_report.topic_name,
+            delivery_report: delivery_report,
             type: 'librdkafka.dispatch_error'
           )
         end
@@ -47,7 +48,8 @@ module WaterDrop
             producer_id: @producer_id,
             offset: delivery_report.offset,
             partition: delivery_report.partition,
-            topic: delivery_report.topic_name
+            topic: delivery_report.topic_name,
+            delivery_report: delivery_report
           )
         end
       end

@@ -26,7 +26,10 @@ module WaterDrop
         @max_payload_size = max_payload_size
       end
 
-      required(:topic) { |val| val.is_a?(String) && TOPIC_REGEXP.match?(val) }
+      required(:topic) do |val|
+        (val.is_a?(String) || val.is_a?(Symbol)) && TOPIC_REGEXP.match?(val.to_s)
+      end
+
       required(:payload) { |val| val.nil? || val.is_a?(String) }
       optional(:key) { |val| val.nil? || (val.is_a?(String) && !val.empty?) }
       optional(:partition) { |val| val.is_a?(Integer) && val >= -1 }
