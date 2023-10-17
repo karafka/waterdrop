@@ -20,6 +20,10 @@ It:
  - Works with Kafka `1.0+` and Ruby `2.7+`
  - Works with and without Karafka
 
+## Documentation
+
+Karafka ecosystem components documentation, including WaterDrop, can be found [here](https://karafka.io/docs/#waterdrop).
+
 ## Getting Started
 
 > [!NOTE]
