@@ -23,8 +23,7 @@ Karafka ecosystem components documentation, including WaterDrop, can be found [h
 
 ## Getting Started
 
-> [!NOTE]
-> If you want to both produce and consume messages, please use [Karafka](https://github.com/karafka/karafka/). It integrates WaterDrop automatically.
+If you want to both produce and consume messages, please use [Karafka](https://github.com/karafka/karafka/). It integrates WaterDrop automatically.
 
 To get started with WaterDrop:
 
