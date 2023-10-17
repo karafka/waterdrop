@@ -5,9 +5,9 @@
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
 > [!IMPORTANT]
-> All of Karafka ecosystems components documentation, including WaterDrop, can be found [here](https://karafka.io/docs/#waterdrop).
+> Karafka ecosystem components documentation, including WaterDrop, can be found [here](https://karafka.io/docs/#waterdrop).
 
-WaterDrop is a standalone gem to send messages to Kafka easily with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
+WaterDrop is a standalone gem that sends messages to Kafka easily with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
 
 It:
 
