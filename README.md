@@ -49,13 +49,13 @@ end
 
 
 ```ruby
-# And use it
+# sync producing
 producer.produce_sync(topic: 'my-topic', payload: 'my message')
 
 # or for async
 producer.produce_async(topic: 'my-topic', payload: 'my message')
 
-# or in batches
+# or in sync batches
 producer.produce_many_sync(
   [
     { topic: 'my-topic', payload: 'my message'},
@@ -63,7 +63,7 @@ producer.produce_many_sync(
   ]
 )
 
-# both sync and async
+# and async batches
 producer.produce_many_async(
   [
     { topic: 'my-topic', payload: 'my message'},
