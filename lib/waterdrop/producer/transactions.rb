@@ -128,7 +128,8 @@ module WaterDrop
 
         if do_retry
           # Backoff more and more before retries
-          sleep(config.max_attempts_on_transaction_command * attempt)
+          sleep(config.wait_backoff_on_transaction_command * attempt)
+
           retry
         end
 

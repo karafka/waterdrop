@@ -121,13 +121,17 @@ module WaterDrop
 
     # Purges data from both the buffer queue as well as the librdkafka queue.
     #
-    # @note This is an operation that can cause data loss. Keep that in mind.
+    # @note This is an operation that can cause data loss. Keep that in mind. It will not only
+    #   purge the internal WaterDrop buffer but will also purge the librdkafka queue as well as
+    #   will cancel any outgoing messages dispatches.
     def purge
-      @buffer_mutex.synchronize do
-        @messages = Concurrent::Array.new
-      end
+      @monitor.instrument('buffer.purged', producer_id: id) do
+        @buffer_mutex.synchronize do
+          @messages = Concurrent::Array.new
+        end
 
-      @client.purge
+        @client.purge
+      end
     end
 
     # Flushes the buffers in a sync way and closes the producer

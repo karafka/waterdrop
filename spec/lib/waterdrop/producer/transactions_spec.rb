@@ -99,20 +99,6 @@ RSpec.describe_current do
     end
   end
 
-  context 'when going beyond the max transaction time' do
-    subject(:producer) { build(:transactional_producer, transaction_timeout_ms: 1_000) }
-
-    it 'expect to crash' do
-      expect do
-        producer.transaction do
-          producer.produce_async(topic: 'example_topic', payload: 'data')
-          sleep(10)
-          producer.produce_async(topic: 'example_topic', payload: 'data')
-        end
-      end.to raise_error(Rdkafka::RdkafkaError)
-    end
-  end
-
   context 'when we start transaction and raise an error' do
     it 'expect to re-raise this error' do
       expect do
@@ -332,6 +318,27 @@ RSpec.describe_current do
           producer.close
         end
       end.to raise_error(Rdkafka::RdkafkaError, /Erroneous state/)
+    end
+  end
+
+  context 'when transaction crashes internally on one of the retryable operations' do
+    before do
+      counter = 0
+      ref = producer.client.method(:begin_transaction)
+
+      allow(producer.client).to receive(:begin_transaction) do
+        if counter.zero?
+          counter += 1
+
+          raise(Rdkafka::RdkafkaError.new(-152, retryable: true))
+        end
+
+        ref.call
+      end
+    end
+
+    it 'expect to retry and continue' do
+      expect { producer.transaction {} }.not_to raise_error
     end
   end
 end

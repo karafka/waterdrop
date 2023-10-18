@@ -24,6 +24,7 @@ module WaterDrop
 
         buffer.flushed_async
         buffer.flushed_sync
+        buffer.purged
 
         statistics.emitted
 
