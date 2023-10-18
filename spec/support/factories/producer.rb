@@ -15,7 +15,7 @@ FactoryBot.define do
         'bootstrap.servers': 'localhost:9092',
         # We emit statistics as it is a great way to check they actually always work
         'statistics.interval.ms': 100,
-        'request.required.acks': 1
+        'request.required.acks': 'all'
       }
     end
 
@@ -32,6 +32,22 @@ FactoryBot.define do
       instance.monitor.subscribe(::WaterDrop::Instrumentation::LoggerListener.new(logger))
 
       instance
+    end
+  end
+
+  factory :transactional_producer, parent: :producer do
+    transient do
+      transactional_id { SecureRandom.uuid }
+      transaction_timeout_ms { 30_000 }
+    end
+
+    kafka do
+      {
+        'bootstrap.servers': 'localhost:9092',
+        'request.required.acks': 'all',
+        'transactional.id': transactional_id,
+        'transaction.timeout.ms': transaction_timeout_ms
+      }
     end
   end
 

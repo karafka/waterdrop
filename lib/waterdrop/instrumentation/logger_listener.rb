@@ -113,8 +113,13 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_buffer_purged(event)
+        info(event, 'Successfully purging buffer')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_closed(event)
-        info event, 'Closing producer'
+        info(event, 'Closing producer')
       end
 
       # @param event [Dry::Events::Event] event that happened with the error details
@@ -123,6 +128,21 @@ module WaterDrop
         type = event[:type]
 
         error(event, "Error occurred: #{error} - #{type}")
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      def on_transaction_started(event)
+        info(event, 'Starting transaction')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      def on_transaction_aborted(event)
+        info(event, 'Aborting transaction')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      def on_transaction_committed(event)
+        info(event, 'Committing transaction')
       end
 
       private

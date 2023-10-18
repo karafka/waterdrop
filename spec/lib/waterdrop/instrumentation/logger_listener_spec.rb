@@ -192,6 +192,15 @@ RSpec.describe_current do
     end
   end
 
+  describe '#on_buffer_purged' do
+    before { listener.on_buffer_purged(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Successfully purging buffer') }
+    it { expect(logged_data[1]).to eq(nil) }
+  end
+
   describe '#on_producer_closed' do
     before { listener.on_producer_closed(event) }
 
@@ -209,5 +218,29 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('ERROR') }
     it { expect(logged_data[0]).to include('Error occurred') }
+  end
+
+  describe '#on_transaction_started' do
+    before { listener.on_transaction_started(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Starting transaction') }
+  end
+
+  describe '#on_transaction_aborted' do
+    before { listener.on_transaction_aborted(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Aborting transaction') }
+  end
+
+  describe '#on_transaction_committed' do
+    before { listener.on_transaction_committed(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Committing transaction') }
   end
 end

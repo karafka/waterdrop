@@ -11,7 +11,9 @@ module WaterDrop
         # @param producer [WaterDrop::Producer] producer instance with its config, etc
         # @note We overwrite this that way, because we do not care
         def new(producer)
-          client = ::Rdkafka::Config.new(producer.config.kafka.to_h).producer
+          config = producer.config.kafka.to_h
+
+          client = ::Rdkafka::Config.new(config).producer
 
           # This callback is not global and is per client, thus we do not have to wrap it with a
           # callbacks manager to make it work
@@ -19,6 +21,9 @@ module WaterDrop
             producer.id,
             producer.config.monitor
           )
+
+          # Switch to the transactional mode if user provided the transactional id
+          client.init_transactions if config.key?(:'transactional.id')
 
           client
         end

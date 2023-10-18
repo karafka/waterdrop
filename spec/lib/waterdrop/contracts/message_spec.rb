@@ -41,8 +41,14 @@ RSpec.describe_current do
       it { expect(errors[:topic]).not_to be_empty }
     end
 
-    context 'when topic is a symbol' do
+    context 'when topic is a valid symbol' do
       before { message[:topic] = :symbol }
+
+      it { expect(contract_result).to be_success }
+    end
+
+    context 'when topic is a symbol that will not be a topic' do
+      before { message[:topic] = '$%^&*()'.to_sym }
 
       it { expect(contract_result).not_to be_success }
       it { expect(errors[:topic]).not_to be_empty }

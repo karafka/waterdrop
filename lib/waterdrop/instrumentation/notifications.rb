@@ -18,8 +18,13 @@ module WaterDrop
         messages.produced_sync
         messages.buffered
 
+        transaction.started
+        transaction.committed
+        transaction.aborted
+
         buffer.flushed_async
         buffer.flushed_sync
+        buffer.purged
 
         statistics.emitted
 

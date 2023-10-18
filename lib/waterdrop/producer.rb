@@ -7,6 +7,7 @@ module WaterDrop
     include Sync
     include Async
     include Buffer
+    include Transactions
     include ::Karafka::Core::Helpers::Time
 
     # Which of the inline flow errors do we want to intercept and re-bind
@@ -38,6 +39,7 @@ module WaterDrop
       @buffer_mutex = Mutex.new
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
+      @transaction_mutex = Mutex.new
 
       @status = Status.new
       @messages = Concurrent::Array.new
@@ -117,8 +119,25 @@ module WaterDrop
       @client
     end
 
+    # Purges data from both the buffer queue as well as the librdkafka queue.
+    #
+    # @note This is an operation that can cause data loss. Keep that in mind. It will not only
+    #   purge the internal WaterDrop buffer but will also purge the librdkafka queue as well as
+    #   will cancel any outgoing messages dispatches.
+    def purge
+      @monitor.instrument('buffer.purged', producer_id: id) do
+        @buffer_mutex.synchronize do
+          @messages = Concurrent::Array.new
+        end
+
+        @client.purge
+      end
+    end
+
     # Flushes the buffers in a sync way and closes the producer
-    def close
+    # @param force [Boolean] should we force closing even with outstanding messages after the
+    #   max wait timeout
+    def close(force: false)
       @operating_mutex.synchronize do
         return unless @status.active?
 
@@ -156,12 +175,19 @@ module WaterDrop
               # `max_wait_timeout` is in seconds at the moment
               @client.flush(@config.max_wait_timeout * 1_000) unless @client.closed?
             # We can safely ignore timeouts here because any left outstanding requests
-            # will anyhow force wait on close
+            # will anyhow force wait on close if not forced.
+            # If forced, we will purge the queue and just close
             rescue ::Rdkafka::RdkafkaError, Rdkafka::AbstractHandle::WaitTimeoutError
               nil
+            ensure
+              # Purge fully the local queue in case of a forceful shutdown just to be sure, that
+              # there are no dangling messages. In case flush was successful, there should be
+              # none but we do it just in case it timed out
+              purge if force
             end
 
             @client.close
+
             @client = nil
           end
 
@@ -172,6 +198,11 @@ module WaterDrop
           @status.closed!
         end
       end
+    end
+
+    # Closes the producer with forced close after timeout, purging any outgoing data
+    def close!
+      close(force: true)
     end
 
     private
@@ -222,6 +253,10 @@ module WaterDrop
         @operating_mutex.synchronize { @operations_in_progress.increment }
         ensure_active!
       end
+
+      # In case someone defines topic as a symbol, we need to convert it into a string as
+      # librdkafka does not accept symbols
+      message = message.merge(topic: message[:topic].to_s) if message[:topic].is_a?(Symbol)
 
       client.produce(**message)
     rescue SUPPORTED_FLOW_ERRORS.first => e

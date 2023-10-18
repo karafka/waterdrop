@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'karafka-core', '>= 2.1.1', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.2.3', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   if $PROGRAM_NAME.end_with?('gem')
@@ -31,10 +31,10 @@ Gem::Specification.new do |spec|
   spec.metadata = {
     'funding_uri' => 'https://karafka.io/#become-pro',
     'homepage_uri' => 'https://karafka.io',
-    'changelog_uri' => 'https://github.com/karafka/waterdrop/blob/master/CHANGELOG.md',
+    'changelog_uri' => 'https://karafka.io/docs/Changelog-WaterDrop',
     'bug_tracker_uri' => 'https://github.com/karafka/waterdrop/issues',
     'source_code_uri' => 'https://github.com/karafka/waterdrop',
-    'documentation_uri' => 'https://github.com/karafka/waterdrop#readme',
+    'documentation_uri' => 'https://karafka.io/docs/#waterdrop',
     'rubygems_mfa_required' => 'true'
   }
 end

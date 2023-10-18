@@ -181,6 +181,63 @@ RSpec.describe_current do
     end
   end
 
+  describe '#close!' do
+    context 'when producer cannot connect and dispatch messages' do
+      subject(:producer) do
+        build(
+          :producer,
+          kafka: { 'bootstrap.servers': 'localhost:9093' },
+          max_wait_timeout: 1
+        )
+      end
+
+      it 'expect not to hang forever' do
+        producer.produce_async(topic: 'na', payload: 'data')
+        producer.close!
+      end
+    end
+  end
+
+  describe '#purge' do
+    context 'when there are some outgoing messages and we purge' do
+      subject(:producer) do
+        build(
+          :producer,
+          kafka: { 'bootstrap.servers': 'localhost:9093' },
+          max_wait_timeout: 1
+        )
+      end
+
+      after { producer.close! }
+
+      it 'expect their deliveries to materialize with errors' do
+        handler = producer.produce_async(topic: 'na', payload: 'data')
+        producer.purge
+        expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+      end
+
+      context 'when monitoring errors via instrumentation' do
+        let(:detected) { [] }
+
+        before do
+          producer.monitor.subscribe('error.occurred') do |event|
+            next unless event[:type] == 'librdkafka.dispatch_error'
+
+            detected << event[:error].code
+          end
+        end
+
+        it 'expect the error notifications to publish those errors' do
+          handler = producer.produce_async(topic: 'na', payload: 'data')
+          producer.purge
+
+          handler.wait(raise_response_error: false)
+          expect(detected.first).to eq(:purge_queue)
+        end
+      end
+    end
+  end
+
   describe '#ensure_usable!' do
     subject(:producer) { build(:producer) }
 

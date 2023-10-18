@@ -32,6 +32,9 @@ module WaterDrop
     # Raised when there is an inline error during single message produce operations
     ProduceError = Class.new(BaseError)
 
+    # Raise it within a transaction to abort it
+    AbortTransaction = Class.new(BaseError)
+
     # Raised when during messages producing something bad happened inline
     class ProduceManyError < ProduceError
       attr_reader :dispatched

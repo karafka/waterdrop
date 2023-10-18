@@ -1,5 +1,18 @@
 # WaterDrop changelog
 
+## 2.7.0 (Unreleased)
+- **[Feature]** Introduce transactions support.
+- [Improvement] Expand `LoggerListener` to inform about transactions (info level).
+- [Improvement] Allow waterdrop to use topic as a symbol or a string.
+- [Improvement] Enhance both `message.acknowledged` and `error.occurred` (for `librdkafka.dispatch_error`) with full delivery_report.
+- [Improvement] Provide `#close!` that will force producer close even with outgoing data after the ma wait timeout.
+- [Improvement] Provide `#purge` that will purge any outgoing data and data from the internal queues (both WaterDrop and librdkafka).
+- [Fix] Fix the `librdkafka.dispatch_error` error dispatch for errors with negative code.
+
+### Upgrade Notes
+
+There are no breaking changes in this release. However, if you upgrade WaterDrop in Karafka **and** choose to use transactions, Karafka Web UI may not support it. Web UI will support transactional producers starting from `0.7.7`.
+
 ## 2.6.7 (2023-09-01)
 - [Improvement] early flush data from `librdkafka` internal buffer before closing.
 - [Maintenance] Update the signing cert as the old one expired.
