@@ -84,6 +84,42 @@ RSpec.describe_current do
       end
     end
 
+    context 'when running nested transaction with production of messages' do
+      it 'expect to add them to the buffers' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          client.produce(topic: 'test', payload: 'test')
+
+          client.transaction do
+            client.produce(topic: 'test', payload: 'test')
+            client.produce(topic: 'test', payload: 'test')
+          end
+        end
+
+        expect(client.messages.size).to eq(7)
+        expect(client.messages_for('test').size).to eq(4)
+      end
+    end
+
+    context 'when running nested transaction with production of messages on abort' do
+      it 'expect to add them to the buffers' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          client.produce(topic: 'test', payload: 'test')
+
+          client.transaction do
+            client.produce(topic: 'test', payload: 'test')
+            client.produce(topic: 'test', payload: 'test')
+
+            throw(:abort)
+          end
+        end
+
+        expect(client.messages.size).to eq(3)
+        expect(client.messages_for('test').size).to eq(0)
+      end
+    end
+
     context 'when abort occurs' do
       it 'expect not to raise error' do
         expect do
