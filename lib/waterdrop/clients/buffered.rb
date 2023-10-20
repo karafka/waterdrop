@@ -73,12 +73,12 @@ module WaterDrop
 
         raise
       ensure
-        return result unless @transaction_mutex.owned?
-
-        @transaction_topics.clear
-        @transaction_messages.clear
-        @transaction_active = false
-        @transaction_mutex.unlock
+        if @transaction_mutex.owned?
+          @transaction_topics.clear
+          @transaction_messages.clear
+          @transaction_active = false
+          @transaction_mutex.unlock
+        end
       end
 
       # Returns messages produced to a given topic
