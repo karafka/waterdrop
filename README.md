@@ -71,4 +71,10 @@ producer.produce_many_async(
     { topic: 'my-topic', payload: 'my message'}
   ]
 )
+
+# transactions
+producer.transaction do
+  producer.produce_async(topic: 'my-topic', payload: 'my message')
+  producer.produce_async(topic: 'my-topic', payload: 'my message')
+end
 ```
