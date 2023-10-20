@@ -11,6 +11,7 @@ It:
  - Is thread-safe
  - Supports sync producing
  - Supports async producing
+ - Supports transactions
  - Supports buffering
  - Supports producing messages to multiple clusters
  - Supports multiple delivery policies
