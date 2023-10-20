@@ -258,7 +258,11 @@ module WaterDrop
       # librdkafka does not accept symbols
       message = message.merge(topic: message[:topic].to_s) if message[:topic].is_a?(Symbol)
 
-      client.produce(**message)
+      if transactional?
+        transaction { client.produce(**message) }
+      else
+        client.produce(**message)
+      end
     rescue SUPPORTED_FLOW_ERRORS.first => e
       # Unless we want to wait and retry and it's a full queue, we raise normally
       raise unless @config.wait_on_queue_full

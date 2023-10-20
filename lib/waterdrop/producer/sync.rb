@@ -63,8 +63,10 @@ module WaterDrop
         dispatched = []
 
         @monitor.instrument('messages.produced_sync', producer_id: id, messages: messages) do
-          messages.each do |message|
-            dispatched << produce(message)
+          with_transaction_if_transactional do
+            messages.each do |message|
+              dispatched << produce(message)
+            end
           end
 
           dispatched.map! do |handler|

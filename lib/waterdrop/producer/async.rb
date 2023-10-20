@@ -60,8 +60,10 @@ module WaterDrop
           producer_id: id,
           messages: messages
         ) do
-          messages.each do |message|
-            dispatched << produce(message)
+          with_transaction_if_transactional do
+            messages.each do |message|
+              dispatched << produce(message)
+            end
           end
 
           dispatched
