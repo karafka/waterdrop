@@ -20,7 +20,9 @@ module WaterDrop
       # parallel.
       #
       # Please note, that if a producer is configured as transactional, it **cannot** produce
-      # messages outside of transactions
+      # messages outside of transactions, that is why by default all dispatches will be wrapped
+      # with a transaction. One transaction per single dispatch and for `produce_many` it will be
+      # a single transaction wrapping all messages dispatches (not one per message).
       #
       # @return Block result
       #
@@ -90,8 +92,9 @@ module WaterDrop
       # This allows us to simplify the async and sync batch dispatchers because we can ensure that
       # their internal dispatches will be wrapped only with a single transaction and not
       # a transaction per message
+      # @param block [Proc] code we want to run
       def with_transaction_if_transactional(&block)
-        transactional? ? transaction(&block) : block.call
+        transactional? ? transaction(&block) : yield
       end
 
       # Instruments the transactional operation with producer id
