@@ -341,4 +341,109 @@ RSpec.describe_current do
       expect { producer.transaction {} }.not_to raise_error
     end
   end
+
+  context 'when we use transactional producer without transaction' do
+    it 'expect to allow as it will wrap with a transaction' do
+      expect do
+        producer.produce_sync(topic: 'example_topic', payload: rand.to_s)
+      end.not_to raise_error
+    end
+
+    it 'expect to deliver message correctly' do
+      result = producer.produce_sync(topic: 'example_topic', payload: rand.to_s)
+      expect(result.topic_name).to eq('example_topic')
+      expect(result.error).to eq(nil)
+    end
+
+    it 'expect to use the async dispatch though with transaction wrapper' do
+      handler = producer.produce_async(topic: 'example_topic', payload: rand.to_s)
+      result = handler.wait
+      expect(result.topic_name).to eq('example_topic')
+      expect(result.error).to eq(nil)
+    end
+
+    context 'when using with produce_many_sync' do
+      let(:messages) { Array.new(10) { build(:valid_message) } }
+      let(:counts) { [] }
+
+      before do
+        local_counts = counts
+        producer.monitor.subscribe('transaction.committed') { local_counts << true }
+      end
+
+      it 'expect to wrap it with a single transaction' do
+        producer.produce_many_sync(messages)
+        expect(counts.size).to eq(1)
+      end
+    end
+
+    context 'when using with produce_many_async' do
+      let(:messages) { Array.new(10) { build(:valid_message) } }
+      let(:counts) { [] }
+
+      before do
+        local_counts = counts
+        producer.monitor.subscribe('transaction.committed') { local_counts << true }
+      end
+
+      it 'expect to wrap it with a single transaction' do
+        producer.produce_many_async(messages)
+        expect(counts.size).to eq(1)
+      end
+    end
+  end
+
+  context 'when nesting transaction inside of a transaction' do
+    let(:counts) { [] }
+
+    before do
+      local_counts = counts
+      producer.monitor.subscribe('transaction.committed') { local_counts << true }
+    end
+
+    it 'expect to work' do
+      handlers = []
+
+      producer.transaction do
+        handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+
+        producer.transaction do
+          handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+        end
+      end
+
+      handlers.each { |handler| expect { handler.wait }.not_to raise_error }
+    end
+
+    it 'expect to have one actual transaction' do
+      producer.transaction do
+        producer.produce_async(topic: 'example_topic', payload: 'data')
+
+        producer.transaction do
+          producer.produce_async(topic: 'example_topic', payload: 'data')
+        end
+      end
+
+      expect(counts.size).to eq(1)
+    end
+
+    context 'when we abort the nested transaction' do
+      it 'expect to abort all levels' do
+        handlers = []
+
+        producer.transaction do
+          handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+
+          producer.transaction do
+            handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+            throw(:abort)
+          end
+        end
+
+        handlers.each do |handler|
+          expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+        end
+      end
+    end
+  end
 end

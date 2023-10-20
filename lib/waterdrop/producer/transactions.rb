@@ -42,6 +42,10 @@ module WaterDrop
       #
       #   handler.wait
       def transaction
+        # This will safely allow us to support one operation transactions so a transactional
+        # producer can work without the transactional block if needed
+        return yield if @transaction_mutex.owned?
+
         @transaction_mutex.synchronize do
           transactional_instrument(:committed) do
             with_transactional_error_handling(:begin) do
@@ -81,6 +85,14 @@ module WaterDrop
       end
 
       private
+
+      # Runs provided code with a transaction wrapper if transactions are enabled.
+      # This allows us to simplify the async and sync batch dispatchers because we can ensure that
+      # their internal dispatches will be wrapped only with a single transaction and not
+      # a transaction per message
+      def with_transaction_if_transactional(&block)
+        transactional? ? transaction(&block) : block.call
+      end
 
       # Instruments the transactional operation with producer id
       #
