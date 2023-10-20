@@ -321,6 +321,17 @@ RSpec.describe_current do
     end
   end
 
+  context 'when trying to close a producer fron a different thread during transaction' do
+    it 'expect to raise an error' do
+      expect do
+        producer.transaction do
+          Thread.new { producer.close }
+          sleep(1)
+        end
+      end.to raise_error(Rdkafka::RdkafkaError, /Erroneous state/)
+    end
+  end
+
   context 'when transaction crashes internally on one of the retryable operations' do
     before do
       counter = 0
