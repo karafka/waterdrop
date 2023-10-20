@@ -25,6 +25,26 @@ module WaterDrop
         true
       end
 
+      # Yields the code pretending it is in a transaction
+      # Supports our aborting transaction flow
+      def transaction
+        result = nil
+        commit = false
+
+        catch(:abort) do
+          result = yield
+          commit = true
+        end
+
+        commit || raise(WaterDrop::Errors::AbortTransaction)
+
+        result
+      rescue StandardError => e
+        return if e.is_a?(WaterDrop::Errors::AbortTransaction)
+
+        raise
+      end
+
       # @param _args [Object] anything really, this dummy is suppose to support anything
       # @return [self] returns self for chaining cases
       def method_missing(*_args)
