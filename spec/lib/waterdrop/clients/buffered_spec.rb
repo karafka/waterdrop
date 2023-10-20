@@ -64,4 +64,120 @@ RSpec.describe_current do
     it { expect(client.messages).to be_empty }
     it { expect(client.messages_for('foo')).to be_empty }
   end
+
+  describe '#transaction' do
+    context 'when no error and no abort' do
+      it 'expect to return the block value' do
+        expect(client.transaction { 1 }).to eq(1)
+      end
+    end
+
+    context 'when running transaction with production of messages' do
+      it 'expect to add them to the buffers' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          client.produce(topic: 'test', payload: 'test')
+        end
+
+        expect(client.messages.size).to eq(5)
+        expect(client.messages_for('test').size).to eq(2)
+      end
+    end
+
+    context 'when running nested transaction with production of messages' do
+      it 'expect to add them to the buffers' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          client.produce(topic: 'test', payload: 'test')
+
+          client.transaction do
+            client.produce(topic: 'test', payload: 'test')
+            client.produce(topic: 'test', payload: 'test')
+          end
+        end
+
+        expect(client.messages.size).to eq(7)
+        expect(client.messages_for('test').size).to eq(4)
+      end
+    end
+
+    context 'when running nested transaction with production of messages on abort' do
+      it 'expect to add them to the buffers' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          client.produce(topic: 'test', payload: 'test')
+
+          client.transaction do
+            client.produce(topic: 'test', payload: 'test')
+            client.produce(topic: 'test', payload: 'test')
+
+            throw(:abort)
+          end
+        end
+
+        expect(client.messages.size).to eq(3)
+        expect(client.messages_for('test').size).to eq(0)
+      end
+    end
+
+    context 'when abort occurs' do
+      it 'expect not to raise error' do
+        expect do
+          client.transaction { throw(:abort) }
+        end.not_to raise_error
+      end
+
+      it 'expect not to contain messages from the aborted transaction' do
+        client.transaction do
+          client.produce(topic: 'test', payload: 'test')
+          throw(:abort)
+        end
+
+        expect(client.messages.size).to eq(3)
+        expect(client.messages_for('test')).to be_empty
+      end
+    end
+
+    context 'when WaterDrop::Errors::AbortTransaction error occurs' do
+      it 'expect not to raise error' do
+        expect do
+          client.transaction { raise(WaterDrop::Errors::AbortTransaction) }
+        end.not_to raise_error
+      end
+    end
+
+    context 'when different error occurs' do
+      it 'expect to raise error' do
+        expect do
+          client.transaction { raise(StandardError) }
+        end.to raise_error(StandardError)
+      end
+
+      it 'expect not to contain messages from the aborted transaction' do
+        expect do
+          client.transaction do
+            client.produce(topic: 'test', payload: 'test')
+
+            raise StandardError
+          end
+        end.to raise_error(StandardError)
+
+        expect(client.messages.size).to eq(3)
+        expect(client.messages_for('test')).to be_empty
+      end
+    end
+
+    context 'when running a nested transaction' do
+      it 'expect to work ok' do
+        result = client.transaction do
+          client.transaction do
+            client.produce(topic: '1', payload: '2')
+            2
+          end
+        end
+
+        expect(result).to eq(2)
+      end
+    end
+  end
 end
