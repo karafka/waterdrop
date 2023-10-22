@@ -4,6 +4,7 @@ RSpec.describe_current do
   subject(:producer) { build(:transactional_producer) }
 
   let(:transactional_id) { SecureRandom.uuid }
+  let(:critical_error) { Exception }
 
   after { producer.close }
 
@@ -197,6 +198,36 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we start transaction and raise a critical Exception' do
+    it 'expect to re-raise this error' do
+      expect do
+        producer.transaction do
+          producer.produce_async(topic: 'example_topic', payload: 'na')
+
+          raise critical_error
+        end
+      end.to raise_error(critical_error)
+    end
+
+    it 'expect to cancel the dispatch of the message' do
+      handler = nil
+
+      begin
+        producer.transaction do
+          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+
+          raise critical_error
+        end
+      rescue critical_error
+        nil
+      end
+
+      expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+    end
+
+    # The rest is expected to behave the same way as StandardError so not duplicating
+  end
+
   context 'when we start transaction and abort' do
     it 'expect not to re-raise' do
       expect do
@@ -321,7 +352,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when trying to close a producer fron a different thread during transaction' do
+  context 'when trying to close a producer from a different thread during transaction' do
     it 'expect to raise an error' do
       expect do
         producer.transaction do
