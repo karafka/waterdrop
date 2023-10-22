@@ -145,6 +145,11 @@ module WaterDrop
         info(event, 'Committing transaction')
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
+      def on_transaction_finished(event)
+        info(event, 'Processing transaction')
+      end
+
       private
 
       # @return [Boolean] should we report the messages details in the debug mode.

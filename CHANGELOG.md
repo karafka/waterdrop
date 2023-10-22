@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.6.9 (Unreleased)
+- [Improvement] Introduce a `transaction.finished` event to indicate that transaction has finished whether it was aborted or committed.
+- [Improvement] Use `transaction.committed` event to indicate that transaction has been committed.
+
 ## 2.6.8 (2023-10-20)
 - **[Feature]** Introduce transactions support.
 - [Improvement] Expand `LoggerListener` to inform about transactions (info level).
