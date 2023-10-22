@@ -21,6 +21,7 @@ module WaterDrop
         transaction.started
         transaction.committed
         transaction.aborted
+        transaction.finished
 
         buffer.flushed_async
         buffer.flushed_sync

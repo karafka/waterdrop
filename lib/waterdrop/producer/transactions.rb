@@ -49,7 +49,7 @@ module WaterDrop
         return yield if @transaction_mutex.owned?
 
         @transaction_mutex.synchronize do
-          transactional_instrument(:committed) do
+          transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
               transactional_instrument(:started) { client.begin_transaction }
             end
@@ -65,11 +65,16 @@ module WaterDrop
             commit || raise(WaterDrop::Errors::AbortTransaction)
 
             with_transactional_error_handling(:commit) do
-              client.commit_transaction
+              transactional_instrument(:committed) { client.commit_transaction }
             end
 
             result
-          rescue StandardError => e
+          # We need to handle any interrupt including critical in order not to have the transaction
+          # running. This will also handle things like `IRB::Abort`
+          #
+          # rubocop:disable Lint/RescueException
+          rescue Exception => e
+            # rubocop:enable Lint/RescueException
             with_transactional_error_handling(:abort) do
               transactional_instrument(:aborted) { client.abort_transaction }
             end
