@@ -19,6 +19,7 @@ module WaterDrop
           # callbacks manager to make it work
           client.delivery_callback = Instrumentation::Callbacks::Delivery.new(
             producer.id,
+            producer.transactional?,
             producer.config.monitor
           )
 

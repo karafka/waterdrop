@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:callback) { described_class.new(producer_id, monitor) }
+  subject(:callback) { described_class.new(producer_id, transactional, monitor) }
 
   let(:producer) { build(:producer) }
   let(:producer_id) { SecureRandom.uuid }
+  let(:transactional) { false }
   let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
   let(:delivery_report) do
     OpenStruct.new(

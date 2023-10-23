@@ -129,10 +129,15 @@ RSpec.describe_current do
 
     context 'when we have error instrumentation' do
       let(:errors) { [] }
+      let(:purges) { [] }
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|
           errors << event[:error]
+        end
+
+        producer.monitor.subscribe('message.purged') do |event|
+          purges << event[:error]
         end
 
         begin
@@ -146,9 +151,13 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect to emit the cancellation error via the error pipeline' do
-        expect(errors.first).to be_a(Rdkafka::RdkafkaError)
-        expect(errors.first.code).to eq(:purge_queue)
+      it 'expect not to emit the cancellation error via the error pipeline' do
+        expect(errors).to be_empty
+      end
+
+      it 'expect to emit the cancellation error via the message.purged' do
+        expect(purges.first).to be_a(Rdkafka::RdkafkaError)
+        expect(purges.first.code).to eq(:purge_queue)
       end
     end
 
@@ -253,10 +262,15 @@ RSpec.describe_current do
 
     context 'when we have error instrumentation' do
       let(:errors) { [] }
+      let(:purges) { [] }
 
       before do
         producer.monitor.subscribe('error.occurred') do |event|
           errors << event[:error]
+        end
+
+        producer.monitor.subscribe('message.purged') do |event|
+          purges << event[:error]
         end
 
         producer.transaction do
@@ -266,9 +280,13 @@ RSpec.describe_current do
         end
       end
 
-      it 'expect to emit the cancellation error via the error pipeline' do
-        expect(errors.first).to be_a(Rdkafka::RdkafkaError)
-        expect(errors.first.code).to eq(:purge_queue)
+      it 'expect not to emit the cancellation error via the error pipeline' do
+        expect(errors).to be_empty
+      end
+
+      it 'expect to emit the cancellation error via the message.purged' do
+        expect(purges.first).to be_a(Rdkafka::RdkafkaError)
+        expect(purges.first.code).to eq(:purge_queue)
       end
     end
 
