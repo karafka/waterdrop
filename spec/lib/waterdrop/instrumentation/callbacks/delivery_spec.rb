@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:producer) { build(:producer) }
   let(:producer_id) { SecureRandom.uuid }
-  let(:transactional) { false }
+  let(:transactional) { producer.transactional? }
   let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
   let(:delivery_report) do
     OpenStruct.new(
@@ -123,6 +123,34 @@ RSpec.describe_current do
       it { expect(errors.first.cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(event[:error]).to be_a(WaterDrop::Errors::ProduceError) }
       it { expect(event[:error].cause).to be_a(Rdkafka::RdkafkaError) }
+    end
+
+    context 'when there is a producer with non-transactional purge' do
+      let(:producer) { build(:slow_producer) }
+      let(:errors) { [] }
+      let(:purges) { [] }
+
+      before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          errors << event[:error]
+        end
+
+        producer.monitor.subscribe('message.purged') do |event|
+          purges << event[:error]
+        end
+
+        producer.produce_async(build(:valid_message))
+        producer.purge
+      end
+
+      it 'expect to have it in the errors' do
+        expect(errors.first).to be_a(Rdkafka::RdkafkaError)
+        expect(errors.first.code).to eq(:purge_queue)
+      end
+
+      it 'expect not to publish purge notification' do
+        expect(purges).to be_empty
+      end
     end
   end
 end
