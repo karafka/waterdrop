@@ -17,7 +17,10 @@ module WaterDrop
         # Error emitted when a message was purged while it was dispatched
         RD_KAFKA_RESP_PURGE_INFLIGHT = -151
 
-        private_constant :RD_KAFKA_RESP_PURGE_QUEUE, :RD_KAFKA_RESP_PURGE_INFLIGHT
+        # Errors related to queue purging that is expected in transactions
+        PURGE_ERRORS = [RD_KAFKA_RESP_PURGE_INFLIGHT, RD_KAFKA_RESP_PURGE_QUEUE].freeze
+
+        private_constant :RD_KAFKA_RESP_PURGE_QUEUE, :RD_KAFKA_RESP_PURGE_INFLIGHT, :PURGE_ERRORS
 
         # @param producer_id [String] id of the current producer
         # @param transactional [Boolean] is this handle for a transactional or regular producer
@@ -36,9 +39,7 @@ module WaterDrop
           if error_code.zero?
             instrument_acknowledged(delivery_report)
 
-          elsif error_code == RD_KAFKA_RESP_PURGE_QUEUE && @transactional
-            instrument_purged(delivery_report)
-          elsif error_code == RD_KAFKA_RESP_PURGE_INFLIGHT && @transactional
+          elsif @transactional && PURGE_ERRORS.include?(error_code)
             instrument_purged(delivery_report)
           else
             instrument_error(delivery_report)
