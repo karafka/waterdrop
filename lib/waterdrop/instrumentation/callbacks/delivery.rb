@@ -12,6 +12,7 @@ module WaterDrop
       #   We do however still want to instrument it for traceability.
       class Delivery
         # @param producer_id [String] id of the current producer
+        # @param transactional [Boolean] is this handle for a transactional or regular producer
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
         def initialize(producer_id, transactional, monitor)
           @producer_id = producer_id
@@ -77,6 +78,9 @@ module WaterDrop
           )
         end
 
+        # Builds appropriate rdkafka error
+        # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
+        # @return [::Rdkafka::RdkafkaError]
         def build_error(delivery_report)
           ::Rdkafka::RdkafkaError.new(delivery_report.error)
         end
