@@ -12,6 +12,7 @@ module WaterDrop
         message.produced_async
         message.produced_sync
         message.acknowledged
+        message.purged
         message.buffered
 
         messages.produced_async
