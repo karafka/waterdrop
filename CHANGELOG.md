@@ -1,8 +1,9 @@
 # WaterDrop changelog
 
-## 2.6.10 (Unreleased)
+## 2.6.10 (2023-10-24)
 - [Improvement] Introduce `message.purged` event to indicate that a message that was not delivered to Kafka was purged. This most of the time refers to messages that were part of a transaction and were not yet dispatched to Kafka. It always means, that given message was not delivered but in case of transactions it is expected. In case of non-transactional it usually means `#purge` usage or exceeding `message.timeout.ms` so `librdkafka` removes this message from its internal queue. Non-transactional producers do **not** use this and pipe purges to `error.occurred`.
 - [Fix] Fix a case where `message.acknowledged` would not have `caller` key.
+- [Fix] Fix a bug where critical errors (like `IRB::Abort`) would not abort the ongoing transaction.
 
 ## 2.6.9 (2023-10-23)
 - [Improvement] Introduce a `transaction.finished` event to indicate that transaction has finished whether it was aborted or committed.
