@@ -68,15 +68,15 @@ RSpec.describe_current do
   describe '#transaction' do
     context 'when no error and no abort' do
       it 'expect to return the block value' do
-        expect(client.transaction { 1 }).to eq(1)
+        expect(producer.transaction { 1 }).to eq(1)
       end
     end
 
     context 'when running transaction with production of messages' do
       it 'expect to add them to the buffers' do
-        client.transaction do
-          client.produce(topic: 'test', payload: 'test')
-          client.produce(topic: 'test', payload: 'test')
+        producer.transaction do
+          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: 'test', payload: 'test')
         end
 
         expect(client.messages.size).to eq(5)
@@ -86,13 +86,13 @@ RSpec.describe_current do
 
     context 'when running nested transaction with production of messages' do
       it 'expect to add them to the buffers' do
-        client.transaction do
-          client.produce(topic: 'test', payload: 'test')
-          client.produce(topic: 'test', payload: 'test')
+        producer.transaction do
+          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: 'test', payload: 'test')
 
-          client.transaction do
-            client.produce(topic: 'test', payload: 'test')
-            client.produce(topic: 'test', payload: 'test')
+          producer.transaction do
+            producer.produce_sync(topic: 'test', payload: 'test')
+            producer.produce_sync(topic: 'test', payload: 'test')
           end
         end
 
@@ -103,13 +103,13 @@ RSpec.describe_current do
 
     context 'when running nested transaction with production of messages on abort' do
       it 'expect to add them to the buffers' do
-        client.transaction do
-          client.produce(topic: 'test', payload: 'test')
-          client.produce(topic: 'test', payload: 'test')
+        producer.transaction do
+          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: 'test', payload: 'test')
 
-          client.transaction do
-            client.produce(topic: 'test', payload: 'test')
-            client.produce(topic: 'test', payload: 'test')
+          producer.transaction do
+            producer.produce_sync(topic: 'test', payload: 'test')
+            producer.produce_sync(topic: 'test', payload: 'test')
 
             throw(:abort)
           end
@@ -123,13 +123,13 @@ RSpec.describe_current do
     context 'when abort occurs' do
       it 'expect not to raise error' do
         expect do
-          client.transaction { throw(:abort) }
+          producer.transaction { throw(:abort) }
         end.not_to raise_error
       end
 
       it 'expect not to contain messages from the aborted transaction' do
-        client.transaction do
-          client.produce(topic: 'test', payload: 'test')
+        producer.transaction do
+          producer.produce_sync(topic: 'test', payload: 'test')
           throw(:abort)
         end
 
@@ -141,7 +141,7 @@ RSpec.describe_current do
     context 'when WaterDrop::Errors::AbortTransaction error occurs' do
       it 'expect not to raise error' do
         expect do
-          client.transaction { raise(WaterDrop::Errors::AbortTransaction) }
+          producer.transaction { raise(WaterDrop::Errors::AbortTransaction) }
         end.not_to raise_error
       end
     end
@@ -149,14 +149,14 @@ RSpec.describe_current do
     context 'when different error occurs' do
       it 'expect to raise error' do
         expect do
-          client.transaction { raise(StandardError) }
+          producer.transaction { raise(StandardError) }
         end.to raise_error(StandardError)
       end
 
       it 'expect not to contain messages from the aborted transaction' do
         expect do
-          client.transaction do
-            client.produce(topic: 'test', payload: 'test')
+          producer.transaction do
+            producer.produce_sync(topic: 'test', payload: 'test')
 
             raise StandardError
           end
@@ -169,9 +169,9 @@ RSpec.describe_current do
 
     context 'when running a nested transaction' do
       it 'expect to work ok' do
-        result = client.transaction do
-          client.transaction do
-            client.produce(topic: '1', payload: '2')
+        result = producer.transaction do
+          producer.transaction do
+            producer.produce_sync(topic: '1', payload: '2')
             2
           end
         end

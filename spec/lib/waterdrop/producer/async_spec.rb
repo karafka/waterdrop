@@ -182,11 +182,9 @@ RSpec.describe_current do
 
       before do
         # Intercept the error so it won't bubble up as we want to check the notifications pipeline
-        begin
-          producer.produce_many_async(messages)
-        rescue WaterDrop::Errors::ProduceError => e
-          errors << e
-        end
+        producer.produce_many_async(messages)
+      rescue WaterDrop::Errors::ProduceError => e
+        errors << e
       end
 
       it { expect(error.dispatched.size).to eq(1) }

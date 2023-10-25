@@ -6,21 +6,12 @@ module WaterDrop
     class Buffered < Clients::Dummy
       attr_accessor :messages
 
-      # Sync fake response for the message delivery to Kafka, since we do not dispatch anything
-      class SyncResponse
-        # @param _args Handler wait arguments (irrelevant as waiting is fake here)
-        def wait(*_args)
-          false
-        end
-      end
-
       # @param args [Object] anything accepted by `Clients::Dummy`
       def initialize(*args)
         super
         @messages = []
         @topics = Hash.new { |k, v| k[v] = [] }
 
-        @transaction_mutex = Mutex.new
         @transaction_active = false
         @transaction_messages = []
         @transaction_topics = Hash.new { |k, v| k[v] = [] }
@@ -29,6 +20,7 @@ module WaterDrop
 
       # "Produces" message to Kafka: it acknowledges it locally, adds it to the internal buffer
       # @param message [Hash] `WaterDrop::Producer#produce_sync` message hash
+      # @return [Dummy::Handle] fake delivery handle that can be materialized into a report
       def produce(message)
         if @transaction_active
           @transaction_topics[message.fetch(:topic)] << message
@@ -39,29 +31,20 @@ module WaterDrop
           @messages << message
         end
 
-        SyncResponse.new
+        super(**message.to_h)
       end
 
-      # Yields the code pretending it is in a transaction
-      # Supports our aborting transaction flow
-      # Moves messages the appropriate buffers only if transaction is successful
-      def transaction
+      # Starts the transaction on a given level
+      def begin_transaction
         @transaction_level += 1
-
-        return yield if @transaction_mutex.owned?
-
-        @transaction_mutex.lock
         @transaction_active = true
+      end
 
-        result = nil
-        commit = false
+      # Finishes given level of transaction
+      def commit_transaction
+        @transaction_level -= 1
 
-        catch(:abort) do
-          result = yield
-          commit = true
-        end
-
-        commit || raise(WaterDrop::Errors::AbortTransaction)
+        return unless @transaction_level.zero?
 
         # Transfer transactional data on success
         @transaction_topics.each do |topic, messages|
@@ -70,20 +53,20 @@ module WaterDrop
 
         @messages += @transaction_messages
 
-        result
-      rescue StandardError => e
-        return if e.is_a?(WaterDrop::Errors::AbortTransaction)
+        @transaction_topics.clear
+        @transaction_messages.clear
+        @transaction_active = false
+      end
 
-        raise
-      ensure
+      # Aborts the transaction
+      def abort_transaction
         @transaction_level -= 1
 
-        if @transaction_level.zero? && @transaction_mutex.owned?
-          @transaction_topics.clear
-          @transaction_messages.clear
-          @transaction_active = false
-          @transaction_mutex.unlock
-        end
+        return unless @transaction_level.zero?
+
+        @transaction_topics.clear
+        @transaction_messages.clear
+        @transaction_active = false
       end
 
       # Returns messages produced to a given topic
@@ -95,6 +78,10 @@ module WaterDrop
       # Clears internal buffer
       # Used in between specs so messages do not leak out
       def reset
+        @transaction_level = 0
+        @transaction_active = false
+        @transaction_topics.clear
+        @transaction_messages.clear
         @messages.clear
         @topics.each_value(&:clear)
       end

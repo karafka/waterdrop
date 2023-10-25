@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.6.11 (Unreleased)
+- [Enhancement] Return delivery handles and delivery report for both dummy and buffered clients with proper topics, partitions and offsets assign and auto-increment offsets per partition.
+- [Fix] Fix a case where buffered test client would not accumulate messages on failed transactions
+
 ## 2.6.10 (2023-10-24)
 - [Improvement] Introduce `message.purged` event to indicate that a message that was not delivered to Kafka was purged. This most of the time refers to messages that were part of a transaction and were not yet dispatched to Kafka. It always means, that given message was not delivered but in case of transactions it is expected. In case of non-transactional it usually means `#purge` usage or exceeding `message.timeout.ms` so `librdkafka` removes this message from its internal queue. Non-transactional producers do **not** use this and pipe purges to `error.occurred`.
 - [Fix] Fix a case where `message.acknowledged` would not have `caller` key.
