@@ -48,6 +48,8 @@ RSpec.describe_current do
         end
 
         producer.produce_sync(message)
+
+        sleep(0.01) until changed.size.positive?
       end
 
       it { expect(event.payload[:partition]).to eq(0) }
@@ -92,6 +94,8 @@ RSpec.describe_current do
         rescue Rdkafka::RdkafkaError
           nil
         end
+
+        sleep(0.01) until changed.size.positive?
       end
 
       it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
@@ -117,6 +121,8 @@ RSpec.describe_current do
         rescue WaterDrop::Errors::ProduceError => e
           errors << e
         end
+
+        sleep(0.01) until changed.size.positive?
       end
 
       it { expect(errors.first).to be_a(WaterDrop::Errors::ProduceError) }
@@ -141,6 +147,8 @@ RSpec.describe_current do
 
         producer.produce_async(build(:valid_message))
         producer.purge
+
+        sleep(0.01) until errors.size.positive?
       end
 
       it 'expect to have it in the errors' do
