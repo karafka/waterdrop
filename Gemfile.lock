@@ -8,7 +8,7 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
-    activesupport (7.1.1)
+    activesupport (7.1.2)
       base64
       bigdecimal
       concurrent-ruby (~> 1.0, >= 1.0.2)
@@ -18,30 +18,30 @@ GEM
       minitest (>= 5.1)
       mutex_m
       tzinfo (~> 2.0)
-    base64 (0.1.1)
+    base64 (0.2.0)
     bigdecimal (3.1.4)
     byebug (11.1.3)
     concurrent-ruby (1.2.2)
     connection_pool (2.4.1)
     diff-lcs (1.5.0)
     docile (1.4.0)
-    drb (2.1.1)
+    drb (2.2.0)
       ruby2_keywords
     factory_bot (6.3.0)
       activesupport (>= 5.0.0)
     ffi (1.16.3)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
-    karafka-core (2.2.4)
+    karafka-core (2.2.7)
       concurrent-ruby (>= 1.1)
-      karafka-rdkafka (>= 0.13.6, < 0.14.0)
-    karafka-rdkafka (0.13.7)
+      karafka-rdkafka (>= 0.13.9, < 0.15.0)
+    karafka-rdkafka (0.14.0)
       ffi (~> 1.15)
       mini_portile2 (~> 2.6)
       rake (> 12)
     mini_portile2 (2.8.5)
     minitest (5.20.0)
-    mutex_m (0.1.2)
+    mutex_m (0.2.0)
     rake (13.1.0)
     rspec (3.12.0)
       rspec-core (~> 3.12.0)
