@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.6.12 (Unreleased)
+- [Change] Remove usage of concurrent ruby.
+
 ## 2.6.11 (2023-10-25)
 - [Enhancement] Return delivery handles and delivery report for both dummy and buffered clients with proper topics, partitions and offsets assign and auto-increment offsets per partition.
 - [Fix] Fix a case where buffered test client would not accumulate messages on failed transactions
