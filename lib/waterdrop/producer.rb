@@ -24,7 +24,7 @@ module WaterDrop
     attr_reader :id
     # @return [Status] producer status object
     attr_reader :status
-    # @return [Concurrent::Array] internal messages buffer
+    # @return [Array] internal messages buffer
     attr_reader :messages
     # @return [Object] monitor we want to use
     attr_reader :monitor
@@ -35,14 +35,14 @@ module WaterDrop
     # @param block [Proc] configuration block
     # @return [Producer] producer instance
     def initialize(&block)
-      @operations_in_progress = Concurrent::AtomicFixnum.new(0)
+      @operations_in_progress = Helpers::Counter.new
       @buffer_mutex = Mutex.new
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
       @transaction_mutex = Mutex.new
 
       @status = Status.new
-      @messages = Concurrent::Array.new
+      @messages = []
 
       return unless block
 
@@ -127,7 +127,7 @@ module WaterDrop
     def purge
       @monitor.instrument('buffer.purged', producer_id: id) do
         @buffer_mutex.synchronize do
-          @messages = Concurrent::Array.new
+          @messages = []
         end
 
         @client.purge

@@ -82,7 +82,7 @@ module WaterDrop
 
         @buffer_mutex.synchronize do
           data_for_dispatch = @messages
-          @messages = Concurrent::Array.new
+          @messages = []
         end
 
         # Do nothing if nothing to flush
