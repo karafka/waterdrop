@@ -9,7 +9,6 @@
   securerandom
   karafka-core
   pathname
-  concurrent/atomic/atomic_fixnum
 ].each { |lib| require lib }
 
 # WaterDrop library
