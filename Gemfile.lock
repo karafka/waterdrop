@@ -27,7 +27,7 @@ GEM
     docile (1.4.0)
     drb (2.2.0)
       ruby2_keywords
-    factory_bot (6.4.0)
+    factory_bot (6.4.1)
       activesupport (>= 5.0.0)
     ffi (1.16.3)
     i18n (1.14.1)
