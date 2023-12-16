@@ -2,7 +2,6 @@
 
 module WaterDrop
   module Instrumentation
-    # Namespace for handlers of callbacks emitted by the kafka client lib
     module Callbacks
       # Statistics callback handler
       # @note We decorate the statistics with our own decorator because some of the metrics from

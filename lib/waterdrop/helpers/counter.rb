@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  # Extra internal helper objects
   module Helpers
     # Atomic counter that we can safely increment and decrement without race conditions
     class Counter
