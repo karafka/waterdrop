@@ -1,7 +1,6 @@
 # WaterDrop changelog
 
 ## 2.6.12 (Unreleased)
-- [Fix] Use explicit file modules declarations to avoid potential loading errors.
 - [Change] Remove usage of concurrent ruby.
 
 ## 2.6.11 (2023-10-25)

@@ -10,17 +10,4 @@ RSpec.describe_current do
       it { expect(waterdrop.gem_root.to_path).to eq path }
     end
   end
-
-  describe 'modules files existence' do
-    let(:lib_location) { File.join(WaterDrop.gem_root, 'lib', 'waterdrop', '**/**') }
-    let(:candidates) { Dir[lib_location].to_a }
-
-    it do
-      failed = candidates.select do |path|
-        File.directory?(path) && !File.exist?("#{path}.rb")
-      end
-
-      expect(failed).to eq([])
-    end
-  end
 end
