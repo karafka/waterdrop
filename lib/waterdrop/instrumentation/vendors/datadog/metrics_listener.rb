@@ -2,7 +2,9 @@
 
 module WaterDrop
   module Instrumentation
+    # Namespace for vendor specific instrumentation
     module Vendors
+      # Datadog specific instrumentation
       module Datadog
         # Listener that can be used to subscribe to WaterDrop producer to receive stats via StatsD
         # and/or Datadog

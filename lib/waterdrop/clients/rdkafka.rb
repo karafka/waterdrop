@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module WaterDrop
+  # Namespace for all the clients that WaterDrop may use under the hood
   module Clients
     # Default Rdkafka client.
     # Since we use the ::Rdkafka::Producer under the hood, this is just a module that aligns with
