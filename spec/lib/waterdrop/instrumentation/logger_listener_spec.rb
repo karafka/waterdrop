@@ -243,4 +243,18 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include('INFO') }
     it { expect(logged_data[0]).to include('Committing transaction') }
   end
+
+  describe '#on_transaction_offset_stored' do
+    before do
+      details[:topic] = rand.to_s
+      details[:partition] = 0
+      details[:offset] = 100
+
+      listener.on_transaction_offset_stored(event)
+    end
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Storing offset') }
+  end
 end
