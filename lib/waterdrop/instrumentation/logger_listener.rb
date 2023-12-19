@@ -146,6 +146,15 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_transaction_offset_stored(event)
+        topic = event[:topic]
+        partition = event[:partition]
+        offset = event[:offset]
+
+        info(event, "Storing offset #{offset} for topic #{topic}/#{partition} in the transaction")
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_transaction_finished(event)
         info(event, 'Processing transaction')
       end

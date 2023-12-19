@@ -506,4 +506,30 @@ RSpec.describe_current do
       end
     end
   end
+
+  context 'when we try to store offset without a transaction' do
+    it 'expect to raise an error' do
+      expect { producer.transactional_store_offset(nil, 'topic', 0, 0) }
+        .to raise_error(WaterDrop::Errors::TransactionRequiredError)
+    end
+  end
+
+  # Full e2e integration of this is checked in Karafka as we do not operate on consumers here
+  context 'when trying to store offset inside a transaction' do
+    let(:consumer) { OpenStruct.new }
+
+    before do
+      allow(producer.client).to receive(:send_offsets_to_transaction)
+
+      producer.transaction do
+        producer.transactional_store_offset(consumer, 'topic', 0, 0)
+      end
+    end
+
+    it 'expect to delegate to client send_offsets_to_transaction with correct timeout' do
+      expect(producer.client)
+        .to have_received(:send_offsets_to_transaction)
+        .with(consumer, any_args, 30_000)
+    end
+  end
 end

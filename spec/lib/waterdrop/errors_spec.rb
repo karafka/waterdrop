@@ -48,4 +48,16 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  describe 'AbortTransaction' do
+    subject(:error) { described_class::AbortTransaction }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
+  describe 'TransactionRequiredError' do
+    subject(:error) { described_class::TransactionRequiredError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
 end

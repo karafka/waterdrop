@@ -91,6 +91,34 @@ module WaterDrop
         @transactional = config.kafka.to_h.key?(:'transactional.id')
       end
 
+      # Stores provided offset inside of the transaction. If used, will connect the stored offset
+      # with the producer transaction making sure that all succeed or fail together
+      #
+      # @param consumer [#consumer_group_metadata_pointer] any consumer from which we can obtain
+      #   the librdkafka consumer group metadata pointer
+      # @param topic [String] topic name
+      # @param partition [Integer] partition
+      # @param offset [Integer] offset we want to store
+      def transactional_store_offset(consumer, topic, partition, offset)
+        raise Errors::TransactionRequiredError unless @transaction_mutex.owned?
+
+        details = { topic: topic, partition: partition, offset: offset }
+
+        transactional_instrument(:offset_stored, details) do
+          tpl = Rdkafka::Consumer::TopicPartitionList.new
+          tpl.add_topic_and_partitions_with_offsets(topic, partition => offset)
+
+          with_transactional_error_handling(:store_offset) do
+            client.send_offsets_to_transaction(
+              consumer,
+              tpl,
+              # This setting is at the moment in seconds and we require ms
+              @config.max_wait_timeout * 1_000
+            )
+          end
+        end
+      end
+
       private
 
       # Runs provided code with a transaction wrapper if transactions are enabled.
@@ -105,9 +133,10 @@ module WaterDrop
       # Instruments the transactional operation with producer id
       #
       # @param key [Symbol] transaction operation key
+      # @param details [Hash] additional instrumentation details
       # @param block [Proc] block to run inside the instrumentation or nothing if not given
-      def transactional_instrument(key, &block)
-        @monitor.instrument("transaction.#{key}", producer_id: id, &block)
+      def transactional_instrument(key, details = EMPTY_HASH, &block)
+        @monitor.instrument("transaction.#{key}", details.merge(producer_id: id), &block)
       end
 
       # Error handling for transactional operations is a bit special. There are three types of
@@ -157,7 +186,7 @@ module WaterDrop
           # Always attempt to abort but if aborting fails with an abortable error, do not attempt
           # to abort from abort as this could create an infinite loop
           with_transactional_error_handling(:abort, allow_abortable: false) do
-            transactional_instrument(:aborted) { @client.abort_transaction }
+            transactional_instrument(:aborted) { client.abort_transaction }
           end
 
           raise
