@@ -32,7 +32,13 @@ module WaterDrop
     # Raised when there is an inline error during single message produce operations
     ProduceError = Class.new(BaseError)
 
+    # Raised when we attempt to perform operation that is only allowed inside of a transaction and
+    # there is no transaction around us
+    TransactionRequiredError = Class.new(BaseError)
+
     # Raise it within a transaction to abort it
+    # It does not have an `Error` postfix because technically it is not an error as it is used for
+    # graceful transaction aborting
     AbortTransaction = Class.new(BaseError)
 
     # Raised when during messages producing something bad happened inline

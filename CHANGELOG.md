@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.6.12 (Unreleased)
+- [Enhancement] Provide ability to commit offset during the transaction with a consumer provided.
 - [Change] Remove usage of concurrent ruby.
 
 ## 2.6.11 (2023-10-25)

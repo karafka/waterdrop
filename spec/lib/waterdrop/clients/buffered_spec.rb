@@ -179,5 +179,22 @@ RSpec.describe_current do
         expect(result).to eq(2)
       end
     end
+
+    context 'when we try to store offset without a transaction' do
+      it 'expect to raise an error' do
+        expect { producer.transactional_store_offset(nil, 'topic', 0, 0) }
+          .to raise_error(WaterDrop::Errors::TransactionRequiredError)
+      end
+    end
+
+    context 'when trying to store offset with transaction' do
+      it do
+        expect do
+          producer.transaction do
+            producer.transactional_store_offset(nil, 'topic', 0, 0)
+          end
+        end.not_to raise_error
+      end
+    end
   end
 end

@@ -16,7 +16,10 @@ module WaterDrop
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
     ].freeze
 
-    private_constant :SUPPORTED_FLOW_ERRORS
+    # Empty has to save on memory allocations
+    EMPTY_HASH = {}.freeze
+
+    private_constant :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH
 
     def_delegators :config, :middleware
 
