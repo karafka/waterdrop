@@ -109,7 +109,7 @@ module WaterDrop
           tpl.add_topic_and_partitions_with_offsets(topic, partition => offset)
 
           with_transactional_error_handling(:store_offset) do
-            @client.send_offsets_to_transaction(
+            client.send_offsets_to_transaction(
               consumer,
               tpl,
               # This setting is at the moment in seconds and we require ms
@@ -186,7 +186,7 @@ module WaterDrop
           # Always attempt to abort but if aborting fails with an abortable error, do not attempt
           # to abort from abort as this could create an infinite loop
           with_transactional_error_handling(:abort, allow_abortable: false) do
-            transactional_instrument(:aborted) { @client.abort_transaction }
+            transactional_instrument(:aborted) { client.abort_transaction }
           end
 
           raise

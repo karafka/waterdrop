@@ -58,6 +58,19 @@ module WaterDrop
         @transaction_active = false
       end
 
+      # Fakes storing the offset in a transactional fashion
+      #
+      # @param _consumer [#consumer_group_metadata_pointer] any consumer from which we can obtain
+      #   the librdkafka consumer group metadata pointer
+      # @param _topic [String] topic name
+      # @param _partition [Integer] partition
+      # @param _offset [Integer] offset we want to store
+      def send_offsets_to_transaction(_consumer, _topic, _partition, _offset)
+        return if @transaction_mutex.owned?
+
+        raise Errors::TransactionRequiredError
+      end
+
       # Aborts the transaction
       def abort_transaction
         @transaction_level -= 1
