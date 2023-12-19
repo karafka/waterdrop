@@ -62,11 +62,10 @@ module WaterDrop
       #
       # @param _consumer [#consumer_group_metadata_pointer] any consumer from which we can obtain
       #   the librdkafka consumer group metadata pointer
-      # @param _topic [String] topic name
-      # @param _partition [Integer] partition
-      # @param _offset [Integer] offset we want to store
-      def send_offsets_to_transaction(_consumer, _topic, _partition, _offset)
-        return if @transaction_mutex.owned?
+      # @param _tpl [Rdkafka::Consumer::TopicPartitionList] consumer tpl for offset storage
+      # @param _timeout [Integer] ms timeout
+      def send_offsets_to_transaction(_consumer, _tpl, _timeout)
+        return unless @transaction_level.zero?
 
         raise Errors::TransactionRequiredError
       end
