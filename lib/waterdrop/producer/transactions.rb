@@ -95,7 +95,7 @@ module WaterDrop
       # with the producer transaction making sure that all succeed or fail together
       #
       # @param consumer [#consumer_group_metadata_pointer] any consumer from which we can obtain
-      #   the librdkafka cosumer group metadata pointer
+      #   the librdkafka consumer group metadata pointer
       # @param topic [String] topic name
       # @param partition [Integer] partition
       # @param offset [Integer] offset we want to store
@@ -133,6 +133,7 @@ module WaterDrop
       # Instruments the transactional operation with producer id
       #
       # @param key [Symbol] transaction operation key
+      # @param details [Hash] additional instrumentation details
       # @param block [Proc] block to run inside the instrumentation or nothing if not given
       def transactional_instrument(key, details = EMPTY_HASH, &block)
         @monitor.instrument("transaction.#{key}", details.merge(producer_id: id), &block)
