@@ -223,16 +223,17 @@ RSpec.describe_current do
           producer.monitor.subscribe('error.occurred') do |event|
             next unless event[:type] == 'librdkafka.dispatch_error'
 
-            detected << event[:error].code
+            detected << event
           end
         end
 
         it 'expect the error notifications to publish those errors' do
-          handler = producer.produce_async(topic: 'na', payload: 'data')
+          handler = producer.produce_async(topic: 'na', payload: 'data', label: 'test')
           producer.purge
 
           handler.wait(raise_response_error: false)
-          expect(detected.first).to eq(:purge_queue)
+          expect(detected.first[:error].code).to eq(:purge_queue)
+          expect(detected.first[:label]).to eq('test')
         end
       end
     end

@@ -20,6 +20,12 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
     end
 
+    context 'when message is valid and with label' do
+      let(:message) { build(:valid_message, label: 'test') }
+
+      it { expect(delivery.label).to eq('test') }
+    end
+
     context 'when sending a tombstone message' do
       let(:message) { build(:valid_message, payload: nil) }
 
@@ -100,7 +106,7 @@ RSpec.describe_current do
         end
 
         begin
-          message = build(:valid_message)
+          message = build(:valid_message, label: 'test')
           5.times { producer.produce_async(message) }
         rescue WaterDrop::Errors::ProduceError => e
           errors << e
@@ -110,6 +116,7 @@ RSpec.describe_current do
       it { expect(errors).to be_empty }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
+      it { expect(occurred.first.payload[:label]).to eq(nil) }
     end
 
     context 'when inline error occurs in librdkafka and we go beyond max wait on queue full' do
@@ -132,7 +139,7 @@ RSpec.describe_current do
         end
 
         begin
-          message = build(:valid_message)
+          message = build(:valid_message, label: 'test')
           5.times { producer.produce_async(message) }
         rescue WaterDrop::Errors::ProduceError => e
           errors << e
@@ -142,6 +149,7 @@ RSpec.describe_current do
       it { expect(errors).not_to be_empty }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
+      it { expect(occurred.first.payload[:label]).to eq(nil) }
     end
   end
 
