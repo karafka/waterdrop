@@ -57,7 +57,8 @@ module WaterDrop
             offset: delivery_report.offset,
             partition: delivery_report.partition,
             topic: delivery_report.topic_name,
-            delivery_report: delivery_report
+            delivery_report: delivery_report,
+            label: delivery_report.label
           )
         end
 
@@ -71,7 +72,9 @@ module WaterDrop
             offset: delivery_report.offset,
             partition: delivery_report.partition,
             topic: delivery_report.topic_name,
-            delivery_report: delivery_report
+            delivery_report: delivery_report,
+            label: delivery_report.label,
+            type: 'librdkafka.dispatch_error'
           )
         end
 
@@ -86,6 +89,7 @@ module WaterDrop
             partition: delivery_report.partition,
             topic: delivery_report.topic_name,
             delivery_report: delivery_report,
+            label: delivery_report.label,
             type: 'librdkafka.dispatch_error'
           )
         end

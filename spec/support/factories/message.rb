@@ -7,12 +7,14 @@ FactoryBot.define do
     topic { rand.to_s }
     payload { rand.to_s }
     partition_key { nil }
+    label { nil }
 
     initialize_with do
       message = new
       message[:topic] = topic
       message[:payload] = payload
       message[:partition_key] = partition_key if partition_key
+      message[:label] = label if label
       message
     end
   end

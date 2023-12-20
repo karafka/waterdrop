@@ -20,6 +20,12 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
+    context 'when message is valid and with label' do
+      let(:message) { build(:valid_message, label: 'test') }
+
+      it { expect(delivery.label).to eq('test') }
+    end
+
     context 'when producing with topic as a symbol' do
       let(:message) do
         msg = build(:valid_message)
@@ -43,7 +49,7 @@ RSpec.describe_current do
           occurred << event
         end
 
-        message = build(:valid_message)
+        message = build(:valid_message, label: 'test')
         threads = Array.new(20) do
           Thread.new do
             producer.produce_sync(message)
@@ -60,6 +66,9 @@ RSpec.describe_current do
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_sync') }
+      # We expect this to be nil because the error was raised by the code that was attempting to
+      # produce, hence there is a chance of not even having a handler
+      it { expect(occurred.first.payload[:label]).to eq(nil) }
     end
   end
 
