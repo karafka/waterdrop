@@ -37,6 +37,7 @@ jobs:
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
+          bundler: 'latest'
 
       - name: Run Kafka with docker-compose
         run: |
@@ -61,7 +62,12 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          bundle install --jobs 4 --retry 3
+
+          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
+            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
+          else
+            bundle install --jobs 4 --retry 3
+          fi
 
       - name: Run all tests
         env:
