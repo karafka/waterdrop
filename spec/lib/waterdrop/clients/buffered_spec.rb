@@ -188,10 +188,12 @@ RSpec.describe_current do
     end
 
     context 'when trying to store offset with transaction' do
+      let(:consumer) { OpenStruct.new(consumer_group_metadata_pointer: nil) }
+
       it do
         expect do
           producer.transaction do
-            producer.transactional_store_offset(nil, 'topic', 0, 0)
+            producer.transactional_store_offset(consumer, 'topic', 0, 0)
           end
         end.not_to raise_error
       end

@@ -27,6 +27,14 @@ en:
       headers_invalid_key_type: all headers keys need to be of type String
       headers_invalid_value_type: all headers values need to be of type String
 
+    transactional_offset:
+      consumer_format: 'must respond to #consumer_group_metadata_pointer method'
+      topic_format: must be a non-empty string
+      missing: must be present
+      partition_format: must be an integer greater or equal to -1
+      offset_format: must be an integer greater or equal to -1
+      offset_metadata_format: must be string or nil
+
     test:
       missing: must be present
       nested.id_format: 'is invalid'
