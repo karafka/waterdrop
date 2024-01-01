@@ -4,6 +4,11 @@ module WaterDrop
   class Producer
     # Transactions related producer functionalities
     module Transactions
+      # Contract to validate that input for transactional offset storage is correct
+      CONTRACT = Contracts::TransactionalOffset.new
+
+      private_constant :CONTRACT
+
       # Creates a transaction.
       #
       # Karafka transactions work in a similar manner to SQL db transactions though there are some
@@ -99,14 +104,27 @@ module WaterDrop
       # @param topic [String] topic name
       # @param partition [Integer] partition
       # @param offset [Integer] offset we want to store
-      def transactional_store_offset(consumer, topic, partition, offset)
+      # @param offset_metadata [String] offset metadata or nil if none
+      def transactional_store_offset(consumer, topic, partition, offset, offset_metadata = nil)
         raise Errors::TransactionRequiredError unless @transaction_mutex.owned?
+
+        CONTRACT.validate!(
+          {
+            consumer: consumer,
+            topic: topic,
+            partition: partition,
+            offset: offset,
+            offset_metadata: offset_metadata
+          },
+          Errors::TransactionalOffsetInvalidError
+        )
 
         details = { topic: topic, partition: partition, offset: offset }
 
         transactional_instrument(:offset_stored, details) do
           tpl = Rdkafka::Consumer::TopicPartitionList.new
-          tpl.add_topic_and_partitions_with_offsets(topic, partition => offset)
+          partition = Rdkafka::Consumer::Partition.new(partition, offset, 0, offset_metadata)
+          tpl.add_topic_and_partitions_with_offsets(topic, [partition])
 
           with_transactional_error_handling(:store_offset) do
             client.send_offsets_to_transaction(
