@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.6.12 (Unreleased)
+## 2.6.12 (2024-01-03)
 - [Enhancement] Provide ability to label message dispatches for increased observability.
 - [Enhancement] Provide ability to commit offset during the transaction with a consumer provided.
 - [Change] Change transactional message purged error type from to `message.error` to `librdkafka.dispatch_error` to align with the non-transactional error type.
