@@ -7,13 +7,12 @@ RSpec.describe_current do
   let(:topic) { 'test_topic' }
   let(:partition) { 0 }
   let(:offset) { 10 }
+  let(:message) { OpenStruct.new(topic: topic, partition: partition, offset: offset) }
   let(:offset_metadata) { 'metadata' }
   let(:input) do
     {
       consumer: consumer,
-      topic: topic,
-      partition: partition,
-      offset: offset,
+      message: message,
       offset_metadata: offset_metadata
     }
   end
@@ -28,43 +27,9 @@ RSpec.describe_current do
     it { expect(contract_result).not_to be_success }
   end
 
-  context 'when topic is invalid' do
-    context 'when topic is empty' do
-      let(:topic) { '' }
-
-      it { expect(contract_result).not_to be_success }
-    end
-
-    context 'when topic is not a string' do
-      let(:topic) { 123 }
-
-      it { expect(contract_result).not_to be_success }
-    end
-  end
-
-  context 'when partition is invalid' do
-    context 'when partition is negative' do
-      let(:partition) { -1 }
-
-      it { expect(contract_result).not_to be_success }
-    end
-
-    context 'when partition is not an integer' do
-      let(:partition) { 'not_an_integer' }
-
-      it { expect(contract_result).not_to be_success }
-    end
-  end
-
-  context 'when offset is invalid' do
-    context 'when offset is negative' do
-      let(:offset) { -10 }
-
-      it { expect(contract_result).not_to be_success }
-    end
-
-    context 'when offset is not an integer' do
-      let(:offset) { 'not_an_integer' }
+  context 'when message is invalid' do
+    context 'when message is a string' do
+      let(:message) { 'test' }
 
       it { expect(contract_result).not_to be_success }
     end

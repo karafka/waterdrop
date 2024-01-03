@@ -244,17 +244,19 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include('Committing transaction') }
   end
 
-  describe '#on_transaction_offset_stored' do
+  describe '#on_transaction_marked_as_consumed' do
     before do
-      details[:topic] = rand.to_s
-      details[:partition] = 0
-      details[:offset] = 100
+      details[:message] = OpenStruct.new(
+        topic: rand.to_s,
+        partition: 0,
+        offset: 100
+      )
 
-      listener.on_transaction_offset_stored(event)
+      listener.on_transaction_marked_as_consumed(event)
     end
 
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
-    it { expect(logged_data[0]).to include('Storing offset') }
+    it { expect(logged_data[0]).to include('Marking message') }
   end
 end

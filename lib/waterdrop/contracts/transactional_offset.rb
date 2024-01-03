@@ -14,9 +14,7 @@ module WaterDrop
       end
 
       required(:consumer) { |val| val.respond_to?(:consumer_group_metadata_pointer) }
-      required(:topic) { |val| val.is_a?(String) && !val.empty? }
-      required(:partition) { |val| val.is_a?(Integer) && val >= 0 }
-      required(:offset) { |val| val.is_a?(Integer) && val >= 0 }
+      required(:message) { |val| val.respond_to?(:topic) && val.respond_to?(:partition) }
       required(:offset_metadata) { |val| val.is_a?(String) || val.nil? }
     end
   end
