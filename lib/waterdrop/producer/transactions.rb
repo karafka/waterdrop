@@ -96,35 +96,37 @@ module WaterDrop
         @transactional = config.kafka.to_h.key?(:'transactional.id')
       end
 
-      # Stores provided offset inside of the transaction. If used, will connect the stored offset
-      # with the producer transaction making sure that all succeed or fail together
+      # Marks given message as consumed inside of a transaction.
       #
       # @param consumer [#consumer_group_metadata_pointer] any consumer from which we can obtain
       #   the librdkafka consumer group metadata pointer
-      # @param topic [String] topic name
-      # @param partition [Integer] partition
-      # @param offset [Integer] offset we want to store
+      # @param message [Karafka::Messages::Message] karafka message
       # @param offset_metadata [String] offset metadata or nil if none
-      def transactional_store_offset(consumer, topic, partition, offset, offset_metadata = nil)
+      def transaction_mark_as_consumed(consumer, message, offset_metadata = nil)
         raise Errors::TransactionRequiredError unless @transaction_mutex.owned?
 
         CONTRACT.validate!(
           {
             consumer: consumer,
-            topic: topic,
-            partition: partition,
-            offset: offset,
+            message: message,
             offset_metadata: offset_metadata
           },
           Errors::TransactionalOffsetInvalidError
         )
 
-        details = { topic: topic, partition: partition, offset: offset }
+        details = { message: message, offset_metadata: offset_metadata }
 
-        transactional_instrument(:offset_stored, details) do
+        transactional_instrument(:marked_as_consumed, details) do
           tpl = Rdkafka::Consumer::TopicPartitionList.new
-          partition = Rdkafka::Consumer::Partition.new(partition, offset, 0, offset_metadata)
-          tpl.add_topic_and_partitions_with_offsets(topic, [partition])
+          partition = Rdkafka::Consumer::Partition.new(
+            message.partition,
+            # +1 because this is next offset from which we will start processing from
+            message.offset + 1,
+            0,
+            offset_metadata
+          )
+
+          tpl.add_topic_and_partitions_with_offsets(message.topic, [partition])
 
           with_transactional_error_handling(:store_offset) do
             client.send_offsets_to_transaction(

@@ -29,10 +29,8 @@ en:
 
     transactional_offset:
       consumer_format: 'must respond to #consumer_group_metadata_pointer method'
-      topic_format: must be a non-empty string
+      message_format: 'must respond to #topic, #partition and #offset'
       missing: must be present
-      partition_format: must be an integer greater or equal to -1
-      offset_format: must be an integer greater or equal to -1
       offset_metadata_format: must be string or nil
 
     test:

@@ -181,19 +181,22 @@ RSpec.describe_current do
     end
 
     context 'when we try to store offset without a transaction' do
+      let(:message) { OpenStruct.new(topic: rand.to_s, partition: 0, offset: 10) }
+
       it 'expect to raise an error' do
-        expect { producer.transactional_store_offset(nil, 'topic', 0, 0) }
+        expect { producer.transaction_mark_as_consumed(nil, message) }
           .to raise_error(WaterDrop::Errors::TransactionRequiredError)
       end
     end
 
     context 'when trying to store offset with transaction' do
       let(:consumer) { OpenStruct.new(consumer_group_metadata_pointer: nil) }
+      let(:message) { OpenStruct.new(topic: rand.to_s, partition: 0, offset: 10) }
 
       it do
         expect do
           producer.transaction do
-            producer.transactional_store_offset(consumer, 'topic', 0, 0)
+            producer.transaction_mark_as_consumed(consumer, message)
           end
         end.not_to raise_error
       end

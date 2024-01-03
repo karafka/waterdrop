@@ -146,12 +146,17 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
-      def on_transaction_offset_stored(event)
-        topic = event[:topic]
-        partition = event[:partition]
-        offset = event[:offset]
+      def on_transaction_marked_as_consumed(event)
+        message = event[:message]
+        topic = message.topic
+        partition = message.partition
+        offset = message.offset
+        loc = "#{topic}/#{partition}"
 
-        info(event, "Storing offset #{offset} for topic #{topic}/#{partition} in the transaction")
+        info(
+          event,
+          "Marking message with offset #{offset} for topic #{loc} as consumed in a transaction"
+        )
       end
 
       # @param event [Dry::Events::Event] event that happened with the details

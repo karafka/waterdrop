@@ -22,7 +22,7 @@ module WaterDrop
         transaction.started
         transaction.committed
         transaction.aborted
-        transaction.offset_stored
+        transaction.marked_as_consumed
         transaction.finished
 
         buffer.flushed_async
