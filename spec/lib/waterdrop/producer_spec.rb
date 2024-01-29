@@ -97,6 +97,30 @@ RSpec.describe_current do
     end
   end
 
+  describe '#partition_count' do
+    subject(:producer) do
+      described_class.new do |config|
+        config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+      end
+    end
+
+    let(:count) { producer.partition_count(topic) }
+
+    context 'when topic does not exist' do
+      let(:topic) { SecureRandom.uuid }
+
+      it { expect { count }.to raise_error(Rdkafka::RdkafkaError, /unknown_topic_or_part/) }
+    end
+
+    context 'when topic exists' do
+      let(:topic) { SecureRandom.uuid }
+
+      before { producer.produce_sync(topic: topic, payload: '') }
+
+      it { expect(count).to eq(1) }
+    end
+  end
+
   describe '#close' do
     before { allow(producer).to receive(:client).and_call_original }
 
