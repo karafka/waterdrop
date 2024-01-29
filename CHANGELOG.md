@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.6.13 (Unreleased)
+- [Enhancement] Expose `#partition_count` for building custom partitioners that need to be aware of number of partitions on a given topic.
+
 ## 2.6.12 (2024-01-03)
 - [Enhancement] Provide ability to label message dispatches for increased observability.
 - [Enhancement] Provide ability to commit offset during the transaction with a consumer provided.
