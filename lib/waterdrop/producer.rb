@@ -125,9 +125,10 @@ module WaterDrop
     # Fetches and caches the partition count of a topic
     #
     # @param topic [String] topic for which we want to get the number of partitions
-    # @return [Integer] number of partitions of the requested topic
+    # @return [Integer] number of partitions of the requested topic or -1 if number could not be
+    #   retrieved.
     #
-    # @note It uses the underlying `rdkafka-ruby` partition count cache.
+    # @note It uses the underlying `rdkafka-ruby` partition count fetch and cache.
     def partition_count(topic)
       client.partition_count(topic.to_s)
     end
