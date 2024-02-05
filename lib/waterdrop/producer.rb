@@ -65,6 +65,7 @@ module WaterDrop
       @id = @config.id
       @monitor = @config.monitor
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
+      @status.setup(@monitor, @id)
       @status.configured!
     end
 
@@ -155,10 +156,7 @@ module WaterDrop
       @operating_mutex.synchronize do
         return unless @status.active?
 
-        @monitor.instrument(
-          'producer.closed',
-          producer_id: id
-        ) do
+        @status.closed! do
           @status.closing!
 
           # No need for auto-gc if everything got closed by us
@@ -208,8 +206,6 @@ module WaterDrop
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
           ::Karafka::Core::Instrumentation.error_callbacks.delete(@id)
-
-          @status.closed!
         end
       end
     end

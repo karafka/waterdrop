@@ -21,6 +21,17 @@ module WaterDrop
         @current = LIFECYCLE.first
       end
 
+      # Configures all the needed references. We need this since we publish events about the
+      # producer lifecycle.
+      #
+      # @param monitor []
+      # @param producer_id [String] id of the producer. We pass it to be consistent with the events
+      #   payload we already have.
+      def setup(monitor, producer_id)
+        @monitor = monitor
+        @producer_id = producer_id
+      end
+
       # @return [Boolean] true if producer is in a active state. Active means, that we can start
       #   sending messages. Actives states are connected (connection established) or configured,
       #   which means, that producer is configured, but connection with Kafka is
@@ -43,7 +54,15 @@ module WaterDrop
 
           # Sets a given state as current
           def #{state}!
-            @current = :#{state}
+            # Monitor is available only post-configuration. Prior events will not be published
+            if @monitor
+              @monitor.instrument("producer.#{state}", producer_id: @producer_id) do
+                yield if block_given?
+                @current = :#{state}
+              end
+            else
+              @current = :#{state}
+            end
           end
         RUBY
       end

@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.6.14 (Unreleased)
+- [Enhancement] Expose all producer lifecycle events.
+
 ## 2.6.13 (2024-01-29)
 - [Enhancement] Expose `#partition_count` for building custom partitioners that need to be aware of number of partitions on a given topic.
 
