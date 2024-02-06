@@ -201,6 +201,14 @@ RSpec.describe_current do
     it { expect(logged_data[1]).to eq(nil) }
   end
 
+  describe '#on_producer_closing' do
+    before { listener.on_producer_closing(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Closing producer') }
+  end
+
   describe '#on_producer_closed' do
     before { listener.on_producer_closed(event) }
 

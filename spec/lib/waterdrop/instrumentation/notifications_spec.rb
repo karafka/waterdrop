@@ -52,4 +52,84 @@ RSpec.describe_current do
       it { expect { subscription }.not_to raise_error }
     end
   end
+
+  describe 'producer lifecycle events flow' do
+    subject(:status) { producer.status }
+
+    let(:producer) { WaterDrop::Producer.new }
+    let(:events) { [] }
+    let(:events_names) do
+      %w[
+        producer.connected
+        producer.closing
+        producer.closed
+      ]
+    end
+
+    after { producer.close }
+
+    context 'when producer is initialized' do
+      it { expect(status.to_s).to eq('initial') }
+      it { expect(events).to be_empty }
+    end
+
+    context 'when producer is configured' do
+      before do
+        producer.setup {}
+
+        events_names.each do |event_name|
+          producer.monitor.subscribe(event_name) do |event|
+            events << event
+          end
+        end
+      end
+
+      it { expect(status.to_s).to eq('configured') }
+      it { expect(events).to be_empty }
+    end
+
+    context 'when producer is connected' do
+      before do
+        producer.setup {}
+
+        events_names.each do |event_name|
+          producer.monitor.subscribe(event_name) do |event|
+            events << event
+          end
+        end
+
+        producer.client
+      end
+
+      it { expect(status.to_s).to eq('connected') }
+      it { expect(events.size).to eq(1) }
+      it { expect(events.last.id).to eq('producer.connected') }
+      it { expect(events.last.payload.key?(:producer_id)).to eq(true) }
+    end
+
+    context 'when producer is closed' do
+      before do
+        producer.setup {}
+
+        events_names.each do |event_name|
+          producer.monitor.subscribe(event_name) do |event|
+            events << event
+          end
+        end
+
+        producer.client
+        producer.close
+      end
+
+      it { expect(status.to_s).to eq('closed') }
+      it { expect(events.size).to eq(3) }
+      it { expect(events.first.id).to eq('producer.connected') }
+      it { expect(events.first.payload.key?(:producer_id)).to eq(true) }
+      it { expect(events[1].id).to eq('producer.closing') }
+      it { expect(events[1].payload.key?(:producer_id)).to eq(true) }
+      it { expect(events.last.id).to eq('producer.closed') }
+      it { expect(events.last.payload.key?(:producer_id)).to eq(true) }
+      it { expect(events.last.payload.key?(:time)).to eq(true) }
+    end
+  end
 end
