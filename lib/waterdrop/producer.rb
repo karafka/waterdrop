@@ -117,6 +117,7 @@ module WaterDrop
         )
 
         @status.connected!
+        @monitor.instrument('producer.connected', producer_id: id)
       end
 
       @client
@@ -160,6 +161,7 @@ module WaterDrop
           producer_id: id
         ) do
           @status.closing!
+          @monitor.instrument('producer.closing', producer_id: id)
 
           # No need for auto-gc if everything got closed by us
           # This should be used only in case a producer was not closed properly and forgotten
