@@ -66,6 +66,8 @@ RSpec.describe_current do
       ]
     end
 
+    after { producer.close }
+
     context 'when producer is initialized' do
       it { expect(status.to_s).to eq('initial') }
       it { expect(events).to be_empty }
