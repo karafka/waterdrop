@@ -118,6 +118,13 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_producer_closing(event)
+        info(event, 'Closing producer')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      # @note While this says "Closing producer", it produces a nice message with time taken:
+      #   "Closing producer took 12 ms" indicating it happened in the past.
       def on_producer_closed(event)
         info(event, 'Closing producer')
       end
@@ -180,7 +187,11 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       # @param log_message [String] message we want to publish
       def info(event, log_message)
-        @logger.info("[#{event[:producer_id]}] #{log_message} took #{event[:time]} ms")
+        if event.payload.key?(:time)
+          @logger.info("[#{event[:producer_id]}] #{log_message} took #{event[:time]} ms")
+        else
+          @logger.info("[#{event[:producer_id]}] #{log_message}")
+        end
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
