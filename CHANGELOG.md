@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## .6.15 (Unreleased)
+- [Enhancement] Introduce `instrument_on_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
+
 ## 2.6.14 (2024-02-06)
 - [Enhancement] Instrument `producer.connected` and `producer.closing` lifecycle events.
 
