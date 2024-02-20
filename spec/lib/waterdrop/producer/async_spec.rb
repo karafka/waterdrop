@@ -119,6 +119,32 @@ RSpec.describe_current do
       it { expect(occurred.first.payload[:label]).to eq(nil) }
     end
 
+    context 'when inline error occurs and we retry on queue full but instrumentation off' do
+      let(:errors) { [] }
+      let(:occurred) { [] }
+      let(:error) { errors.first }
+      let(:producer) { build(:slow_producer, wait_on_queue_full: true) }
+
+      before do
+        producer.config.wait_on_queue_full = true
+        producer.config.instrument_on_wait_queue_full = false
+
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
+        begin
+          message = build(:valid_message, label: 'test')
+          5.times { producer.produce_async(message) }
+        rescue WaterDrop::Errors::ProduceError => e
+          errors << e
+        end
+      end
+
+      it { expect(errors).to be_empty }
+      it { expect(occurred).to be_empty }
+    end
+
     context 'when inline error occurs in librdkafka and we go beyond max wait on queue full' do
       let(:errors) { [] }
       let(:occurred) { [] }
