@@ -64,6 +64,8 @@ module WaterDrop
     # option [Numeric] how many seconds should we wait with the backoff on queue having space for
     # more messages before re-raising the error.
     setting :wait_timeout_on_queue_full, default: 10
+    # option [Boolean] should we instrument non-critical, retryable queue full errors
+    setting :instrument_on_wait_queue_full, default: true
     # option [Numeric] How long to wait before retrying a retryable transaction related error
     setting :wait_backoff_on_transaction_command, default: 0.5
     # option [Numeric] How many times to retry a retryable transaction related error before

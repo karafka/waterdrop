@@ -297,18 +297,24 @@ module WaterDrop
       begin
         raise Errors::ProduceError, e.inspect
       rescue Errors::ProduceError => e
-        # We want to instrument on this event even when we restart it.
-        # The reason is simple: instrumentation and visibility.
-        # We can recover from this, but despite that we should be able to instrument this.
-        # If this type of event happens too often, it may indicate that the buffer settings are not
-        # well configured.
-        @monitor.instrument(
-          'error.occurred',
-          producer_id: id,
-          message: message,
-          error: e,
-          type: "message.#{label}"
-        )
+        # Users can configure this because in pipe-like flows with high throughput, queue full with
+        # retry may be used as a throttling system that will backoff and wait.
+        # In such scenarios this error notification can be removed and until queue full is
+        # retryable, it will not be raised as an error.
+        if @config.instrument_on_wait_queue_full
+          # We want to instrument on this event even when we restart it.
+          # The reason is simple: instrumentation and visibility.
+          # We can recover from this, but despite that we should be able to instrument this.
+          # If this type of event happens too often, it may indicate that the buffer settings are
+          # not well configured.
+          @monitor.instrument(
+            'error.occurred',
+            producer_id: id,
+            message: message,
+            error: e,
+            type: "message.#{label}"
+          )
+        end
 
         # We do not poll the producer because polling happens in a background thread
         # It also should not be a frequent case (queue full), hence it's ok to just throttle.
