@@ -2,7 +2,7 @@
 
 ## 2.7.0 (Unreleased)
 
-This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
+This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
 - **[Breaking]** Change default timeouts so final delivery `message.timeout.ms` is less that `max_wait_time` so we do not end up with not final verdict.
 - **[Breaking]** Update all the time related configuration settings to be in `ms` and not mixed.
