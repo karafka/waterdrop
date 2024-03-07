@@ -36,6 +36,16 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
+    context 'when producing sync to an unreachable cluster' do
+      let(:message) { build(:valid_message) }
+      let(:producer) { build(:unreachable_producer) }
+
+      it 'expect to raise final error' do
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError, /msg_timed_out/)
+      end
+    end
+
     context 'when inline error occurs in librdkafka' do
       let(:errors) { [] }
       let(:error) { errors.first }

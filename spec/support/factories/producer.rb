@@ -6,9 +6,9 @@ FactoryBot.define do
 
     deliver { true }
     logger { Logger.new('/dev/null', level: Logger::DEBUG) }
-    max_wait_timeout { 30 }
+    max_wait_timeout { 30_000 }
     wait_on_queue_full { false }
-    wait_timeout_on_queue_full { 1.0 }
+    wait_timeout_on_queue_full { 1_000 }
 
     kafka do
       {
@@ -46,13 +46,14 @@ FactoryBot.define do
         'bootstrap.servers': 'localhost:9092',
         'request.required.acks': 'all',
         'transactional.id': transactional_id,
-        'transaction.timeout.ms': transaction_timeout_ms
+        'transaction.timeout.ms': transaction_timeout_ms,
+        'message.timeout.ms': transaction_timeout_ms
       }
     end
   end
 
   factory :limited_producer, parent: :producer do
-    wait_timeout_on_queue_full { 15 }
+    wait_timeout_on_queue_full { 15_000 }
 
     kafka do
       {
@@ -66,7 +67,7 @@ FactoryBot.define do
   end
 
   factory :slow_producer, parent: :producer do
-    wait_timeout_on_queue_full { 2 }
+    wait_timeout_on_queue_full { 2_000 }
 
     kafka do
       {
@@ -85,6 +86,23 @@ FactoryBot.define do
         'statistics.interval.ms': 100,
         'request.required.acks': 'all',
         'enable.idempotence': true
+      }
+    end
+  end
+
+  factory :unreachable_producer, parent: :producer do
+    max_wait_timeout { 2_000 }
+
+    transient do
+      message_timeout_ms { 1_000 }
+    end
+
+    kafka do
+      {
+        'bootstrap.servers': 'localhost:9093',
+        'request.required.acks': 'all',
+        'transaction.timeout.ms': message_timeout_ms,
+        'message.timeout.ms': message_timeout_ms
       }
     end
   end

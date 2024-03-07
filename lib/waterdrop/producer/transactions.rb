@@ -132,8 +132,7 @@ module WaterDrop
             client.send_offsets_to_transaction(
               consumer,
               tpl,
-              # This setting is at the moment in seconds and we require ms
-              @config.max_wait_timeout * 1_000
+              @config.max_wait_timeout
             )
           end
         end
@@ -197,7 +196,7 @@ module WaterDrop
 
         if do_retry
           # Backoff more and more before retries
-          sleep(config.wait_backoff_on_transaction_command * attempt)
+          sleep((config.wait_backoff_on_transaction_command / 1_000.0) * attempt)
 
           retry
         end
