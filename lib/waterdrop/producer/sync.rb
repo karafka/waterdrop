@@ -52,8 +52,8 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports
       #
       # @raise [Rdkafka::RdkafkaError] When adding the messages to rdkafka's queue failed
-      # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and the
-      #   some handles are still pending
+      # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and some
+      #   handles are still pending
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
       def produce_many_sync(messages)

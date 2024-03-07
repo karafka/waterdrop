@@ -12,7 +12,12 @@ module WaterDrop
       'client.id': 'waterdrop',
       # emit librdkafka statistics every five seconds. This is used in instrumentation.
       # When disabled, part of metrics will not be published and available.
-      'statistics.interval.ms': 5_000
+      'statistics.interval.ms': 5_000,
+      # We set it to a value that is lower than `max_wait_time` to have a final verdict upon sync
+      # delivery
+      'message.timeout.ms': 55_000,
+      # Must be less or equal to `message.timeout.ms` defaults
+      'transaction.timeout.ms': 45_000
     }.freeze
 
     private_constant :KAFKA_DEFAULTS
@@ -44,12 +49,12 @@ module WaterDrop
     # option [Integer] max payload size allowed for delivery to Kafka
     setting :max_payload_size, default: 1_000_012
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
-    #   longer than the timeout.
-    setting :max_wait_timeout, default: 5
+    #   longer than the timeout ms.
+    setting :max_wait_timeout, default: 60_000
     # option [Numeric] how long should we wait between re-checks on the availability of the
     #   delivery report. In a really robust systems, this describes the min-delivery time
     #   for a single sync message when produced in isolation
-    setting :wait_timeout, default: 0.005 # 5 milliseconds
+    setting :wait_timeout, default: 5 # 5 milliseconds
     # option [Boolean] should we upon detecting full librdkafka queue backoff and retry or should
     #   we raise an exception.
     #   When this is set to `true`, upon full queue, we won't raise an error. There will be error
@@ -60,14 +65,14 @@ module WaterDrop
     # option [Integer] how long (in seconds) should we backoff before a retry when queue is full
     #   The retry will happen with the same message and backoff should give us some time to
     #   dispatch previously buffered messages.
-    setting :wait_backoff_on_queue_full, default: 0.1
-    # option [Numeric] how many seconds should we wait with the backoff on queue having space for
+    setting :wait_backoff_on_queue_full, default: 100
+    # option [Numeric] how many ms should we wait with the backoff on queue having space for
     # more messages before re-raising the error.
-    setting :wait_timeout_on_queue_full, default: 10
+    setting :wait_timeout_on_queue_full, default: 10_000
     # option [Boolean] should we instrument non-critical, retryable queue full errors
     setting :instrument_on_wait_queue_full, default: true
     # option [Numeric] How long to wait before retrying a retryable transaction related error
-    setting :wait_backoff_on_transaction_command, default: 0.5
+    setting :wait_backoff_on_transaction_command, default: 500
     # option [Numeric] How many times to retry a retryable transaction related error before
     #   giving up
     setting :max_attempts_on_transaction_command, default: 5

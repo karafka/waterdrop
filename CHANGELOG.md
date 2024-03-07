@@ -1,7 +1,82 @@
 # WaterDrop changelog
 
-## 2.6.15 (Unreleased)
+## 2.7.0 (Unreleased)
+
+This release contains a **BREAKING** change. Make sure to read and apply upgrade notes.
+
+- **[Breaking]** Change default timeouts so final delivery `message.timeout.ms` is less that `max_wait_time` so we do not end up with not final verdict.
+- **[Breaking]** Update all the time related configuration settings to be in `ms` and not mixed.
 - [Enhancement] Introduce `instrument_on_wait_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
+
+### Upgrade Notes
+
+**PLEASE MAKE SURE TO READ AND APPLY THEM!**
+
+#### Time Settings Format Alignment
+
+**All** time-related values are now configured in milliseconds instead of some being in seconds and some in milliseconds.
+
+The values that were changed from seconds to milliseconds are:
+
+- `max_wait_timeout`
+- `wait_timeout`
+- `wait_backoff_on_queue_full`
+- `wait_timeout_on_queue_full`
+- `wait_backoff_on_transaction_command, default`
+
+If you have configured any of those yourself, please replace the seconds representation with milliseconds:
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  config.deliver = true
+
+  # Replace this:
+  config.wait_timeout = 30
+
+  # With
+  config.wait_timeout = 30_000
+  # ...
+end
+```
+
+#### Defaults Alignment
+
+In this release, we've updated our default settings to address a crucial issue: previous defaults could lead to inconclusive outcomes in synchronous operations due to wait timeout errors. Users often mistakenly believed that a message dispatch was halted because of these errors when, in fact, the timeout was related to awaiting the final dispatch verdict, not the dispatch action itself.
+
+The new defaults in WaterDrop 2.7.0 eliminate this confusion by ensuring synchronous operation results are always transparent and conclusive. This change aims to provide a straightforward understanding of wait timeout errors, reinforcing that they reflect the wait state, not the dispatch success.
+
+Below, you can find a table with what has changed, the new defaults, and the current ones in case you want to retain the previous behavior:
+
+<table>
+  <thead>
+    <tr>
+      <th>Config</th>
+      <th>Previous Default</th>
+      <th>New Default</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>root <code>max_wait_timeout</code></td>
+      <td>5000 ms (5 seconds)</td>
+      <td>60000 ms (60 seconds)</td>
+    </tr>
+    <tr>
+      <td>kafka <code>message.timeout.ms</code></td>
+      <td>300000 ms (5 minutes)</td>
+      <td>55000 ms (55 seconds)</td>
+    </tr>
+    <tr>
+      <td>kafka <code>transaction.timeout.ms</code></td>
+      <td>60000 ms (1 minute)</td>
+      <td>45000 ms (45 seconds)</td>
+    </tr>
+  </tbody>
+</table>
+
+This alignment ensures that when using sync operations or invoking `#wait`, any exception you get should give you a conclusive and final delivery verdict.
 
 ## 2.6.14 (2024-02-06)
 - [Enhancement] Instrument `producer.connected` and `producer.closing` lifecycle events.

@@ -188,8 +188,7 @@ module WaterDrop
             # The linger.ms time will be ignored for the duration of the call,
             # queued messages will be sent to the broker as soon as possible.
             begin
-              # `max_wait_timeout` is in seconds at the moment
-              @client.flush(@config.max_wait_timeout * 1_000) unless @client.closed?
+              @client.flush(@config.max_wait_timeout) unless @client.closed?
             # We can safely ignore timeouts here because any left outstanding requests
             # will anyhow force wait on close if not forced.
             # If forced, we will purge the queue and just close
@@ -250,8 +249,9 @@ module WaterDrop
     # @param handler [Rdkafka::Producer::DeliveryHandle]
     def wait(handler)
       handler.wait(
-        max_wait_timeout: @config.max_wait_timeout,
-        wait_timeout: @config.wait_timeout
+        # rdkafka max_wait_timeout is in seconds and we use ms
+        max_wait_timeout: @config.max_wait_timeout / 1_000.0,
+        wait_timeout: @config.wait_timeout / 1_000.0
       )
     end
 
@@ -286,7 +286,7 @@ module WaterDrop
       # If we're running for longer than the timeout, we need to re-raise the queue full.
       # This will prevent from situation where cluster is down forever and we just retry and retry
       # in an infinite loop, effectively hanging the processing
-      raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full * 1_000
+      raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
 
       label = caller_locations(2, 1)[0].label.split(' ').last
 
@@ -318,7 +318,7 @@ module WaterDrop
 
         # We do not poll the producer because polling happens in a background thread
         # It also should not be a frequent case (queue full), hence it's ok to just throttle.
-        sleep @config.wait_backoff_on_queue_full
+        sleep @config.wait_backoff_on_queue_full / 1_000.0
       end
 
       @operations_in_progress.decrement
