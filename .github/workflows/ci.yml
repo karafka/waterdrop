@@ -22,7 +22,6 @@ jobs:
           - '3.2'
           - '3.1'
           - '3.0'
-          - '2.7'
         include:
           - ruby: '3.3'
             coverage: 'true'
@@ -49,25 +48,15 @@ jobs:
 
       - name: Install latest bundler
         run: |
-          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
-            gem install bundler -v 2.4.22 --no-document
-            gem update --system 3.4.22 --no-document
-          else
-            gem install bundler --no-document
-            gem update --system --no-document
-          fi
+          gem install bundler --no-document
+          gem update --system --no-document
 
           bundle config set without 'tools benchmarks docs'
 
       - name: Bundle install
         run: |
           bundle config set without development
-
-          if [[ "$(ruby -v | awk '{print $2}')" == 2.7.8* ]]; then
-            BUNDLER_VERSION=2.4.22 bundle install --jobs 4 --retry 3
-          else
-            bundle install --jobs 4 --retry 3
-          fi
+          bundle install --jobs 4 --retry 3
 
       - name: Run all tests
         env:
