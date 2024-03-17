@@ -549,4 +549,23 @@ RSpec.describe_current do
       end
     end
   end
+
+  context 'when creating transactional producer with default config' do
+    let(:producer) do
+      WaterDrop::Producer.new do |config|
+        config.deliver = true
+        config.kafka = {
+          'bootstrap.servers': 'localhost:9092',
+          'request.required.acks': 1,
+          'transactional.id': SecureRandom.uuid,
+          acks: 'all'
+        }
+      end
+    end
+
+    it 'expect to be able to do so and to send a message' do
+      expect { producer.produce_async(topic: 'test', payload: 'a') }
+        .not_to raise_error
+    end
+  end
 end
