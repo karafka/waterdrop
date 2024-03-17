@@ -250,8 +250,7 @@ module WaterDrop
     def wait(handler)
       handler.wait(
         # rdkafka max_wait_timeout is in seconds and we use ms
-        max_wait_timeout: @config.max_wait_timeout / 1_000.0,
-        wait_timeout: @config.wait_timeout / 1_000.0
+        max_wait_timeout: @config.max_wait_timeout / 1_000.0
       )
     end
 

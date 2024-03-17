@@ -51,10 +51,6 @@ module WaterDrop
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
     #   longer than the timeout ms.
     setting :max_wait_timeout, default: 60_000
-    # option [Numeric] how long should we wait between re-checks on the availability of the
-    #   delivery report. In a really robust systems, this describes the min-delivery time
-    #   for a single sync message when produced in isolation
-    setting :wait_timeout, default: 5 # 5 milliseconds
     # option [Boolean] should we upon detecting full librdkafka queue backoff and retry or should
     #   we raise an exception.
     #   When this is set to `true`, upon full queue, we won't raise an error. There will be error
