@@ -17,7 +17,6 @@ module WaterDrop
       required(:deliver) { |val| [true, false].include?(val) }
       required(:max_payload_size) { |val| val.is_a?(Integer) && val >= 1 }
       required(:max_wait_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
-      required(:wait_timeout) { |val| val.is_a?(Numeric) && val.positive? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
       required(:wait_on_queue_full) { |val| [true, false].include?(val) }
       required(:wait_backoff_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
