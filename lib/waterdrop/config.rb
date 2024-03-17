@@ -16,7 +16,7 @@ module WaterDrop
       # We set it to a value that is lower than `max_wait_timeout` to have a final verdict upon
       # sync delivery
       'message.timeout.ms': 50_000,
-      # Must be less or equal to `message.timeout.ms` defaults
+      # Must be more or equal to `message.timeout.ms` defaults
       'transaction.timeout.ms': 55_000
     }.freeze
 
