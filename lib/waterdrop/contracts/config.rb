@@ -14,13 +14,22 @@ module WaterDrop
 
       required(:id) { |val| val.is_a?(String) && !val.empty? }
       required(:logger) { |val| !val.nil? }
+      required(:monitor) { |val| !val.nil? }
       required(:deliver) { |val| [true, false].include?(val) }
       required(:max_payload_size) { |val| val.is_a?(Integer) && val >= 1 }
       required(:max_wait_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:client_class) { |val| !val.nil? }
       required(:kafka) { |val| val.is_a?(Hash) && !val.empty? }
       required(:wait_on_queue_full) { |val| [true, false].include?(val) }
+      required(:instrument_on_wait_queue_full) { |val| [true, false].include?(val) }
       required(:wait_backoff_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
       required(:wait_timeout_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:wait_backoff_on_transaction_command) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:max_attempts_on_transaction_command) { |val| val.is_a?(Integer) && val >= 1 }
+
+      nested(:oauth) do
+        required(:token_provider_listener) { |val| val == false || val.respond_to?(:call) }
+      end
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
       # This can be confusing, so we expect all keys to be symbolized

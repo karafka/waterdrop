@@ -8,12 +8,21 @@ RSpec.describe_current do
     {
       id: SecureRandom.uuid,
       logger: Logger.new('/dev/null'),
+      monitor: WaterDrop::Instrumentation::Monitor.new,
       deliver: false,
+      client_class: WaterDrop::Clients::Rdkafka,
       max_payload_size: 1024 * 1024,
       max_wait_timeout: 1,
       wait_on_queue_full: true,
       wait_backoff_on_queue_full: 1,
       wait_timeout_on_queue_full: 10,
+      wait_backoff_on_transaction_command: 15,
+      max_attempts_on_transaction_command_format: 5,
+      instrument_on_wait_queue_full: true,
+      max_attempts_on_transaction_command: 1,
+      oauth: {
+        token_provider_listener: false
+      },
       kafka: {
         'bootstrap.servers': 'localhost:9092,localhots:9092'
       }
@@ -43,6 +52,34 @@ RSpec.describe_current do
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:id]).not_to be_empty }
+  end
+
+  context 'when monitor is missing' do
+    before { config.delete(:monitor) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:monitor]).not_to be_empty }
+  end
+
+  context 'when monitor is nil' do
+    before { config[:monitor] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:monitor]).not_to be_empty }
+  end
+
+  context 'when client_class is missing' do
+    before { config.delete(:client_class) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:client_class]).not_to be_empty }
+  end
+
+  context 'when client_class is nil' do
+    before { config[:client_class] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:client_class]).not_to be_empty }
   end
 
   context 'when logger is missing' do
@@ -141,6 +178,45 @@ RSpec.describe_current do
     it { expect(contract_result).not_to be_success }
   end
 
+  context 'when max_attempts_on_transaction_command is nil' do
+    before { config[:max_attempts_on_transaction_command] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
+  end
+
+  context 'when max_attempts_on_transaction_command is a negative int' do
+    before { config[:max_attempts_on_transaction_command] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
+  end
+
+  context 'when max_attempts_on_transaction_command is a negative float' do
+    before { config[:max_attempts_on_transaction_command] = -0.1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
+  end
+
+  context 'when max_attempts_on_transaction_command is 0' do
+    before { config[:max_attempts_on_transaction_command] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when max_attempts_on_transaction_command is positive int' do
+    before { config[:max_attempts_on_transaction_command] = 1 }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when max_attempts_on_transaction_command is positive float' do
+    before { config[:max_attempts_on_transaction_command] = 1.1 }
+
+    it { expect(contract_result).not_to be_success }
+  end
+
   context 'when max_wait_timeout is missing' do
     before { config.delete(:max_wait_timeout) }
 
@@ -194,6 +270,13 @@ RSpec.describe_current do
     it { expect(contract_errors[:wait_on_queue_full]).not_to be_empty }
   end
 
+  context 'when instrument_on_wait_queue_full is not a boolean' do
+    before { config[:instrument_on_wait_queue_full] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:instrument_on_wait_queue_full]).not_to be_empty }
+  end
+
   context 'when wait_backoff_on_queue_full is not a numeric' do
     before { config[:wait_backoff_on_queue_full] = 'na' }
 
@@ -208,6 +291,20 @@ RSpec.describe_current do
     it { expect(contract_errors[:wait_backoff_on_queue_full]).not_to be_empty }
   end
 
+  context 'when wait_backoff_on_transaction_command is not a numeric' do
+    before { config[:wait_backoff_on_transaction_command] = 'na' }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_backoff_on_transaction_command]).not_to be_empty }
+  end
+
+  context 'when wait_backoff_on_transaction_command is less than 0' do
+    before { config[:wait_backoff_on_transaction_command] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:wait_backoff_on_transaction_command]).not_to be_empty }
+  end
+
   context 'when wait_timeout_on_queue_full is not a numeric' do
     before { config[:wait_timeout_on_queue_full] = 'na' }
 
@@ -220,5 +317,18 @@ RSpec.describe_current do
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when oauth token_provider_listener does not respond to call' do
+    before { config[:oauth][:token_provider_listener] = true }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:'oauth.token_provider_listener']).not_to be_empty }
+  end
+
+  context 'when oauth token_provider_listener responds to call' do
+    before { config[:oauth][:token_provider_listener] = -> {} }
+
+    it { expect(contract_result).to be_success }
   end
 end

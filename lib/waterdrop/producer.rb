@@ -104,18 +104,6 @@ module WaterDrop
         @pid = Process.pid
         @client = Builder.new.call(self, @config)
 
-        # Register statistics runner for this particular type of callbacks
-        ::Karafka::Core::Instrumentation.statistics_callbacks.add(
-          @id,
-          Instrumentation::Callbacks::Statistics.new(@id, @client.name, @config.monitor)
-        )
-
-        # Register error tracking callback
-        ::Karafka::Core::Instrumentation.error_callbacks.add(
-          @id,
-          Instrumentation::Callbacks::Error.new(@id, @client.name, @config.monitor)
-        )
-
         @status.connected!
         @monitor.instrument('producer.connected', producer_id: id)
       end
@@ -209,6 +197,7 @@ module WaterDrop
           # Remove callbacks runners that were registered
           ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
           ::Karafka::Core::Instrumentation.error_callbacks.delete(@id)
+          ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(@id)
 
           @status.closed!
         end

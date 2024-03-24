@@ -11,20 +11,41 @@ module WaterDrop
         # @param producer [WaterDrop::Producer] producer instance with its config, etc
         # @note We overwrite this that way, because we do not care
         def new(producer)
-          config = producer.config.kafka.to_h
+          kafka_config = producer.config.kafka.to_h
+          monitor = producer.config.monitor
 
-          client = ::Rdkafka::Config.new(config).producer
+          client = ::Rdkafka::Config.new(kafka_config).producer(native_kafka_auto_start: false)
+
+          # Register statistics runner for this particular type of callbacks
+          ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.add(
+            producer.id,
+            Instrumentation::Callbacks::OauthbearerTokenRefresh.new(client, monitor)
+          )
+
+          # Register statistics runner for this particular type of callbacks
+          ::Karafka::Core::Instrumentation.statistics_callbacks.add(
+            producer.id,
+            Instrumentation::Callbacks::Statistics.new(producer.id, client.name, monitor)
+          )
+
+          # Register error tracking callback
+          ::Karafka::Core::Instrumentation.error_callbacks.add(
+            producer.id,
+            Instrumentation::Callbacks::Error.new(producer.id, client.name, monitor)
+          )
 
           # This callback is not global and is per client, thus we do not have to wrap it with a
           # callbacks manager to make it work
           client.delivery_callback = Instrumentation::Callbacks::Delivery.new(
             producer.id,
             producer.transactional?,
-            producer.config.monitor
+            monitor
           )
 
+          client.start
+
           # Switch to the transactional mode if user provided the transactional id
-          client.init_transactions if config.key?(:'transactional.id')
+          client.init_transactions if kafka_config.key?(:'transactional.id')
 
           client
         end

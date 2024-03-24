@@ -4,7 +4,10 @@ en:
       missing: must be present
       logger_format: must be present
       deliver_format: must be boolean
+      instrument_on_wait_queue_full_format: must be boolean
       id_format: must be a non-empty string
+      monitor_format: must be present
+      client_class_format: must be present
       max_payload_size_format: must be an integer that is equal or bigger than 1
       max_wait_timeout_format: must be an integer that is equal or bigger than 0
       kafka_format: must be a hash with symbol based keys
@@ -12,6 +15,9 @@ en:
       wait_on_queue_full_format: must be boolean
       wait_backoff_on_queue_full_format: must be a numeric that is bigger or equal to 0
       wait_timeout_on_queue_full_format: must be a numeric that is bigger or equal to 0
+      wait_backoff_on_transaction_command_format: must be a numeric that is bigger or equal to 0
+      max_attempts_on_transaction_command_format: must be an integer that is equal or bigger than 1
+      oauth.token_provider_listener_format: 'must be false or respond to #call'
 
     message:
       missing: must be present
