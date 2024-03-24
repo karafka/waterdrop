@@ -21,6 +21,8 @@ module WaterDrop
         messages.produced_sync
         messages.buffered
 
+        oauthbearer.token_refresh
+
         transaction.started
         transaction.committed
         transaction.aborted
