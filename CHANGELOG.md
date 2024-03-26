@@ -4,6 +4,7 @@
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
+- **[Feature]** Support custom OAuth providers.
 - **[Breaking]** Drop Ruby `2.7` support.
 - **[Breaking]** Change default timeouts so final delivery `message.timeout.ms` is less that `max_wait_time` so we do not end up with not final verdict.
 - **[Breaking]** Update all the time related configuration settings to be in `ms` and not mixed.

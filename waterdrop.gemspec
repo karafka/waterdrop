@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description   = spec.summary
   spec.license       = 'MIT'
 
-  spec.add_dependency 'karafka-core', '>= 2.4.0.alpha1', '< 3.0.0'
+  spec.add_dependency 'karafka-core', '>= 2.4.0.beta2', '< 3.0.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 3.0.0'

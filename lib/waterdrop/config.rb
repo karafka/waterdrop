@@ -89,6 +89,14 @@ module WaterDrop
       constructor: ->(middleware) { middleware || WaterDrop::Middleware.new }
     )
 
+    # Namespace for oauth related configuration
+    setting :oauth do
+      # option [false, #call] Listener for using oauth bearer. This listener will be able to
+      #   get the client name to decide whether to use a single multi-client token refreshing
+      #   or have separate tokens per instance.
+      setting :token_provider_listener, default: false
+    end
+
     # Configuration method
     # @yield Runs a block of code providing a config singleton instance to it
     # @yieldparam [WaterDrop::Config] WaterDrop config instance

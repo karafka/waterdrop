@@ -23,6 +23,25 @@ RSpec.describe_current do
       it { expect(producer.status.configured?).to eq(true) }
       it { expect(producer.status.active?).to eq(true) }
     end
+
+    context 'when initializing with oauth listener' do
+      let(:listener) do
+        Class.new do
+          def on_oauthbearer_token_refresh(_); end
+        end
+      end
+
+      subject(:producer) do
+        described_class.new do |config|
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+          config.oauth.token_provider_listener = listener.new
+        end
+      end
+
+      it { expect { producer }.not_to raise_error }
+      it { expect(producer.status.configured?).to eq(true) }
+      it { expect(producer.status.active?).to eq(true) }
+    end
   end
 
   describe '#setup' do
