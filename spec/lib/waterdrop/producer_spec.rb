@@ -25,10 +25,16 @@ RSpec.describe_current do
     end
 
     context 'when initializing with oauth listener' do
+      let(:listener) do
+        Class.new do
+          def on_oauthbearer_token_refresh(_); end
+        end
+      end
+
       subject(:producer) do
         described_class.new do |config|
           config.kafka = { 'bootstrap.servers': 'localhost:9092' }
-          config.oauth.token_provider_listener = ->(event) {}
+          config.oauth.token_provider_listener = listener.new
         end
       end
 

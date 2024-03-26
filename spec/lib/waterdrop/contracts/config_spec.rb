@@ -319,15 +319,21 @@ RSpec.describe_current do
     it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
   end
 
-  context 'when oauth token_provider_listener does not respond to call' do
+  context 'when oauth token_provider_listener does not respond to on_oauthbearer_token_refresh' do
     before { config[:oauth][:token_provider_listener] = true }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:'oauth.token_provider_listener']).not_to be_empty }
   end
 
-  context 'when oauth token_provider_listener responds to call' do
-    before { config[:oauth][:token_provider_listener] = -> {} }
+  context 'when oauth token_provider_listener responds to on_oauthbearer_token_refresh' do
+    let(:listener) do
+      Class.new do
+        def on_oauthbearer_token_refresh(_); end
+      end
+    end
+
+    before { config[:oauth][:token_provider_listener] = listener.new }
 
     it { expect(contract_result).to be_success }
   end

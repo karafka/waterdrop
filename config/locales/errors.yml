@@ -17,7 +17,7 @@ en:
       wait_timeout_on_queue_full_format: must be a numeric that is equal or bigger to 0
       wait_backoff_on_transaction_command_format: must be a numeric that is equal or bigger to 0
       max_attempts_on_transaction_command_format: must be an integer that is equal or bigger than 1
-      oauth.token_provider_listener_format: 'must be false or respond to #call'
+      oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
     message:
       missing: must be present

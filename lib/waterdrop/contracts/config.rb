@@ -28,7 +28,9 @@ module WaterDrop
       required(:max_attempts_on_transaction_command) { |val| val.is_a?(Integer) && val >= 1 }
 
       nested(:oauth) do
-        required(:token_provider_listener) { |val| val == false || val.respond_to?(:call) }
+        required(:token_provider_listener) do |val|
+          val == false || val.respond_to?(:on_oauthbearer_token_refresh)
+        end
       end
 
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
