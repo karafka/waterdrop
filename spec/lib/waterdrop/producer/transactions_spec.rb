@@ -31,6 +31,7 @@ RSpec.describe_current do
     end
 
     it { expect(producer.transactional?).to eq(false) }
+    it { expect(producer.transaction?).to eq(false) }
   end
 
   context 'when we make a transaction without sending any messages' do
