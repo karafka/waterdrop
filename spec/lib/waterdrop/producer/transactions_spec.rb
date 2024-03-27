@@ -31,6 +31,7 @@ RSpec.describe_current do
     end
 
     it { expect(producer.transactional?).to eq(false) }
+    it { expect(producer.transaction?).to eq(false) }
   end
 
   context 'when we make a transaction without sending any messages' do
@@ -566,6 +567,18 @@ RSpec.describe_current do
     it 'expect to be able to do so and to send a message' do
       expect { producer.produce_async(topic: 'test', payload: 'a') }
         .not_to raise_error
+    end
+  end
+
+  context 'when we are not inside a running transaction' do
+    it { expect(producer.transaction?).to eq(false) }
+  end
+
+  context 'when we are inside a transaction' do
+    it 'expect to be recognize it and be true' do
+      producer.transaction do
+        expect(producer.transaction?).to eq(true)
+      end
     end
   end
 end

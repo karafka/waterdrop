@@ -89,6 +89,11 @@ module WaterDrop
         end
       end
 
+      # @return [Boolean] true if we are in an active transaction
+      def transaction?
+        @transaction_mutex.owned?
+      end
+
       # @return [Boolean] Is this producer a transactional one
       def transactional?
         return @transactional if instance_variable_defined?(:'@transactional')

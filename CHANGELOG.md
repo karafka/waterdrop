@@ -9,6 +9,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Change default timeouts so final delivery `message.timeout.ms` is less that `max_wait_time` so we do not end up with not final verdict.
 - **[Breaking]** Update all the time related configuration settings to be in `ms` and not mixed.
 - **[Breaking]** Remove no longer needed `wait_timeout` configuration option.
+- [Enhancement] Provide `WaterDrop::Producer#transaction?` that returns only when producer has an active transaction running.
 - [Enhancement] Introduce `instrument_on_wait_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
 
 ### Upgrade Notes
