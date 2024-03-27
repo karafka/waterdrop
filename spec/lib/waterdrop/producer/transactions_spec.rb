@@ -568,4 +568,16 @@ RSpec.describe_current do
         .not_to raise_error
     end
   end
+
+  context 'when we are not inside a running transaction' do
+    it { expect(producer.transaction?).to eq(false) }
+  end
+
+  context 'when we are inside a transaction' do
+    it 'expect to be recognize it and be true' do
+      producer.transaction do
+        expect(producer.transaction?).to eq(true)
+      end
+    end
+  end
 end
