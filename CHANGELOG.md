@@ -70,12 +70,12 @@ Below, you can find a table with what has changed, the new defaults, and the cur
     <tr>
       <td>kafka <code>message.timeout.ms</code></td>
       <td>300000 ms (5 minutes)</td>
-      <td>55000 ms (55 seconds)</td>
+      <td>50000 ms (50 seconds)</td>
     </tr>
     <tr>
       <td>kafka <code>transaction.timeout.ms</code></td>
       <td>60000 ms (1 minute)</td>
-      <td>45000 ms (45 seconds)</td>
+      <td>55000 ms (55 seconds)</td>
     </tr>
   </tbody>
 </table>
