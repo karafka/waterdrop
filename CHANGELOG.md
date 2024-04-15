@@ -16,6 +16,21 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 
 **PLEASE MAKE SURE TO READ AND APPLY THEM!**
 
+#### `wait_timeout` Configuration No Longer Needed
+
+The `wait_timeout` WaterDrop configuration option is no longer needed. You can safely remove it.
+
+```ruby
+producer = WaterDrop::Producer.new
+
+producer.setup do |config|
+  # Other config...
+
+  # Remove this, no longer needed
+  config.wait_timeout = 30
+end
+```
+
 #### Time Settings Format Alignment
 
 **All** time-related values are now configured in milliseconds instead of some being in seconds and some in milliseconds.
@@ -23,7 +38,6 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 The values that were changed from seconds to milliseconds are:
 
 - `max_wait_timeout`
-- `wait_timeout`
 - `wait_backoff_on_queue_full`
 - `wait_timeout_on_queue_full`
 - `wait_backoff_on_transaction_command, default`
@@ -37,10 +51,10 @@ producer.setup do |config|
   config.deliver = true
 
   # Replace this:
-  config.wait_timeout = 30
+  config.max_wait_timeout = 30
 
   # With
-  config.wait_timeout = 30_000
+  config.max_wait_timeout = 30_000
   # ...
 end
 ```
