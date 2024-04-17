@@ -123,6 +123,10 @@ producer.flush_async(topic: nil, payload: '')
 # => WaterDrop::Errors::MessageInvalidError
 ```
 
+#### Middleware Execution Prior to Flush When Buffering
+
+The timing of middleware execution has been adjusted. Middleware, which was previously run when messages were added to the buffer, will now only execute immediately before the messages are flushed from the buffer and dispatched. This change is similar to the validation-related changes.
+
 ## 2.6.14 (2024-02-06)
 - [Enhancement] Instrument `producer.connected` and `producer.closing` lifecycle events.
 
