@@ -9,8 +9,12 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Change default timeouts so final delivery `message.timeout.ms` is less that `max_wait_time` so we do not end up with not final verdict.
 - **[Breaking]** Update all the time related configuration settings to be in `ms` and not mixed.
 - **[Breaking]** Remove no longer needed `wait_timeout` configuration option.
+- **[Breaking]** Do **not** validate or morph (via middleware) messages added to the buffer prior to `flush_sync` or `flush_async`.
 - [Enhancement] Provide `WaterDrop::Producer#transaction?` that returns only when producer has an active transaction running.
 - [Enhancement] Introduce `instrument_on_wait_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
+- [Fix] Fix a case where purge on non-initialized client would crash.
+- [Fix] Middlewares run twice when using buffered produce.
+- [Fix] Validations run twice when using buffered produce.
 
 ### Upgrade Notes
 
@@ -95,6 +99,29 @@ Below, you can find a table with what has changed, the new defaults, and the cur
 </table>
 
 This alignment ensures that when using sync operations or invoking `#wait`, any exception you get should give you a conclusive and final delivery verdict.
+
+#### Buffering No Longer Early Validates Messages
+
+As of version `2.7.0`, WaterDrop has changed how message buffering works. Previously, messages underwent validation and middleware processing when they were buffered. Now, these steps are deferred until just before dispatching the messages. The buffer functions strictly as a thread-safe storage area without performing any validations or middleware operations until the messages are ready to be sent.
+
+This adjustment was made primarily to ensure that middleware runs and validations are applied when most relevant—shortly before message dispatch. This approach addresses potential issues with buffers that might hold messages for extended periods:
+
+- **Temporal Relevance**: Validating and processing messages near their dispatch time helps ensure that actions such as partition assignments reflect the current system state. This is crucial in dynamic environments where system states are subject to rapid changes.
+
+- **Stale State Management**: By delaying validations and middleware to the dispatch phase, the system minimizes the risk of acting on outdated information, which could lead to incorrect processing or partitioning decisions.
+
+
+```ruby
+# Prior to 2.7.0 this would raise an error
+producer.buffer(topic: nil, payload: '')
+# => WaterDrop::Errors::MessageInvalidError
+
+# After 2.7.0 buffer will not, but flush_async will
+producer.buffer(topic: nil, payload: '')
+# => all good here
+producer.flush_async(topic: nil, payload: '')
+# => WaterDrop::Errors::MessageInvalidError
+```
 
 ## 2.6.14 (2024-02-06)
 - [Enhancement] Instrument `producer.connected` and `producer.closing` lifecycle events.

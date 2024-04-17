@@ -133,7 +133,7 @@ module WaterDrop
           @messages = []
         end
 
-        @client.purge
+        @client&.purge
       end
     end
 
