@@ -110,7 +110,6 @@ This adjustment was made primarily to ensure that middleware runs and validation
 
 - **Stale State Management**: By delaying validations and middleware to the dispatch phase, the system minimizes the risk of acting on outdated information, which could lead to incorrect processing or partitioning decisions.
 
-
 ```ruby
 # Prior to 2.7.0 this would raise an error
 producer.buffer(topic: nil, payload: '')
