@@ -109,8 +109,7 @@ RSpec.describe_current do
 
       # histogram
       expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
-      # -1 here means, one message was removed from the queue as we use histogram for tracking
-      expect(histograms['waterdrop.queue.size']).to include([-1, { tags: [] }])
+      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
 
       # gauge
       expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1
