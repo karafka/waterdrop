@@ -133,7 +133,12 @@ module WaterDrop
           @messages = []
         end
 
-        @client.purge
+        # We should not purge if there is no client initialized
+        # It may not be initialized if we created a new producer that never connected to kafka,
+        # we used buffer and purged. In cases like this client won't exist
+        @connecting_mutex.synchronize do
+          @client&.purge
+        end
       end
     end
 
