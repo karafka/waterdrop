@@ -32,6 +32,7 @@ RSpec.describe_current do
         gauge
         increment
         decrement
+        distribution
       ].each do |method_name|
         define_method method_name do |metric, value = nil, details = {}|
           @buffer[method_name][metric] << [value, details]
@@ -96,6 +97,7 @@ RSpec.describe_current do
     let(:counts) { dummy_client.buffer[:count] }
     let(:histograms) { dummy_client.buffer[:histogram] }
     let(:guages) { dummy_client.buffer[:gauge] }
+    let(:distributions) { dummy_client.buffer[:distribution] }
     let(:broker_tag) { { tags: %w[broker:127.0.0.1:9092] } }
 
     # We add all expectations in one example not to sleep each time
@@ -107,9 +109,9 @@ RSpec.describe_current do
       expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag])
       expect(counts['waterdrop.receive.errors']).to include([0, broker_tag])
 
-      # histogram
-      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
-      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
+      # distribution
+      expect(distributions['waterdrop.queue.size']).to include([0, { tags: [] }])
+      expect(distributions['waterdrop.queue.size']).to include([0, { tags: [] }])
 
       # gauge
       expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1

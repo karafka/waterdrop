@@ -148,6 +148,7 @@ module WaterDrop
             histogram
             increment
             decrement
+            distribution
           ].each do |metric_type|
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               def #{metric_type}(key, *args)
