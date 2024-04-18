@@ -36,7 +36,7 @@ module WaterDrop
           setting :rd_kafka_metrics, default: [
             # Client metrics
             RdKafkaMetric.new(:count, :root, 'calls', 'tx_d'),
-            RdKafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt_d'),
+            RdKafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt'),
 
             # Broker metrics
             RdKafkaMetric.new(:count, :brokers, 'deliver.attempts', 'txretries_d'),
