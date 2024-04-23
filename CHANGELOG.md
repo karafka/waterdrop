@@ -12,6 +12,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Do **not** validate or morph (via middleware) messages added to the buffer prior to `flush_sync` or `flush_async`.
 - [Enhancement] Provide `WaterDrop::Producer#transaction?` that returns only when producer has an active transaction running.
 - [Enhancement] Introduce `instrument_on_wait_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
+- [Enhancement] Protect critical `rdkafka` thread executable code sections.
 - [Enhancement] Treat the queue size as a gauge rather than a cumulative stat (isturdy).
 - [Fix] Fix a case where purge on non-initialized client would crash.
 - [Fix] Middlewares run twice when using buffered produce.

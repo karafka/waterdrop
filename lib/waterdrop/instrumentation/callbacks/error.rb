@@ -32,6 +32,17 @@ module WaterDrop
             producer_id: @producer_id,
             type: 'librdkafka.error'
           )
+        # This runs from the rdkafka thread, thus we want to safe-guard it and prevent absolute
+        # crashes even if the instrumentation code fails. If it would bubble-up, it could crash
+        # the rdkafka background thread
+        rescue StandardError => e
+          @monitor.instrument(
+            'error.occurred',
+            caller: self,
+            error: e,
+            producer_id: @producer_id,
+            type: 'callbacks.error.error'
+          )
         end
       end
     end
