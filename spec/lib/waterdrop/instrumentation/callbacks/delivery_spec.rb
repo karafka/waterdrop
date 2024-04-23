@@ -34,6 +34,28 @@ RSpec.describe_current do
     it { expect(event[:offset]).to eq(delivery_report.offset) }
     it { expect(event[:partition]).to eq(delivery_report.partition) }
     it { expect(event[:topic]).to eq(delivery_report.topic_name) }
+
+    context 'when delivery handler code contains an error' do
+      let(:tracked_errors) { [] }
+
+      before do
+        monitor.subscribe('message.acknowledged') do
+          raise
+        end
+
+        local_errors = tracked_errors
+
+        monitor.subscribe('error.occurred') do |event|
+          local_errors << event
+        end
+      end
+
+      it 'expect to contain in, notify and continue as we do not want to crash rdkafka' do
+        expect { callback.call(delivery_report) }.not_to raise_error
+        expect(tracked_errors.size).to eq(1)
+        expect(tracked_errors.first[:type]).to eq('callbacks.delivery.error')
+      end
+    end
   end
 
   describe '#when we do an end-to-end delivery report check' do
