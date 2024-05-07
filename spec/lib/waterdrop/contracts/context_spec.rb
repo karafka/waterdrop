@@ -8,6 +8,7 @@ RSpec.describe_current do
     {
       default: true,
       max_wait_timeout: 10,
+      transactional: false,
       topic_config: {
         'request.required.acks': -1,
         acks: 'all',
@@ -62,6 +63,24 @@ RSpec.describe_current do
 
   context 'when topic_config has contains non per-topic keys' do
     before { context[:topic_config][:'batch.size'] = 1 }
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when producer is transactional and we try to redefine acks' do
+    before do
+      context[:transactional] = true
+      context[:topic_config][:acks] = 1
+    end
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when producer is transactional and we try to redefine request.required.acks' do
+    before do
+      context[:transactional] = true
+      context[:topic_config][:'request.required.acks'] = 1
+    end
 
     it { expect(contract_result).not_to be_success }
   end
