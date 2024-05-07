@@ -9,7 +9,7 @@ module WaterDrop
       # deprecated values. We also do not support settings that would break rdkafka-ruby
       #
       # @see https://karafka.io/docs/Librdkafka-Configuration/#topic-configuration-properties
-      TOPIC_CONFIG_KEYS = %w[
+      TOPIC_CONFIG_KEYS = %i[
         request.required.acks
         acks
         request.timeout.ms
@@ -32,8 +32,58 @@ module WaterDrop
             File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
           )
         ).fetch('en').fetch('validations').fetch('context')
+      end
 
-        required(:default) { |val| BOOLEANS.include?(val) }
+      required(:default) { |val| BOOLEANS.include?(val) }
+      required(:max_wait_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
+
+      # Checks if all keys are symbols
+      virtual do |config, errors|
+        next true unless errors.empty?
+
+        errors = []
+
+        config
+          .fetch(:topic_config)
+          .keys
+          .reject { |key| key.is_a?(Symbol) }
+          .each { |key| errors << [[:kafka, key], :kafka_key_must_be_a_symbol] }
+
+        errors
+      end
+
+      # Checks if we have any keys that are not allowed
+      virtual do |config, errors|
+        next true unless errors.empty?
+
+        errors = []
+
+        config
+          .fetch(:topic_config)
+          .keys
+          .reject { |key| TOPIC_CONFIG_KEYS.include?(key) }
+          .each { |key| errors << [[:kafka, key], :kafka_key_not_per_topic] }
+
+        errors
+      end
+
+      # Ensure, that acks is not changed when in transactional mode
+      # acks needs to be set to 'all' and should not be changed when working with transactional
+      # producer as it causes librdkafka to crash
+      virtual do |config, errors|
+        next true unless errors.empty?
+        # Relevant only for the transactional producer
+        next true unless config.fetch(:transactional)
+
+        errors = []
+
+        config
+          .fetch(:topic_config)
+          .keys
+          .select { |key| key.to_s.include?('acks') }
+          .each { |key| errors << [[:kafka, key], :kafka_key_acks_not_changeable] }
+
+        errors
       end
     end
   end

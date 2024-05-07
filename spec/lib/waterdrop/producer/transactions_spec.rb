@@ -22,6 +22,14 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we try to create producer with invalid acks' do
+    it 'expect to raise an error' do
+      expect do
+        build(:transactional_producer, request_required_acks: 1).client
+      end.to raise_error(Rdkafka::Config::ClientCreationError, /acks/)
+    end
+  end
+
   context 'when we try to start transaction without transactional.id' do
     subject(:producer) { build(:producer) }
 
@@ -67,12 +75,12 @@ RSpec.describe_current do
   context 'when trying to use transaction on a non-existing topics and short time' do
     subject(:producer) { build(:transactional_producer, transaction_timeout_ms: 1_000) }
 
-    it 'expect to crash with an inconsistent state after abort' do
+    it 'expect to crash with an inconsistent or a timeout state after abort' do
       error = nil
 
       begin
         producer.transaction do
-          10.times do |i|
+          20.times do |i|
             producer.produce_async(topic: SecureRandom.uuid, payload: i.to_s)
           end
         end
@@ -83,7 +91,7 @@ RSpec.describe_current do
       expect(error).to be_a(Rdkafka::RdkafkaError)
       expect(error.code).to eq(:state)
       expect(error.cause).to be_a(Rdkafka::RdkafkaError)
-      expect(error.cause.code).to eq(:inconsistent)
+      expect(error.cause.code).to eq(:inconsistent).or eq(:timed_out)
     end
   end
 
@@ -323,7 +331,10 @@ RSpec.describe_current do
         result = handler.create_result
 
         # It will be compacted but is still visible as a delivery report
-        expect(result.partition).to eq(-1)
+        # It can be either -1 or 0 if topic was created fast enough for report to become aware
+        # of it
+        expect(result.partition).to eq(-1).or eq(0)
+        expect(result.offset).to eq(-1_001)
         expect(result.error).to be_a(Rdkafka::RdkafkaError)
       end
     end

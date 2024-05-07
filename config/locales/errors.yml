@@ -22,6 +22,10 @@ en:
     context:
       missing: must be present
       default_format: must be boolean
+      max_wait_timeout_format: must be an integer that is equal or bigger than 0
+      kafka_key_must_be_a_symbol: All keys under the kafka settings scope need to be symbols
+      kafka_key_not_per_topic: This config option cannot be set on a per topic basis
+      kafka_key_acks_not_changeable: Acks value cannot be redefined for a transactional producer
 
     message:
       missing: must be present

@@ -286,13 +286,10 @@ module WaterDrop
       # user is using for some other operations
       if message[:topic].is_a?(Symbol) || !current_context.default?
         message = message.dup
-
-        message.merge!(
-          # In case someone defines topic as a symbol, we need to convert it into a string as
-          # librdkafka does not accept symbols
-          topic: message[:topic].to_s,
-          topic_config: current_context.topic_config
-        )
+        # In case someone defines topic as a symbol, we need to convert it into a string as
+        # librdkafka does not accept symbols
+        message[:topic] = message[:topic].to_s
+        message[:topic_config] = current_context.topic_config
       end
 
       if transactional?
