@@ -19,6 +19,10 @@ en:
       max_attempts_on_transaction_command_format: must be an integer that is equal or bigger than 1
       oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
 
+    context:
+      missing: must be present
+      default_format: must be boolean
+
     message:
       missing: must be present
       partition_format: must be an integer greater or equal to -1

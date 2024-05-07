@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.7.1 (Unreleased)
+- **[Feature]** Support context-base configuration with low-level topic settings alterations.
+
 ## 2.7.0 (2024-04-26)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.

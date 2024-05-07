@@ -9,6 +9,9 @@ module WaterDrop
     # Raised when configuration doesn't match with validation contract
     ConfigurationInvalidError = Class.new(BaseError)
 
+    # Raised when context alteration is not valid
+    ContextInvalidError = Class.new(BaseError)
+
     # Raised when we want to use a producer that was not configured
     ProducerNotConfiguredError = Class.new(BaseError)
 
