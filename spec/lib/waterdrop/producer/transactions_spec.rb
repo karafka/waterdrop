@@ -210,7 +210,8 @@ RSpec.describe_current do
         result = handler.create_result
 
         # It will be compacted but is still visible as a delivery report
-        expect(result.partition).to eq(-1)
+        expect(result.partition).to eq(-1).or eq(0)
+        expect(result.offset).to eq(-1_001)
         expect(result.error).to be_a(Rdkafka::RdkafkaError)
       end
     end
