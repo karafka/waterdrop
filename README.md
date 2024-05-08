@@ -9,13 +9,13 @@ WaterDrop is a standalone gem that sends messages to Kafka easily with an extra 
 It:
 
  - Is thread-safe
- - Supports sync producing
- - Supports async producing
+ - Supports sync and async producing
  - Supports transactions
  - Supports buffering
- - Supports producing messages to multiple clusters
+ - Supports producing to multiple clusters
  - Supports multiple delivery policies
- - Works with Kafka `1.0+` and Ruby `2.7+`
+ - Supports per-topic configuration alterations (variants)
+ - Works with Kafka `1.0+` and Ruby `3.0+`
  - Works with and without Karafka
 
 ## Documentation
