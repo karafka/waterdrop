@@ -13,6 +13,12 @@ RSpec.describe_current do
     specify { expect(error).to be < described_class::BaseError }
   end
 
+  describe 'VariantInvalidError' do
+    subject(:error) { described_class::VariantInvalidError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
   describe 'ProducerNotConfiguredError' do
     subject(:error) { described_class::ProducerNotConfiguredError }
 

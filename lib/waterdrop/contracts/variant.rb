@@ -2,8 +2,8 @@
 
 module WaterDrop
   module Contracts
-    # Context validator to ensure basic sanity of the context alteration data
-    class Context < ::Karafka::Core::Contractable::Contract
+    # Variant validator to ensure basic sanity of the variant alteration data
+    class Variant < ::Karafka::Core::Contractable::Contract
       # Taken from librdkafka config
       # Those values can be changed on a per topic basis. We do not support experimental or
       # deprecated values. We also do not support settings that would break rdkafka-ruby
@@ -31,7 +31,7 @@ module WaterDrop
           File.read(
             File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
           )
-        ).fetch('en').fetch('validations').fetch('context')
+        ).fetch('en').fetch('validations').fetch('variant')
       end
 
       required(:default) { |val| BOOLEANS.include?(val) }

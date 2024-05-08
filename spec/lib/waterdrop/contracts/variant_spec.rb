@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
 RSpec.describe_current do
-  subject(:contract_result) { described_class.new.call(context) }
+  subject(:contract_result) { described_class.new.call(variant) }
 
   let(:contract_errors) { contract_result.errors.to_h }
-  let(:context) do
+  let(:variant) do
     {
       default: true,
       max_wait_timeout: 10,
@@ -26,28 +26,28 @@ RSpec.describe_current do
   end
 
   context 'when default is missing' do
-    before { context.delete(:default) }
+    before { variant.delete(:default) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:default]).not_to be_empty }
   end
 
   context 'when default is not a boolean' do
-    before { context[:default] = 'true' }
+    before { variant[:default] = 'true' }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:default]).not_to be_empty }
   end
 
   context 'when max_wait_timeout is missing' do
-    before { context.delete(:max_wait_timeout) }
+    before { variant.delete(:max_wait_timeout) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
   end
 
   context 'when max_wait_timeout is not a number' do
-    before { context[:max_wait_timeout] = '10' }
+    before { variant[:max_wait_timeout] = '10' }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
@@ -55,22 +55,22 @@ RSpec.describe_current do
 
   context 'when topic_config hash is present' do
     context 'when there is a non-symbol key setting' do
-      before { context[:topic_config]['invalid_key'] = true }
+      before { variant[:topic_config]['invalid_key'] = true }
 
       it { expect(contract_result).not_to be_success }
     end
   end
 
   context 'when topic_config has contains non per-topic keys' do
-    before { context[:topic_config][:'batch.size'] = 1 }
+    before { variant[:topic_config][:'batch.size'] = 1 }
 
     it { expect(contract_result).not_to be_success }
   end
 
   context 'when producer is transactional and we try to redefine acks' do
     before do
-      context[:transactional] = true
-      context[:topic_config][:acks] = 1
+      variant[:transactional] = true
+      variant[:topic_config][:acks] = 1
     end
 
     it { expect(contract_result).not_to be_success }
@@ -78,8 +78,8 @@ RSpec.describe_current do
 
   context 'when producer is transactional and we try to redefine request.required.acks' do
     before do
-      context[:transactional] = true
-      context[:topic_config][:'request.required.acks'] = 1
+      variant[:transactional] = true
+      variant[:topic_config][:'request.required.acks'] = 1
     end
 
     it { expect(contract_result).not_to be_success }

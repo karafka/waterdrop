@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.1 (Unreleased)
-- **[Feature]** Support context-base configuration with low-level topic settings alterations.
+- **[Feature]** Support context-base configuration with low-level topic settings alterations producer variants.
 
 ## 2.7.0 (2024-04-26)
 

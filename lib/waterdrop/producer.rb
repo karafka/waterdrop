@@ -65,7 +65,7 @@ module WaterDrop
       @id = @config.id
       @monitor = @config.monitor
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
-      @default_context = Context.new(self, default: true)
+      @default_variant = Variant.new(self, default: true)
       @status.configured!
     end
 
@@ -182,7 +182,7 @@ module WaterDrop
             # The linger.ms time will be ignored for the duration of the call,
             # queued messages will be sent to the broker as soon as possible.
             begin
-              @client.flush(current_context.max_wait_timeout) unless @client.closed?
+              @client.flush(current_variant.max_wait_timeout) unless @client.closed?
             # We can safely ignore timeouts here because any left outstanding requests
             # will anyhow force wait on close if not forced.
             # If forced, we will purge the queue and just close
@@ -210,14 +210,14 @@ module WaterDrop
       end
     end
 
-    # Builds the context alteration and returns it.
+    # Builds the variant alteration and returns it.
     #
-    # @param args [Object] anything `Producer::Context` initializer accepts
-    # @return [WaterDrop::Producer::Context] context proxy to use with alterations
+    # @param args [Object] anything `Producer::Variant` initializer accepts
+    # @return [WaterDrop::Producer::Variant] variant proxy to use with alterations
     def with(**args)
       ensure_active!
 
-      Context.new(self, **args)
+      Variant.new(self, **args)
     end
 
     # Closes the producer with forced close after timeout, purging any outgoing data
@@ -255,14 +255,14 @@ module WaterDrop
     def wait(handler)
       handler.wait(
         # rdkafka max_wait_timeout is in seconds and we use ms
-        max_wait_timeout: current_context.max_wait_timeout / 1_000.0
+        max_wait_timeout: current_variant.max_wait_timeout / 1_000.0
       )
     end
 
-    # @return [Producer::Context] the context config. Either custom if built using `#with` or
+    # @return [Producer::Context] the variant config. Either custom if built using `#with` or
     #   a default one.
-    def current_context
-      Thread.current[id] || @default_context
+    def current_variant
+      Thread.current[id] || @default_variant
     end
 
     # Runs the client produce method with a given message
@@ -281,15 +281,15 @@ module WaterDrop
       end
 
       # We basically only duplicate the message hash only if it is needed.
-      # It is needed when user is using a custom settings context or when symbol is provided as
+      # It is needed when user is using a custom settings variant or when symbol is provided as
       # the topic name. We should never mutate user input message as it may be a hash that the
       # user is using for some other operations
-      if message[:topic].is_a?(Symbol) || !current_context.default?
+      if message[:topic].is_a?(Symbol) || !current_variant.default?
         message = message.dup
         # In case someone defines topic as a symbol, we need to convert it into a string as
         # librdkafka does not accept symbols
         message[:topic] = message[:topic].to_s
-        message[:topic_config] = current_context.topic_config
+        message[:topic_config] = current_variant.topic_config
       end
 
       if transactional?

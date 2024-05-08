@@ -137,7 +137,7 @@ module WaterDrop
             client.send_offsets_to_transaction(
               consumer,
               tpl,
-              current_context.max_wait_timeout
+              current_variant.max_wait_timeout
             )
           end
         end

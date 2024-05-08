@@ -10,39 +10,39 @@ module WaterDrop
     # separate objects just to alter thing like `acks` may not be efficient and may lead to
     # extensive usage of TCP connections, especially in bigger clusters.
     #
-    # This context object allows for "wrapping" of the producer with alteration of those settings
+    # This variant object allows for "wrapping" of the producer with alteration of those settings
     # in such a way, that two or more alterations can co-exist and share the same producer,
     # effectively sharing the librdkafka client.
     #
     # Since this is an enhanced `SimpleDelegator` all `WaterDrop::Producer` APIs are preserved and
-    # a context alteration can be used as a regular producer. The only important thing is to
+    # a variant alteration can be used as a regular producer. The only important thing is to
     # remember to only close it once.
     #
     # @note Not all settings are alterable. We only allow to alter things that are safe to be
     #   altered as they have no impact on the producer. If there is a setting you consider
     #   important and want to make it alterable, please open a GH issue for evaluation.
     #
-    # @note Please be aware, that context changes also affect buffers. If you overwrite the
+    # @note Please be aware, that variant changes also affect buffers. If you overwrite the
     #  `max_wait_timeout`, since buffers are shared (as they exist on producer level), flushing
     #   may be impacted.
     #
     # @note `topic_config` is validated when created for the first time during message production.
     #   This means, that configuration error may be raised only during dispatch. There is no
     #   way out of this, since we need `librdkafka` instance to create the references.
-    class Context < SimpleDelegator
+    class Variant < SimpleDelegator
       # Empty hash we use as defaults for topic config.
       # When rdkafka-ruby detects empty hash, it will use the librdkafka defaults
       EMPTY_HASH = {}.freeze
 
       private_constant :EMPTY_HASH
 
-      attr_reader :max_wait_timeout, :topic_config
+      attr_reader :max_wait_timeout, :topic_config, :producer
 
-      # @param producer [WaterDrop::Producer] producer for which we want to have a context
+      # @param producer [WaterDrop::Producer] producer for which we want to have a variant
       # @param max_wait_timeout [Integer, nil] alteration to max wait timeout or nil to use
       #   default
       # @param topic_config [Hash] extra topic configuration that can be altered.
-      # @param default [Boolean] is this a default context or an altered one
+      # @param default [Boolean] is this a default variant or an altered one
       # @see https://karafka.io/docs/Librdkafka-Configuration/#topic-configuration-properties
       def initialize(
         producer,
@@ -56,17 +56,17 @@ module WaterDrop
         @default = default
         super(producer)
 
-        Contracts::Context.new.validate!(to_h, Errors::ContextInvalidError)
+        Contracts::Variant.new.validate!(to_h, Errors::VariantInvalidError)
       end
 
-      # @return [Boolean] is this a default context for this producer
+      # @return [Boolean] is this a default variant for this producer
       def default?
         @default
       end
 
-      # We need to wrap any methods from our API that could use a context alteration with the
-      # per thread context injection. Since method_missing can be slow and problematic, it is just
-      # easier to use our public API components methods to ensure the context is being injected.
+      # We need to wrap any methods from our API that could use a variant alteration with the
+      # per thread variant injection. Since method_missing can be slow and problematic, it is just
+      # easier to use our public API components methods to ensure the variant is being injected.
       [
         Async,
         Buffer,
