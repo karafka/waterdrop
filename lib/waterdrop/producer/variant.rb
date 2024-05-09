@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-require 'delegate'
 
 module WaterDrop
   class Producer

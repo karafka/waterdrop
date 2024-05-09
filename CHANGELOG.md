@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.7.2 (2024-05-09)
+- [Fix] Fix missing requirement of `delegate` for non-Rails use-cases. Always require delegate for variants usage (samsm)
+
 ## 2.7.1 (2024-05-09)
 - **[Feature]** Support context-base configuration with low-level topic settings alterations producer variants.
 - [Enhancement] Prefix random default `SecureRandom.hex(6)` producers ids with `waterdrop-hex` to indicate type of object.
