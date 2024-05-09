@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.7.1 (Unreleased)
+- **[Feature]** Support context-base configuration with low-level topic settings alterations producer variants.
+- [Enhancement] Prefix random default `SecureRandom.hex(6)` producers ids with `waterdrop-hex` to indicate type of object.
+
 ## 2.7.0 (2024-04-26)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
