@@ -10,15 +10,15 @@ module WaterDrop
       #
       # @see https://karafka.io/docs/Librdkafka-Configuration/#topic-configuration-properties
       TOPIC_CONFIG_KEYS = %i[
-        request.required.acks
         acks
-        request.timeout.ms
-        message.timeout.ms
-        delivery.timeout.ms
-        partitioner
         compression.codec
-        compression.type
         compression.level
+        compression.type
+        delivery.timeout.ms
+        message.timeout.ms
+        partitioner
+        request.required.acks
+        request.timeout.ms
       ].freeze
 
       # Boolean values
