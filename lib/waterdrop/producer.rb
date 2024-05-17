@@ -220,6 +220,8 @@ module WaterDrop
       Variant.new(self, **args)
     end
 
+    alias variant with
+
     # Closes the producer with forced close after timeout, purging any outgoing data
     def close!
       close(force: true)
