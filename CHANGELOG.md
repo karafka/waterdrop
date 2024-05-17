@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.7.3 (Unreleased)
+- [Enhancement] Provide alias to `#with` named `#variant`.
+
 ## 2.7.2 (2024-05-09)
 - [Fix] Fix missing requirement of `delegate` for non-Rails use-cases. Always require delegate for variants usage (samsm)
 

@@ -9,6 +9,12 @@ RSpec.describe_current do
 
   after { producer.close }
 
+  describe '#variant' do
+    it 'expect to allow to create variants' do
+      expect { producer.variant(topic_config: { acks: 1 }) }.not_to raise_error
+    end
+  end
+
   context 'when referencing original producer back' do
     let(:variant) { producer.with(topic_config: { acks: 1 }) }
 
