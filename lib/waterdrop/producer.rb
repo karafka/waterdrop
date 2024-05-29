@@ -143,6 +143,27 @@ module WaterDrop
       end
     end
 
+    # Builds the variant alteration and returns it.
+    #
+    # @param args [Object] anything `Producer::Variant` initializer accepts
+    # @return [WaterDrop::Producer::Variant] variant proxy to use with alterations
+    def with(**args)
+      ensure_active!
+
+      Variant.new(self, **args)
+    end
+
+    alias variant with
+
+    # @return [Boolean] true if current producer is idempotent
+    def idempotent?
+      # Every transactional producer is idempotent by default always
+      return true if transactional?
+      return @idempotent if instance_variable_defined?(:'@idempotent')
+
+      @idempotent = config.kafka.to_h.key?(:'enable.idempotence')
+    end
+
     # Flushes the buffers in a sync way and closes the producer
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
@@ -209,18 +230,6 @@ module WaterDrop
         end
       end
     end
-
-    # Builds the variant alteration and returns it.
-    #
-    # @param args [Object] anything `Producer::Variant` initializer accepts
-    # @return [WaterDrop::Producer::Variant] variant proxy to use with alterations
-    def with(**args)
-      ensure_active!
-
-      Variant.new(self, **args)
-    end
-
-    alias variant with
 
     # Closes the producer with forced close after timeout, purging any outgoing data
     def close!

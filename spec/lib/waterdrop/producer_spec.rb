@@ -140,6 +140,26 @@ RSpec.describe_current do
     end
   end
 
+  describe '#idempotent?' do
+    context 'when producer is transactional' do
+      subject(:producer) { create(:transactional_producer) }
+
+      it { expect(producer.idempotent?).to eq(true) }
+    end
+
+    context 'when it is a regular producer' do
+      subject(:producer) { create(:producer) }
+
+      it { expect(producer.idempotent?).to eq(false) }
+    end
+
+    context 'when it is an idempotent producer' do
+      subject(:producer) { create(:idempotent_producer) }
+
+      it { expect(producer.idempotent?).to eq(true) }
+    end
+  end
+
   describe '#close' do
     before { allow(producer).to receive(:client).and_call_original }
 
