@@ -92,4 +92,38 @@ RSpec.describe_current do
       end
     end
   end
+
+  context 'when having an idempotent producer with alterations' do
+    subject(:producer) { build(:idempotent_producer) }
+
+    let(:variant) { producer.with(topic_config: { 'message.timeout.ms': 10_000 }) }
+
+    it 'expect to use the settings' do
+      expect do
+        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+      end.not_to raise_error
+    end
+
+    context 'when trying to overwrite acks on a idempotent producer' do
+      let(:variant) { producer.with(topic_config: { acks: 1 }) }
+
+      it 'expect not to allow it' do
+        expect do
+          variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+        end.to raise_error(config_error)
+      end
+    end
+  end
+
+  context 'when trying to lower the acks on an idempotent producer' do
+    subject(:variant) { producer.variant(topic_config: { acks: 1 }) }
+
+    let(:producer) { build(:idempotent_producer) }
+
+    it 'expect not to allow it' do
+      expect do
+        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+      end.to raise_error(config_error)
+    end
+  end
 end
