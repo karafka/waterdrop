@@ -9,6 +9,7 @@ RSpec.describe_current do
       default: true,
       max_wait_timeout: 10,
       transactional: false,
+      idempotent: false,
       topic_config: {
         'request.required.acks': -1,
         acks: 'all',
@@ -79,6 +80,24 @@ RSpec.describe_current do
   context 'when producer is transactional and we try to redefine request.required.acks' do
     before do
       variant[:transactional] = true
+      variant[:topic_config][:'request.required.acks'] = 1
+    end
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when producer is idempotent and we try to redefine acks' do
+    before do
+      variant[:idempotent] = true
+      variant[:topic_config][:acks] = 1
+    end
+
+    it { expect(contract_result).not_to be_success }
+  end
+
+  context 'when producer is idempotent and we try to redefine request.required.acks' do
+    before do
+      variant[:idempotent] = true
       variant[:topic_config][:'request.required.acks'] = 1
     end
 

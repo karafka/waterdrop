@@ -85,6 +85,23 @@ module WaterDrop
 
         errors
       end
+
+      # Prevent from creating variants altering acks when idempotent
+      virtual do |config, errors|
+        next true unless errors.empty?
+        # Relevant only for the transactional producer
+        next true unless config.fetch(:idempotent)
+
+        errors = []
+
+        config
+          .fetch(:topic_config)
+          .keys
+          .select { |key| key.to_s.include?('acks') }
+          .each { |key| errors << [[:kafka, key], :kafka_key_acks_not_changeable] }
+
+        errors
+      end
     end
   end
 end
