@@ -25,5 +25,15 @@ RSpec.describe_current do
           .not_to raise_error
       end
     end
+
+    context 'when we try to create and use transactional producer without idempotence' do
+      subject(:producer) { build(:transactional_producer, idempotent: false) }
+
+      it 'expect not to allow it' do
+        expect do
+          producer.produce_sync(topic: 'test', payload: 'test')
+        end.to raise_error(Rdkafka::Config::ClientCreationError)
+      end
+    end
   end
 end

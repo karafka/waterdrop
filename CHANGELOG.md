@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.3 (Unreleased)
+- [Enhancement] Provide `#idempontent?` similar to `#transactional?`.
 - [Enhancement] Provide alias to `#with` named `#variant`.
 
 ## 2.7.2 (2024-05-09)

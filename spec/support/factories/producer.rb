@@ -40,6 +40,7 @@ FactoryBot.define do
       transactional_id { SecureRandom.uuid }
       transaction_timeout_ms { 30_000 }
       request_required_acks { 'all' }
+      idempotent { true }
     end
 
     kafka do
@@ -48,7 +49,8 @@ FactoryBot.define do
         'request.required.acks': request_required_acks,
         'transactional.id': transactional_id,
         'transaction.timeout.ms': transaction_timeout_ms,
-        'message.timeout.ms': transaction_timeout_ms
+        'message.timeout.ms': transaction_timeout_ms,
+        'enable.idempotence': idempotent
       }
     end
   end
