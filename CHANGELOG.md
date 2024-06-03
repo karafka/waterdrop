@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.3 (Unreleased)
+- [Enhancement] Cache middleware reference saving 1 object allocation on each message dispatch.
 - [Enhancement] Provide `#idempotent?` similar to `#transactional?`.
 - [Enhancement] Provide alias to `#with` named `#variant`.
 - [Fix] Prevent from creating `acks` altering variants on idempotent producers.

@@ -21,7 +21,7 @@ module WaterDrop
 
     private_constant :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH
 
-    def_delegators :config, :middleware
+    def_delegators :config
 
     # @return [String] uuid of the current producer
     attr_reader :id
@@ -162,6 +162,12 @@ module WaterDrop
       return @idempotent if instance_variable_defined?(:'@idempotent')
 
       @idempotent = config.kafka.to_h.key?(:'enable.idempotence')
+    end
+
+    # Returns and caches the middleware object that may be used
+    # @return [WaterDrop::Producer::Middleware]
+    def middleware
+      @middleware ||= config.middleware
     end
 
     # Flushes the buffers in a sync way and closes the producer
@@ -317,7 +323,7 @@ module WaterDrop
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
 
-      label = caller_locations(2, 1)[0].label.split(' ').last
+      label = caller_locations(2, 1)[0].label.split(' ').last.split('#').last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
