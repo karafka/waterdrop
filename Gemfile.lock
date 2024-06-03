@@ -41,6 +41,7 @@ GEM
     mini_portile2 (2.8.7)
     minitest (5.23.1)
     mutex_m (0.2.0)
+    ostruct (0.6.0)
     rake (13.2.1)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
@@ -72,6 +73,7 @@ PLATFORMS
 DEPENDENCIES
   byebug
   factory_bot
+  ostruct
   rspec
   simplecov
   waterdrop!
