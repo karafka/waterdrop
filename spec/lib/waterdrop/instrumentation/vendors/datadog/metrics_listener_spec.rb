@@ -260,4 +260,34 @@ RSpec.describe_current do
       expect { listener.send(:report_metric, metric, statistics) }.to raise_error(ArgumentError)
     end
   end
+
+  context 'when trying to publish a topic level metric' do
+    before do
+      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      sleep(1)
+    end
+
+    let(:metric) { described_class::RdKafkaMetric.new(:gauge, :topics, 'topics.batchcnt.avg', %w[batchcnt avg]) }
+    let(:guages) { dummy_client.buffer[:gauge] }
+    let(:statistics) do
+      {
+        'name' => 'producer-1',
+        'brokers' => {},
+        'topics' => {
+          'test' => {
+            'topic' => 'test',
+            'batchcnt' => {
+              'avg' => 6956
+            }
+          }
+        }
+      }
+    end
+
+    before { listener.send(:report_metric, metric, statistics) }
+
+    it 'report metric will publish statistic with topic tag' do
+      expect(guages['waterdrop.topics.batchcnt.avg']).to eql [[6956, { tags: ['topic:test'] }]]
+    end
+  end
 end
