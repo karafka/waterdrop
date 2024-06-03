@@ -199,6 +199,16 @@ module WaterDrop
                   tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
                 )
               end
+            when :topics
+              statistics.fetch('topics').each_value do |topic_statistics|
+
+                public_send(
+                  metric.type,
+                  metric.name,
+                  topic_statistics.dig(*metric.key_location),
+                  tags: default_tags + ["topic:#{topic_statistics['topic']}"]
+                )
+              end
             else
               raise ArgumentError, metric.scope
             end
