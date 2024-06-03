@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'factory_bot'
+require 'ostruct'
 
 coverage = !ENV.key?('GITHUB_WORKFLOW')
 coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
