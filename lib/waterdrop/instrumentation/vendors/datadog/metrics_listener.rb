@@ -201,7 +201,6 @@ module WaterDrop
               end
             when :topics
               statistics.fetch('topics').each_value do |topic_statistics|
-
                 public_send(
                   metric.type,
                   metric.name,
