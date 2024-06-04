@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.3 (Unreleased)
+- [Enhancement] Add topic scope to `report_metric` (YadhuPrakash)
 - [Enhancement] Cache middleware reference saving 1 object allocation on each message dispatch.
 - [Enhancement] Provide `#idempotent?` similar to `#transactional?`.
 - [Enhancement] Provide alias to `#with` named `#variant`.
