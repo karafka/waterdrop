@@ -229,8 +229,6 @@ module WaterDrop
           with_transactional_error_handling(:abort, allow_abortable: false) do
             transactional_instrument(:aborted) { client.abort_transaction }
           end
-
-          raise
         end
 
         raise
