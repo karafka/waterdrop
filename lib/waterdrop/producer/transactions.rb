@@ -85,15 +85,25 @@ module WaterDrop
           #
           # rubocop:disable Lint/RescueException
           rescue Exception => e
-            # rubocop:enable Lint/RescueException
-            with_transactional_error_handling(:abort) do
-              transactional_instrument(:aborted) do
-                client.abort_transaction
+            # This code is a bit tricky. We have an error and when it happens we try to rollback
+            # the transaction. However we may end up in a state where transaction aborting itself
+            # produces error. In such case we also want to handle it as fatal and reload client.
+            # This is why we catch this here
+            begin
+              # rubocop:enable Lint/RescueException
+              with_transactional_error_handling(:abort) do
+                transactional_instrument(:aborted) do
+                  client.abort_transaction
+                end
               end
+            rescue StandardError => e
+              # If something from rdkafka leaks here, it means there was a non-retryable error that
+              # bubbled up. In such cases if we should, we do reload the underling client
+              transactional_reload_client_if_needed(e)
+
+              raise
             end
 
-            # If something from rdkafka leaks here, it means there was a non-retryable error that
-            # bubbled up. In such cases if we should, we do reload the underling client
             transactional_reload_client_if_needed(e)
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
@@ -248,9 +258,11 @@ module WaterDrop
       # putting aside performance implication of closing and reconnecting, this should not be an
       # issue.
       def transactional_reload_client_if_needed(error)
-        return unless error.cause.is_a?(Rdkafka::RdkafkaError)
+        rd_error = error.is_a?(Rdkafka::RdkafkaError) ? error : error.cause
+
+        return unless rd_error.is_a?(Rdkafka::RdkafkaError)
         return unless config.reload_on_transaction_fatal_error
-        return if NON_RELOADABLE_ERRORS.include?(error.cause.code)
+        return if NON_RELOADABLE_ERRORS.include?(rd_error.code)
 
         @operating_mutex.synchronize do
           @monitor.instrument(
