@@ -593,4 +593,53 @@ RSpec.describe_current do
       end
     end
   end
+
+  context 'when producer gets a critical broker errors with reload on' do
+    let(:topic) { SecureRandom.uuid }
+
+    let(:producer) do
+      WaterDrop::Producer.new do |config|
+        config.max_payload_size = 1_000_000_000_000
+        config.kafka = {
+          'bootstrap.servers': 'localhost:9092',
+          'transactional.id': SecureRandom.uuid,
+          'max.in.flight': 5
+        }
+      end
+    end
+
+    before do
+      admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
+      admin.create_topic(topic, 1, 1, 'max.message.bytes': 128).wait
+      admin.close
+    end
+
+    it 'expect to be able to use same producer after the error when async' do
+      errored = false
+
+      begin
+        producer.produce_async(topic: topic, payload: '1' * 512)
+      rescue WaterDrop::Errors::ProduceError
+        errored = true
+      end
+
+      expect(errored).to eq(true)
+
+      producer.produce_async(topic: topic, payload: '1')
+    end
+
+    it 'expect to be able to use same producer after the error when sync' do
+      errored = false
+
+      begin
+        producer.produce_sync(topic: topic, payload: '1' * 512)
+      rescue WaterDrop::Errors::ProduceError
+        errored = true
+      end
+
+      expect(errored).to eq(true)
+
+      producer.produce_sync(topic: topic, payload: '1')
+    end
+  end
 end
