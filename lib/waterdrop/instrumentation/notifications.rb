@@ -29,7 +29,6 @@ module WaterDrop
         transaction.aborted
         transaction.marked_as_consumed
         transaction.finished
-        transaction.reloaded
 
         buffer.flushed_async
         buffer.flushed_sync

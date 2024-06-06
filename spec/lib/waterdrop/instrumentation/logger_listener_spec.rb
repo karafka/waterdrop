@@ -217,6 +217,14 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include('Closing producer') }
   end
 
+  describe '#on_producer_reloaded' do
+    before { listener.on_producer_reloaded(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Producer successfully reloaded') }
+  end
+
   describe '#on_error_occurred' do
     before do
       details[:type] = 'error.type'
