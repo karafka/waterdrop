@@ -129,6 +129,11 @@ module WaterDrop
         info(event, 'Closing producer')
       end
 
+      # @param event [Dry::Events::Event] event that happened with the details
+      def on_producer_reloaded(event)
+        info(event, 'Producer successfully reloaded')
+      end
+
       # @param event [Dry::Events::Event] event that happened with the error details
       def on_error_occurred(event)
         error = event[:error]

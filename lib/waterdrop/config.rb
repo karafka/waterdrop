@@ -72,6 +72,10 @@ module WaterDrop
     # option [Numeric] How many times to retry a retryable transaction related error before
     #   giving up
     setting :max_attempts_on_transaction_command, default: 5
+    # When a fatal transactional error occurs, should we close and recreate the underlying producer
+    # to keep going or should we stop. Since we will open a new instance and the failed transaction
+    # anyhow rolls back, we should be able to safely reload.
+    setting :reload_on_transaction_fatal_error, default: true
 
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will

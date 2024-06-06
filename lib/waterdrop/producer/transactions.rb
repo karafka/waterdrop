@@ -4,10 +4,16 @@ module WaterDrop
   class Producer
     # Transactions related producer functionalities
     module Transactions
+      # We should never reload producer if it was fenced, otherwise we could end up with some sort
+      # of weird race-conditions
+      NON_RELOADABLE_ERRORS = %i[
+        fenced
+      ].freeze
+
       # Contract to validate that input for transactional offset storage is correct
       CONTRACT = Contracts::TransactionalOffset.new
 
-      private_constant :CONTRACT
+      private_constant :CONTRACT, :NON_RELOADABLE_ERRORS
 
       # Creates a transaction.
       #
@@ -79,10 +85,26 @@ module WaterDrop
           #
           # rubocop:disable Lint/RescueException
           rescue Exception => e
-            # rubocop:enable Lint/RescueException
-            with_transactional_error_handling(:abort) do
-              transactional_instrument(:aborted) { client.abort_transaction }
+            # This code is a bit tricky. We have an error and when it happens we try to rollback
+            # the transaction. However we may end up in a state where transaction aborting itself
+            # produces error. In such case we also want to handle it as fatal and reload client.
+            # This is why we catch this here
+            begin
+              # rubocop:enable Lint/RescueException
+              with_transactional_error_handling(:abort) do
+                transactional_instrument(:aborted) do
+                  client.abort_transaction
+                end
+              end
+            rescue StandardError => e
+              # If something from rdkafka leaks here, it means there was a non-retryable error that
+              # bubbled up. In such cases if we should, we do reload the underling client
+              transactional_reload_client_if_needed(e)
+
+              raise
             end
+
+            transactional_reload_client_if_needed(e)
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
           end
@@ -197,7 +219,12 @@ module WaterDrop
           attempt: attempt
         )
 
-        raise if e.fatal?
+        if e.fatal?
+          # Reload the client on fatal errors if requested
+          transactional_reload_client_if_needed(e)
+
+          raise
+        end
 
         if do_retry
           # Backoff more and more before retries
@@ -212,11 +239,42 @@ module WaterDrop
           with_transactional_error_handling(:abort, allow_abortable: false) do
             transactional_instrument(:aborted) { client.abort_transaction }
           end
-
-          raise
         end
 
         raise
+      end
+
+      # Reloads the underlying client instance if needed and allowed
+      #
+      # This should be used only in transactions as only then we can get fatal transactional
+      # errors and we can safely reload the client.
+      #
+      # @param error [Exception] any error that was raised
+      #
+      # @note We only reload on rdkafka errors that are a cause on messages dispatches.
+      # Because we reload on any errors where cause is `Rdkafka::RdkafkaError` (minus exclusions)
+      # this in theory can cause reload if it was something else that raised those in transactions,
+      # for example Karafka. This is a trade-off. Since any error anyhow will cause a rollback,
+      # putting aside performance implication of closing and reconnecting, this should not be an
+      # issue.
+      def transactional_reload_client_if_needed(error)
+        rd_error = error.is_a?(Rdkafka::RdkafkaError) ? error : error.cause
+
+        return unless rd_error.is_a?(Rdkafka::RdkafkaError)
+        return unless config.reload_on_transaction_fatal_error
+        return if NON_RELOADABLE_ERRORS.include?(rd_error.code)
+
+        @operating_mutex.synchronize do
+          @monitor.instrument(
+            'producer.reloaded',
+            producer_id: id
+          ) do
+            @client.flush(current_variant.max_wait_timeout)
+            purge
+            @client.close
+            @client = Builder.new.call(self, @config)
+          end
+        end
       end
     end
   end

@@ -20,6 +20,7 @@ RSpec.describe_current do
       max_attempts_on_transaction_command_format: 5,
       instrument_on_wait_queue_full: true,
       max_attempts_on_transaction_command: 1,
+      reload_on_transaction_fatal_error: true,
       oauth: {
         token_provider_listener: false
       },
@@ -268,6 +269,13 @@ RSpec.describe_current do
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_on_queue_full]).not_to be_empty }
+  end
+
+  context 'when reload_on_transaction_fatal_error is not a boolean' do
+    before { config[:reload_on_transaction_fatal_error] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:reload_on_transaction_fatal_error]).not_to be_empty }
   end
 
   context 'when instrument_on_wait_queue_full is not a boolean' do
