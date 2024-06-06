@@ -81,7 +81,15 @@ module WaterDrop
           rescue Exception => e
             # rubocop:enable Lint/RescueException
             with_transactional_error_handling(:abort) do
-              transactional_instrument(:aborted) { client.abort_transaction }
+              transactional_instrument(:aborted) do
+                client.abort_transaction
+              end
+            end
+
+            # If something from rdkafka leaks here, it means there was a non-retryable error that
+            # bubbled up. In such cases if we should, we do reload the underling client
+            if e.cause.is_a?(Rdkafka::RdkafkaError) && config.reload_on_transaction_fatal_error
+              transactional_reload_client
             end
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
@@ -197,7 +205,12 @@ module WaterDrop
           attempt: attempt
         )
 
-        raise if e.fatal?
+        if e.fatal?
+          # Reload the client on fatal errors if requested
+          transactional_reload_client if config.reload_on_transaction_fatal_error
+
+          raise
+        end
 
         if do_retry
           # Backoff more and more before retries
@@ -217,6 +230,23 @@ module WaterDrop
         end
 
         raise
+      end
+
+      # Reloads the underlying client instance
+      # This should be used only in transactions as only then we can get fatal transactional
+      # errors and we can safely reload the client.
+      def transactional_reload_client
+        @operating_mutex.synchronize do
+          @monitor.instrument(
+            'producer.reloaded',
+            producer_id: id
+          ) do
+            @client.flush(current_variant.max_wait_timeout)
+            purge
+            @client.close
+            @client = Builder.new.call(self, @config)
+          end
+        end
       end
     end
   end

@@ -26,6 +26,7 @@ module WaterDrop
       required(:wait_timeout_on_queue_full) { |val| val.is_a?(Numeric) && val >= 0 }
       required(:wait_backoff_on_transaction_command) { |val| val.is_a?(Numeric) && val >= 0 }
       required(:max_attempts_on_transaction_command) { |val| val.is_a?(Integer) && val >= 1 }
+      required(:reload_on_transaction_fatal_error) { |val| [true, false].include?(val) }
 
       nested(:oauth) do
         required(:token_provider_listener) do |val|
