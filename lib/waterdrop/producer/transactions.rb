@@ -241,13 +241,13 @@ module WaterDrop
       # This should be used only in transactions as only then we can get fatal transactional
       # errors and we can safely reload the client.
       #
-      # @param error [Exception] any erro that was raised
+      # @param error [Exception] any error that was raised
       #
       # @note We only reload on rdkafka errors that are a cause on messages dispatches.
       # Because we reload on any errors where cause is `Rdkafka::RdkafkaError` (minus exclusions)
       # this in theory can cause reload if it was something else that raised those in transactions,
-      # for example Karafka. This is a tradeoff. Since any error anyhow will cause a rollback,
-      # putting aside performace implication of closing and reconnecting, this should not be an
+      # for example Karafka. This is a trade-off. Since any error anyhow will cause a rollback,
+      # putting aside performance implication of closing and reconnecting, this should not be an
       # issue.
       def transactional_reload_client_if_needed(error)
         return unless error.cause.is_a?(Rdkafka::RdkafkaError)
