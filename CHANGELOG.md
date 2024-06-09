@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.7.3 (Unreleased)
+## 2.7.3 (2024-06-09)
 - [Enhancement] Introduce `reload_on_transaction_fatal_error` to reload the librdkafka after transactional failures
 - [Enhancement] Flush on fatal transactional errors.
 - [Enhancement] Add topic scope to `report_metric` (YadhuPrakash)
