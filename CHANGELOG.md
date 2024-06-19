@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.7.4 (Unreleased)
+- [Change] Require 'karafka-core' `>= 2.4.3`
+
 ## 2.7.3 (2024-06-09)
 - [Enhancement] Introduce `reload_on_transaction_fatal_error` to reload the librdkafka after transactional failures
 - [Enhancement] Flush on fatal transactional errors.
