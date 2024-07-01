@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.4 (Unreleased)
+- [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
 - [Change] Require 'karafka-core' `>= 2.4.3`
 
 ## 2.7.3 (2024-06-09)

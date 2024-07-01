@@ -193,7 +193,8 @@ module WaterDrop
       # @param log_message [String] message we want to publish
       def info(event, log_message)
         if event.payload.key?(:time)
-          @logger.info("[#{event[:producer_id]}] #{log_message} took #{event[:time]} ms")
+          time = event[:time].round(2)
+          @logger.info("[#{event[:producer_id]}] #{log_message} took #{time} ms")
         else
           @logger.info("[#{event[:producer_id]}] #{log_message}")
         end
