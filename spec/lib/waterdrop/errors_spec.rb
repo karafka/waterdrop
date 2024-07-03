@@ -66,4 +66,17 @@ RSpec.describe_current do
 
     specify { expect(error).to be < described_class::BaseError }
   end
+
+  # Aliases for better DX
+  describe 'root AbortTransaction' do
+    subject(:error) { WaterDrop::AbortTransaction }
+
+    specify { expect(error).to eq described_class::AbortTransaction }
+  end
+
+  describe 'root Rollback' do
+    subject(:error) { WaterDrop::Rollback }
+
+    specify { expect(error).to eq described_class::AbortTransaction }
+  end
 end
