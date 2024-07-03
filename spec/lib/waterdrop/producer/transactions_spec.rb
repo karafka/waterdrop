@@ -597,6 +597,20 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we are inside a transaction and early break' do
+    it 'expect not to corrupt the state of the producer' do
+      10.times do
+        producer.transaction { break }
+        producer.transaction {}
+      end
+    end
+
+    it 'expect to return nil' do
+      result = producer.transaction { break(10) }
+      expect(result).to eq(nil)
+    end
+  end
+
   context 'when producer gets a critical broker errors with reload on' do
     let(:topic) { SecureRandom.uuid }
 

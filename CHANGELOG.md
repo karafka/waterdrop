@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.7.4 (Unreleased)
+- [Fix] Consumer consuming error: Local: Erroneous state (state) post break flow in transaction.
 - [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
 - [Change] Require 'karafka-core' `>= 2.4.3`
 
