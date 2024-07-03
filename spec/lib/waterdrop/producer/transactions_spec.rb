@@ -597,6 +597,32 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we are inside a transaction and early break' do
+    it 'expect not to corrupt the state of the producer' do
+      10.times do
+        producer.transaction { break }
+        producer.transaction {}
+      end
+    end
+
+    it 'expect to return nil' do
+      result = producer.transaction { break(10) }
+      expect(result).to eq(nil)
+    end
+
+    it 'expect to cancel dispatches' do
+      handler = nil
+
+      producer.transaction do
+        handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+
+        break
+      end
+
+      expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+    end
+  end
+
   context 'when producer gets a critical broker errors with reload on' do
     let(:topic) { SecureRandom.uuid }
 

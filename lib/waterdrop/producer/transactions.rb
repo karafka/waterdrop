@@ -35,7 +35,8 @@ module WaterDrop
       # with a transaction. One transaction per single dispatch and for `produce_many` it will be
       # a single transaction wrapping all messages dispatches (not one per message).
       #
-      # @return Block result
+      # @param block [Proc] block of code that should run
+      # @return Block result or `nil` in case of early break/return
       #
       # @example Simple transaction
       #   producer.transaction do
@@ -54,7 +55,7 @@ module WaterDrop
       #             end
       #
       #   handler.wait
-      def transaction
+      def transaction(&block)
         # This will safely allow us to support one operation transactions so a transactional
         # producer can work without the transactional block if needed
         return yield if @transaction_mutex.owned?
@@ -65,13 +66,7 @@ module WaterDrop
               transactional_instrument(:started) { client.begin_transaction }
             end
 
-            result = nil
-            commit = false
-
-            catch(:abort) do
-              result = yield
-              commit = true
-            end
+            result, commit = transactional_execute(&block)
 
             commit || raise(WaterDrop::Errors::AbortTransaction)
 
@@ -82,15 +77,12 @@ module WaterDrop
             result
           # We need to handle any interrupt including critical in order not to have the transaction
           # running. This will also handle things like `IRB::Abort`
-          #
-          # rubocop:disable Lint/RescueException
           rescue Exception => e
             # This code is a bit tricky. We have an error and when it happens we try to rollback
             # the transaction. However we may end up in a state where transaction aborting itself
             # produces error. In such case we also want to handle it as fatal and reload client.
             # This is why we catch this here
             begin
-              # rubocop:enable Lint/RescueException
               with_transactional_error_handling(:abort) do
                 transactional_instrument(:aborted) do
                   client.abort_transaction
@@ -174,6 +166,27 @@ module WaterDrop
       # @param block [Proc] code we want to run
       def with_transaction_if_transactional(&block)
         transactional? ? transaction(&block) : yield
+      end
+
+      # Executes the requested code in a transaction with error handling and ensures, that upon
+      # early break we rollback the transaction instead of having it dangling and causing an issue
+      # where transactional producer would end up in an error state.
+      def transactional_execute
+        result = nil
+        commit = false
+
+        catch(:abort) do
+          result = yield
+          commit = true
+        end
+
+        [result, commit]
+      rescue Exception => e
+        errored = true
+
+        raise e
+      ensure
+        return [result, commit] unless errored
       end
 
       # Instruments the transactional operation with producer id
