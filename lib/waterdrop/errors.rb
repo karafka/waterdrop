@@ -64,8 +64,4 @@ module WaterDrop
   # Alias so we can have a nicer API to abort transactions
   # This makes referencing easier
   AbortTransaction = Errors::AbortTransaction
-
-  # Alias so we can have a nicer API to abort transactions
-  # This mimics Rails convention
-  Rollback = Errors::AbortTransaction
 end

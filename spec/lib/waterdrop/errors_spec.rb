@@ -73,10 +73,4 @@ RSpec.describe_current do
 
     specify { expect(error).to eq described_class::AbortTransaction }
   end
-
-  describe 'root Rollback' do
-    subject(:error) { WaterDrop::Rollback }
-
-    specify { expect(error).to eq described_class::AbortTransaction }
-  end
 end
