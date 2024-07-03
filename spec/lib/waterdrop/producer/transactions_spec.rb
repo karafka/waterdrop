@@ -609,6 +609,18 @@ RSpec.describe_current do
       result = producer.transaction { break(10) }
       expect(result).to eq(nil)
     end
+
+    it 'expect to cancel dispatches' do
+      handler = nil
+
+      producer.transaction do
+        handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+
+        break
+      end
+
+      expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+    end
   end
 
   context 'when producer gets a critical broker errors with reload on' do
