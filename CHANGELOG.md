@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.7.4 (Unreleased)
+## 2.7.4 (2024-07-04)
 - [Maintenance] Alias `WaterDrop::Errors::AbortTransaction` with `WaterDrop::AbortTransaction`.
 - [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.
 - [Fix] Consumer consuming error: Local: Erroneous state (state) post break flow in transaction.
