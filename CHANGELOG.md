@@ -5,7 +5,7 @@
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
 - **[Breaking]** Remove ability to abort transactions using `throw(:abort)`. Please use `raise WaterDrop::Errors::AbortTransaction`.
-- **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return` or `break`.
+- **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return`, `break` or `throw`.
 
 ### Upgrade Notes
 
