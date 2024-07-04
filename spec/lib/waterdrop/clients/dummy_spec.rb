@@ -111,18 +111,10 @@ RSpec.describe_current do
       end
     end
 
-    context 'when abort occurs' do
+    context 'when WaterDrop::AbortTransaction occurs' do
       it 'expect not to raise error' do
         expect do
-          producer.transaction { throw(:abort) }
-        end.not_to raise_error
-      end
-    end
-
-    context 'when WaterDrop::Errors::AbortTransaction error occurs' do
-      it 'expect not to raise error' do
-        expect do
-          producer.transaction { raise(WaterDrop::Errors::AbortTransaction) }
+          producer.transaction { raise(WaterDrop::AbortTransaction) }
         end.not_to raise_error
       end
     end

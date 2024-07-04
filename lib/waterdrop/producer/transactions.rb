@@ -35,7 +35,6 @@ module WaterDrop
       # with a transaction. One transaction per single dispatch and for `produce_many` it will be
       # a single transaction wrapping all messages dispatches (not one per message).
       #
-      # @param block [Proc] block of code that should run
       # @return Block result or `nil` in case of early break/return
       #
       # @example Simple transaction
@@ -46,7 +45,7 @@ module WaterDrop
       # @example Aborted transaction - messages producer won't be visible by consumers
       #   producer.transaction do
       #     producer.produce_sync(topic: 'topic', payload: 'data')
-      #     throw(:abort)
+      #     raise WaterDrop::AbortTransaction
       #   end
       #
       # @example Use block result last handler to wait on all messages ack
@@ -55,7 +54,7 @@ module WaterDrop
       #             end
       #
       #   handler.wait
-      def transaction(&block)
+      def transaction
         # This will safely allow us to support one operation transactions so a transactional
         # producer can work without the transactional block if needed
         return yield if @transaction_mutex.owned?
@@ -66,9 +65,26 @@ module WaterDrop
               transactional_instrument(:started) { client.begin_transaction }
             end
 
-            result, commit = transactional_execute(&block)
+            result = nil
+            finished = false
 
-            commit || raise(WaterDrop::Errors::AbortTransaction)
+            begin
+              result = yield
+              finished = true
+            rescue Exception => e
+              raise(e)
+            ensure
+              if !e && !finished
+                raise(
+                  Errors::EarlyTransactionExitNotAllowedError,
+                  <<~ERROR_MSG.tr("\n", ' ')
+                    Using `return`, `break` or `throw` to exit a transaction block is not allowed.
+                    If the `throw` came from `Timeout.timeout(duration)`, pass an exception class as
+                    a second argument so it doesn't use `throw` to abort its block.
+                  ERROR_MSG
+                )
+              end
+            end
 
             with_transactional_error_handling(:commit) do
               transactional_instrument(:committed) { client.commit_transaction }
@@ -166,27 +182,6 @@ module WaterDrop
       # @param block [Proc] code we want to run
       def with_transaction_if_transactional(&block)
         transactional? ? transaction(&block) : yield
-      end
-
-      # Executes the requested code in a transaction with error handling and ensures, that upon
-      # early break we rollback the transaction instead of having it dangling and causing an issue
-      # where transactional producer would end up in an error state.
-      def transactional_execute
-        result = nil
-        commit = false
-
-        catch(:abort) do
-          result = yield
-          commit = true
-        end
-
-        [result, commit]
-      rescue Exception => e
-        errored = true
-
-        raise e
-      ensure
-        return [result, commit] unless errored
       end
 
       # Instruments the transactional operation with producer id

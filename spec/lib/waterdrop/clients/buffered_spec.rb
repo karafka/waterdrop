@@ -111,7 +111,7 @@ RSpec.describe_current do
             producer.produce_sync(topic: 'test', payload: 'test')
             producer.produce_sync(topic: 'test', payload: 'test')
 
-            throw(:abort)
+            raise WaterDrop::AbortTransaction
           end
         end
 
@@ -123,14 +123,15 @@ RSpec.describe_current do
     context 'when abort occurs' do
       it 'expect not to raise error' do
         expect do
-          producer.transaction { throw(:abort) }
+          producer.transaction { raise WaterDrop::AbortTransaction }
         end.not_to raise_error
       end
 
       it 'expect not to contain messages from the aborted transaction' do
         producer.transaction do
           producer.produce_sync(topic: 'test', payload: 'test')
-          throw(:abort)
+
+          raise WaterDrop::AbortTransaction
         end
 
         expect(client.messages.size).to eq(3)
@@ -138,10 +139,10 @@ RSpec.describe_current do
       end
     end
 
-    context 'when WaterDrop::Errors::AbortTransaction error occurs' do
+    context 'when WaterDrop::AbortTransaction error occurs' do
       it 'expect not to raise error' do
         expect do
-          producer.transaction { raise(WaterDrop::Errors::AbortTransaction) }
+          producer.transaction { raise(WaterDrop::AbortTransaction) }
         end.not_to raise_error
       end
     end
