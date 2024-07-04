@@ -1,5 +1,96 @@
 # WaterDrop changelog
 
+## 2.8.0 (Unreleased)
+
+This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
+
+- **[Breaking]** Remove ability to abort transactions using `throw(:abort)`. Please use `raise WaterDrop::Errors::AbortTransaction`.
+- **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return` or `break`.
+
+### Upgrade Notes
+
+**PLEASE MAKE SURE TO READ AND APPLY THEM!**
+
+#### `throw(:abort)` No Longer Allowed To Abort Transactions
+
+Replace:
+
+```ruby
+producer.transaction do
+  messages.each do |message|
+    # Pipe all events
+    producer.produce_async(topic: 'events', payload: message.raw_payload)
+  end
+
+  # And abort if more events are no longer needed
+  throw(:abort) if KnowledgeBase.more_events_needed?
+end
+```
+
+With:
+
+```ruby
+producer.transaction do
+  messages.each do |message|
+    # Pipe all events
+    producer.produce_async(topic: 'events', payload: message.raw_payload)
+  end
+
+  # And abort if more events are no longer needed
+  raise(WaterDrop::AbortTransaction) if KnowledgeBase.more_events_needed?
+end
+```
+
+#### `return`, `break` and `throw` No Longer Allowed Inside Transaction Block
+
+Previously, transactions would abort if you exited early using `return`, `break`, or `throw`. This could create unexpected behavior, where users might not notice the rollback or have different intentions. For example, the following would trigger a rollback:
+
+```ruby
+MAX = 10
+
+def process(messages)
+  count = 0
+
+  producer.transaction do
+    messages.each do |message|
+      count += 1
+
+      producer.produce_async(topic: 'events', payload: message.raw_payload)
+
+      # This would trigger a rollback.
+      return if count >= MAX
+    end
+  end
+end
+```
+
+This is a source of errors, hence such exits are no longer allowed. You can implement similar flow control inside of your methods that are wrapped in a WaterDrop transaction:
+
+```ruby
+MAX = 10
+
+def process(messages)
+  producer.transaction do
+    # Early return from this method will not affect the transaction.
+    # It will be committed
+    insert_with_limit(messages)
+  end
+end
+
+def insert_with_limit(messages)
+  count = 0
+
+  messages.each do |message|
+    count += 1
+
+    producer.produce_async(topic: 'events', payload: message.raw_payload)
+
+    # This would trigger a rollback.
+    return if count >= MAX
+  end
+end
+```
+
 ## 2.7.4 (2024-07-04)
 - [Maintenance] Alias `WaterDrop::Errors::AbortTransaction` with `WaterDrop::AbortTransaction`.
 - [Maintenance] Lower the precision reporting to 100 microseconds in the logger listener.

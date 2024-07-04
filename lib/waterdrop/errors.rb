@@ -47,6 +47,9 @@ module WaterDrop
     # graceful transaction aborting
     AbortTransaction = Class.new(BaseError)
 
+    # Do not use `break`, `return` or `throw` inside of the transaction blocks
+    EarlyTransactionExitNotAllowedError = Class.new(BaseError)
+
     # Raised when during messages producing something bad happened inline
     class ProduceManyError < ProduceError
       attr_reader :dispatched

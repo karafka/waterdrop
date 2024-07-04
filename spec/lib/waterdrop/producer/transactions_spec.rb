@@ -256,7 +256,7 @@ RSpec.describe_current do
         producer.transaction do
           producer.produce_async(topic: 'example_topic', payload: 'na')
 
-          throw(:abort)
+          raise WaterDrop::AbortTransaction
         end
       end.not_to raise_error
     end
@@ -267,7 +267,7 @@ RSpec.describe_current do
       producer.transaction do
         handler = producer.produce_async(topic: 'example_topic', payload: 'na')
 
-        raise WaterDrop::Errors::AbortTransaction
+        raise WaterDrop::AbortTransaction
       end
 
       expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
@@ -289,7 +289,7 @@ RSpec.describe_current do
         producer.transaction do
           producer.produce_async(topic: 'example_topic', payload: 'na')
 
-          throw(:abort)
+          raise(WaterDrop::AbortTransaction)
         end
       end
 
@@ -313,7 +313,7 @@ RSpec.describe_current do
           expect(result.partition).to eq(0)
           expect(result.error).to eq(nil)
 
-          throw(:abort)
+          raise(WaterDrop::AbortTransaction)
         end
 
         # It will be compacted but is still visible as a delivery report
@@ -329,7 +329,7 @@ RSpec.describe_current do
         producer.transaction do
           handler = producer.produce_async(topic: 'example_topic', payload: 'na')
 
-          throw(:abort)
+          raise(WaterDrop::AbortTransaction)
         end
 
         result = handler.create_result
@@ -512,7 +512,7 @@ RSpec.describe_current do
 
           producer.transaction do
             handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
-            throw(:abort)
+            raise(WaterDrop::AbortTransaction)
           end
         end
 
@@ -598,28 +598,40 @@ RSpec.describe_current do
   end
 
   context 'when we are inside a transaction and early break' do
-    it 'expect not to corrupt the state of the producer' do
-      10.times do
+    it 'expect to raise error' do
+      expect do
         producer.transaction { break }
-        producer.transaction {}
-      end
-    end
-
-    it 'expect to return nil' do
-      result = producer.transaction { break(10) }
-      expect(result).to eq(nil)
+      end.to raise_error WaterDrop::Errors::EarlyTransactionExitNotAllowedError
     end
 
     it 'expect to cancel dispatches' do
       handler = nil
 
-      producer.transaction do
-        handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+      begin
+        producer.transaction do
+          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
 
-        break
+          break
+        end
+      rescue WaterDrop::Errors::EarlyTransactionExitNotAllowedError
+        expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+      end
+    end
+
+    it 'expect not to affect the client state in an inconsistent way' do
+      begin
+        producer.transaction do
+          break
+        end
+      rescue WaterDrop::Errors::EarlyTransactionExitNotAllowedError
+        nil
       end
 
-      expect { handler.wait }.to raise_error(Rdkafka::RdkafkaError, /Purged in queue/)
+      handler = producer.transaction do
+        producer.produce_async(topic: 'example_topic', payload: 'na')
+      end
+
+      expect { handler.wait }.not_to raise_error
     end
   end
 
@@ -669,6 +681,54 @@ RSpec.describe_current do
       expect(errored).to eq(true)
 
       producer.produce_sync(topic: topic, payload: '1')
+    end
+  end
+
+  context 'when wrapping an early return method with a transaction' do
+    let(:operation) do
+      Class.new do
+        def call(producer, handlers)
+          handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+
+          return unless handlers.empty?
+
+          # Never to be reached, expected in this spec
+          handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+        end
+      end
+    end
+
+    it 'expect to work correctly' do
+      handlers = []
+
+      producer.transaction do
+        operation.new.call(producer, handlers)
+      end
+
+      expect { handlers.map!(&:wait) }.not_to raise_error
+    end
+  end
+
+  context 'when wrapping an early break block with a transaction' do
+    let(:operation) do
+      lambda do |producer, handlers|
+        handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+
+        return unless handlers.empty?
+
+        # Never to be reached, expected in this spec
+        handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+      end
+    end
+
+    it 'expect to work correctly' do
+      handlers = []
+
+      producer.transaction do
+        operation.call(producer, handlers)
+      end
+
+      expect { handlers.map!(&:wait) }.not_to raise_error
     end
   end
 end
