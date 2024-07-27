@@ -214,7 +214,9 @@ RSpec.describe_current do
 
         # It will be compacted but is still visible as a delivery report
         expect(result.partition).to eq(-1).or eq(0)
-        expect(result.offset).to eq(-1_001)
+        # This can be either rejected in-flight or after delivery to kafka despite async under
+        # heavy load, so offset may be assigned
+        expect(result.offset).to(satisfy { |offset| offset == -1001 || offset > -1 })
         expect(result.error).to be_a(Rdkafka::RdkafkaError)
       end
     end
