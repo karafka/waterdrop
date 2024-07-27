@@ -10,6 +10,9 @@ module WaterDrop
     include Transactions
     include ::Karafka::Core::Helpers::Time
 
+    # Local storage for given thread waterdrop client references for variants
+    ::Fiber.send(:attr_accessor, :waterdrop_clients)
+
     # Which of the inline flow errors do we want to intercept and re-bind
     SUPPORTED_FLOW_ERRORS = [
       Rdkafka::RdkafkaError,
@@ -276,10 +279,11 @@ module WaterDrop
       )
     end
 
-    # @return [Producer::Context] the variant config. Either custom if built using `#with` or
+    # @return [Producer::Variant] the variant config. Either custom if built using `#with` or
     #   a default one.
     def current_variant
-      Thread.current[id] || @default_variant
+      Fiber.current.waterdrop_clients ||= {}
+      Fiber.current.waterdrop_clients[id] || @default_variant
     end
 
     # Runs the client produce method with a given message
