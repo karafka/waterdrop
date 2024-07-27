@@ -76,11 +76,12 @@ module WaterDrop
         scope.instance_methods(false).each do |method_name|
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def #{method_name}(*args, &block)
-              Thread.current[@producer.id] = self
+              ref = Fiber.current.waterdrop_clients ||= {}
+              ref[@producer.id] = self
 
               @producer.#{method_name}(*args, &block)
             ensure
-              Thread.current[@producer.id] = nil
+              ref[@producer.id] = nil
             end
           RUBY
         end
