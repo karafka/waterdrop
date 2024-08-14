@@ -7,6 +7,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Remove ability to abort transactions using `throw(:abort)`. Please use `raise WaterDrop::Errors::AbortTransaction`.
 - **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return`, `break` or `throw`.
 - [Enhancement] Make variants fiber safe.
+- [Enhancement] In transactional mode do not return any `dispatched` messages as none will be dispatched due to rollback.
 
 ### Upgrade Notes
 

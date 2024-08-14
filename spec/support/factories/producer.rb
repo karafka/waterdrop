@@ -9,6 +9,7 @@ FactoryBot.define do
     max_wait_timeout { 30_000 }
     wait_on_queue_full { false }
     wait_timeout_on_queue_full { 1_000 }
+    max_payload_size { 1_000_012 }
 
     kafka do
       {
@@ -27,6 +28,7 @@ FactoryBot.define do
         config.max_wait_timeout = max_wait_timeout
         config.wait_on_queue_full = wait_on_queue_full
         config.wait_timeout_on_queue_full = wait_timeout_on_queue_full
+        config.max_payload_size = max_payload_size
       end
 
       instance.monitor.subscribe(::WaterDrop::Instrumentation::LoggerListener.new(logger))
