@@ -82,7 +82,11 @@ module WaterDrop
           'error.occurred',
           producer_id: id,
           messages: messages,
-          dispatched: dispatched,
+          # If it is a transactional producer nothing was successfully dispatched on error, thus
+          # we never return any dispatched handlers. While those messages might have reached
+          # Kafka, in transactional mode they will not be visible to consumers with correct
+          # isolation level.
+          dispatched: transactional? ? EMPTY_ARRAY : dispatched,
           error: re_raised,
           type: 'messages.produce_many_sync'
         )

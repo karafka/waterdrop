@@ -19,10 +19,13 @@ module WaterDrop
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
     ].freeze
 
-    # Empty has to save on memory allocations
+    # Empty hash to save on memory allocations
     EMPTY_HASH = {}.freeze
 
-    private_constant :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH
+    # Empty array to save on memory allocations
+    EMPTY_ARRAY = [].freeze
+
+    private_constant :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
 
     def_delegators :config
 
@@ -272,10 +275,13 @@ module WaterDrop
     # Waits on a given handler
     #
     # @param handler [Rdkafka::Producer::DeliveryHandle]
-    def wait(handler)
+    # @param raise_response_error [Boolean] should we raise the response error after we receive the
+    #   final result and it is an error.
+    def wait(handler, raise_response_error: true)
       handler.wait(
         # rdkafka max_wait_timeout is in seconds and we use ms
-        max_wait_timeout: current_variant.max_wait_timeout / 1_000.0
+        max_wait_timeout: current_variant.max_wait_timeout / 1_000.0,
+        raise_response_error: raise_response_error
       )
     end
 

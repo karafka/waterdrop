@@ -453,6 +453,35 @@ RSpec.describe_current do
         producer.produce_many_sync(messages)
         expect(counts.size).to eq(1)
       end
+
+      context 'when error occurs after few messages' do
+        subject(:producer) { build(:transactional_producer, max_payload_size: 10 * 1_024 * 1_024) }
+
+        let(:messages) do
+          too_big = build(:valid_message)
+          too_big[:payload] = '1' * 1024 * 1024
+
+          [
+            Array.new(9) { build(:valid_message) },
+            too_big
+          ].flatten
+        end
+
+        let(:dispatched) { [] }
+
+        before do
+          producer.monitor.subscribe('error.occurred') do |event|
+            dispatched << event[:dispatched]
+          end
+        end
+
+        it 'expect not to contain anything in the dispatched notification' do
+          expect { producer.produce_many_sync(messages) }
+            .to raise_error(WaterDrop::Errors::ProduceManyError)
+
+          expect(dispatched.flatten).to eq([])
+        end
+      end
     end
 
     context 'when using with produce_many_async' do
