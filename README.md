@@ -15,7 +15,7 @@ It:
  - Supports producing to multiple clusters
  - Supports multiple delivery policies
  - Supports per-topic configuration alterations (variants)
- - Works with Kafka `1.0+` and Ruby `3.0+`
+ - Works with Kafka `1.0+` and Ruby `3.1+`
  - Works with and without Karafka
 
 ## Documentation
