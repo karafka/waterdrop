@@ -117,7 +117,7 @@ RSpec.describe_current do
       let(:messages) { Array.new(10) { build(:valid_message) } }
 
       it 'expect all the results to be delivery handles' do
-        expect(delivery).to all be_a(Rdkafka::Producer::DeliveryReport)
+        expect(delivery).to all be_a(Rdkafka::Producer::DeliveryHandle)
       end
     end
   end

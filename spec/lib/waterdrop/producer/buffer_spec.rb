@@ -161,7 +161,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
     context 'when there are messages in the buffer' do
       before { producer.buffer(create(:valid_message)) }
 
-      it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryReport) }
+      it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryHandle) }
       it { expect(producer.tap(&:flush_sync).messages).to be_empty }
     end
 

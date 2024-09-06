@@ -61,17 +61,37 @@ module WaterDrop
         messages.each { |message| validate_message!(message) }
 
         dispatched = []
+        inline_error = nil
 
         @monitor.instrument('messages.produced_sync', producer_id: id, messages: messages) do
-          with_transaction_if_transactional do
-            messages.each do |message|
-              dispatched << produce(message)
+          # While most of the librdkafka errors are async and not inline, there are some like
+          # buffer overflow that can leak in during the `#produce` itself. When this happens, we
+          # still (since it's a sync mode) need to wait on deliveries of things that were
+          # successfully delegated to librdkafka. To do this, we catch the inline error and we
+          # wait on messages that were in the buffer to reach final state. Then if no error, we
+          # check each for error and if none all good. If there was an inline error, we re-raise
+          # it with the handlers in final states.
+          #
+          # Such flow ensures, that we never end up with handlers not being in the final states
+          # for the sync flow
+          begin
+            with_transaction_if_transactional do
+              messages.each do |message|
+                dispatched << produce(message)
+              end
             end
+          rescue *SUPPORTED_FLOW_ERRORS => e
+            inline_error = e
           end
 
-          dispatched.map! do |handler|
-            wait(handler)
-          end
+          # This will ensure, that we have all verdicts before raising the failure, so we pass
+          # all delivery handles having a final verdict
+          dispatched.each { |handler| wait(handler, raise_response_error: false) }
+
+          raise(inline_error) if inline_error
+
+          # This will raise an error on the first error that have happened
+          dispatched.each { |handler| wait(handler) }
 
           dispatched
         end

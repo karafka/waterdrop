@@ -8,6 +8,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return`, `break` or `throw`.
 - [Enhancement] Make variants fiber safe.
 - [Enhancement] In transactional mode do not return any `dispatched` messages as none will be dispatched due to rollback.
+- [Fix] Ensure, that `:dispatched` key for `#produce_many_sync` always contains delivery handles (final) and not delivery reports.
 
 ### Upgrade Notes
 
