@@ -31,7 +31,6 @@ GEM
     factory_bot (6.5.0)
       activesupport (>= 5.0.0)
     ffi (1.17.0)
-    ffi (1.17.0-x86_64-linux-gnu)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     karafka-core (2.4.3)
