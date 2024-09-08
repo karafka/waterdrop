@@ -1,0 +1,17 @@
+Copyright (c) Maciej Mensfeld
+
+WaterDrop is part of Karafka and it is an Open Source project licensed under the terms of
+the LGPLv3 license. Please see <https://github.com/karafka/karafka/blob/master/LICENSE-LGPL>
+for license text.
+
+Karafka ecosystem can also be used under commercial-friendly license, with commercial support and commercial components.
+
+All of the commercial components are present in the lib/karafka/pro and lib/karafka/web/pro
+directory of this repository and their usage requires commercial license agreement.
+
+By sending a pull request to the pro components, you are agreeing to transfer the copyright of your
+code to Maciej Mensfeld.
+
+You can find the commercial license in LICENSE-COMM <https://github.com/karafka/karafka/blob/master/LICENSE-COMM>.
+
+Please see https://karafka.io for purchasing options.
