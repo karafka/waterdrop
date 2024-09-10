@@ -4,6 +4,7 @@
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
+- **[Breaking]** Require Ruby `3.1+`.
 - **[Breaking]** Remove ability to abort transactions using `throw(:abort)`. Please use `raise WaterDrop::Errors::AbortTransaction`.
 - **[Breaking]** Disallow (similar to ActiveRecord) exiting transactions with `return`, `break` or `throw`.
 - **[Breaking]** License changed from MIT to LGPL with an additional commercial option. Note: there is no commercial code in this repository. The commercial license is available for companies unable to use LGPL-licensed software for legal reasons.
