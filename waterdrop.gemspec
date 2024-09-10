@@ -17,10 +17,10 @@ Gem::Specification.new do |spec|
   spec.licenses      = %w[LGPL-3.0-only Commercial]
 
   spec.add_dependency 'karafka-core', '>= 2.4.3', '< 3.0.0'
-  spec.add_dependency 'karafka-rdkafka', '>= 0.15.1'
+  spec.add_dependency 'karafka-rdkafka', '>= 0.17.5'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.required_ruby_version = '>= 3.1.0'
 
   if $PROGRAM_NAME.end_with?('gem')
     spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
