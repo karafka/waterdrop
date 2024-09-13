@@ -28,7 +28,7 @@ RSpec.describe_current do
 
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
-    it { expect(logged_data[0]).to include('Async producing of a message to') }
+    it { expect(logged_data[0]).to include('topic was delegated to a dispatch queue') }
     it { expect(logged_data[0]).to include(message[:topic]) }
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
@@ -39,7 +39,7 @@ RSpec.describe_current do
 
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
-      it { expect(logged_data[0]).to include('Async producing of a message to') }
+      it { expect(logged_data[0]).to include('topic was delegated to a dispatch queue') }
       it { expect(logged_data[0]).to include(message[:topic]) }
       it { expect(logged_data[1]).to eq(nil) }
     end
@@ -68,11 +68,13 @@ RSpec.describe_current do
   end
 
   describe '#on_messages_produced_async' do
+    let(:dispatched_msg) { '2 messages to 2 topics were delegated to a dispatch queue' }
+
     before { listener.on_messages_produced_async(event) }
 
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
-    it { expect(logged_data[0]).to include('Async producing of 2 messages to 2 topics') }
+    it { expect(logged_data[0]).to include(dispatched_msg) }
     it { expect(logged_data[1]).to include(producer.id) }
     it { expect(logged_data[1]).to include('DEBUG') }
     it { expect(logged_data[1]).to include(message.to_s) }
@@ -82,7 +84,7 @@ RSpec.describe_current do
 
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
-      it { expect(logged_data[0]).to include('Async producing of 2 messages to 2 topics') }
+      it { expect(logged_data[0]).to include(dispatched_msg) }
       it { expect(logged_data[1]).to eq(nil) }
     end
   end
