@@ -10,6 +10,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** License changed from MIT to LGPL with an additional commercial option. Note: there is no commercial code in this repository. The commercial license is available for companies unable to use LGPL-licensed software for legal reasons.
 - [Enhancement] Make variants fiber safe.
 - [Enhancement] In transactional mode do not return any `dispatched` messages as none will be dispatched due to rollback.
+- [Enhancement] Align the `LoggerListener` async messages to reflect, that messages are delegated to the internal queue and not dispatched.
 - [Fix] Ensure, that `:dispatched` key for `#produce_many_sync` always contains delivery handles (final) and not delivery reports.
 
 ### Upgrade Notes

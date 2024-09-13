@@ -26,7 +26,7 @@ module WaterDrop
       def on_message_produced_async(event)
         message = event[:message]
 
-        info(event, "Async producing of a message to '#{message[:topic]}' topic")
+        info(event, "Message to '#{message[:topic]}' topic was delegated to a dispatch queue")
 
         return unless log_messages?
 
@@ -49,7 +49,10 @@ module WaterDrop
         messages = event[:messages]
         topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
 
-        info(event, "Async producing of #{messages.size} messages to #{topics_count} topics")
+        info(
+          event,
+          "#{messages.size} messages to #{topics_count} topics were delegated to a dispatch queue"
+        )
 
         return unless log_messages?
 
