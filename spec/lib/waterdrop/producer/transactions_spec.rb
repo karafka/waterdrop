@@ -535,6 +535,8 @@ RSpec.describe_current do
     end
 
     context 'when we abort the nested transaction' do
+      subject(:producer) { build(:transactional_producer, queue_buffering_max_ms: 5_000) }
+
       it 'expect to abort all levels' do
         handlers = []
 
