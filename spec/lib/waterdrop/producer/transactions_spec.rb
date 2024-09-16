@@ -535,17 +535,15 @@ RSpec.describe_current do
     end
 
     context 'when we abort the nested transaction' do
+      subject(:producer) { build(:transactional_producer, queue_buffering_max_ms: 5_000) }
+
       it 'expect to abort all levels' do
         handlers = []
 
         producer.transaction do
           handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
 
-          sleep(0.1)
-
           producer.transaction do
-            sleep(0.1)
-
             handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
             raise(WaterDrop::AbortTransaction)
           end

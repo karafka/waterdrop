@@ -43,6 +43,7 @@ FactoryBot.define do
       transaction_timeout_ms { 30_000 }
       request_required_acks { 'all' }
       idempotent { true }
+      queue_buffering_max_ms { 5 }
     end
 
     kafka do
@@ -52,7 +53,8 @@ FactoryBot.define do
         'transactional.id': transactional_id,
         'transaction.timeout.ms': transaction_timeout_ms,
         'message.timeout.ms': transaction_timeout_ms,
-        'enable.idempotence': idempotent
+        'enable.idempotence': idempotent,
+        'queue.buffering.max.ms': queue_buffering_max_ms
       }
     end
   end
