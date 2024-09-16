@@ -541,7 +541,11 @@ RSpec.describe_current do
         producer.transaction do
           handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
 
+          sleep(0.1)
+
           producer.transaction do
+            sleep(0.1)
+
             handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
             raise(WaterDrop::AbortTransaction)
           end
