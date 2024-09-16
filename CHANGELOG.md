@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.0 (Unreleased)
+## 2.8.0 (2024-09-16)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
 
