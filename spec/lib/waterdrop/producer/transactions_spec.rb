@@ -113,6 +113,8 @@ RSpec.describe_current do
   end
 
   context 'when we start transaction and raise an error' do
+    subject(:producer) { build(:transactional_producer, queue_buffering_max_ms: 5_000) }
+
     it 'expect to re-raise this error' do
       expect do
         producer.transaction do
