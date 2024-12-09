@@ -55,6 +55,13 @@ module WaterDrop
       #
       #   handler.wait
       def transaction
+        unless transactional?
+          raise(
+            Errors::ProducerNotTransactionalError,
+            "#{id} is not transactional"
+          )
+        end
+
         # This will safely allow us to support one operation transactions so a transactional
         # producer can work without the transactional block if needed
         return yield if @transaction_mutex.owned?

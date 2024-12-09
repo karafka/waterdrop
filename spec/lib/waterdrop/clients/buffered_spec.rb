@@ -66,6 +66,16 @@ RSpec.describe_current do
   end
 
   describe '#transaction' do
+    let(:producer) do
+      WaterDrop::Producer.new do |config|
+        config.deliver = false
+        config.kafka = {
+          'bootstrap.servers': 'localhost:9092',
+          'transactional.id': SecureRandom.uuid
+        }
+      end
+    end
+
     context 'when no error and no abort' do
       it 'expect to return the block value' do
         expect(producer.transaction { 1 }).to eq(1)
