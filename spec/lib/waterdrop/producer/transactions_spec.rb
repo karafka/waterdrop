@@ -35,7 +35,7 @@ RSpec.describe_current do
 
     it 'expect to raise with info that this functionality is not configured' do
       expect { producer.transaction {} }
-        .to raise_error(::Rdkafka::RdkafkaError, /Local: Functionality not configured/)
+        .to raise_error(::WaterDrop::Errors::ProducerNotTransactionalError)
     end
 
     it { expect(producer.transactional?).to eq(false) }

@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.1 (Unreleased)
+- [Enhancement] Raise `WaterDrop::ProducerNotTransactionalError` when attempting to use transactions on a non-transactional producer.
+
 ## 2.8.0 (2024-09-16)
 
 This release contains **BREAKING** changes. Make sure to read and apply upgrade notes.
