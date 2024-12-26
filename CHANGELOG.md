@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.1 (Unreleased)
+## 2.8.1 (2024-12-26)
 - [Enhancement] Raise `WaterDrop::ProducerNotTransactionalError` when attempting to use transactions on a non-transactional producer.
 - [Fix] Disallow closing a producer from within a transaction.
 - [Fix] WaterDrop should prevent opening a transaction using a closed producer.
