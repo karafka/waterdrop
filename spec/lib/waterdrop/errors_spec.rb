@@ -43,6 +43,12 @@ RSpec.describe_current do
     specify { expect(error).to be < described_class::BaseError }
   end
 
+  describe 'ProducerTransactionalCloseAttemptError' do
+    subject(:error) { described_class::ProducerTransactionalCloseAttemptError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
   describe 'MessageInvalidError' do
     subject(:error) { described_class::MessageInvalidError }
 
