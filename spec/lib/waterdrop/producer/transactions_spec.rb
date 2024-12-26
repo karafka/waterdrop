@@ -386,7 +386,7 @@ RSpec.describe_current do
         producer.transaction do
           producer.close
         end
-      end.to raise_error(Rdkafka::RdkafkaError, /Erroneous state/)
+      end.to raise_error(WaterDrop::Errors::ProducerTransactionalCloseAttemptError)
     end
   end
 
@@ -397,7 +397,7 @@ RSpec.describe_current do
           Thread.new { producer.close }
           sleep(1)
         end
-      end.to raise_error(Rdkafka::RdkafkaError, /Erroneous state/)
+      end.not_to raise_error
     end
   end
 
@@ -764,6 +764,16 @@ RSpec.describe_current do
       end
 
       expect { handlers.map!(&:wait) }.not_to raise_error
+    end
+  end
+
+  context 'when trying to use a closed producer to start a transaction' do
+    before { producer.close }
+
+    it 'expect not to allow it' do
+      expect do
+        producer.transaction {}
+      end.to raise_error(WaterDrop::Errors::ProducerClosedError)
     end
   end
 end

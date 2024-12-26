@@ -67,6 +67,8 @@ module WaterDrop
         return yield if @transaction_mutex.owned?
 
         @transaction_mutex.synchronize do
+          ensure_active!
+
           transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
               transactional_instrument(:started) { client.begin_transaction }

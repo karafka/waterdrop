@@ -25,6 +25,9 @@ module WaterDrop
     # Raised when there was an attempt to use a closed producer
     ProducerClosedError = Class.new(BaseError)
 
+    # Raised if you attempt to close the producer from within a transaction. This is not allowed.
+    ProducerTransactionalCloseAttemptError = Class.new(BaseError)
+
     # Raised when we want to send a message that is invalid (impossible topic, etc)
     MessageInvalidError = Class.new(BaseError)
 

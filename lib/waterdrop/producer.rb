@@ -85,6 +85,7 @@ module WaterDrop
 
       # Don't allow to obtain a client reference for a producer that was not configured
       raise Errors::ProducerNotConfiguredError, id if @status.initial?
+      raise Errors::ProducerClosedError, id if @status.closed?
 
       @connecting_mutex.synchronize do
         return @client if @client && @pid == Process.pid
@@ -180,65 +181,75 @@ module WaterDrop
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
     def close(force: false)
-      @operating_mutex.synchronize do
-        return unless @status.active?
+      # If we already own the transactional mutex, it means we are inside of a transaction and
+      # it should not we allowed to close the producer in such a case.
+      if @transaction_mutex.locked? && @transaction_mutex.owned?
+        raise Errors::ProducerTransactionalCloseAttemptError, id
+      end
 
-        @monitor.instrument(
-          'producer.closed',
-          producer_id: id
-        ) do
-          @status.closing!
-          @monitor.instrument('producer.closing', producer_id: id)
+      # The transactional mutex here can be used even when no transactions are in use
+      # It prevents us from closing a mutex during transactions and is irrelevant in other cases
+      @transaction_mutex.synchronize do
+        @operating_mutex.synchronize do
+          return unless @status.active?
 
-          # No need for auto-gc if everything got closed by us
-          # This should be used only in case a producer was not closed properly and forgotten
-          ObjectSpace.undefine_finalizer(id)
+          @monitor.instrument(
+            'producer.closed',
+            producer_id: id
+          ) do
+            @status.closing!
+            @monitor.instrument('producer.closing', producer_id: id)
 
-          # We save this thread id because we need to bypass the activity verification on the
-          # producer for final flush of buffers.
-          @closing_thread_id = Thread.current.object_id
+            # No need for auto-gc if everything got closed by us
+            # This should be used only in case a producer was not closed properly and forgotten
+            ObjectSpace.undefine_finalizer(id)
 
-          # Wait until all the outgoing operations are done. Only when no one is using the
-          # underlying client running operations we can close
-          sleep(0.001) until @operations_in_progress.value.zero?
+            # We save this thread id because we need to bypass the activity verification on the
+            # producer for final flush of buffers.
+            @closing_thread_id = Thread.current.object_id
 
-          # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
-          # as we close the client after the flushing (even if blocked by the mutex)
-          flush(true)
+            # Wait until all the outgoing operations are done. Only when no one is using the
+            # underlying client running operations we can close
+            sleep(0.001) until @operations_in_progress.value.zero?
 
-          # We should not close the client in several threads the same time
-          # It is safe to run it several times but not exactly the same moment
-          # We also mark it as closed only if it was connected, if not, it would trigger a new
-          # connection that anyhow would be immediately closed
-          if @client
-            # Why do we trigger it early instead of just having `#close` do it?
-            # The linger.ms time will be ignored for the duration of the call,
-            # queued messages will be sent to the broker as soon as possible.
-            begin
-              @client.flush(current_variant.max_wait_timeout) unless @client.closed?
-            # We can safely ignore timeouts here because any left outstanding requests
-            # will anyhow force wait on close if not forced.
-            # If forced, we will purge the queue and just close
-            rescue ::Rdkafka::RdkafkaError, Rdkafka::AbstractHandle::WaitTimeoutError
-              nil
-            ensure
-              # Purge fully the local queue in case of a forceful shutdown just to be sure, that
-              # there are no dangling messages. In case flush was successful, there should be
-              # none but we do it just in case it timed out
-              purge if force
+            # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
+            # as we close the client after the flushing (even if blocked by the mutex)
+            flush(true)
+
+            # We should not close the client in several threads the same time
+            # It is safe to run it several times but not exactly the same moment
+            # We also mark it as closed only if it was connected, if not, it would trigger a new
+            # connection that anyhow would be immediately closed
+            if @client
+              # Why do we trigger it early instead of just having `#close` do it?
+              # The linger.ms time will be ignored for the duration of the call,
+              # queued messages will be sent to the broker as soon as possible.
+              begin
+                @client.flush(current_variant.max_wait_timeout) unless @client.closed?
+              # We can safely ignore timeouts here because any left outstanding requests
+              # will anyhow force wait on close if not forced.
+              # If forced, we will purge the queue and just close
+              rescue ::Rdkafka::RdkafkaError, Rdkafka::AbstractHandle::WaitTimeoutError
+                nil
+              ensure
+                # Purge fully the local queue in case of a forceful shutdown just to be sure, that
+                # there are no dangling messages. In case flush was successful, there should be
+                # none but we do it just in case it timed out
+                purge if force
+              end
+
+              @client.close
+
+              @client = nil
             end
 
-            @client.close
+            # Remove callbacks runners that were registered
+            ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
+            ::Karafka::Core::Instrumentation.error_callbacks.delete(@id)
+            ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(@id)
 
-            @client = nil
+            @status.closed!
           end
-
-          # Remove callbacks runners that were registered
-          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(@id)
-          ::Karafka::Core::Instrumentation.error_callbacks.delete(@id)
-          ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(@id)
-
-          @status.closed!
         end
       end
     end
