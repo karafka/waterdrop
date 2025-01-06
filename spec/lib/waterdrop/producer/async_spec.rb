@@ -116,7 +116,7 @@ RSpec.describe_current do
       it { expect(errors).to be_empty }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
-      it { expect(occurred.first.payload[:label]).to eq(nil) }
+      it { expect(occurred.first.payload[:label]).to be_nil }
     end
 
     context 'when inline error occurs and we retry on queue full but instrumentation off' do
@@ -175,7 +175,7 @@ RSpec.describe_current do
       it { expect(errors).not_to be_empty }
       it { expect(occurred.first.payload[:error].cause).to be_a(Rdkafka::RdkafkaError) }
       it { expect(occurred.first.payload[:type]).to eq('message.produce_async') }
-      it { expect(occurred.first.payload[:label]).to eq(nil) }
+      it { expect(occurred.first.payload[:label]).to be_nil }
     end
   end
 

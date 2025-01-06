@@ -11,7 +11,7 @@ RSpec.describe_current do
   it do
     # First run will check if cached
     producer.transactional?
-    expect(producer.transactional?).to eq(true)
+    expect(producer.transactional?).to be(true)
   end
 
   context 'when we try to create producer with invalid transactional settings' do
@@ -38,8 +38,8 @@ RSpec.describe_current do
         .to raise_error(::WaterDrop::Errors::ProducerNotTransactionalError)
     end
 
-    it { expect(producer.transactional?).to eq(false) }
-    it { expect(producer.transaction?).to eq(false) }
+    it { expect(producer.transactional?).to be(false) }
+    it { expect(producer.transaction?).to be(false) }
   end
 
   context 'when we make a transaction without sending any messages' do
@@ -184,7 +184,7 @@ RSpec.describe_current do
             result = producer.produce_sync(topic: 'example_topic', payload: 'na')
 
             expect(result.partition).to eq(0)
-            expect(result.error).to eq(nil)
+            expect(result.error).to be_nil
 
             raise StandardError
           end
@@ -194,7 +194,7 @@ RSpec.describe_current do
 
         # It will be compacted but is still visible as a delivery report
         expect(result.partition).to eq(0)
-        expect(result.error).to eq(nil)
+        expect(result.error).to be_nil
       end
     end
 
@@ -315,14 +315,14 @@ RSpec.describe_current do
           result = producer.produce_sync(topic: 'example_topic', payload: 'na')
 
           expect(result.partition).to eq(0)
-          expect(result.error).to eq(nil)
+          expect(result.error).to be_nil
 
           raise(WaterDrop::AbortTransaction)
         end
 
         # It will be compacted but is still visible as a delivery report
         expect(result.partition).to eq(0)
-        expect(result.error).to eq(nil)
+        expect(result.error).to be_nil
       end
     end
 
@@ -432,14 +432,14 @@ RSpec.describe_current do
     it 'expect to deliver message correctly' do
       result = producer.produce_sync(topic: 'example_topic', payload: rand.to_s)
       expect(result.topic_name).to eq('example_topic')
-      expect(result.error).to eq(nil)
+      expect(result.error).to be_nil
     end
 
     it 'expect to use the async dispatch though with transaction wrapper' do
       handler = producer.produce_async(topic: 'example_topic', payload: rand.to_s)
       result = handler.wait
       expect(result.topic_name).to eq('example_topic')
-      expect(result.error).to eq(nil)
+      expect(result.error).to be_nil
     end
 
     context 'when using with produce_many_sync' do
@@ -621,13 +621,13 @@ RSpec.describe_current do
   end
 
   context 'when we are not inside a running transaction' do
-    it { expect(producer.transaction?).to eq(false) }
+    it { expect(producer.transaction?).to be(false) }
   end
 
   context 'when we are inside a transaction' do
     it 'expect to be recognize it and be true' do
       producer.transaction do
-        expect(producer.transaction?).to eq(true)
+        expect(producer.transaction?).to be(true)
       end
     end
   end
@@ -699,7 +699,7 @@ RSpec.describe_current do
         errored = true
       end
 
-      expect(errored).to eq(true)
+      expect(errored).to be(true)
 
       producer.produce_async(topic: topic, payload: '1')
     end
@@ -713,7 +713,7 @@ RSpec.describe_current do
         errored = true
       end
 
-      expect(errored).to eq(true)
+      expect(errored).to be(true)
 
       producer.produce_sync(topic: topic, payload: '1')
     end

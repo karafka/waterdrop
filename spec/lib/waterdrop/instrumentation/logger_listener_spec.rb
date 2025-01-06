@@ -41,7 +41,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('topic was delegated to a dispatch queue') }
       it { expect(logged_data[0]).to include(message[:topic]) }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -63,7 +63,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Sync producing of a message to') }
       it { expect(logged_data[0]).to include(message[:topic]) }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -85,7 +85,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include(dispatched_msg) }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -105,7 +105,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Sync producing of 2 messages to 2 topics') }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -127,7 +127,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Buffering of a message to ') }
       it { expect(logged_data[0]).to include(message[:topic]) }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -147,7 +147,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Buffering of 2 messages ') }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -169,7 +169,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Async flushing of 2 messages from the buffer') }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -190,7 +190,7 @@ RSpec.describe_current do
       it { expect(logged_data[0]).to include(producer.id) }
       it { expect(logged_data[0]).to include('INFO') }
       it { expect(logged_data[0]).to include('Sync flushing of 2 messages from the buffer') }
-      it { expect(logged_data[1]).to eq(nil) }
+      it { expect(logged_data[1]).to be_nil }
     end
   end
 
@@ -200,7 +200,7 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include(producer.id) }
     it { expect(logged_data[0]).to include('INFO') }
     it { expect(logged_data[0]).to include('Successfully purging buffer') }
-    it { expect(logged_data[1]).to eq(nil) }
+    it { expect(logged_data[1]).to be_nil }
   end
 
   describe '#on_producer_closing' do

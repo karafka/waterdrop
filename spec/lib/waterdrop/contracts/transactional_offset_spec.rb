@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:contract_result) { described_class.new.call(input) }
 
-  let(:consumer) { instance_double('Consumer', consumer_group_metadata_pointer: true) }
+  let(:consumer) { instance_double(Rdkafka::Consumer, consumer_group_metadata_pointer: true) }
   let(:topic) { 'test_topic' }
   let(:partition) { 0 }
   let(:offset) { 10 }
