@@ -104,7 +104,7 @@ RSpec.describe_current do
       it { expect(status.to_s).to eq('connected') }
       it { expect(events.size).to eq(1) }
       it { expect(events.last.id).to eq('producer.connected') }
-      it { expect(events.last.payload.key?(:producer_id)).to eq(true) }
+      it { expect(events.last.payload.key?(:producer_id)).to be(true) }
     end
 
     context 'when producer is closed' do
@@ -124,12 +124,12 @@ RSpec.describe_current do
       it { expect(status.to_s).to eq('closed') }
       it { expect(events.size).to eq(3) }
       it { expect(events.first.id).to eq('producer.connected') }
-      it { expect(events.first.payload.key?(:producer_id)).to eq(true) }
+      it { expect(events.first.payload.key?(:producer_id)).to be(true) }
       it { expect(events[1].id).to eq('producer.closing') }
-      it { expect(events[1].payload.key?(:producer_id)).to eq(true) }
+      it { expect(events[1].payload.key?(:producer_id)).to be(true) }
       it { expect(events.last.id).to eq('producer.closed') }
-      it { expect(events.last.payload.key?(:producer_id)).to eq(true) }
-      it { expect(events.last.payload.key?(:time)).to eq(true) }
+      it { expect(events.last.payload.key?(:producer_id)).to be(true) }
+      it { expect(events.last.payload.key?(:time)).to be(true) }
     end
   end
 end

@@ -78,7 +78,7 @@ RSpec.describe_current do
       it { expect(occurred.first.payload[:type]).to eq('message.produce_sync') }
       # We expect this to be nil because the error was raised by the code that was attempting to
       # produce, hence there is a chance of not even having a handler
-      it { expect(occurred.first.payload[:label]).to eq(nil) }
+      it { expect(occurred.first.payload[:label]).to be_nil }
     end
   end
 

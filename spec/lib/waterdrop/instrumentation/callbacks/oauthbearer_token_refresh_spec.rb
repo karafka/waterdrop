@@ -3,7 +3,7 @@
 RSpec.describe_current do
   subject(:callback) { described_class.new(bearer, monitor) }
 
-  let(:bearer) { instance_double('Rdkafka::Producer', name: 'test_bearer') }
+  let(:bearer) { instance_double(Rdkafka::Producer, name: 'test_bearer') }
   let(:monitor) { WaterDrop::Instrumentation::Monitor.new }
   let(:rd_config) { Rdkafka::Config.new }
   let(:bearer_name) { 'test_bearer' }

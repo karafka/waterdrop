@@ -8,7 +8,7 @@ RSpec.describe_current do
   describe '#initialize' do
     context 'when we initialize without a setup' do
       it { expect { producer }.not_to raise_error }
-      it { expect(producer.status.active?).to eq(false) }
+      it { expect(producer.status.active?).to be(false) }
     end
 
     context 'when initializing with setup' do
@@ -20,8 +20,8 @@ RSpec.describe_current do
       end
 
       it { expect { producer }.not_to raise_error }
-      it { expect(producer.status.configured?).to eq(true) }
-      it { expect(producer.status.active?).to eq(true) }
+      it { expect(producer.status.configured?).to be(true) }
+      it { expect(producer.status.active?).to be(true) }
     end
 
     context 'when initializing with oauth listener' do
@@ -39,8 +39,8 @@ RSpec.describe_current do
       end
 
       it { expect { producer }.not_to raise_error }
-      it { expect(producer.status.configured?).to eq(true) }
-      it { expect(producer.status.active?).to eq(true) }
+      it { expect(producer.status.configured?).to be(true) }
+      it { expect(producer.status.active?).to be(true) }
     end
   end
 
@@ -144,19 +144,19 @@ RSpec.describe_current do
     context 'when producer is transactional' do
       subject(:producer) { create(:transactional_producer) }
 
-      it { expect(producer.idempotent?).to eq(true) }
+      it { expect(producer.idempotent?).to be(true) }
     end
 
     context 'when it is a regular producer' do
       subject(:producer) { create(:producer) }
 
-      it { expect(producer.idempotent?).to eq(false) }
+      it { expect(producer.idempotent?).to be(false) }
     end
 
     context 'when it is an idempotent producer' do
       subject(:producer) { create(:idempotent_producer) }
 
-      it { expect(producer.idempotent?).to eq(true) }
+      it { expect(producer.idempotent?).to be(true) }
     end
   end
 
@@ -169,14 +169,14 @@ RSpec.describe_current do
       before { producer.close }
 
       it { expect { producer.close }.not_to raise_error }
-      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+      it { expect(producer.tap(&:close).status.closed?).to be(true) }
     end
 
     context 'when producer was not yet closed' do
       subject(:producer) { build(:producer).tap(&:client) }
 
       it { expect { producer.close }.not_to raise_error }
-      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+      it { expect(producer.tap(&:close).status.closed?).to be(true) }
     end
 
     context 'when there were messages in the buffer' do
@@ -200,9 +200,9 @@ RSpec.describe_current do
     context 'when producer was configured but not connected' do
       subject(:producer) { build(:producer) }
 
-      it { expect(producer.status.configured?).to eq(true) }
+      it { expect(producer.status.configured?).to be(true) }
       it { expect { producer.close }.not_to raise_error }
-      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+      it { expect(producer.tap(&:close).status.closed?).to be(true) }
 
       it 'expect not to close client since was not open' do
         producer.close
@@ -217,9 +217,9 @@ RSpec.describe_current do
 
       before { allow(client).to receive(:close).and_call_original }
 
-      it { expect(producer.status.connected?).to eq(true) }
+      it { expect(producer.status.connected?).to be(true) }
       it { expect { producer.close }.not_to raise_error }
-      it { expect(producer.tap(&:close).status.closed?).to eq(true) }
+      it { expect(producer.tap(&:close).status.closed?).to be(true) }
 
       it 'expect to close client since was open' do
         producer.close
@@ -309,11 +309,13 @@ RSpec.describe_current do
       let(:expected_error) { WaterDrop::Errors::StatusInvalidError }
 
       before do
-        allow(producer.status).to receive(:configured?).and_return(false)
-        allow(producer.status).to receive(:connected?).and_return(false)
-        allow(producer.status).to receive(:initial?).and_return(false)
-        allow(producer.status).to receive(:closing?).and_return(false)
-        allow(producer.status).to receive(:closed?).and_return(false)
+        allow(producer.status).to receive_messages(
+          configured?: false,
+          connected?: false,
+          initial?: false,
+          closing?: false,
+          closed?: false
+        )
       end
 
       it { expect { producer.send(:ensure_active!) }.to raise_error(expected_error) }

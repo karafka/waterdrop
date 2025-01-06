@@ -101,7 +101,7 @@ RSpec.describe_current do
   end
 
   describe '#respond_to?' do
-    it { expect(client.respond_to?(:test)).to eq(true) }
+    it { expect(client.respond_to?(:test)).to be(true) }
   end
 
   describe '#transaction' do
