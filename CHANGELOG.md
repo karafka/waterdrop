@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.2 (Unreleased)
+- [Feature] Allow for tagging of producer instances similar to how consumers can be tagged.
+
 ## 2.8.1 (2024-12-26)
 - [Enhancement] Raise `WaterDrop::ProducerNotTransactionalError` when attempting to use transactions on a non-transactional producer.
 - [Fix] Disallow closing a producer from within a transaction.
