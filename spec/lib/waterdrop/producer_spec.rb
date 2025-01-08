@@ -322,6 +322,19 @@ RSpec.describe_current do
     end
   end
 
+  describe '#tags' do
+    let(:producer1) { build(:producer) }
+    let(:producer2) { build(:producer) }
+
+    before do
+      producer1.tags.add(:type, 'transactional')
+      producer2.tags.add(:type, 'regular')
+    end
+
+    it { expect(producer1.tags.to_a).to eq(%w[transactional]) }
+    it { expect(producer2.tags.to_a).to eq(%w[regular]) }
+  end
+
   describe 'statistics callback hook' do
     let(:message) { build(:valid_message) }
 

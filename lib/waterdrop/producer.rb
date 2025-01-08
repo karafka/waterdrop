@@ -9,6 +9,7 @@ module WaterDrop
     include Buffer
     include Transactions
     include ::Karafka::Core::Helpers::Time
+    include ::Karafka::Core::Taggable
 
     # Local storage for given thread waterdrop client references for variants
     ::Fiber.send(:attr_accessor, :waterdrop_clients)
