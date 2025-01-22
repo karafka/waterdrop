@@ -28,7 +28,7 @@ Gem::Specification.new do |spec|
 
   spec.cert_chain    = %w[certs/cert.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.executables   = []
   spec.require_paths = %w[lib]
 
   spec.metadata = {

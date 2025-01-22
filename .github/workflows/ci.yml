@@ -63,6 +63,9 @@ jobs:
           GITHUB_COVERAGE: ${{matrix.coverage}}
         run: bundle exec rspec
 
+      - name: Check Kafka logs for unexpected warnings
+        run: bin/verify_kafka_warnings
+
   diffend:
     runs-on: ubuntu-latest
     strategy:
