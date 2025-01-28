@@ -291,6 +291,7 @@ RSpec.describe_current do
         end
 
         producer.transaction do
+          sleep(0.1)
           producer.produce_async(topic: 'example_topic', payload: 'na')
 
           raise(WaterDrop::AbortTransaction)
