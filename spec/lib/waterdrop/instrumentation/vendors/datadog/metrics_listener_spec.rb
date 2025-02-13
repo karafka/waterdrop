@@ -46,6 +46,8 @@ RSpec.describe_current do
     producer
   end
 
+  let(:topic) { "it-#{SecureRandom.uuid}" }
+
   after { producer.close }
 
   context 'when having some default tags present' do
@@ -61,7 +63,7 @@ RSpec.describe_current do
     end
 
     context 'when publishing, default tags should be included' do
-      before { producer.produce_sync(topic: rand.to_s, payload: rand.to_s) }
+      before { producer.produce_sync(topic: topic, payload: rand.to_s) }
 
       it 'expect to have proper metrics data in place' do
         published_tags = dummy_client.buffer[:increment]['waterdrop.produced_sync'][0][0][:tags]
@@ -87,7 +89,7 @@ RSpec.describe_current do
   context 'when expecting emitted stats DD dispatch' do
     # Just to trigger some stats
     before do
-      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_sync(topic: topic, payload: rand.to_s)
 
       # Give it some time to emit the stats
       sleep(1)
@@ -129,12 +131,12 @@ RSpec.describe_current do
 
   context 'when producing sync' do
     before do
-      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_sync(topic: topic, payload: rand.to_s)
 
       producer.produce_many_sync(
         [
-          { topic: rand.to_s, payload: rand.to_s },
-          { topic: rand.to_s, payload: rand.to_s }
+          { topic: topic, payload: rand.to_s },
+          { topic: topic, payload: rand.to_s }
         ]
       )
     end
@@ -146,12 +148,12 @@ RSpec.describe_current do
 
   context 'when producing async' do
     before do
-      producer.produce_async(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_async(topic: topic, payload: rand.to_s)
 
       producer.produce_many_async(
         [
-          { topic: rand.to_s, payload: rand.to_s },
-          { topic: rand.to_s, payload: rand.to_s }
+          { topic: topic, payload: rand.to_s },
+          { topic: topic, payload: rand.to_s }
         ]
       )
     end
@@ -163,12 +165,12 @@ RSpec.describe_current do
 
   context 'when buffering' do
     before do
-      producer.buffer(topic: rand.to_s, payload: rand.to_s)
+      producer.buffer(topic: topic, payload: rand.to_s)
 
       producer.buffer_many(
         [
-          { topic: rand.to_s, payload: rand.to_s },
-          { topic: rand.to_s, payload: rand.to_s }
+          { topic: topic, payload: rand.to_s },
+          { topic: topic, payload: rand.to_s }
         ]
       )
     end
@@ -180,7 +182,7 @@ RSpec.describe_current do
 
   context 'when flushing sync' do
     before do
-      producer.buffer(topic: rand.to_s, payload: rand.to_s)
+      producer.buffer(topic: topic, payload: rand.to_s)
       producer.flush_sync
     end
 
@@ -191,7 +193,7 @@ RSpec.describe_current do
 
   context 'when flushing async' do
     before do
-      producer.buffer(topic: rand.to_s, payload: rand.to_s)
+      producer.buffer(topic: topic, payload: rand.to_s)
       producer.flush_async
     end
 
@@ -202,7 +204,7 @@ RSpec.describe_current do
 
   context 'when message is acknowledged' do
     before do
-      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_sync(topic: topic, payload: rand.to_s)
       # We need to give the async callback a bit of time to kick in
       sleep(0.1)
     end
@@ -227,7 +229,7 @@ RSpec.describe_current do
     end
 
     before do
-      producer.produce_async(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_async(topic: topic, payload: rand.to_s)
       sleep(1)
     end
 
@@ -263,7 +265,7 @@ RSpec.describe_current do
 
   context 'when trying to publish a topic level metric' do
     before do
-      producer.produce_sync(topic: rand.to_s, payload: rand.to_s)
+      producer.produce_sync(topic: topic, payload: rand.to_s)
       sleep(1)
       listener.send(:report_metric, metric, statistics)
     end

@@ -4,7 +4,7 @@ FactoryBot.define do
   factory :valid_message, class: 'Hash' do
     skip_create
 
-    topic { rand.to_s }
+    topic { "it-#{SecureRandom.uuid}" }
     payload { rand.to_s }
     partition_key { nil }
     label { nil }

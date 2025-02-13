@@ -5,6 +5,7 @@ RSpec.describe_current do
 
   let(:transactional_id) { SecureRandom.uuid }
   let(:critical_error) { Exception }
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
 
   after { producer.close }
 
@@ -53,8 +54,8 @@ RSpec.describe_current do
       handlers = []
 
       producer.transaction do
-        handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
-        handlers << producer.produce_async(topic: 'example_topic2', payload: '2')
+        handlers << producer.produce_async(topic: "#{topic_name}1", payload: '1')
+        handlers << producer.produce_async(topic: "#{topic_name}2", payload: '2')
       end
 
       expect { handlers.map!(&:wait) }.not_to raise_error
@@ -64,7 +65,7 @@ RSpec.describe_current do
       result = rand
 
       transaction_result = producer.transaction do
-        producer.produce_async(topic: 'example_topic', payload: '2')
+        producer.produce_async(topic: topic_name, payload: '2')
         result
       end
 
@@ -81,7 +82,7 @@ RSpec.describe_current do
       begin
         producer.transaction do
           20.times do |i|
-            producer.produce_async(topic: SecureRandom.uuid, payload: i.to_s)
+            producer.produce_async(topic: topic_name, payload: i.to_s)
           end
         end
       rescue Rdkafka::RdkafkaError => e
@@ -105,7 +106,7 @@ RSpec.describe_current do
       expect do
         producer.transaction do
           10.times do |i|
-            producer.produce_async(topic: SecureRandom.uuid, payload: i.to_s)
+            producer.produce_async(topic: topic_name, payload: i.to_s)
           end
         end
       end.not_to raise_error
@@ -118,7 +119,7 @@ RSpec.describe_current do
     it 'expect to re-raise this error' do
       expect do
         producer.transaction do
-          producer.produce_async(topic: 'example_topic', payload: 'na')
+          producer.produce_async(topic: topic_name, payload: 'na')
 
           raise StandardError
         end
@@ -130,7 +131,7 @@ RSpec.describe_current do
 
       begin
         producer.transaction do
-          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+          handler = producer.produce_async(topic: topic_name, payload: 'na')
 
           raise StandardError
         end
@@ -156,7 +157,7 @@ RSpec.describe_current do
 
         begin
           producer.transaction do
-            producer.produce_async(topic: 'example_topic', payload: 'na')
+            producer.produce_async(topic: topic_name, payload: 'na')
 
             raise StandardError
           end
@@ -181,7 +182,7 @@ RSpec.describe_current do
 
         begin
           producer.transaction do
-            result = producer.produce_sync(topic: 'example_topic', payload: 'na')
+            result = producer.produce_sync(topic: topic_name, payload: 'na')
 
             expect(result.partition).to eq(0)
             expect(result.error).to be_nil
@@ -204,7 +205,7 @@ RSpec.describe_current do
 
         begin
           producer.transaction do
-            handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+            handler = producer.produce_async(topic: topic_name, payload: 'na')
 
             raise StandardError
           end
@@ -228,7 +229,7 @@ RSpec.describe_current do
     it 'expect to re-raise this error' do
       expect do
         producer.transaction do
-          producer.produce_async(topic: 'example_topic', payload: 'na')
+          producer.produce_async(topic: topic_name, payload: 'na')
 
           raise critical_error
         end
@@ -240,7 +241,7 @@ RSpec.describe_current do
 
       begin
         producer.transaction do
-          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+          handler = producer.produce_async(topic: topic_name, payload: 'na')
 
           raise critical_error
         end
@@ -258,7 +259,7 @@ RSpec.describe_current do
     it 'expect not to re-raise' do
       expect do
         producer.transaction do
-          producer.produce_async(topic: 'example_topic', payload: 'na')
+          producer.produce_async(topic: topic_name, payload: 'na')
 
           raise WaterDrop::AbortTransaction
         end
@@ -269,7 +270,7 @@ RSpec.describe_current do
       handler = nil
 
       producer.transaction do
-        handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+        handler = producer.produce_async(topic: topic_name, payload: 'na')
 
         raise WaterDrop::AbortTransaction
       end
@@ -292,7 +293,7 @@ RSpec.describe_current do
 
         producer.transaction do
           sleep(0.1)
-          producer.produce_async(topic: 'example_topic', payload: 'na')
+          producer.produce_async(topic: topic_name, payload: 'na')
 
           raise(WaterDrop::AbortTransaction)
         end
@@ -313,7 +314,7 @@ RSpec.describe_current do
         result = nil
 
         producer.transaction do
-          result = producer.produce_sync(topic: 'example_topic', payload: 'na')
+          result = producer.produce_sync(topic: topic_name, payload: 'na')
 
           expect(result.partition).to eq(0)
           expect(result.error).to be_nil
@@ -332,7 +333,7 @@ RSpec.describe_current do
         handler = nil
 
         producer.transaction do
-          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+          handler = producer.produce_async(topic: topic_name, payload: 'na')
 
           raise(WaterDrop::AbortTransaction)
         end
@@ -364,7 +365,7 @@ RSpec.describe_current do
 
       expect do
         producer1.transaction do
-          producer1.produce_async(topic: 'example_topic', payload: '1')
+          producer1.produce_async(topic: topic_name, payload: '1')
         end
       end.to raise_error(Rdkafka::RdkafkaError, /fenced by a newer instance/)
     end
@@ -375,7 +376,7 @@ RSpec.describe_current do
 
       expect do
         producer2.transaction do
-          producer2.produce_async(topic: 'example_topic', payload: '1')
+          producer2.produce_async(topic: topic_name, payload: '1')
         end
       end.not_to raise_error
     end
@@ -426,20 +427,20 @@ RSpec.describe_current do
   context 'when we use transactional producer without transaction' do
     it 'expect to allow as it will wrap with a transaction' do
       expect do
-        producer.produce_sync(topic: 'example_topic', payload: rand.to_s)
+        producer.produce_sync(topic: topic_name, payload: rand.to_s)
       end.not_to raise_error
     end
 
     it 'expect to deliver message correctly' do
-      result = producer.produce_sync(topic: 'example_topic', payload: rand.to_s)
-      expect(result.topic_name).to eq('example_topic')
+      result = producer.produce_sync(topic: topic_name, payload: rand.to_s)
+      expect(result.topic_name).to eq(topic_name)
       expect(result.error).to be_nil
     end
 
     it 'expect to use the async dispatch though with transaction wrapper' do
-      handler = producer.produce_async(topic: 'example_topic', payload: rand.to_s)
+      handler = producer.produce_async(topic: topic_name, payload: rand.to_s)
       result = handler.wait
-      expect(result.topic_name).to eq('example_topic')
+      expect(result.topic_name).to eq(topic_name)
       expect(result.error).to be_nil
     end
 
@@ -515,10 +516,10 @@ RSpec.describe_current do
       handlers = []
 
       producer.transaction do
-        handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+        handlers << producer.produce_async(topic: topic_name, payload: 'data')
 
         producer.transaction do
-          handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+          handlers << producer.produce_async(topic: topic_name, payload: 'data')
         end
       end
 
@@ -527,10 +528,10 @@ RSpec.describe_current do
 
     it 'expect to have one actual transaction' do
       producer.transaction do
-        producer.produce_async(topic: 'example_topic', payload: 'data')
+        producer.produce_async(topic: topic_name, payload: 'data')
 
         producer.transaction do
-          producer.produce_async(topic: 'example_topic', payload: 'data')
+          producer.produce_async(topic: topic_name, payload: 'data')
         end
       end
 
@@ -544,10 +545,10 @@ RSpec.describe_current do
         handlers = []
 
         producer.transaction do
-          handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+          handlers << producer.produce_async(topic: topic_name, payload: 'data')
 
           producer.transaction do
-            handlers << producer.produce_async(topic: 'example_topic', payload: 'data')
+            handlers << producer.produce_async(topic: topic_name, payload: 'data')
             raise(WaterDrop::AbortTransaction)
           end
         end
@@ -560,7 +561,7 @@ RSpec.describe_current do
   end
 
   context 'when trying to mark as consumed in a transaction' do
-    let(:message) { OpenStruct.new(topic: rand.to_s, partition: 0, offset: 100) }
+    let(:message) { OpenStruct.new(topic: topic_name, partition: 0, offset: 100) }
 
     context 'when we try mark as consumed without a transaction' do
       it 'expect to raise an error' do
@@ -616,7 +617,7 @@ RSpec.describe_current do
     end
 
     it 'expect to be able to do so and to send a message' do
-      expect { producer.produce_async(topic: 'test', payload: 'a') }
+      expect { producer.produce_async(topic: topic_name, payload: 'a') }
         .not_to raise_error
     end
   end
@@ -645,7 +646,7 @@ RSpec.describe_current do
 
       begin
         producer.transaction do
-          handler = producer.produce_async(topic: 'example_topic', payload: 'na')
+          handler = producer.produce_async(topic: topic_name, payload: 'na')
 
           break
         end
@@ -664,7 +665,7 @@ RSpec.describe_current do
       end
 
       handler = producer.transaction do
-        producer.produce_async(topic: 'example_topic', payload: 'na')
+        producer.produce_async(topic: topic_name, payload: 'na')
       end
 
       expect { handler.wait }.not_to raise_error
@@ -672,8 +673,6 @@ RSpec.describe_current do
   end
 
   context 'when producer gets a critical broker errors with reload on' do
-    let(:topic) { SecureRandom.uuid }
-
     let(:producer) do
       WaterDrop::Producer.new do |config|
         config.max_payload_size = 1_000_000_000_000
@@ -687,7 +686,7 @@ RSpec.describe_current do
 
     before do
       admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
-      admin.create_topic(topic, 1, 1, 'max.message.bytes': 128).wait
+      admin.create_topic(topic_name, 1, 1, 'max.message.bytes': 128).wait
       admin.close
     end
 
@@ -695,41 +694,43 @@ RSpec.describe_current do
       errored = false
 
       begin
-        producer.produce_async(topic: topic, payload: '1' * 512)
+        producer.produce_async(topic: topic_name, payload: '1' * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       expect(errored).to be(true)
 
-      producer.produce_async(topic: topic, payload: '1')
+      producer.produce_async(topic: topic_name, payload: '1')
     end
 
     it 'expect to be able to use same producer after the error when sync' do
       errored = false
 
       begin
-        producer.produce_sync(topic: topic, payload: '1' * 512)
+        producer.produce_sync(topic: topic_name, payload: '1' * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       expect(errored).to be(true)
 
-      producer.produce_sync(topic: topic, payload: '1')
+      producer.produce_sync(topic: topic_name, payload: '1')
     end
   end
 
   context 'when wrapping an early return method with a transaction' do
     let(:operation) do
+      t_name = topic_name
+
       Class.new do
-        def call(producer, handlers)
-          handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+        define_method :call do |producer, handlers|
+          handlers << producer.produce_async(topic: "#{t_name}1", payload: '1')
 
           return unless handlers.empty?
 
           # Never to be reached, expected in this spec
-          handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+          handlers << producer.produce_async(topic: "#{t_name}1", payload: '1')
         end
       end
     end
@@ -748,12 +749,12 @@ RSpec.describe_current do
   context 'when wrapping an early break block with a transaction' do
     let(:operation) do
       lambda do |producer, handlers|
-        handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+        handlers << producer.produce_async(topic: "#{topic_name}1", payload: '1')
 
         return unless handlers.empty?
 
         # Never to be reached, expected in this spec
-        handlers << producer.produce_async(topic: 'example_topic1', payload: '1')
+        handlers << producer.produce_async(topic: "#{topic_name}1", payload: '1')
       end
     end
 

@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:producer) { described_class.new }
 
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
+
   after { producer.close }
 
   describe '#initialize' do
@@ -126,13 +128,13 @@ RSpec.describe_current do
     let(:count) { producer.partition_count(topic) }
 
     context 'when topic does not exist' do
-      let(:topic) { SecureRandom.uuid }
+      let(:topic) { "it-#{SecureRandom.uuid}" }
 
       it { expect { count }.to raise_error(Rdkafka::RdkafkaError, /unknown_topic_or_part/) }
     end
 
     context 'when topic exists' do
-      let(:topic) { SecureRandom.uuid }
+      let(:topic) { "it-#{SecureRandom.uuid}" }
 
       before { producer.produce_sync(topic: topic, payload: '') }
 
@@ -291,7 +293,7 @@ RSpec.describe_current do
         end
 
         it 'expect the error notifications to publish those errors' do
-          handler = producer.produce_async(topic: 'na', payload: 'data', label: 'test')
+          handler = producer.produce_async(topic: topic_name, payload: 'data', label: 'test')
           producer.purge
 
           handler.wait(raise_response_error: false)
@@ -478,7 +480,7 @@ RSpec.describe_current do
 
     let(:child_process) do
       fork do
-        producer.produce_sync(topic: 'test', payload: '1')
+        producer.produce_sync(topic: topic_name, payload: '1')
         producer.close
       end
     end

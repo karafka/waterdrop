@@ -6,6 +6,7 @@ RSpec.describe_current do
   let(:config_error) { WaterDrop::Errors::VariantInvalidError }
   let(:produce_error) { WaterDrop::Errors::ProduceError }
   let(:rd_config_error) { Rdkafka::Config::ConfigError }
+  let(:topic) { "it-#{SecureRandom.uuid}" }
 
   after { producer.close }
 
@@ -48,7 +49,7 @@ RSpec.describe_current do
 
     it 'expect to allow the original one' do
       variant
-      expect { producer.produce_sync(topic: SecureRandom.uuid, payload: '') }.not_to raise_error
+      expect { producer.produce_sync(topic: topic, payload: '') }.not_to raise_error
     end
   end
 
@@ -56,7 +57,7 @@ RSpec.describe_current do
     let(:variant) { producer.with(topic_config: { 'message.timeout.ms': 100_000 }) }
 
     it 'expect to work' do
-      expect { variant.produce_sync(topic: SecureRandom.uuid, payload: '') }.not_to raise_error
+      expect { variant.produce_sync(topic: topic, payload: '') }.not_to raise_error
     end
   end
 
@@ -66,7 +67,7 @@ RSpec.describe_current do
 
     it 'expect to use this timeout it' do
       expect do
-        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+        variant.produce_sync(topic: topic, payload: '')
       end.to raise_error(produce_error)
     end
   end
@@ -78,7 +79,7 @@ RSpec.describe_current do
 
     it 'expect to use the settings' do
       expect do
-        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+        variant.produce_sync(topic: topic, payload: '')
       end.not_to raise_error
     end
 
@@ -87,7 +88,7 @@ RSpec.describe_current do
 
       it 'expect not to allow it' do
         expect do
-          variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+          variant.produce_sync(topic: topic, payload: '')
         end.to raise_error(config_error)
       end
     end
@@ -100,7 +101,7 @@ RSpec.describe_current do
 
     it 'expect to use the settings' do
       expect do
-        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+        variant.produce_sync(topic: topic, payload: '')
       end.not_to raise_error
     end
 
@@ -109,7 +110,7 @@ RSpec.describe_current do
 
       it 'expect not to allow it' do
         expect do
-          variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+          variant.produce_sync(topic: topic, payload: '')
         end.to raise_error(config_error)
       end
     end
@@ -122,7 +123,7 @@ RSpec.describe_current do
 
     it 'expect not to allow it' do
       expect do
-        variant.produce_sync(topic: SecureRandom.uuid, payload: '')
+        variant.produce_sync(topic: topic, payload: '')
       end.to raise_error(config_error)
     end
   end

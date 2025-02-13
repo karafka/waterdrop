@@ -2,6 +2,7 @@
 
 ## 2.8.2 (Unreleased)
 - [Feature] Allow for tagging of producer instances similar to how consumers can be tagged.
+- [Refactor] Ensure all test topics in the test suite start with "it-" prefix. 
 
 ## 2.8.1 (2024-12-26)
 - [Enhancement] Raise `WaterDrop::ProducerNotTransactionalError` when attempting to use transactions on a non-transactional producer.

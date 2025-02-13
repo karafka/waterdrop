@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:producer) { build(:producer) }
 
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
+
   after { producer.close }
 
   describe '#produce_sync' do
@@ -85,9 +87,9 @@ RSpec.describe_current do
   describe '#produce_sync with partition key' do
     subject(:delivery) { producer.produce_sync(message) }
 
-    let(:message) { build(:valid_message, partition_key: rand.to_s, topic: 'example_topic') }
+    let(:message) { build(:valid_message, partition_key: rand.to_s, topic: topic_name) }
 
-    before { producer.produce_sync(topic: 'example_topic', payload: '1') }
+    before { producer.produce_sync(topic: topic_name, payload: '1') }
 
     it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
   end
