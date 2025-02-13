@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:client) { described_class.new(producer) }
 
+  let(:topic_name) { "it-#{SecureRandom}" }
+
   let(:producer) do
     WaterDrop::Producer.new do |config|
       config.deliver = false
@@ -85,41 +87,41 @@ RSpec.describe_current do
     context 'when running transaction with production of messages' do
       it 'expect to add them to the buffers' do
         producer.transaction do
-          producer.produce_sync(topic: 'test', payload: 'test')
-          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
         end
 
         expect(client.messages.size).to eq(5)
-        expect(client.messages_for('test').size).to eq(2)
+        expect(client.messages_for(topic_name).size).to eq(2)
       end
     end
 
     context 'when running nested transaction with production of messages' do
       it 'expect to add them to the buffers' do
         producer.transaction do
-          producer.produce_sync(topic: 'test', payload: 'test')
-          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
 
           producer.transaction do
-            producer.produce_sync(topic: 'test', payload: 'test')
-            producer.produce_sync(topic: 'test', payload: 'test')
+            producer.produce_sync(topic: topic_name, payload: 'test')
+            producer.produce_sync(topic: topic_name, payload: 'test')
           end
         end
 
         expect(client.messages.size).to eq(7)
-        expect(client.messages_for('test').size).to eq(4)
+        expect(client.messages_for(topic_name).size).to eq(4)
       end
     end
 
     context 'when running nested transaction with production of messages on abort' do
       it 'expect to add them to the buffers' do
         producer.transaction do
-          producer.produce_sync(topic: 'test', payload: 'test')
-          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
 
           producer.transaction do
-            producer.produce_sync(topic: 'test', payload: 'test')
-            producer.produce_sync(topic: 'test', payload: 'test')
+            producer.produce_sync(topic: topic_name, payload: 'test')
+            producer.produce_sync(topic: topic_name, payload: 'test')
 
             raise WaterDrop::AbortTransaction
           end
@@ -139,7 +141,7 @@ RSpec.describe_current do
 
       it 'expect not to contain messages from the aborted transaction' do
         producer.transaction do
-          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
 
           raise WaterDrop::AbortTransaction
         end
@@ -167,7 +169,7 @@ RSpec.describe_current do
       it 'expect not to contain messages from the aborted transaction' do
         expect do
           producer.transaction do
-            producer.produce_sync(topic: 'test', payload: 'test')
+            producer.produce_sync(topic: topic_name, payload: 'test')
 
             raise StandardError
           end
@@ -192,7 +194,8 @@ RSpec.describe_current do
     end
 
     context 'when we try to store offset without a transaction' do
-      let(:message) { OpenStruct.new(topic: rand.to_s, partition: 0, offset: 10) }
+      let(:topic) { "it-#{SecureRandom.uuid}" }
+      let(:message) { OpenStruct.new(topic: topic, partition: 0, offset: 10) }
 
       it 'expect to raise an error' do
         expect { producer.transaction_mark_as_consumed(nil, message) }
@@ -201,8 +204,9 @@ RSpec.describe_current do
     end
 
     context 'when trying to store offset with transaction' do
+      let(:topic) { "it-#{SecureRandom.uuid}" }
       let(:consumer) { OpenStruct.new(consumer_group_metadata_pointer: nil) }
-      let(:message) { OpenStruct.new(topic: rand.to_s, partition: 0, offset: 10) }
+      let(:message) { OpenStruct.new(topic: topic, partition: 0, offset: 10) }
 
       it do
         expect do

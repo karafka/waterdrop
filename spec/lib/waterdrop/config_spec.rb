@@ -3,6 +3,8 @@
 RSpec.describe_current do
   subject(:config) { described_class.new }
 
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
+
   describe '#setup' do
     context 'when configuration has errors' do
       let(:error_class) { ::WaterDrop::Errors::ConfigurationInvalidError }
@@ -31,7 +33,7 @@ RSpec.describe_current do
 
       it 'expect not to allow it' do
         expect do
-          producer.produce_sync(topic: 'test', payload: 'test')
+          producer.produce_sync(topic: topic_name, payload: 'test')
         end.to raise_error(Rdkafka::Config::ClientCreationError)
       end
     end
