@@ -8,6 +8,8 @@
 #
 # It also ensures we have one convention that we can follow.
 
+require 'bundler'
+Bundler.setup(:default, :test, :integrations)
 require 'rdkafka'
 
 admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
