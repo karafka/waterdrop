@@ -66,6 +66,9 @@ jobs:
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
 
+      - name: Check test topics naming convention
+        run: bin/verify_topics_naming
+
   diffend:
     runs-on: ubuntu-latest
     strategy:

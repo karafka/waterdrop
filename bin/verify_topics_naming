@@ -1,0 +1,30 @@
+#!/usr/bin/env ruby
+
+# This script verifies that we do not create (except few needed exceptions) test topics that do
+# not start with the "it-" prefix which is our standard.
+#
+# This ensures that we can clearly identify all test topics for removal in case of doing dev work
+# on a long-lived Kafka cluster without option to fully reset it.
+#
+# It also ensures we have one convention that we can follow.
+
+require 'bundler'
+Bundler.setup(:default, :test, :integrations)
+require 'rdkafka'
+
+admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
+
+invalid = admin
+          .metadata
+          .topics
+          .map { |topic| topic[:topic_name] }
+          .select { |topic| !topic.start_with?('it-') }
+          .select { |topic| topic.length <= 6 }
+
+admin.close
+
+invalid.each do |invalid_name|
+  puts "#{invalid_name} does not start with the \"it-\" prefix"
+end
+
+exit invalid.empty? ? 0 : 1

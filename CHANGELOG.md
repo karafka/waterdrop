@@ -1,8 +1,12 @@
 # WaterDrop changelog
 
+## 2.8.3 (Unreleased)
+- [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
+
 ## 2.8.2 (2025-02-13)
 - [Feature] Allow for tagging of producer instances similar to how consumers can be tagged.
 - [Refactor] Ensure all test topics in the test suite start with "it-" prefix. 
+- [Refactor] Introduce a `bin/verify_kafka_warnings` script to clean Kafka from temporary test-suite topics.
 
 ## 2.8.1 (2024-12-26)
 - [Enhancement] Raise `WaterDrop::ProducerNotTransactionalError` when attempting to use transactions on a non-transactional producer.
