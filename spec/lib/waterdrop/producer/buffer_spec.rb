@@ -133,7 +133,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
     end
 
     context 'when there are messages in the buffer' do
-      before { producer.buffer(create(:valid_message)) }
+      before { producer.buffer(build(:valid_message)) }
 
       it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryHandle) }
       it { expect(producer.tap(&:flush_async).messages).to be_empty }
@@ -144,7 +144,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
 
       before do
         allow(producer.client).to receive(:produce).and_raise(error)
-        producer.buffer(create(:valid_message))
+        producer.buffer(build(:valid_message))
       end
 
       it { expect { flushing }.to raise_error(WaterDrop::Errors::ProduceManyError) }
@@ -159,7 +159,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
     end
 
     context 'when there are messages in the buffer' do
-      before { producer.buffer(create(:valid_message)) }
+      before { producer.buffer(build(:valid_message)) }
 
       it { expect(flushing[0]).to be_a(Rdkafka::Producer::DeliveryHandle) }
       it { expect(producer.tap(&:flush_sync).messages).to be_empty }
@@ -170,7 +170,7 @@ RSpec.describe WaterDrop::Producer::Buffer do
 
       before do
         allow(producer.client).to receive(:produce).and_raise(error)
-        producer.buffer(create(:valid_message))
+        producer.buffer(build(:valid_message))
       end
 
       it { expect { flushing }.to raise_error(WaterDrop::Errors::ProduceManyError) }

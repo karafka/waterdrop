@@ -11,7 +11,6 @@ group :development do
 end
 
 group :test do
-  gem 'factory_bot'
   gem 'ostruct'
   gem 'rspec'
   gem 'simplecov'

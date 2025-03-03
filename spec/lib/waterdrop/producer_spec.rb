@@ -144,19 +144,19 @@ RSpec.describe_current do
 
   describe '#idempotent?' do
     context 'when producer is transactional' do
-      subject(:producer) { create(:transactional_producer) }
+      subject(:producer) { build(:transactional_producer) }
 
       it { expect(producer.idempotent?).to be(true) }
     end
 
     context 'when it is a regular producer' do
-      subject(:producer) { create(:producer) }
+      subject(:producer) { build(:producer) }
 
       it { expect(producer.idempotent?).to be(false) }
     end
 
     context 'when it is an idempotent producer' do
-      subject(:producer) { create(:idempotent_producer) }
+      subject(:producer) { build(:idempotent_producer) }
 
       it { expect(producer.idempotent?).to be(true) }
     end
