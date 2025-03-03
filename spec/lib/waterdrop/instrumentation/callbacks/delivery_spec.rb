@@ -88,9 +88,13 @@ RSpec.describe_current do
           changed << event
         end
 
-        # We force it to bypass the validations, so we trigger an error on delivery
-        # otherwise we would be stopped by WaterDrop itself
-        producer.send(:client).produce(topic: '$%^&*', payload: '1')
+        100.times do
+          # We force it to bypass the validations, so we trigger an error on delivery
+          # otherwise we would be stopped by WaterDrop itself
+          producer.send(:client).produce(topic: '$%^&*', payload: '1')
+        rescue Rdkafka::RdkafkaError
+          nil
+        end
 
         sleep(0.01) until changed.size.positive?
       end
