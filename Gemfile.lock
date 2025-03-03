@@ -74,6 +74,7 @@ DEPENDENCIES
   rspec
   simplecov
   waterdrop!
+  zeitwerk (~> 2.6)
 
 BUNDLED WITH
    2.6.2

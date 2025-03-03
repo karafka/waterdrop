@@ -6,6 +6,8 @@ plugin 'diffend'
 
 gemspec
 
+gem 'zeitwerk', '~> 2.6'
+
 group :development do
   gem 'byebug'
 end
