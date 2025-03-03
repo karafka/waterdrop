@@ -2,7 +2,7 @@ PATH
   remote: .
   specs:
     waterdrop (2.8.3)
-      karafka-core (>= 2.4.3, < 3.0.0)
+      karafka-core (>= 2.4.9, < 3.0.0)
       karafka-rdkafka (>= 0.17.5)
       zeitwerk (~> 2.3)
 
@@ -23,7 +23,7 @@ GEM
     ffi (1.17.1-x86_64-darwin)
     ffi (1.17.1-x86_64-linux-gnu)
     ffi (1.17.1-x86_64-linux-musl)
-    karafka-core (2.4.8)
+    karafka-core (2.4.9)
       karafka-rdkafka (>= 0.17.6, < 0.19.0)
       logger (>= 1.6.0)
     karafka-rdkafka (0.18.1)
