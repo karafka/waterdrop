@@ -2,6 +2,7 @@
 
 ## 2.8.3 (Unreleased)
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
+- [Refactor] Remove factory bot and active support requirement in tests/dev.
 
 ## 2.8.2 (2025-02-13)
 - [Feature] Allow for tagging of producer instances similar to how consumers can be tagged.

@@ -41,7 +41,7 @@ RSpec.describe_current do
   end
 
   let(:producer) do
-    producer = create(:producer)
+    producer = build(:producer)
     producer.monitor.subscribe listener
     producer
   end
@@ -216,7 +216,7 @@ RSpec.describe_current do
 
   context 'when error occurred' do
     let(:producer) do
-      producer = create(
+      producer = build(
         :producer,
         kafka: {
           'bootstrap.servers': 'localhost:9093',

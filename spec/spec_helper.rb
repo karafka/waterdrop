@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-require 'factory_bot'
 require 'ostruct'
 require 'securerandom'
+require 'logger'
 
 coverage = !ENV.key?('GITHUB_WORKFLOW')
 coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
@@ -28,18 +28,25 @@ end
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
 
+require_relative 'support/factories'
+require_relative 'support/factories/message'
+require_relative 'support/factories/producer'
+
 RSpec.configure do |config|
-  config.include FactoryBot::Syntax::Methods
   config.disable_monkey_patching!
   config.order = :random
+
+  config.include Factories
+  config.include Factories::Message
+  config.include Factories::Producer
 
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
 end
 
-require 'karafka/core/helpers/rspec_locator'
-RSpec.extend Karafka::Core::Helpers::RSpecLocator.new(__FILE__, 'Waterdrop' => 'WaterDrop')
+require 'support/rspec_locator'
+RSpec.extend RSpecLocator.new(__FILE__, 'Waterdrop' => 'WaterDrop')
 
 require 'waterdrop'
 require 'waterdrop/instrumentation/vendors/datadog/metrics_listener'

@@ -1,27 +1,33 @@
 # frozen_string_literal: true
 
-FactoryBot.define do
-  factory :valid_message, class: 'Hash' do
-    skip_create
+module Factories
+  # Message factories
+  module Message
+    # @param overrides [Hash] keys we want to override
+    # @return [Hash] valid message
+    def valid_message_factory(overrides = {})
+      defaults = {
+        topic: "it-#{SecureRandom.uuid}",
+        payload: rand.to_s,
+        partition_key: nil,
+        label: nil
+      }
 
-    topic { "it-#{SecureRandom.uuid}" }
-    payload { rand.to_s }
-    partition_key { nil }
-    label { nil }
+      message = {}
+      attributes = defaults.merge(overrides)
 
-    initialize_with do
-      message = new
-      message[:topic] = topic
-      message[:payload] = payload
-      message[:partition_key] = partition_key if partition_key
-      message[:label] = label if label
+      message[:topic] = attributes[:topic]
+      message[:payload] = attributes[:payload]
+      message[:partition_key] = attributes[:partition_key] if attributes[:partition_key]
+      message[:label] = attributes[:label] if attributes[:label]
+
       message
     end
-  end
 
-  factory :invalid_message, class: 'Hash' do
-    skip_create
-
-    initialize_with { new }
+    # @param _overrides [Hash]
+    # @return [Hash] invalid message
+    def invalid_message_factory(_overrides = {})
+      {}
+    end
   end
 end
