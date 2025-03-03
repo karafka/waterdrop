@@ -6,6 +6,7 @@ plugin 'diffend'
 
 gemspec
 
+# Relaxed from 2.7 because we support Ruby 3.1
 gem 'zeitwerk', '~> 2.6'
 
 group :development do
