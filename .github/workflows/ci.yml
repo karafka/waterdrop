@@ -40,7 +40,7 @@ jobs:
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
+        uses: ruby/setup-ruby@f0a4d6bddd8e71bd3268c611f7ea6f41dce6d7fd
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -85,7 +85,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@bbda85882f33075a3727c01e3c8d0de0be6146ce
+        uses: ruby/setup-ruby@f0a4d6bddd8e71bd3268c611f7ea6f41dce6d7fd
         with:
           ruby-version: 3.4
       - name: Install latest bundler
