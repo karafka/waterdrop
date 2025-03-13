@@ -6,5 +6,11 @@
   "github-actions": {
     "enabled": true,
     "pinDigests": true
-  }
+  },
+  "packageRules": [
+    {
+      "matchManagers": ["github-actions"],
+      "schedule": ["after 1 week"]
+    }
+  ]
 }
