@@ -311,7 +311,7 @@ RSpec.describe_current do
     end
 
     context 'when headers value is a valid array of strings' do
-      before { message[:headers] = { 'key' => ['value1', 'value2'] } }
+      before { message[:headers] = { 'key' => %w[value1 value2] } }
 
       it { expect(contract_result).to be_success }
       it { expect(errors).to be_empty }
