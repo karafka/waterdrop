@@ -39,7 +39,7 @@ en:
       key_format: must be a non-empty string
       payload_max_size: is more than `max_payload_size` config value
       headers_invalid_key_type: all headers keys need to be of type String
-      headers_invalid_value_type: all headers values need to be of type String
+      headers_invalid_value_type: all headers values need to be strings or arrays of strings
 
     transactional_offset:
       consumer_format: 'must respond to #consumer_group_metadata_pointer method'

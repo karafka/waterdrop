@@ -279,17 +279,39 @@ RSpec.describe_current do
       before { message[:headers] = rand }
 
       it { expect(contract_result).not_to be_success }
+      it { expect(errors[:headers]).not_to be_empty }
     end
 
-    context 'when headers is an empty hash' do
-      before { message[:headers] = {} }
+    context 'when headers key is not a string' do
+      before { message[:headers] = { rand => 'value' } }
+
+      it { expect(contract_result).not_to be_success }
+      it { expect(errors[:headers]).not_to be_empty }
+    end
+
+    context 'when headers value is not a string or array of strings' do
+      before { message[:headers] = { 'key' => rand } }
+
+      it { expect(contract_result).not_to be_success }
+      it { expect(errors[:headers]).not_to be_empty }
+    end
+
+    context 'when headers value is an array with non-string elements' do
+      before { message[:headers] = { 'key' => ['value', rand] } }
+
+      it { expect(contract_result).not_to be_success }
+      it { expect(errors[:headers]).not_to be_empty }
+    end
+
+    context 'when headers value is a valid string' do
+      before { message[:headers] = { 'key' => 'value' } }
 
       it { expect(contract_result).to be_success }
       it { expect(errors).to be_empty }
     end
 
-    context 'when headers is valid hash with data' do
-      before { message[:headers] = { rand.to_s => rand.to_s } }
+    context 'when headers value is a valid array of strings' do
+      before { message[:headers] = { 'key' => %w[value1 value2] } }
 
       it { expect(contract_result).to be_success }
       it { expect(errors).to be_empty }
@@ -300,20 +322,6 @@ RSpec.describe_current do
 
       it { expect(contract_result).to be_success }
       it { expect(errors).to be_empty }
-    end
-
-    context 'when headers keys are not string' do
-      before { message[:headers] = { rand => rand.to_s } }
-
-      it { expect(contract_result).not_to be_success }
-      it { expect(errors[:headers]).not_to be_empty }
-    end
-
-    context 'when headers values are not string' do
-      before { message[:headers] = { rand.to_s => rand } }
-
-      it { expect(contract_result).not_to be_success }
-      it { expect(errors[:headers]).not_to be_empty }
     end
   end
 end

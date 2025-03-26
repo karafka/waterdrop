@@ -46,7 +46,12 @@ module WaterDrop
 
         message.fetch(:headers).each do |key, value|
           errors << [%i[headers], :invalid_key_type] unless key.is_a?(String)
-          errors << [%i[headers], :invalid_value_type] unless value.is_a?(String)
+
+          # Headers can be either strings or arrays of strings
+          next if value.is_a?(String)
+          next if value.is_a?(Array) && value.all? { |value| value.is_a?(String) }
+
+          errors << [%i[headers], :invalid_value_type]
         end
 
         errors
