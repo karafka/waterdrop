@@ -22,6 +22,18 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
 
+    context 'when message has array headers' do
+      let(:message) { build(:valid_message, headers: { 'a' => %w[b c] }) }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
+    end
+
+    context 'when message has invalid headers' do
+      let(:message) { build(:valid_message, headers: { 'a' => %i[b c] }) }
+
+      it { expect { delivery }.to raise_error(WaterDrop::Errors::MessageInvalidError) }
+    end
+
     context 'when message is valid and with label' do
       let(:message) { build(:valid_message, label: 'test') }
 
@@ -117,6 +129,14 @@ RSpec.describe_current do
 
     context 'when we have several valid messages' do
       let(:messages) { Array.new(10) { build(:valid_message) } }
+
+      it 'expect all the results to be delivery handles' do
+        expect(delivery).to all be_a(Rdkafka::Producer::DeliveryHandle)
+      end
+    end
+
+    context 'when we have several valid messages with array headers' do
+      let(:messages) { Array.new(10) { build(:valid_message, headers: { 'a' => %w[b c] }) } }
 
       it 'expect all the results to be delivery handles' do
         expect(delivery).to all be_a(Rdkafka::Producer::DeliveryHandle)

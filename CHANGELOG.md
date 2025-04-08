@@ -4,6 +4,7 @@
 - [Enhancement] Support producing messages with arrays of strings in headers (KIP-82).
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
 - [Refactor] Remove factory bot and active support requirement in tests/dev.
+- [Change] Require `karafka-rdkafka` `>= 0.19.1` due to KIP-82.
 
 ## 2.8.2 (2025-02-13)
 - [Feature] Allow for tagging of producer instances similar to how consumers can be tagged.

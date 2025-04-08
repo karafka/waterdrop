@@ -73,6 +73,38 @@ RSpec.describe_current do
     end
   end
 
+  context 'when we dispatch in transaction to multiple topics with array headers' do
+    it 'expect to work' do
+      handlers = []
+
+      producer.transaction do
+        handlers << producer.produce_async(
+          topic: "#{topic_name}1",
+          payload: '1',
+          headers: { 'a' => 'b', 'c' => %w[d e] }
+        )
+        handlers << producer.produce_async(
+          topic: "#{topic_name}2",
+          payload: '2',
+          headers: { 'a' => 'b', 'c' => %w[d e] }
+        )
+      end
+
+      expect { handlers.map!(&:wait) }.not_to raise_error
+    end
+
+    it 'expect to return block result as the transaction result' do
+      result = rand
+
+      transaction_result = producer.transaction do
+        producer.produce_async(topic: topic_name, payload: '2')
+        result
+      end
+
+      expect(transaction_result).to eq(result)
+    end
+  end
+
   context 'when trying to use transaction on a non-existing topics and short time' do
     subject(:producer) { build(:transactional_producer, transaction_timeout_ms: 1_000) }
 

@@ -10,7 +10,8 @@ module Factories
         topic: "it-#{SecureRandom.uuid}",
         payload: rand.to_s,
         partition_key: nil,
-        label: nil
+        label: nil,
+        headers: {}
       }
 
       message = {}
@@ -20,6 +21,7 @@ module Factories
       message[:payload] = attributes[:payload]
       message[:partition_key] = attributes[:partition_key] if attributes[:partition_key]
       message[:label] = attributes[:label] if attributes[:label]
+      message[:headers] = attributes[:headers] if attributes[:headers]
 
       message
     end
