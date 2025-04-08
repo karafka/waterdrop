@@ -20,6 +20,12 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
     end
 
+    context 'when message is valid with array headers' do
+      let(:message) { build(:valid_message, headers: { 'a' => %w[b c] }) }
+
+      it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryHandle) }
+    end
+
     context 'when message is valid and with label' do
       let(:message) { build(:valid_message, label: 'test') }
 
