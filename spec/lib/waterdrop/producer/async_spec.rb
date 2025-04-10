@@ -125,6 +125,35 @@ RSpec.describe_current do
       it { expect(occurred.first.payload[:label]).to be_nil }
     end
 
+    context 'when linger is longer than shutdown' do
+      let(:occurred) { [] }
+      let(:error) { occurred.first[:error] }
+      let(:producer) do
+        build(
+          :slow_producer,
+          kafka: {
+            'bootstrap.servers': 'localhost:9092',
+            'queue.buffering.max.ms': 1,
+            'message.timeout.ms': 2
+          }
+        )
+      end
+
+      before do
+        producer.monitor.subscribe('error.occurred') do |event|
+          occurred << event
+        end
+
+        message = build(:valid_message, label: 'test')
+        100.times { producer.produce_async(message) }
+        producer.close
+      end
+
+      it { expect(occurred).not_to be_empty }
+      it { expect(error).to be_a(Rdkafka::RdkafkaError) }
+      it { expect(error.code).to eq(:msg_timed_out) }
+    end
+
     context 'when inline error occurs and we retry on queue full but instrumentation off' do
       let(:errors) { [] }
       let(:occurred) { [] }
