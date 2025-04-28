@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.4 (Unreleased)
+- [Change] Require `karafka-rdkafka` `>=` `0.20.0.rc1`.
+
 ## 2.8.3 (2025-04-08)
 - [Enhancement] Support producing messages with arrays of strings in headers (KIP-82).
 - [Refactor] Introduce a `bin/verify_topics_naming` script to ensure proper test topics naming convention.
