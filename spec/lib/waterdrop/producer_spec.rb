@@ -130,7 +130,18 @@ RSpec.describe_current do
     context 'when topic does not exist' do
       let(:topic) { "it-#{SecureRandom.uuid}" }
 
-      it { expect { count }.to raise_error(Rdkafka::RdkafkaError, /unknown_topic_or_part/) }
+      if Rdkafka::VERSION >= '0.20'
+        it do
+          expect(count).to eq(1)
+        rescue Rdkafka::RdkafkaError => e
+          expect(e).to be_a(Rdkafka::RdkafkaError)
+          expect(e.code).to eq(:unknown_topic_or_part)
+        end
+      else
+        # Older versions of librdkafka (pre 2.10) would raise error, after that it may not
+        # topic may be created if fast enough or error may happen
+        it { expect { count }.to raise_error(Rdkafka::RdkafkaError, /unknown_topic_or_part/) }
+      end
     end
 
     context 'when topic exists' do
