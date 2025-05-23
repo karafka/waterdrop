@@ -28,5 +28,9 @@ jobs:
         with:
           bundler-cache: false
 
+      - name: Bundle install
+        run: |
+          bundle install --jobs 4 --retry 3
+
       # Release
       - uses: rubygems/release-gem@9e85cb11501bebc2ae661c1500176316d3987059 # v1
