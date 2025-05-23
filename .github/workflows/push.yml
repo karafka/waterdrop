@@ -30,7 +30,6 @@ jobs:
 
       - name: Bundle install
         run: |
-          set -e
           bundle install --jobs 4 --retry 3
 
       # Release
