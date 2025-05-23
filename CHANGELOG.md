@@ -1,7 +1,8 @@
 # WaterDrop changelog
 
-## 2.8.4 (Unreleased)
+## 2.8.4 (2025-05-23)
 - [Change] Require `karafka-rdkafka` `>= 0.19.2` due to new partition count caching usage.
+- [Change] Move to trusted-publishers and remove signing since no longer needed.
 
 ## 2.8.3 (2025-04-08)
 - [Enhancement] Support producing messages with arrays of strings in headers (KIP-82).

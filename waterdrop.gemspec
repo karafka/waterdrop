@@ -22,11 +22,6 @@ Gem::Specification.new do |spec|
 
   spec.required_ruby_version = '>= 3.1.0'
 
-  if $PROGRAM_NAME.end_with?('gem')
-    spec.signing_key = File.expand_path('~/.ssh/gem-private_key.pem')
-  end
-
-  spec.cert_chain    = %w[certs/cert.pem]
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = []
   spec.require_paths = %w[lib]
