@@ -60,6 +60,54 @@ RSpec.describe_current do
       end
     end
 
+    context 'when producing sync to a topic that does not exist with partition_key' do
+      let(:message) { build(:valid_message, partition_key: 'test', key: 'test') }
+
+      it 'expect not to raise error and work correctly as the topic should be created' do
+        expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport)
+      end
+    end
+
+    context 'when allow.auto.create.topics is set to false' do
+      let(:message) { build(:valid_message) }
+
+      let(:producer) do
+        build(
+          :producer,
+          kafka: {
+            'bootstrap.servers': 'localhost:9092',
+            'allow.auto.create.topics': false,
+            'message.timeout.ms': 500
+          }
+        )
+      end
+
+      it 'expect to raise final error' do
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError, /msg_timed_out/)
+      end
+    end
+
+    context 'when allow.auto.create.topics is set to false and we use partition key' do
+      let(:message) { build(:valid_message, partition_key: 'test', key: 'test') }
+
+      let(:producer) do
+        build(
+          :producer,
+          kafka: {
+            'bootstrap.servers': 'localhost:9092',
+            'allow.auto.create.topics': false,
+            'message.timeout.ms': 500
+          }
+        )
+      end
+
+      it 'expect to raise final error' do
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError, /msg_timed_out/)
+      end
+    end
+
     context 'when inline error occurs in librdkafka' do
       let(:errors) { [] }
       let(:error) { errors.first }
