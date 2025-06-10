@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.5 (Unreleased)
+- [Enhancement] Normalize topic + partition logs format (single place).
+
 ## 2.8.4 (2025-05-23)
 - [Change] Require `karafka-rdkafka` `>= 0.19.2` due to new partition count caching usage.
 - [Change] Move to trusted-publishers and remove signing since no longer needed.

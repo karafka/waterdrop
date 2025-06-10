@@ -166,11 +166,11 @@ module WaterDrop
         topic = message.topic
         partition = message.partition
         offset = message.offset
-        loc = "#{topic}/#{partition}"
+        loc = "#{topic}-#{partition}"
 
         info(
           event,
-          "Marking message with offset #{offset} for topic #{loc} as consumed in a transaction"
+          "Marking message with offset #{offset} on #{loc} as consumed in a transaction"
         )
       end
 
