@@ -40,6 +40,11 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
+      - name: Remove platform-specific ffi entries for Ruby previews
+        if: contains(matrix.ruby, '3.5')
+        run: |
+          ruby -i -ne 'puts $_ unless /^\s*ffi \(.*-.*\)$/' Gemfile.lock
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@13e7a03dc3ac6c3798f4570bfead2aed4d96abfb # v1.244.0
         with:
@@ -63,18 +68,7 @@ jobs:
       - name: Bundle install
         run: |
           bundle config set without development
-          if [[ "${{ matrix.ruby }}" == "3.5.0-preview1" ]]; then
-            bundle config set force_ruby_platform true
-            # Get all platforms except ruby and remove them
-            PLATFORMS=$(grep -A 100 "^PLATFORMS$" Gemfile.lock | grep -v "^PLATFORMS$" | grep -v "^$" | grep -v "ruby" | sed 's/^[ \t]*//' | tr '\n' ' ')
-            if [ ! -z "$PLATFORMS" ]; then
-              bundle lock --remove-platform $PLATFORMS
-            fi
-            bundle lock --add-platform ruby
-            bundle install --jobs 4 --retry 3
-          else
-            bundle install --jobs 4 --retry 3
-          fi
+          bundle install --jobs 4 --retry 3
 
       - name: Run all tests
         env:
