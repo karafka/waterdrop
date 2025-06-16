@@ -32,7 +32,6 @@ jobs:
         include:
           - ruby: '3.4'
             coverage: 'true'
-            cache-version: 2
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
@@ -47,6 +46,7 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
           bundler: 'latest'
+          cache-version: 2
 
       - name: Run Kafka with Docker Compose
         run: |
