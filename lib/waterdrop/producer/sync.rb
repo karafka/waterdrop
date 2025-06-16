@@ -8,7 +8,7 @@ module WaterDrop
       #
       # @param message [Hash] hash that complies with the {Contracts::Message} contract
       #
-      # @return [Rdkafka::Producer::DeliveryReport] delivery report
+      # @return [Rdkafka::Producer::DeliveryHandle] delivery report
       #
       # @raise [Rdkafka::RdkafkaError] When adding the message to rdkafka's queue failed
       # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and the
@@ -49,7 +49,7 @@ module WaterDrop
       # @param messages [Array<Hash>] array with messages that comply with the
       #   {Contracts::Message} contract
       #
-      # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports
+      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery reports
       #
       # @raise [Rdkafka::RdkafkaError] When adding the messages to rdkafka's queue failed
       # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and some
