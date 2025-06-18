@@ -169,7 +169,7 @@ module WaterDrop
       return true if transactional?
       return @idempotent if instance_variable_defined?(:'@idempotent')
 
-      @idempotent = config.kafka.to_h.key?(:'enable.idempotence')
+      @idempotent = config.kafka.to_h.fetch(:'enable.idempotence', false)
     end
 
     # Returns and caches the middleware object that may be used
