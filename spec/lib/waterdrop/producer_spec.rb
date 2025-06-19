@@ -175,6 +175,16 @@ RSpec.describe_current do
 
       it { expect(producer.idempotent?).to be(true) }
     end
+
+    context 'when setting explicit enable.idempotence to false' do
+      subject(:producer) do
+        described_class.new do |config|
+          config.kafka = { 'enable.idempotence': false }
+        end
+      end
+
+      it { expect(producer.idempotent?).to be(false) }
+    end
   end
 
   describe '#close' do
