@@ -32,7 +32,7 @@ GEM
       rake (> 12)
     logger (1.7.0)
     mini_portile2 (2.8.9)
-    ostruct (0.6.2)
+    ostruct (0.6.3)
     rake (13.3.0)
     rspec (3.13.1)
       rspec-core (~> 3.13.0)
