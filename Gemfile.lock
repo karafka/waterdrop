@@ -1,9 +1,9 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.8.5)
+    waterdrop (2.8.6)
       karafka-core (>= 2.4.9, < 3.0.0)
-      karafka-rdkafka (>= 0.19.2)
+      karafka-rdkafka (>= 0.21.0.rc1)
       zeitwerk (~> 2.3)
 
 GEM
@@ -23,11 +23,27 @@ GEM
     ffi (1.17.2-x86_64-darwin)
     ffi (1.17.2-x86_64-linux-gnu)
     ffi (1.17.2-x86_64-linux-musl)
-    karafka-core (2.4.11)
-      karafka-rdkafka (>= 0.17.6, < 0.20.0)
+    karafka-core (2.5.2)
+      karafka-rdkafka (>= 0.19.2, < 0.21.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.19.5)
+    karafka-rdkafka (0.21.0.rc1)
       ffi (~> 1.15)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.21.0.rc1-arm64-darwin)
+      ffi (~> 1.15)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.21.0.rc1-x86_64-linux-gnu)
+      ffi (~> 1.15)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.21.0.rc1-x86_64-linux-musl)
+      ffi (~> 1.15)
+      logger
       mini_portile2 (~> 2.6)
       rake (> 12)
     logger (1.7.0)
@@ -77,4 +93,4 @@ DEPENDENCIES
   zeitwerk (~> 2.6.18)
 
 BUNDLED WITH
-   2.6.7
+   2.7.0

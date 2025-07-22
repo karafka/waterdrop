@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.6 (Unreleased)
+- [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
+
 ## 2.8.5 (2025-06-23)
 - [Enhancement] Normalize topic + partition logs format (single place).
 - [Fix] A producer is not idempotent unless the enable.idempotence config is `true` (ferrous26).
