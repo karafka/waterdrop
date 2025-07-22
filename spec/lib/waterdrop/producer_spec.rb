@@ -130,21 +130,14 @@ RSpec.describe_current do
     context 'when topic does not exist' do
       let(:topic) { "it-#{SecureRandom.uuid}" }
 
-      if Rdkafka::VERSION >= '0.20'
-        it do
-          expect(count).to eq(1)
-        rescue Rdkafka::RdkafkaError => e
-          expect(e).to be_a(Rdkafka::RdkafkaError)
-          expect(e.code).to eq(:unknown_topic_or_part)
-        end
-      # 0.19.5+ with older librdkafka will report -1 consistently with inability to get the
-      # partition count from metadata
-      elsif Rdkafka::VERSION >= '0.19.5'
-        it { expect(count).to eq(-1) }
-      else
-        # Older versions of librdkafka (pre 0.19.5) would raise error, after that it may not
-        # topic may be created if fast enough or error may happen
-        it { expect { count }.to raise_error(Rdkafka::RdkafkaError, /unknown_topic_or_part/) }
+      it do
+        producer.partition_count(topic)
+        sleep(1)
+
+        expect(count).to eq(1)
+      rescue Rdkafka::RdkafkaError => e
+        expect(e).to be_a(Rdkafka::RdkafkaError)
+        expect(e.code).to eq(:unknown_topic_or_part)
       end
     end
 
