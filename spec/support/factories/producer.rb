@@ -140,7 +140,7 @@ module Factories
 
       producer_factory(
         {
-          max_wait_timeout: 2_000,
+          max_wait_timeout: 5_000,
           kafka: kafka_config
         }.merge(producer_attrs)
       )
