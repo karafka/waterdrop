@@ -279,9 +279,7 @@ module WaterDrop
       end
 
       # Check if client is connected without triggering connection
-      parts << if @client
-                 'connected=true'
-               elsif @status&.connected?
+      parts << if @status.connected?
                  'connected=true'
                else
                  'connected=false'
