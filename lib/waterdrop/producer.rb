@@ -260,6 +260,37 @@ module WaterDrop
       close(force: true)
     end
 
+    # @return [String] mutex-safe inspect details
+    def inspect
+      # Basic info that's always safe to access
+      parts = []
+      parts << "id=#{@id.inspect}"
+      parts << "status=#{@status}" if @status
+
+      # Try to get buffer info safely
+      if @buffer_mutex.try_lock
+        begin
+          parts << "buffer_size=#{@messages.size}"
+        ensure
+          @buffer_mutex.unlock
+        end
+      else
+        parts << 'buffer_size=busy'
+      end
+
+      # Check if client is connected without triggering connection
+      parts << if @status.connected?
+                 'connected=true'
+               else
+                 'connected=false'
+               end
+
+      parts << "operations=#{@operations_in_progress.value}"
+      parts << 'in_transaction=true' if @transaction_mutex.locked?
+
+      "#<#{self.class.name} #{parts.join(' ')}>"
+    end
+
     private
 
     # Ensures that we don't run any operations when the producer is not configured or when it

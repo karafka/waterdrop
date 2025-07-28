@@ -355,6 +355,128 @@ RSpec.describe_current do
     it { expect(producer2.tags.to_a).to eq(%w[regular]) }
   end
 
+  describe '#inspect' do
+    context 'when producer is not configured' do
+      subject(:producer) { described_class.new }
+
+      it { expect(producer.inspect).to include('WaterDrop::Producer') }
+      it { expect(producer.inspect).to include('initial') }
+      it { expect(producer.inspect).to include('buffer_size=0') }
+      it { expect(producer.inspect).to include('id=nil') }
+    end
+
+    context 'when producer is configured but not connected' do
+      subject(:producer) { build(:producer) }
+
+      it { expect(producer.inspect).to include('WaterDrop::Producer') }
+      it { expect(producer.inspect).to include('configured') }
+      it { expect(producer.inspect).to include('buffer_size=0') }
+      it { expect(producer.inspect).to include("id=\"#{producer.id}\"") }
+    end
+
+    context 'when producer is connected' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      it { expect(producer.inspect).to include('WaterDrop::Producer') }
+      it { expect(producer.inspect).to include('connected') }
+      it { expect(producer.inspect).to include('buffer_size=0') }
+      it { expect(producer.inspect).to include("id=\"#{producer.id}\"") }
+    end
+
+    context 'when producer has messages in buffer' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      let(:message) { build(:valid_message) }
+
+      before { producer.buffer(message) }
+
+      it { expect(producer.inspect).to include('buffer_size=1') }
+
+      context 'when multiple messages are buffered' do
+        before do
+          producer.buffer(message)
+          producer.buffer(message)
+        end
+
+        it { expect(producer.inspect).to include('buffer_size=3') }
+      end
+    end
+
+    context 'when buffer mutex is locked' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      it 'shows buffer as busy when mutex is locked' do
+        producer.instance_variable_get(:@buffer_mutex).lock
+
+        expect(producer.inspect).to include('buffer_size=busy')
+
+        producer.instance_variable_get(:@buffer_mutex).unlock
+      end
+    end
+
+    context 'when producer is being closed' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      before { allow(producer.status).to receive(:to_s).and_return('closing') }
+
+      it { expect(producer.inspect).to include('closing') }
+    end
+
+    context 'when producer is closed' do
+      subject(:producer) { build(:producer).tap(&:client).tap(&:close) }
+
+      it { expect(producer.inspect).to include('closed') }
+      it { expect(producer.inspect).to include('buffer_size=0') }
+    end
+
+    context 'when called concurrently' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      it 'does not block or raise errors' do
+        threads = Array.new(10) do
+          Thread.new { producer.inspect }
+        end
+
+        results = threads.map(&:value)
+
+        expect(results).to all(be_a(String))
+        expect(results).to all(include('WaterDrop::Producer'))
+      end
+    end
+
+    context 'when inspect is called during buffer operations' do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      let(:message) { build(:valid_message) }
+
+      it 'does not interfere with buffer operations' do
+        # Start a thread that continuously inspects
+        inspect_thread = Thread.new do
+          100.times { producer.inspect }
+        end
+
+        # Meanwhile, perform buffer operations
+        expect do
+          10.times { producer.buffer(message) }
+          producer.flush_sync
+        end.not_to raise_error
+
+        inspect_thread.join
+      end
+    end
+
+    it 'returns a string' do
+      expect(producer.inspect).to be_a(String)
+    end
+
+    it 'does not call complex methods that could trigger side effects' do
+      allow(producer).to receive(:client)
+      # Ensure inspect doesn't trigger client creation
+      producer.inspect
+      expect(producer).not_to have_received(:client)
+    end
+  end
+
   describe 'statistics callback hook' do
     let(:message) { build(:valid_message) }
 
