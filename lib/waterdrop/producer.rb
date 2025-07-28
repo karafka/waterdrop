@@ -285,10 +285,7 @@ module WaterDrop
                  'connected=false'
                end
 
-      # Show operation count if available
-      parts << "operations=#{@operations_in_progress.value}" if @operations_in_progress
-
-      # Show if we're in a transaction (mutex-protected state)
+      parts << "operations=#{@operations_in_progress.value}"
       parts << 'in_transaction=true' if @transaction_mutex.locked?
 
       "#<#{self.class.name} #{parts.join(' ')}>"
