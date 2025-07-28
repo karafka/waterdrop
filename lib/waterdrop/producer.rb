@@ -288,7 +288,7 @@ module WaterDrop
       parts << "operations=#{@operations_in_progress.value}"
       parts << 'in_transaction=true' if @transaction_mutex.locked?
 
-      "#<#{self.class.name} #{parts.join(' ')}>"
+      "#<#{self.class.name}:#{format('%#x', object_id)} #{parts.join(' ')}>"
     end
 
     private
