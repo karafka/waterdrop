@@ -50,6 +50,11 @@ module WaterDrop
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
       @transaction_mutex = Mutex.new
+      @id = nil
+      @monitor = nil
+      @contract = nil
+      @default_variant = nil
+      @client = nil
 
       @status = Status.new
       @messages = []
