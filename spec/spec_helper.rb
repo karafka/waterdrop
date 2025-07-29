@@ -1,5 +1,21 @@
 # frozen_string_literal: true
 
+Warning[:performance] = true if RUBY_VERSION >= '3.3'
+Warning[:deprecated] = true
+$VERBOSE = true
+
+require 'warning'
+
+Warning.process do |warning|
+  next unless warning.include?(Dir.pwd)
+  next if warning.include?('vendor/bundle')
+  # Allow OpenStruct usage only in specs
+  next if warning.include?('OpenStruct use') && warning.include?('_spec')
+  next if warning.include?('$CHILD_STATUS')
+
+  raise "Warning in your code: #{warning}"
+end
+
 require 'ostruct'
 require 'securerandom'
 require 'logger'
