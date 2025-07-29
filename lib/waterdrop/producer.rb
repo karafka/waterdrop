@@ -55,6 +55,7 @@ module WaterDrop
       @contract = nil
       @default_variant = nil
       @client = nil
+      @closing_thread_id = nil
 
       @status = Status.new
       @messages = []
