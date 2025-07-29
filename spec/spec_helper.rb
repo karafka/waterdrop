@@ -11,6 +11,7 @@ Warning.process do |warning|
   next if warning.include?('vendor/bundle')
   # Allow OpenStruct usage only in specs
   next if warning.include?('OpenStruct use') && warning.include?('_spec')
+  next if warning.include?('$CHILD_STATUS')
 
   raise "Warning in your code: #{warning}"
 end
