@@ -2,6 +2,7 @@
 
 ## 2.8.6 (Unreleased)
 - [Enhancement] Introduce `WaterDrop::Producer#inspect` that is mutex-safe.
+- [Enhancement] Raise errors on detected Ruby warnings.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
 
 ## 2.8.5 (2025-06-23)
