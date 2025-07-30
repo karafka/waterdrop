@@ -5,6 +5,7 @@
 - [Enhancement] Raise errors on detected Ruby warnings.
 - [Enhancement] Optimize producer for Ruby shapes.
 - [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
+- [Change] Add new CI action to trigger auto-doc refresh.
 
 ## 2.8.5 (2025-06-23)
 - [Enhancement] Normalize topic + partition logs format (single place).
