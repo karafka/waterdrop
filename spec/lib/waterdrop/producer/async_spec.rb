@@ -128,25 +128,28 @@ RSpec.describe_current do
     context 'when linger is longer than shutdown' do
       let(:occurred) { [] }
       let(:error) { occurred.first[:error] }
-      let(:producer) do
-        build(
-          :slow_producer,
-          kafka: {
-            'bootstrap.servers': 'localhost:9092',
-            'queue.buffering.max.ms': 1,
-            'message.timeout.ms': 2
-          }
-        )
-      end
 
       before do
-        producer.monitor.subscribe('error.occurred') do |event|
-          occurred << event
-        end
+        while occurred.empty?
+          # On fast CPUs we may actually be fast enough to dispatch it to local kafka with ack
+          # within 1ms and no errors will occur. That's why we do repeat it
+          producer = build(
+            :slow_producer,
+            kafka: {
+              'bootstrap.servers': 'localhost:9092',
+              'queue.buffering.max.ms': 0,
+              'message.timeout.ms': 1
+            }
+          )
 
-        message = build(:valid_message, label: 'test')
-        100.times { producer.produce_async(message) }
-        producer.close
+          producer.monitor.subscribe('error.occurred') do |event|
+            occurred << event
+          end
+
+          message = build(:valid_message, label: 'test')
+          100.times { producer.produce_async(message) }
+          producer.close
+        end
       end
 
       it { expect(occurred).not_to be_empty }
