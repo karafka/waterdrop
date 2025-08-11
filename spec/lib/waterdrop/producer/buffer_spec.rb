@@ -176,4 +176,12 @@ RSpec.describe WaterDrop::Producer::Buffer do
       it { expect { flushing }.to raise_error(WaterDrop::Errors::ProduceManyError) }
     end
   end
+
+  context 'when we have data in the buffer' do
+    before { producer.buffer(build(:valid_message)) }
+
+    it 'expect not to allow for a disconnect' do
+      expect(producer.disconnect).to be(false)
+    end
+  end
 end
