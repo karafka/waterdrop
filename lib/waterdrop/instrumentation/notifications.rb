@@ -11,6 +11,7 @@ module WaterDrop
         producer.closing
         producer.closed
         producer.reloaded
+        producer.disconnected
 
         message.produced_async
         message.produced_sync

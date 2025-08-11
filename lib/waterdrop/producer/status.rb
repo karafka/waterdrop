@@ -9,6 +9,7 @@ module WaterDrop
         initial
         configured
         connected
+        disconnected
         closing
         closed
       ].freeze
@@ -22,11 +23,12 @@ module WaterDrop
       end
 
       # @return [Boolean] true if producer is in a active state. Active means, that we can start
-      #   sending messages. Actives states are connected (connection established) or configured,
-      #   which means, that producer is configured, but connection with Kafka is
-      #   not yet established.
+      #   sending messages. Active states are connected (connection established), configured
+      #   which means, that producer is configured, but connection with Kafka is not yet
+      #   established or disconnected, meaning it was working but user disconnected for his own
+      #   reasons though sending could reconnect and continue.
       def active?
-        connected? || configured?
+        connected? || configured? || disconnected?
       end
 
       # @return [String] current status as a string

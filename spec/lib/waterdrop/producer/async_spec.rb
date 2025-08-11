@@ -265,5 +265,32 @@ RSpec.describe_current do
       it { expect(error.message).to eq(error.cause.inspect) }
       it { expect(error.cause).to be_a(Rdkafka::RdkafkaError) }
     end
+
+    context 'when there are dispatched messages not in kafka yet' do
+      let(:producer) do
+        build(
+          :slow_producer,
+          kafka: {
+            'bootstrap.servers': 'localhost:9092',
+            'queue.buffering.max.ms': 5_000,
+            'queue.buffering.max.messages': 2_000
+          }
+        )
+      end
+
+      let(:dispatched) do
+        message = build(:valid_message, label: 'test')
+        Array.new(1_000) { producer.produce_async(message) }
+      end
+
+      it 'expect not to allow for disconnect' do
+        expect(producer.disconnect).to be(false)
+      end
+
+      it 'expect to allow disconnect after they are dispatched' do
+        dispatched.each(&:wait)
+        expect(producer.disconnect).to be(true)
+      end
+    end
   end
 end

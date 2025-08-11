@@ -231,4 +231,15 @@ RSpec.describe_current do
       it { expect(delivery).to be_a(Rdkafka::Producer::DeliveryReport) }
     end
   end
+
+  context 'when producing and disconnected in a loop' do
+    let(:message) { build(:valid_message) }
+
+    it 'expect to always disconnect and reconnect and continue to produce' do
+      100.times do |i|
+        expect(producer.produce_sync(message).offset).to eq(i)
+        producer.disconnect
+      end
+    end
+  end
 end

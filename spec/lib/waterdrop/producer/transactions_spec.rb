@@ -71,6 +71,20 @@ RSpec.describe_current do
 
       expect(transaction_result).to eq(result)
     end
+
+    it 'expect not to allow to disconnect producer during transaction' do
+      producer.transaction do
+        expect(producer.disconnect).to be(false)
+      end
+    end
+
+    it 'expect to allow to disconnect producer after transaction' do
+      producer.transaction do
+        producer.produce_async(topic: topic_name, payload: '2')
+      end
+
+      expect(producer.disconnect).to be(true)
+    end
   end
 
   context 'when we dispatch in transaction to multiple topics with array headers' do

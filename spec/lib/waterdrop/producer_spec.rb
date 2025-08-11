@@ -44,6 +44,10 @@ RSpec.describe_current do
       it { expect(producer.status.configured?).to be(true) }
       it { expect(producer.status.active?).to be(true) }
     end
+
+    it 'expect not to allow to disconnect' do
+      expect(producer.disconnect).to be(false)
+    end
   end
 
   describe '#setup' do
@@ -64,6 +68,10 @@ RSpec.describe_current do
       end
 
       it { expect { producer.setup(&setup) }.not_to raise_error }
+    end
+
+    it 'expect not to allow to disconnect' do
+      expect(producer.disconnect).to be(false)
     end
   end
 
@@ -260,6 +268,14 @@ RSpec.describe_current do
 
       it 'expect to close and not to raise any errors' do
         expect { producer.close }.not_to raise_error
+      end
+    end
+
+    context 'when producer is already closed and we try to disconnect' do
+      before { producer.close }
+
+      it 'expect not to allow to disconnect' do
+        expect(producer.disconnect).to be(false)
       end
     end
   end
@@ -501,6 +517,40 @@ RSpec.describe_current do
       # This is in microseconds. We needed a stable value for comparison, and the distance in
       # between statistics events should always be within 1ms
       it { expect(events.last[:statistics]['ts_d']).to be_between(90_000, 200_000) }
+    end
+
+    context 'when we have a reconnected producer' do
+      subject(:producer) { build(:producer) }
+      let(:message) { build(:valid_message) }
+
+      it 'expect to continue to receive statistics after reconnect' do
+        switch = :before
+        events = []
+
+        producer.monitor.subscribe('statistics.emitted') do |event|
+          events << [event[:statistics].object_id, switch]
+        end
+
+        producer.produce_sync(message)
+
+        sleep(2)
+
+        producer.disconnect
+        switch = :disconnected
+
+        sleep(2)
+
+        switch = :reconnected
+        producer.produce_sync(message)
+        sleep(2)
+
+        types = events.map(&:last)
+        expect(types).to include(:before)
+        expect(types).to include(:reconnected)
+        expect(types).not_to include(:disconnected)
+        # This ensures we do not get the same events twice after reconnecting
+        expect(events.map(&:first)).to eq(events.map(&:first).uniq)
+      end
     end
 
     context 'when we have more producers' do

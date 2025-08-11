@@ -184,6 +184,61 @@ module WaterDrop
       @middleware ||= config.middleware
     end
 
+    # Disconnects the producer from Kafka while keeping it configured for potential reconnection
+    #
+    # This method safely disconnects the underlying Kafka client while preserving the producer's
+    # configuration. Unlike `#close`, this allows the producer to be reconnected later by calling
+    # methods that require the client. The disconnection will only proceed if certain safety
+    # conditions are met.
+    #
+    # This API can be used to preserve connections on low-intensity producer instances, etc.
+    #
+    # @return [Boolean] true if disconnection was successful, false if disconnection was not
+    #   possible due to safety conditions (active transactions, ongoing operations, pending
+    #   messages in buffer, or if already disconnected)
+    #
+    # @note This method will refuse to disconnect if:
+    #   - There are pending messages in the internal buffer
+    #   - There are operations currently in progress
+    #   - A transaction is currently active
+    #   - The client is not currently connected
+    #   - Required mutexes are locked by other operations
+    #
+    # @note After successful disconnection, the producer status changes to disconnected but
+    #   remains configured, allowing for future reconnection when client access is needed.
+    def disconnect
+      return false unless @client
+      return false unless @status.connected?
+      return false if @transaction_mutex.locked?
+      return false if @operating_mutex.locked?
+
+      # Use the same mutex pattern as the regular close method to prevent race conditions
+      @transaction_mutex.synchronize do
+        @operating_mutex.synchronize do
+          @buffer_mutex.synchronize do
+            return false unless @client
+            return false unless @status.connected?
+            return false unless @messages.empty?
+            return false unless @operations_in_progress.value.zero?
+
+            @monitor.instrument(
+              'producer.disconnected',
+              producer_id: id
+            ) do
+              # Close the client
+              @client.close
+              @client = nil
+
+              # Reset connection status but keep producer configured
+              @status.disconnected!
+
+              true
+            end
+          end
+        end
+      end
+    end
+
     # Flushes the buffers in a sync way and closes the producer
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
