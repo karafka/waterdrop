@@ -13,6 +13,7 @@ module Factories
         wait_on_queue_full: false,
         wait_timeout_on_queue_full: 1_000,
         max_payload_size: 1_000_012,
+        idle_disconnect_timeout: 0,
         kafka: {
           'bootstrap.servers': 'localhost:9092',
           'statistics.interval.ms': 100,
@@ -30,6 +31,7 @@ module Factories
         config.wait_on_queue_full = attributes[:wait_on_queue_full]
         config.wait_timeout_on_queue_full = attributes[:wait_timeout_on_queue_full]
         config.max_payload_size = attributes[:max_payload_size]
+        config.idle_disconnect_timeout = attributes[:idle_disconnect_timeout]
       end
 
       instance.monitor.subscribe(

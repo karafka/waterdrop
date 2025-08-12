@@ -12,6 +12,7 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(false) }
     it { expect(status.active?).to be(false) }
     it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(false) }
     it { expect(status.closing?).to be(false) }
     it { expect(status.closed?).to be(false) }
@@ -25,6 +26,7 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(true) }
     it { expect(status.active?).to be(true) }
     it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(false) }
     it { expect(status.closing?).to be(false) }
     it { expect(status.closed?).to be(false) }
@@ -38,10 +40,25 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(false) }
     it { expect(status.active?).to be(true) }
     it { expect(status.connected?).to be(true) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(false) }
     it { expect(status.closing?).to be(false) }
     it { expect(status.closed?).to be(false) }
     it { expect(status.to_s).to eq('connected') }
+  end
+
+  context 'when in the disconnecting state' do
+    before { status.disconnecting! }
+
+    it { expect(status.initial?).to be(false) }
+    it { expect(status.configured?).to be(false) }
+    it { expect(status.active?).to be(true) }
+    it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(true) }
+    it { expect(status.disconnected?).to be(false) }
+    it { expect(status.closing?).to be(false) }
+    it { expect(status.closed?).to be(false) }
+    it { expect(status.to_s).to eq('disconnecting') }
   end
 
   context 'when in the disconnected state' do
@@ -51,6 +68,7 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(false) }
     it { expect(status.active?).to be(true) }
     it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(true) }
     it { expect(status.closing?).to be(false) }
     it { expect(status.closed?).to be(false) }
@@ -64,6 +82,7 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(false) }
     it { expect(status.active?).to be(false) }
     it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(false) }
     it { expect(status.closing?).to be(true) }
     it { expect(status.closed?).to be(false) }
@@ -77,6 +96,7 @@ RSpec.describe_current do
     it { expect(status.configured?).to be(false) }
     it { expect(status.active?).to be(false) }
     it { expect(status.connected?).to be(false) }
+    it { expect(status.disconnecting?).to be(false) }
     it { expect(status.disconnected?).to be(false) }
     it { expect(status.closing?).to be(false) }
     it { expect(status.closed?).to be(true) }

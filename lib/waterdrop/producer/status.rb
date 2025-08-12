@@ -9,6 +9,7 @@ module WaterDrop
         initial
         configured
         connected
+        disconnecting
         disconnected
         closing
         closed
@@ -28,7 +29,7 @@ module WaterDrop
       #   established or disconnected, meaning it was working but user disconnected for his own
       #   reasons though sending could reconnect and continue.
       def active?
-        connected? || configured? || disconnected?
+        connected? || configured? || disconnecting? || disconnected?
       end
 
       # @return [String] current status as a string

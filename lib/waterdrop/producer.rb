@@ -79,6 +79,18 @@ module WaterDrop
       @monitor = @config.monitor
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
       @default_variant = Variant.new(self, default: true)
+
+      return @status.configured! if @config.idle_disconnect_timeout.zero?
+
+      # Setup idle disconnect listener if configured so we preserve tcp connections on rarely
+      # used producers
+      disconnector = Instrumentation::IdleDisconnectorListener.new(
+        self,
+        disconnect_timeout: @config.idle_disconnect_timeout
+      )
+
+      @monitor.subscribe(disconnector)
+
       @status.configured!
     end
 
@@ -207,10 +219,7 @@ module WaterDrop
     # @note After successful disconnection, the producer status changes to disconnected but
     #   remains configured, allowing for future reconnection when client access is needed.
     def disconnect
-      return false unless @client
-      return false unless @status.connected?
-      return false if @transaction_mutex.locked?
-      return false if @operating_mutex.locked?
+      return false unless disconnectable?
 
       # Use the same mutex pattern as the regular close method to prevent race conditions
       @transaction_mutex.synchronize do
@@ -221,22 +230,38 @@ module WaterDrop
             return false unless @messages.empty?
             return false unless @operations_in_progress.value.zero?
 
-            @monitor.instrument(
-              'producer.disconnected',
-              producer_id: id
-            ) do
+            @status.disconnecting!
+            @monitor.instrument('producer.disconnecting', producer_id: id)
+
+            @monitor.instrument('producer.disconnected', producer_id: id) do
               # Close the client
               @client.close
               @client = nil
 
               # Reset connection status but keep producer configured
               @status.disconnected!
-
-              true
             end
+
+            true
           end
         end
       end
+    end
+
+    # Is the producer in a state from which we can disconnect
+    #
+    # @return [Boolean] is producer in a state that potentially allows for a disconnect
+    #
+    # @note This is a best effort method. The proper checks happen also when disconnecting behind
+    #   all the needed mutexes
+    def disconnectable?
+      return false unless @client
+      return false unless @status.connected?
+      return false unless @messages.empty?
+      return false if @transaction_mutex.locked?
+      return false if @operating_mutex.locked?
+
+      true
     end
 
     # Flushes the buffers in a sync way and closes the producer

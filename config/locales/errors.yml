@@ -19,6 +19,7 @@ en:
       max_attempts_on_transaction_command_format: must be an integer that is equal or bigger than 1
       reload_on_transaction_fatal_error_format: must be boolean
       oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
+      idle_disconnect_timeout_format: 'must be an integer that is equal to 0 or bigger than 30 000 (30 seconds)'
 
     variant:
       missing: must be present

@@ -20,6 +20,7 @@ RSpec.describe_current do
       max_attempts_on_transaction_command_format: 5,
       instrument_on_wait_queue_full: true,
       max_attempts_on_transaction_command: 1,
+      idle_disconnect_timeout: 0,
       reload_on_transaction_fatal_error: true,
       oauth: {
         token_provider_listener: false
@@ -342,6 +343,59 @@ RSpec.describe_current do
     end
 
     before { config[:oauth][:token_provider_listener] = listener.new }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when idle_disconnect_timeout is missing' do
+    before { config.delete(:idle_disconnect_timeout) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
+  end
+
+  context 'when idle_disconnect_timeout is nil' do
+    before { config[:idle_disconnect_timeout] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
+  end
+
+  context 'when idle_disconnect_timeout is not an integer' do
+    before { config[:idle_disconnect_timeout] = 30.5 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
+  end
+
+  context 'when idle_disconnect_timeout is a negative integer' do
+    before { config[:idle_disconnect_timeout] = -1000 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
+  end
+
+  context 'when idle_disconnect_timeout is below minimum (30 seconds)' do
+    before { config[:idle_disconnect_timeout] = 29_999 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
+  end
+
+  context 'when idle_disconnect_timeout is zero (disabled)' do
+    before { config[:idle_disconnect_timeout] = 0 }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when idle_disconnect_timeout is exactly minimum (30 seconds)' do
+    before { config[:idle_disconnect_timeout] = 30_000 }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when idle_disconnect_timeout is above minimum' do
+    before { config[:idle_disconnect_timeout] = 60_000 }
 
     it { expect(contract_result).to be_success }
   end
