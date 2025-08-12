@@ -71,33 +71,60 @@ RSpec.describe_current do
         end
       end
 
-      context 'when producer cannot be disconnected' do
+      context 'when producer is not disconnectable' do
         before do
-          # Simulate producer being busy (transaction, operations, etc)
-          allow(producer).to receive(:disconnect).and_return(false)
+          # Mock disconnectable? to return false (producer busy with transaction, operations, etc)
+          allow(producer).to receive(:disconnectable?).and_return(false)
+          allow(producer).to receive(:disconnect)
         end
 
-        it 'expect not to emit disconnect event' do
+        it 'expect not to attempt disconnect at all' do
           listener.on_statistics_emitted(event)
           expect(disconnected_events).to be_empty
+          expect(producer).not_to have_received(:disconnect)
         end
 
-        it 'expect to try again after timeout period' do
-          # First attempt fails
+        it 'expect to still reset activity time' do
+          old_activity_time = listener.instance_variable_get(:@last_activity_time)
           listener.on_statistics_emitted(event)
+          new_activity_time = listener.instance_variable_get(:@last_activity_time)
+
+          expect(new_activity_time).to be > old_activity_time
+        end
+      end
+
+      context 'when disconnect fails with an error in the thread' do
+        let(:error_events) { [] }
+        let(:test_error) { StandardError.new('disconnect failed') }
+
+        before do
+          producer.monitor.subscribe('error.occurred') do |event|
+            error_events << event
+          end
+
+          # Producer is disconnectable but disconnect raises an error
+          allow(producer).to receive(:disconnectable?).and_return(true)
+          allow(producer).to receive(:disconnect).and_raise(test_error)
+        end
+
+        it 'expect to handle error gracefully and instrument it' do
+          listener.on_statistics_emitted(event)
+          sleep(0.1) # Give thread time to complete and handle error
+
           expect(disconnected_events).to be_empty
+          expect(error_events).not_to be_empty
+          expect(error_events.first[:type]).to eq('producer.disconnect.error')
+          expect(error_events.first[:error]).to eq(test_error)
+          expect(error_events.first[:producer_id]).to eq(producer.id)
+        end
 
-          # Simulate time passing again
-          listener.instance_variable_set(:@last_activity_time, old_time)
-
-          # Allow disconnect to succeed this time
-          allow(producer).to receive(:disconnect).and_call_original
-
+        it 'expect to still reset activity time even after error' do
+          old_activity_time = listener.instance_variable_get(:@last_activity_time)
           listener.on_statistics_emitted(event)
+          sleep(0.1) # Give thread time to complete
+          new_activity_time = listener.instance_variable_get(:@last_activity_time)
 
-          sleep(0.1) # a bit of time because disconnect happens async
-
-          expect(disconnected_events.size).to eq(1)
+          expect(new_activity_time).to be > old_activity_time
         end
       end
     end
