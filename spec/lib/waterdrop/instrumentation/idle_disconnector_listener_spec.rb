@@ -6,6 +6,7 @@ RSpec.describe_current do
   let(:producer) { build(:producer) }
   let(:timeout_ms) { 1000 } # 1 second for fast tests
   let(:disconnected_events) { [] }
+  let(:topic_name) { "it-#{SecureRandom.uuid}" }
 
   before do
     producer.monitor.subscribe('producer.disconnected') do |event|
@@ -13,7 +14,7 @@ RSpec.describe_current do
     end
 
     # Initialize producer connection
-    producer.produce_sync(topic: 'test', payload: 'msg')
+    2.times { producer.produce_sync(topic: topic_name, payload: 'msg') }
   end
 
   after { producer.close }
