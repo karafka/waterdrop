@@ -70,6 +70,22 @@ RSpec.describe_current do
       it { expect { producer.setup(&setup) }.not_to raise_error }
     end
 
+    context 'when idle_disconnect_timeout is zero (disabled)' do
+      before do
+        producer.setup do |config|
+          config.deliver = false
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+          config.idle_disconnect_timeout = 0
+        end
+      end
+
+      it 'expect not to setup idle disconnector listener' do
+        # With the current optimized producer setup, we can't easily verify
+        # the absence of listeners without coupling to implementation details
+        expect { producer }.not_to raise_error
+      end
+    end
+
     it 'expect not to allow to disconnect' do
       expect(producer.disconnect).to be(false)
     end
@@ -681,6 +697,42 @@ RSpec.describe_current do
         Process.wait
         expect($CHILD_STATUS.to_i).to eq(0)
       end
+    end
+  end
+
+  # Since 30 seconds is minimum, they take a bit of time
+  # We also test all producer cases at once to preserve time
+  describe 'disconnect integration specs' do
+    let(:never_used) { build(:producer, idle_disconnect_timeout: 30_000) }
+    let(:used_short) { build(:producer, idle_disconnect_timeout: 30_000) }
+    let(:used) { build(:producer, idle_disconnect_timeout: 30_000) }
+    let(:buffered) { build(:producer, idle_disconnect_timeout: 30_000) }
+    let(:message) { build(:valid_message) }
+
+    after do
+      never_used.close
+      used_short.close
+      used.close
+      buffered.close
+    end
+
+    it 'expect to correctly shutdown those that are in need of it' do
+      never_used
+      buffered.buffer(message)
+      used_short.produce_sync(message)
+
+      31.times do
+        used.produce_sync(message)
+        sleep(1)
+      end
+
+      # Give a bit of time for the instrumentation to kick in
+      sleep(1)
+
+      expect(never_used.status.disconnected?).to be(false)
+      expect(used.status.disconnected?).to be(false)
+      expect(buffered.status.disconnected?).to be(false)
+      expect(used_short.status.disconnected?).to be(true)
     end
   end
 end

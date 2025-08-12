@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.8.6 (Unreleased)
+- [Feature] Add `idle_disconnect_timeout` config option to automatically disconnect idle producers after a configurable timeout period.
 - [Enhancement] Introduce the `WaterDrop::Producer#disconnect` so users can write custom logic to save on connections then producer is only used from time to time.
 - [Enhancement] Introduce `WaterDrop::Producer#inspect` that is mutex-safe.
 - [Enhancement] Raise errors on detected Ruby warnings.

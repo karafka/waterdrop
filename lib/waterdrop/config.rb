@@ -76,6 +76,12 @@ module WaterDrop
     # to keep going or should we stop. Since we will open a new instance and the failed transaction
     # anyhow rolls back, we should be able to safely reload.
     setting :reload_on_transaction_fatal_error, default: true
+    # option [Integer] Idle disconnect timeout in milliseconds. When set to 0, idle disconnection
+    #   is disabled. When set to a positive value, WaterDrop will automatically disconnect
+    #   producers that haven't sent any messages for the specified time period. This helps preserve
+    #   TCP connections in low-intensity scenarios. Minimum value is 30 seconds (30_000 ms) to
+    #   prevent overly aggressive disconnections.
+    setting :idle_disconnect_timeout, default: 0
 
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
