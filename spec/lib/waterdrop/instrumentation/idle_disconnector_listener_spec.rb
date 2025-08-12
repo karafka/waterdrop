@@ -16,6 +16,8 @@ RSpec.describe_current do
     producer.produce_sync(topic: 'test', payload: 'msg')
   end
 
+  after { producer.close }
+
   describe '#call' do
     let(:statistics) { { 'txmsgs' => 100 } }
     let(:event) { { statistics: statistics } }

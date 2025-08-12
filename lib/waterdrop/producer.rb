@@ -230,19 +230,19 @@ module WaterDrop
             return false unless @messages.empty?
             return false unless @operations_in_progress.value.zero?
 
-            @monitor.instrument(
-              'producer.disconnected',
-              producer_id: id
-            ) do
+            @status.disconnecting!
+            @monitor.instrument('producer.disconnecting', producer_id: id)
+
+            @monitor.instrument('producer.disconnected', producer_id: id) do
               # Close the client
               @client.close
               @client = nil
 
               # Reset connection status but keep producer configured
               @status.disconnected!
-
-              true
             end
+
+            true
           end
         end
       end
@@ -257,6 +257,7 @@ module WaterDrop
     def disconnectable?
       return false unless @client
       return false unless @status.connected?
+      return false unless @messages.empty?
       return false if @transaction_mutex.locked?
       return false if @operating_mutex.locked?
 

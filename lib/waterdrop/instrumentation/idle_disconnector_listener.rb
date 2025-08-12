@@ -77,13 +77,24 @@ module WaterDrop
         # Check for timeout and attempt disconnect
         return unless (current_time - @last_activity_time) >= @disconnect_timeout
 
-        # Since the statistics operations happen from the rdkafka native thread. we cannot close
-        # it from itself as you cannot join on yourself as it would cause a deadlock. We spawn
-        # a thread to do this
-        # We do an early check if producer is in a viable state for a disconnect so in case its
-        # internal state would prevent us from disconnecting, we won't be spamming with new thread
-        # creation
-        Thread.new { @producer.disconnect } if @producer.disconnectable?
+        if @producer.disconnectable?
+          # Since the statistics operations happen from the rdkafka native thread. we cannot close
+          # it from itself as you cannot join on yourself as it would cause a deadlock. We spawn
+          # a thread to do this
+          # We do an early check if producer is in a viable state for a disconnect so in case its
+          # internal state would prevent us from disconnecting, we won't be spamming with new
+          # thread creation
+          Thread.new do
+            @producer.disconnect
+          rescue StandardError => e
+            @producer.monitor.instrument(
+              'error.occurred',
+              producer_id: @producer.id,
+              error: e,
+              type: 'producer.disconnect.error'
+            )
+          end
+        end
 
         # We change this always because:
         #   - if we were able to disconnect, this should give us time before any potential future
@@ -92,13 +103,6 @@ module WaterDrop
         #   - if we were not able to disconnect, it means that there was something in the producer
         #     state that prevent it, and we consider this as activity as well
         @last_activity_time = current_time
-      rescue StandardError => e
-        @monitor.instrument(
-          'error.occurred',
-          producer_id: @producer.id,
-          error: e,
-          type: 'producer.disconnect.error'
-        )
       end
     end
   end

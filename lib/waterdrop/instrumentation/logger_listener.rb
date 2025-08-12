@@ -133,6 +133,18 @@ module WaterDrop
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
+      def on_producer_disconnecting(event)
+        info(event, 'Disconnecting producer')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
+      # @note While this says "Disconnecting producer", it produces a nice message with time taken:
+      #   "Disconnecting producer took 5 ms" indicating it happened in the past.
+      def on_producer_disconnected(event)
+        info(event, 'Disconnected producer')
+      end
+
+      # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_reloaded(event)
         info(event, 'Producer successfully reloaded')
       end

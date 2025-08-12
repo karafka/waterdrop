@@ -219,6 +219,22 @@ RSpec.describe_current do
     it { expect(logged_data[0]).to include('Closing producer') }
   end
 
+  describe '#on_producer_disconnecting' do
+    before { listener.on_producer_disconnecting(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Disconnecting producer') }
+  end
+
+  describe '#on_producer_disconnected' do
+    before { listener.on_producer_disconnected(event) }
+
+    it { expect(logged_data[0]).to include(producer.id) }
+    it { expect(logged_data[0]).to include('INFO') }
+    it { expect(logged_data[0]).to include('Disconnected producer') }
+  end
+
   describe '#on_producer_reloaded' do
     before { listener.on_producer_reloaded(event) }
 

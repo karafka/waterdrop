@@ -735,4 +735,77 @@ RSpec.describe_current do
       expect(used_short.status.disconnected?).to be(true)
     end
   end
+
+  describe '#disconnectable?' do
+    context 'when producer is not configured' do
+      it 'expect not to be disconnectable' do
+        expect(producer.disconnectable?).to be(false)
+      end
+    end
+
+    context 'when producer is configured but not connected' do
+      before do
+        producer.setup do |config|
+          config.deliver = false
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+        end
+      end
+
+      it 'expect not to be disconnectable' do
+        expect(producer.disconnectable?).to be(false)
+      end
+    end
+
+    context 'when producer is connected' do
+      subject(:producer) { build(:producer) }
+
+      before do
+        # Initialize connection by accessing client
+        producer.client
+      end
+
+      it 'expect to be disconnectable' do
+        expect(producer.disconnectable?).to be(true)
+      end
+
+      context 'when producer has buffered messages' do
+        before do
+          producer.buffer(build(:valid_message))
+        end
+
+        it 'expect not to be disconnectable' do
+          expect(producer.disconnectable?).to be(false)
+        end
+      end
+
+      context 'when producer is closed' do
+        before { producer.close }
+
+        it 'expect not to be disconnectable' do
+          expect(producer.disconnectable?).to be(false)
+        end
+      end
+
+      context 'when producer is already disconnected' do
+        before do
+          # Disconnect the producer first
+          producer.disconnect
+        end
+
+        it 'expect not to be disconnectable again' do
+          expect(producer.disconnectable?).to be(false)
+        end
+      end
+    end
+
+    context 'when producer is in transaction' do
+      subject(:producer) { build(:transactional_producer) }
+
+      it 'expect not to be disconnectable during transaction' do
+        producer.transaction do
+          expect(producer.disconnectable?).to be(false)
+        end
+      end
+    end
+  end
 end
