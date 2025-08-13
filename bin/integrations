@@ -151,6 +151,7 @@ class Scenario
       WATERDROP_GEM_DIR=#{ROOT_PATH} \
       bundle install &&
       BUNDLE_AUTO_INSTALL=true \
+      WATERDROP_GEM_DIR=#{ROOT_PATH} \
       bundle exec ruby #{file_name}
     CMD
   end
