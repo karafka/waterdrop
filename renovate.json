@@ -7,12 +7,24 @@
     "enabled": true,
     "pinDigests": true
   },
+  "includePaths": [
+    "Gemfile",
+    "waterdrop.gemspec",
+    "spec/integrations/**/Gemfile"
+  ],
   "packageRules": [
     {
       "matchManagers": [
         "github-actions"
       ],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchFileNames": [
+        "spec/integrations/**/Gemfile"
+      ],
+      "groupName": "integration test dependencies",
+      "commitMessageTopic": "integration test dependencies"
     }
   ]
 }
