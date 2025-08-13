@@ -75,6 +75,11 @@ jobs:
           bundle config set without development
           bundle install --jobs 4 --retry 3
 
+      - name: Run all tests
+        env:
+          GITHUB_COVERAGE: ${{matrix.coverage}}
+        run: bundle exec rspec
+
       - name: Run integration tests
         run: ./bin/integrations
 
