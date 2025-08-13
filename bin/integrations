@@ -148,6 +148,7 @@ class Scenario
 
     <<~CMD
       cd #{temp_dir} &&
+      bundle install &&
       WATERDROP_GEM_DIR=#{ROOT_PATH} \
       BUNDLE_AUTO_INSTALL=true \
       bundle exec ruby #{file_name}
