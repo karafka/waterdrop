@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.6 (Unreleased)
+## 2.8.6 (2025-08-18)
 - [Feature] Add `idle_disconnect_timeout` config option to automatically disconnect idle producers after a configurable timeout period.
 - [Feature] Add support for [async](https://github.com/socketry/async) gems ecosystem with proper fiber yielding during blocking operations.
 - [Feature] Add integration testing infrastructure with `bin/integrations` runner for testing external ecosystem compatibility.
@@ -9,7 +9,7 @@
 - [Enhancement] Raise errors on detected Ruby warnings.
 - [Enhancement] Optimize producer for Ruby shapes.
 - [Enhancement] Add integration spec to validate fiber yielding behavior with async gems.
-- [Change] Require `karafka-rdkafka` `>=` `0.21.0`.
+- [Change] Require `karafka-rdkafka` `>=` `0.20.0`.
 - [Change] Add new CI action to trigger auto-doc refresh.
 
 ## 2.8.5 (2025-06-23)
