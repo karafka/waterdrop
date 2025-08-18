@@ -3,7 +3,7 @@ PATH
   specs:
     waterdrop (2.8.6)
       karafka-core (>= 2.4.9, < 3.0.0)
-      karafka-rdkafka (>= 0.21.0.rc1)
+      karafka-rdkafka (>= 0.20.0)
       zeitwerk (~> 2.3)
 
 GEM
