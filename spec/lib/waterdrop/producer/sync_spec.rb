@@ -75,7 +75,7 @@ RSpec.describe_current do
         build(
           :producer,
           kafka: {
-            'bootstrap.servers': 'localhost:9092',
+            'bootstrap.servers': KAFKA_HOST,
             'allow.auto.create.topics': false,
             'message.timeout.ms': 500
           }
@@ -95,7 +95,7 @@ RSpec.describe_current do
         build(
           :producer,
           kafka: {
-            'bootstrap.servers': 'localhost:9092',
+            'bootstrap.servers': KAFKA_HOST,
             'allow.auto.create.topics': false,
             'message.timeout.ms': 500
           }
@@ -199,7 +199,7 @@ RSpec.describe_current do
       build(
         :producer,
         kafka: {
-          'bootstrap.servers': 'localhost:9092',
+          'bootstrap.servers': KAFKA_HOST,
           'compression.codec': codec
         }
       )

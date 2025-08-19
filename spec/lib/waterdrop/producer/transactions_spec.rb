@@ -654,7 +654,7 @@ RSpec.describe_current do
       WaterDrop::Producer.new do |config|
         config.deliver = true
         config.kafka = {
-          'bootstrap.servers': 'localhost:9092',
+          'bootstrap.servers': KAFKA_HOST,
           'request.required.acks': 1,
           'transactional.id': SecureRandom.uuid,
           acks: 'all'
@@ -723,7 +723,7 @@ RSpec.describe_current do
       WaterDrop::Producer.new do |config|
         config.max_payload_size = 1_000_000_000_000
         config.kafka = {
-          'bootstrap.servers': 'localhost:9092',
+          'bootstrap.servers': KAFKA_HOST,
           'transactional.id': SecureRandom.uuid,
           'max.in.flight': 5
         }
@@ -731,7 +731,7 @@ RSpec.describe_current do
     end
 
     before do
-      admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
+      admin = Rdkafka::Config.new('bootstrap.servers': KAFKA_HOST).admin
       admin.create_topic(topic_name, 1, 1, 'max.message.bytes': 128).wait
       admin.close
     end

@@ -14,7 +14,7 @@ require 'logger'
 require 'securerandom'
 
 producer = WaterDrop::Producer.new do |config|
-  config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+  config.kafka = { 'bootstrap.servers': KAFKA_HOST }
 end
 
 message_template = {
