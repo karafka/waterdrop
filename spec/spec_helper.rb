@@ -37,6 +37,8 @@ end
 
 KAFKA_HOST = "#{KAFKA_IP}:#{KAFKA_PORT}"
 
+p KAFKA_HOST
+
 if coverage
   require 'simplecov'
 
