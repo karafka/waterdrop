@@ -1,16 +1,12 @@
 # frozen_string_literal: true
 
 # External components
-# delegate should be removed because we don't need it, we just add it because of ruby-kafka
-%w[
-  delegate
-  forwardable
-  json
-  zeitwerk
-  securerandom
-  karafka-core
-  pathname
-].each { |lib| require lib }
+require 'forwardable'
+require 'json'
+require 'zeitwerk'
+require 'securerandom'
+require 'karafka-core'
+require 'pathname'
 
 # WaterDrop library
 module WaterDrop
