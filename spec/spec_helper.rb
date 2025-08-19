@@ -32,7 +32,6 @@ else
         $(docker ps -qf 'name=kafka' | head -n1) \
         2>/dev/null`.strip
   KAFKA_IP = ip.empty? ? 'localhost' : ip
-  KAFKA_IP = ip.empty? ? 'localhost' : ip
   KAFKA_PORT = ENV.fetch('KAFKA_PORT', '9092')
 end
 
