@@ -29,8 +29,9 @@ if ENV.key?('KAFKA_IP')
 else
   ip = `docker inspect \
         -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
-        $(docker compose ps -q kafka 2>/dev/null) \
+        $(docker ps -qf 'name=kafka' | head -n1) \
         2>/dev/null`.strip
+  KAFKA_IP = ip.empty? ? 'localhost' : ip
   KAFKA_IP = ip.empty? ? 'localhost' : ip
   KAFKA_PORT = ENV.fetch('KAFKA_PORT', '9092')
 end
