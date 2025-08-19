@@ -8,7 +8,7 @@ module Factories
     def producer_factory(overrides = {})
       defaults = {
         deliver: true,
-        logger: Logger.new('/dev/null', level: Logger::DEBUG),
+        logger: Logger.new($stdout, level: Logger::DEBUG),
         max_wait_timeout: 30_000,
         wait_on_queue_full: false,
         wait_timeout_on_queue_full: 1_000,
@@ -17,8 +17,9 @@ module Factories
         kafka: {
           'bootstrap.servers': KAFKA_HOST,
           'statistics.interval.ms': 100,
-          'request.required.acks': 'all'
-        }
+          'request.required.acks': 'all',
+          debug: 'all'
+        },
       }
 
       attributes = defaults.merge(overrides)
@@ -62,7 +63,8 @@ module Factories
         'transaction.timeout.ms': transient_attrs[:transaction_timeout_ms],
         'message.timeout.ms': transient_attrs[:transaction_timeout_ms],
         'enable.idempotence': transient_attrs[:idempotent],
-        'queue.buffering.max.ms': transient_attrs[:queue_buffering_max_ms]
+        'queue.buffering.max.ms': transient_attrs[:queue_buffering_max_ms],
+          debug: 'all'
       }
 
       producer_factory(
@@ -77,7 +79,8 @@ module Factories
         'bootstrap.servers': KAFKA_HOST,
         'request.required.acks': 1,
         'queue.buffering.max.messages': 1,
-        'queue.buffering.max.ms': 10_000
+        'queue.buffering.max.ms': 10_000,
+          debug: 'all'
       }
 
       producer_factory(
@@ -95,7 +98,8 @@ module Factories
         'bootstrap.servers': KAFKA_HOST,
         'request.required.acks': 1,
         'queue.buffering.max.messages': 1,
-        'queue.buffering.max.ms': 1_000
+        'queue.buffering.max.ms': 1_000,
+          debug: 'all'
       }
 
       producer_factory(
@@ -113,7 +117,8 @@ module Factories
         'bootstrap.servers': KAFKA_HOST,
         'statistics.interval.ms': 100,
         'request.required.acks': 'all',
-        'enable.idempotence': true
+        'enable.idempotence': true,
+          debug: 'all'
       }
 
       producer_factory(
@@ -134,10 +139,11 @@ module Factories
       producer_attrs = overrides.reject { |k, _| transient.key?(k) }
 
       kafka_config = {
-        'bootstrap.servers': 'localhost:9093',
+        'bootstrap.servers': 'localhost:9095',
         'request.required.acks': 'all',
         'transaction.timeout.ms': transient_attrs[:message_timeout_ms],
-        'message.timeout.ms': transient_attrs[:message_timeout_ms]
+        'message.timeout.ms': transient_attrs[:message_timeout_ms],
+          debug: 'all'
       }
 
       producer_factory(
