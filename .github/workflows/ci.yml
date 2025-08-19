@@ -18,7 +18,17 @@ permissions:
 jobs:
   specs:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name == 'schedule' ||
+         (contains(fromJSON(vars.SELF_HOSTED_RUNNER_USERS || '[]'), github.actor) &&
+          (github.event_name == 'push' ||
+           (github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository))))
+        && fromJSON('["self-hosted", "linux", "x64", "docker"]')
+        || 'ubuntu-latest'
+      }}
+
     needs: diffend
     env:
       BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
@@ -56,6 +66,7 @@ jobs:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
           bundler: 'latest'
+          self-hosted: false
 
       - name: Run Kafka with Docker Compose
         run: |
@@ -91,7 +102,18 @@ jobs:
 
   diffend:
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+
+    runs-on: >-
+      ${{
+        (github.event_name == 'schedule' ||
+         (contains(fromJSON(vars.SELF_HOSTED_RUNNER_USERS || '[]'), github.actor) &&
+          (github.event_name == 'push' ||
+           (github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository))))
+        && fromJSON('["self-hosted", "linux", "x64", "docker"]')
+        || 'ubuntu-latest'
+      }}
+
     strategy:
       fail-fast: false
     steps:
@@ -102,6 +124,8 @@ jobs:
         uses: ruby/setup-ruby@2a7b30092b0caf9c046252510f9273b4875f3db9 # v1.254.0
         with:
           ruby-version: 3.4
+          self-hosted: false
+
       - name: Install latest bundler
         run: gem install bundler --no-document
       - name: Install Diffend plugin
@@ -111,7 +135,17 @@ jobs:
 
   coditsu:
     timeout-minutes: 5
-    runs-on: ubuntu-latest
+    runs-on: >-
+      ${{
+        (github.event_name == 'schedule' ||
+         (contains(fromJSON(vars.SELF_HOSTED_RUNNER_USERS || '[]'), github.actor) &&
+          (github.event_name == 'push' ||
+           (github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository))))
+        && fromJSON('["self-hosted", "linux", "x64", "docker"]')
+        || 'ubuntu-latest'
+      }}
+
     strategy:
       fail-fast: false
     steps:
