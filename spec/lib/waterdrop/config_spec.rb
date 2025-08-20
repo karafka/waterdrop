@@ -19,7 +19,7 @@ RSpec.describe_current do
 
     context 'when configuration is valid' do
       let(:kafka_config) do
-        { 'bootstrap.servers': KAFKA_HOST, rand.to_s.to_sym => rand }
+        { 'bootstrap.servers': BOOTSTRAP_SERVERS, rand.to_s.to_sym => rand }
       end
 
       it 'not raise ConfigurationInvalidError exception' do

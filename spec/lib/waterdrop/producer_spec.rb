@@ -17,7 +17,7 @@ RSpec.describe_current do
       subject(:producer) do
         described_class.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
       end
 
@@ -35,7 +35,7 @@ RSpec.describe_current do
 
       subject(:producer) do
         described_class.new do |config|
-          config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
           config.oauth.token_provider_listener = listener.new
         end
       end
@@ -63,7 +63,7 @@ RSpec.describe_current do
       let(:setup) do
         lambda { |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         }
       end
 
@@ -74,7 +74,7 @@ RSpec.describe_current do
       before do
         producer.setup do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
           config.idle_disconnect_timeout = 0
         end
       end
@@ -145,7 +145,7 @@ RSpec.describe_current do
   describe '#partition_count' do
     subject(:producer) do
       described_class.new do |config|
-        config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
       end
     end
 
@@ -747,7 +747,7 @@ RSpec.describe_current do
       before do
         producer.setup do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
       end
 

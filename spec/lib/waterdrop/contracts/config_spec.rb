@@ -26,7 +26,7 @@ RSpec.describe_current do
         token_provider_listener: false
       },
       kafka: {
-        'bootstrap.servers': "#{KAFKA_HOST},#{KAFKA_HOST}"
+        'bootstrap.servers': "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
       }
     }
   end

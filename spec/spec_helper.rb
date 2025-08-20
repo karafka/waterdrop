@@ -23,19 +23,7 @@ require 'logger'
 coverage = !ENV.key?('GITHUB_WORKFLOW')
 coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
 
-if ENV.key?('KAFKA_IP')
-  KAFKA_IP = ENV.fetch('KAFKA_IP')
-  KAFKA_PORT = ENV.fetch('KAFKA_PORT')
-else
-  ip = `docker inspect \
-        -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' \
-        $(docker ps -qf 'name=kafka' | head -n1) \
-        2>/dev/null`.strip
-  KAFKA_IP = ip.empty? ? 'localhost' : ip
-  KAFKA_PORT = ENV.fetch('KAFKA_PORT', '9092')
-end
-
-KAFKA_HOST = "127.0.0.1:9092"
+BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
 
 if coverage
   require 'simplecov'

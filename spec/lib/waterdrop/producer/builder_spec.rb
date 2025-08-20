@@ -12,7 +12,7 @@ RSpec.describe_current do
 
     producer_config.setup do |config|
       config.deliver = should_deliver
-      config.kafka = { 'bootstrap.servers': KAFKA_HOST }
+      config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
     end
 
     producer_config.config
