@@ -35,7 +35,7 @@ else
   KAFKA_PORT = ENV.fetch('KAFKA_PORT', '9092')
 end
 
-KAFKA_HOST = "#{KAFKA_IP}:#{KAFKA_PORT}"
+KAFKA_HOST = "127.0.0.1:9092"
 
 if coverage
   require 'simplecov'
