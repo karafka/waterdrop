@@ -136,7 +136,7 @@ RSpec.describe_current do
           producer = build(
             :slow_producer,
             kafka: {
-              'bootstrap.servers': 'localhost:9092',
+              'bootstrap.servers': BOOTSTRAP_SERVERS,
               'queue.buffering.max.ms': 0,
               'message.timeout.ms': 1
             }
@@ -271,7 +271,7 @@ RSpec.describe_current do
         build(
           :slow_producer,
           kafka: {
-            'bootstrap.servers': 'localhost:9092',
+            'bootstrap.servers': BOOTSTRAP_SERVERS,
             'queue.buffering.max.ms': 5_000,
             'queue.buffering.max.messages': 2_000
           }

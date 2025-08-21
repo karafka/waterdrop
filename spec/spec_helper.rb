@@ -23,6 +23,10 @@ require 'logger'
 coverage = !ENV.key?('GITHUB_WORKFLOW')
 coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
 
+# Used to point out to Kafka location
+# Useful when we run specs on non-local clusters for extended testing
+BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+
 if coverage
   require 'simplecov'
 

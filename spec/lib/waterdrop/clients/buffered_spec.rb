@@ -8,7 +8,7 @@ RSpec.describe_current do
   let(:producer) do
     WaterDrop::Producer.new do |config|
       config.deliver = false
-      config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+      config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
     end
   end
 
@@ -72,7 +72,7 @@ RSpec.describe_current do
       WaterDrop::Producer.new do |config|
         config.deliver = false
         config.kafka = {
-          'bootstrap.servers': 'localhost:9092',
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
           'transactional.id': SecureRandom.uuid
         }
       end
