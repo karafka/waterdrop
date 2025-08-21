@@ -15,7 +15,7 @@ module Factories
         max_payload_size: 1_000_012,
         idle_disconnect_timeout: 0,
         kafka: {
-          'bootstrap.servers': 'localhost:9092',
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
           'statistics.interval.ms': 100,
           'request.required.acks': 'all'
         }
@@ -56,7 +56,7 @@ module Factories
       producer_attrs = overrides.reject { |k, _| transient.key?(k) }
 
       kafka_config = {
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': BOOTSTRAP_SERVERS,
         'request.required.acks': transient_attrs[:request_required_acks],
         'transactional.id': transient_attrs[:transactional_id],
         'transaction.timeout.ms': transient_attrs[:transaction_timeout_ms],
@@ -74,7 +74,7 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def limited_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': BOOTSTRAP_SERVERS,
         'request.required.acks': 1,
         'queue.buffering.max.messages': 1,
         'queue.buffering.max.ms': 10_000
@@ -92,7 +92,7 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def slow_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': BOOTSTRAP_SERVERS,
         'request.required.acks': 1,
         'queue.buffering.max.messages': 1,
         'queue.buffering.max.ms': 1_000
@@ -110,7 +110,7 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def idempotent_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': 'localhost:9092',
+        'bootstrap.servers': BOOTSTRAP_SERVERS,
         'statistics.interval.ms': 100,
         'request.required.acks': 'all',
         'enable.idempotence': true
@@ -134,7 +134,7 @@ module Factories
       producer_attrs = overrides.reject { |k, _| transient.key?(k) }
 
       kafka_config = {
-        'bootstrap.servers': 'localhost:9093',
+        'bootstrap.servers': 'localhost:9095',
         'request.required.acks': 'all',
         'transaction.timeout.ms': transient_attrs[:message_timeout_ms],
         'message.timeout.ms': transient_attrs[:message_timeout_ms]

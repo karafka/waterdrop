@@ -26,7 +26,7 @@ RSpec.describe_current do
         token_provider_listener: false
       },
       kafka: {
-        'bootstrap.servers': 'localhost:9092,localhots:9092'
+        'bootstrap.servers': "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
       }
     }
   end
