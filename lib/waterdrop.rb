@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 # External components
+require 'delegate'
 require 'forwardable'
 require 'json'
 require 'zeitwerk'

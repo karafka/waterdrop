@@ -1,7 +1,6 @@
 # WaterDrop changelog
 
 ## 2.8.7 (Unreleased)
-- [Enhancement] Removed not needed require of `delegate`
 - [Change] Normalize how libs and dependencies are required (no functional change for the end user)
 
 ## 2.8.6 (2025-08-18)
