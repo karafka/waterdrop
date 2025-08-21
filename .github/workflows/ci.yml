@@ -55,6 +55,11 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
+      - name: Remove platform-specific ffi entries for Ruby previews
+        if: contains(matrix.ruby, '3.5')
+        run: |
+          sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
+
       - name: Set up Ruby
         uses: ruby/setup-ruby@2a7b30092b0caf9c046252510f9273b4875f3db9 # v1.254.0
         with:
@@ -62,11 +67,6 @@ jobs:
           bundler-cache: true
           bundler: 'latest'
           self-hosted: false
-
-      - name: Remove platform-specific ffi entries for Ruby previews
-        if: contains(matrix.ruby, '3.5')
-        run: |
-          ruby -i -ne 'puts $_ unless /^\s*ffi \(.*-.*\)$/' Gemfile.lock
 
       - name: Run Kafka with Docker Compose
         run: |
