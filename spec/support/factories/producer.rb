@@ -18,7 +18,7 @@ module Factories
           'bootstrap.servers': BOOTSTRAP_SERVERS,
           'statistics.interval.ms': 100,
           'request.required.acks': 'all'
-        },
+        }
       }
 
       attributes = defaults.merge(overrides)

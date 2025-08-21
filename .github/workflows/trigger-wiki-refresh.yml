@@ -15,7 +15,7 @@ jobs:
           (github.event_name == 'push' ||
            (github.event_name == 'pull_request' &&
             github.event.pull_request.head.repo.full_name == github.repository))))
-        && fromJSON('["self-hosted", "linux", "x64", "lxc"]')
+        && fromJSON('["self-hosted", "linux", "x64", "qemu"]')
         || 'ubuntu-latest'
       }}
 
