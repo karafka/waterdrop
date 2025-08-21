@@ -100,7 +100,7 @@ module Factories
 
       producer_factory(
         {
-          wait_timeout_on_queue_full: 2_000,
+          wait_timeout_on_queue_full: 5_000,
           kafka: kafka_config
         }.merge(overrides)
       )
