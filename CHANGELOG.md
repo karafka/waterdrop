@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.7 (Unreleased)
+- [Change] Normalize how libs and dependencies are required (no functional change for the end user)
+
 ## 2.8.6 (2025-08-18)
 - [Feature] Add `idle_disconnect_timeout` config option to automatically disconnect idle producers after a configurable timeout period.
 - [Feature] Add support for [async](https://github.com/socketry/async) gems ecosystem with proper fiber yielding during blocking operations.
