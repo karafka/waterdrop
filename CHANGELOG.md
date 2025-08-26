@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## 2.8.7 (Unreleased)
-- [Enhancement] Disable Nagle algorithm by default
+- [Enhancement] Disable Nagle algorithm by default (improves latency)
 - [Change] Normalize how libs and dependencies are required (no functional change for the end user)
 
 ## 2.8.6 (2025-08-18)
