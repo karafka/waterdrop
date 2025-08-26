@@ -6,9 +6,8 @@ concurrency:
 
 on:
   pull_request:
-    branches: [ main, master ]
-  push:
-    branches: [ main, master ]
+    branches: [ master ]
+  merge_group:
   schedule:
     - cron:  '0 1 * * *'
 
@@ -136,3 +135,20 @@ jobs:
           fi
       - name: Run Coditsu
         run: ./coditsu_script.sh
+
+  ci-success:
+    name: CI Success
+    runs-on: ubuntu-latest
+    if: always()
+    needs:
+      - diffend
+      - coditsu
+      - specs
+    steps:
+      - name: Check all jobs passed
+        if: |
+          contains(needs.*.result, 'failure') ||
+          contains(needs.*.result, 'cancelled') ||
+          contains(needs.*.result, 'skipped')
+        run: exit 1
+      - run: echo "All CI checks passed!"

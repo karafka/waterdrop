@@ -17,7 +17,10 @@ module WaterDrop
       # sync delivery
       'message.timeout.ms': 50_000,
       # Must be more or equal to `message.timeout.ms` defaults
-      'transaction.timeout.ms': 55_000
+      'transaction.timeout.ms': 55_000,
+      # Lowers latency. Default in newer librdkafka but we want to make sure it is shipped to
+      # users despite what librdkafka they run on
+      'socket.nagle.disable': true
     }.freeze
 
     private_constant :KAFKA_DEFAULTS
