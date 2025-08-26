@@ -10,6 +10,8 @@ RSpec.describe_current do
     end
   end
 
+  after { producer.close }
+
   describe 'publishing interface' do
     it 'expect to return self for further chaining' do
       expect(client.publish_sync({})).to eq(client)
