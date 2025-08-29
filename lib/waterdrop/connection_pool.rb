@@ -5,8 +5,8 @@ module WaterDrop
   # Connection pool wrapper for WaterDrop producers using the proven connection_pool gem.
   #
   # This provides a clean WaterDrop-specific API while leveraging the battle-tested,
-  # fiber-safe connection_pool gem underneath. The wrapper hides the direct usage
-  # of the connection_pool gem and provides WaterDrop-specific configuration.
+  # connection_pool gem underneath. The wrapper hides the direct usage of the connection_pool
+  # gem and provides WaterDrop-specific configuration.
   #
   # @example Basic usage
   #   pool = WaterDrop::ConnectionPool.new(size: 10) do |config|
@@ -16,6 +16,14 @@ module WaterDrop
   #
   #   pool.with do |producer|
   #     producer.produce_sync(topic: 'events', payload: 'data')
+  #   end
+  #
+  # @example Transactional producers with unique IDs
+  #   pool = WaterDrop::ConnectionPool.new(size: 5) do |config, index|
+  #     config.kafka = {
+  #       'bootstrap.servers': 'localhost:9092',
+  #       'transactional.id': "my-app-#{index}"
+  #     }
   #   end
   #
   # @example Global connection pool
@@ -29,6 +37,7 @@ module WaterDrop
   class ConnectionPool
     # Delegate key methods to underlying connection pool
     extend Forwardable
+
     def_delegators :@pool, :with, :size, :available
 
     class << self
@@ -40,16 +49,26 @@ module WaterDrop
       # @param size [Integer] Pool size (default: 5)
       # @param timeout [Numeric] Connection timeout in seconds (default: 5)
       # @param producer_config [Proc] Block to configure each producer in the pool
-      # @yield [config] Block to configure each producer in the pool
+      # @yield [config, index] Block to configure each producer in the pool, receives config and
+      #   pool index
       # @return [ConnectionPool] The configured global pool
       #
-      # @example
+      # @example Basic setup
       #   WaterDrop::ConnectionPool.setup(size: 15) do |config|
       #     config.kafka = { 'bootstrap.servers': ENV['KAFKA_BROKERS'] }
       #     config.deliver = true
       #   end
+      #
+      # @example Transactional setup with unique IDs
+      #   WaterDrop::ConnectionPool.setup(size: 5) do |config, index|
+      #     config.kafka = {
+      #       'bootstrap.servers': ENV['KAFKA_BROKERS'],
+      #       'transactional.id': "my-app-#{index}"
+      #     }
+      #   end
       def setup(size: 5, timeout: 5, &producer_config)
         ensure_connection_pool_gem!
+
         @default_pool = new(size: size, timeout: timeout, &producer_config)
       end
 
@@ -128,12 +147,25 @@ module WaterDrop
     # @param size [Integer] Pool size (default: 5)
     # @param timeout [Numeric] Connection timeout in seconds (default: 5)
     # @param producer_config [Proc] Block to configure each producer in the pool
-    # @yield [config] Block to configure each producer in the pool
+    # @yield [config, index] Block to configure each producer in the pool, receives config and
+    #   pool index
     def initialize(size: 5, timeout: 5, &producer_config)
       self.class.send(:ensure_connection_pool_gem!)
 
+      @producer_config = producer_config
+      @pool_index = 0
+      @pool_mutex = Mutex.new
+
       @pool = ::ConnectionPool.new(size: size, timeout: timeout) do
-        WaterDrop::Producer.new(&producer_config)
+        producer_index = @pool_mutex.synchronize { @pool_index += 1 }
+
+        WaterDrop::Producer.new do |config|
+          if @producer_config.arity == 2
+            @producer_config.call(config, producer_index)
+          else
+            @producer_config.call(config)
+          end
+        end
       end
     end
 

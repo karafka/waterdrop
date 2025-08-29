@@ -42,6 +42,74 @@ RSpec.describe_current do
           expect(producer.config.deliver).to be(false)
         end
       end
+
+      it 'supports per-producer configuration with index parameter' do
+        producer_ids = []
+
+        pool = described_class.new(size: 3) do |config, index|
+          config.deliver = false
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.id = "producer-#{index}"
+        end
+
+        # Force all producers to be created by using them simultaneously
+        mutex = Mutex.new
+        threads = Array.new(3) do
+          Thread.new do
+            pool.with do |producer|
+              mutex.synchronize { producer_ids << producer.id }
+              sleep(0.1) # Hold the producer longer to force pool to create others
+            end
+          end
+        end
+        threads.each(&:join)
+
+        expect(producer_ids.uniq.size).to eq(3)
+        expect(producer_ids.sort).to eq(%w[producer-1 producer-2 producer-3])
+      end
+
+      it 'supports transactional producers with unique transaction IDs' do
+        transaction_ids = []
+
+        pool = described_class.new(size: 2) do |config, index|
+          config.deliver = false
+          config.kafka = {
+            'bootstrap.servers': BOOTSTRAP_SERVERS,
+            'transactional.id': "tx-#{index}"
+          }
+        end
+
+        # Force all producers to be created by using them simultaneously
+        mutex = Mutex.new
+        threads = Array.new(2) do
+          Thread.new do
+            pool.with do |producer|
+              tx_id = producer.config.kafka[:'transactional.id']
+              mutex.synchronize do
+                transaction_ids << tx_id
+              end
+              sleep(0.1) # Hold the producer longer to force pool to create others
+            end
+          end
+        end
+        threads.each(&:join)
+
+        expect(transaction_ids.uniq.size).to eq(2)
+        expect(transaction_ids.sort).to eq(%w[tx-1 tx-2])
+      end
+
+      it 'maintains backward compatibility with single-parameter blocks' do
+        pool = described_class.new(size: 2) do |config|
+          config.deliver = false
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        end
+
+        pool.with do |producer|
+          expect(producer).to be_a(WaterDrop::Producer)
+          expect(producer.status.configured?).to be(true)
+          expect(producer.config.deliver).to be(false)
+        end
+      end
     end
   end
 
@@ -250,6 +318,31 @@ RSpec.describe_current do
 
       it 'requires connection_pool gem when called' do
         expect { described_class.setup { |config| config.deliver = false } }.not_to raise_error
+      end
+
+      it 'supports per-producer configuration with index in global setup' do
+        described_class.setup(size: 2) do |config, index|
+          config.deliver = false
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.id = "global-#{index}"
+        end
+
+        producer_ids = []
+
+        # Force all producers to be created by using them simultaneously
+        mutex = Mutex.new
+        threads = Array.new(2) do
+          Thread.new do
+            described_class.with do |producer|
+              mutex.synchronize { producer_ids << producer.id }
+              sleep(0.1) # Hold the producer longer to force pool to create others
+            end
+          end
+        end
+        threads.each(&:join)
+
+        expect(producer_ids.uniq.size).to eq(2)
+        expect(producer_ids.sort).to eq(%w[global-1 global-2])
       end
     end
 
