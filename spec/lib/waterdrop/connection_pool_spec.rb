@@ -320,6 +320,19 @@ RSpec.describe_current do
         expect { described_class.setup { |config| config.deliver = false } }.not_to raise_error
       end
 
+      it 'raises LoadError when connection_pool gem is not available' do
+        # Hide the ConnectionPool constant to simulate gem not being available
+        hide_const('ConnectionPool')
+
+        # Mock require to raise LoadError
+        allow(described_class).to receive(:require).with('connection_pool').and_raise(LoadError)
+
+        expect { described_class.setup { |config| config.deliver = false } }.to raise_error(
+          LoadError,
+          /WaterDrop::ConnectionPool requires the 'connection_pool' gem/
+        )
+      end
+
       it 'supports per-producer configuration with index in global setup' do
         described_class.setup(size: 2) do |config, index|
           config.deliver = false
