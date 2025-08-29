@@ -145,6 +145,29 @@ RSpec.describe_current do
 
       pool.shutdown
     end
+
+    it 'handles inactive producers during shutdown' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be inactive
+      status = instance_double(WaterDrop::Producer::Status, active?: false)
+      allow(producer).to receive(:status).and_return(status)
+
+      expect { pool.shutdown }.not_to raise_error
+    end
+
+    it 'handles nil status during shutdown' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be nil - this covers the &. safe navigation
+      allow(producer).to receive(:status).and_return(nil)
+
+      expect { pool.shutdown }.not_to raise_error
+    end
   end
 
   describe '#reload' do
@@ -158,6 +181,29 @@ RSpec.describe_current do
     before { require 'connection_pool' }
 
     it 'reloads all connections in the pool' do
+      expect { pool.reload }.not_to raise_error
+    end
+
+    it 'handles inactive producers during reload' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be inactive
+      status = instance_double(WaterDrop::Producer::Status, active?: false)
+      allow(producer).to receive(:status).and_return(status)
+
+      expect { pool.reload }.not_to raise_error
+    end
+
+    it 'handles nil status during reload' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be nil - this covers the &. safe navigation
+      allow(producer).to receive(:status).and_return(nil)
+
       expect { pool.reload }.not_to raise_error
     end
   end
@@ -275,6 +321,19 @@ RSpec.describe_current do
           expect(described_class.stats).to be_nil
         end
       end
+
+      context 'when global pool becomes nil during operation' do
+        it 'handles nil pool gracefully' do
+          described_class.setup do |config|
+            config.deliver = false
+          end
+
+          described_class.shutdown
+
+          # Should return nil after shutdown
+          expect(described_class.stats).to be_nil
+        end
+      end
     end
 
     describe '.shutdown' do
@@ -322,6 +381,16 @@ RSpec.describe_current do
 
       context 'when global pool is not configured' do
         it 'does not raise an error' do
+          expect { described_class.reload }.not_to raise_error
+        end
+      end
+
+      context 'when global pool is nil' do
+        before do
+          described_class.instance_variable_set(:@default_pool, nil)
+        end
+
+        it 'handles nil pool gracefully with safe navigation' do
           expect { described_class.reload }.not_to raise_error
         end
       end
