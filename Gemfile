@@ -14,6 +14,7 @@ group :development do
 end
 
 group :test do
+  gem 'connection_pool'
   gem 'ostruct'
   gem 'rspec'
   gem 'simplecov'
