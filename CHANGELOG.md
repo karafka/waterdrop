@@ -2,6 +2,7 @@
 
 ## 2.8.8 (Unreleased)
 - [Feature] Add `WaterDrop::ConnectionPool` for efficient connection pooling using the proven `connection_pool` gem.
+- [Change] Remove Ruby `3.1` specs according to the EOL schedule.
 
 ## 2.8.7 (2025-09-02)
 - [Enhancement] Disable Nagle algorithm by default (improves latency / aligned with librdkafka)
