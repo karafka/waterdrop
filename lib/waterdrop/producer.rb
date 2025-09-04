@@ -8,6 +8,7 @@ module WaterDrop
     include Async
     include Buffer
     include Transactions
+    include ClassMonitor
     include ::Karafka::Core::Helpers::Time
     include ::Karafka::Core::Taggable
 
@@ -60,6 +61,13 @@ module WaterDrop
       @status = Status.new
       @messages = []
 
+      # Instrument producer creation for global listeners
+      class_monitor.instrument(
+        'producer.created',
+        producer: self,
+        producer_id: @id
+      )
+
       return unless block
 
       setup(&block)
@@ -80,7 +88,19 @@ module WaterDrop
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
       @default_variant = Variant.new(self, default: true)
 
-      return @status.configured! if @config.idle_disconnect_timeout.zero?
+      if @config.idle_disconnect_timeout.zero?
+        @status.configured!
+
+        # Instrument producer configuration for global listeners
+        class_monitor.instrument(
+          'producer.configured',
+          producer: self,
+          producer_id: @id,
+          config: @config
+        )
+
+        return
+      end
 
       # Setup idle disconnect listener if configured so we preserve tcp connections on rarely
       # used producers
@@ -92,6 +112,14 @@ module WaterDrop
       @monitor.subscribe(disconnector)
 
       @status.configured!
+
+      # Instrument producer configuration for global listeners
+      class_monitor.instrument(
+        'producer.configured',
+        producer: self,
+        producer_id: @id,
+        config: @config
+      )
     end
 
     # @return [Rdkafka::Producer] raw rdkafka producer
