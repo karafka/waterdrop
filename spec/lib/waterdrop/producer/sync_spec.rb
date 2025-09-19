@@ -190,6 +190,31 @@ RSpec.describe_current do
         expect(delivery).to all be_a(Rdkafka::Producer::DeliveryHandle)
       end
     end
+
+    context 'when producing to multiple topics with invalid partition key' do
+      let(:topic1) { topic_name }
+      let(:topic2) { "#{topic1}-2" }
+
+      let(:messages) do
+        [
+          { topic: topic1, payload: 'message1', partition: 0 },
+          { topic: topic1, payload: 'message2', partition: 0 },
+          { topic: topic2, payload: 'message3', partition: 1 },
+          { topic: topic2, payload: 'message4', partition: 0 },
+          { topic: topic2, payload: 'message5', partition: 0 }
+        ]
+      end
+
+      before do
+        producer.produce_sync(topic: topic1, payload: 'setup1', partition: 0)
+        producer.produce_sync(topic: topic2, payload: 'setup2', partition: 0)
+      end
+
+      it 'expect to raise unknown partition error' do
+        expect { delivery }
+          .to raise_error(WaterDrop::Errors::ProduceManyError, /unknown_partition/)
+      end
+    end
   end
 
   context 'when using compression.codec' do
