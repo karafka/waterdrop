@@ -192,8 +192,8 @@ RSpec.describe_current do
     end
 
     context 'when producing to multiple topics with invalid partition key' do
-      let(:topic1) { "it-topic1-#{SecureRandom.uuid}" }
-      let(:topic2) { "it-topic2-#{SecureRandom.uuid}" }
+      let(:topic1) { topic_name }
+      let(:topic2) { "#{topic1}-2" }
 
       let(:messages) do
         [
