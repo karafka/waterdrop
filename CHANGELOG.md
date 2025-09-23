@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.8 (Unreleased)
+## 2.8.8 (2025-09-23)
 - [Feature] Add `WaterDrop::ConnectionPool` for efficient connection pooling using the proven `connection_pool` gem.
 - [Feature] Add `WaterDrop.instrumentation` class-level instrumentation for producer lifecycle events. This allows external libraries to subscribe to `producer.created` and `producer.configured` events without needing producer instance references, enabling middleware injection and configuration by libraries like Datadog tracing.
 - [Change] Remove Ruby `3.1` specs according to the EOL schedule.
