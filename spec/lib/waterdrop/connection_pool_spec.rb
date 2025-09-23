@@ -1005,4 +1005,164 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'Connection Pool Events' do
+    let(:events) { [] }
+
+    before do
+      # Subscribe to all connection pool events
+      WaterDrop.instrumentation.subscribe('connection_pool.created') { |event| events << event }
+      WaterDrop.instrumentation.subscribe('connection_pool.setup') { |event| events << event }
+      WaterDrop.instrumentation.subscribe('connection_pool.shutdown') { |event| events << event }
+      WaterDrop.instrumentation.subscribe('connection_pool.reload') { |event| events << event }
+      WaterDrop.instrumentation.subscribe('connection_pool.reloaded') { |event| events << event }
+    end
+
+    describe 'pool lifecycle events' do
+      context 'when creating a new pool' do
+        let(:pool) do
+          described_class.new(size: 2) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+        end
+
+        it 'emits connection_pool.created event' do
+          pool
+          created_event = events.find { |e| e.id == 'connection_pool.created' }
+
+          expect(created_event).not_to be_nil
+          expect(created_event[:pool]).to eq(pool)
+          expect(created_event[:size]).to eq(2)
+          expect(created_event[:timeout]).to eq(5)
+        end
+      end
+
+      context 'when setting up global pool' do
+        after do
+          described_class.shutdown if described_class.active?
+        end
+
+        it 'emits connection_pool.setup event' do
+          pool = described_class.setup(size: 3, timeout: 10) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+
+          setup_event = events.find { |e| e.id == 'connection_pool.setup' }
+
+          expect(setup_event).not_to be_nil
+          expect(setup_event[:pool]).to eq(pool)
+          expect(setup_event[:size]).to eq(3)
+          expect(setup_event[:timeout]).to eq(10)
+        end
+      end
+
+      context 'when shutting down global pool' do
+        before do
+          described_class.setup(size: 2) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+        end
+
+        it 'emits connection_pool.shutdown event' do
+          described_class.shutdown
+
+          shutdown_event = events.find { |e| e.id == 'connection_pool.shutdown' }
+
+          expect(shutdown_event).not_to be_nil
+          expect(shutdown_event[:pool]).not_to be_nil
+        end
+      end
+
+      context 'when reloading global pool' do
+        before do
+          described_class.setup(size: 2) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+        end
+
+        after do
+          described_class.shutdown if described_class.active?
+        end
+
+        it 'emits connection_pool.reload event' do
+          described_class.reload
+
+          reload_event = events.find { |e| e.id == 'connection_pool.reload' }
+
+          expect(reload_event).not_to be_nil
+          expect(reload_event[:pool]).not_to be_nil
+        end
+      end
+
+      context 'when shutting down instance pool' do
+        let(:pool) do
+          described_class.new(size: 2) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+        end
+
+        it 'emits shutdown event' do
+          pool.shutdown
+
+          shutdown_event = events.find { |e| e.id == 'connection_pool.shutdown' }
+
+          expect(shutdown_event).not_to be_nil
+          expect(shutdown_event[:pool]).to eq(pool)
+        end
+      end
+
+      context 'when reloading instance pool' do
+        let(:pool) do
+          described_class.new(size: 2) do |config|
+            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.deliver = false
+          end
+        end
+
+        after { pool.shutdown }
+
+        it 'emits reloaded event' do
+          pool.reload
+
+          reloaded_event = events.find { |e| e.id == 'connection_pool.reloaded' }
+
+          expect(reloaded_event).not_to be_nil
+          expect(reloaded_event[:pool]).to eq(pool)
+        end
+      end
+    end
+
+    describe 'event ordering' do
+      let(:pool) do
+        described_class.new(size: 1) do |config|
+          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+          config.deliver = false
+        end
+      end
+
+      it 'emits events in the correct order for pool operations' do
+        pool.with { |producer| producer }
+        pool.reload
+        pool.shutdown
+
+        event_ids = events.map(&:id)
+
+        # Pool creation comes first
+        expect(event_ids.first).to eq('connection_pool.created')
+
+        # Reload event
+        reload_index = event_ids.index('connection_pool.reloaded')
+        expect(reload_index).to be > 0
+
+        # Shutdown event comes last
+        shutdown_index = event_ids.index('connection_pool.shutdown')
+        expect(shutdown_index).to eq(event_ids.size - 1)
+      end
+    end
+  end
 end
