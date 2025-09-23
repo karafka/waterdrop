@@ -33,7 +33,7 @@ RSpec.describe_current do
         pool = described_class.new(size: 2) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
-          config.id = 'test-producer'
+          config.id = SecureRandom.uuid
         end
 
         pool.with do |producer|
