@@ -8,6 +8,11 @@ RSpec.describe_current do
       expected_events = %w[
         producer.created
         producer.configured
+        connection_pool.created
+        connection_pool.setup
+        connection_pool.shutdown
+        connection_pool.reload
+        connection_pool.reloaded
       ]
 
       expect(described_class::EVENTS).to eq(expected_events)
