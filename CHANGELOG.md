@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.9 (Unreleased)
+- [Enhancement] Add connection pool lifecycle events to global instrumentation for improved observability. Events include `connection_pool.created`, `connection_pool.setup`, `connection_pool.shutdown`, `connection_pool.reload`, and `connection_pool.reloaded`.
+
 ## 2.8.8 (2025-09-23)
 - [Feature] Add `WaterDrop::ConnectionPool` for efficient connection pooling using the proven `connection_pool` gem.
 - [Feature] Add `WaterDrop.instrumentation` class-level instrumentation for producer lifecycle events. This allows external libraries to subscribe to `producer.created` and `producer.configured` events without needing producer instance references, enabling middleware injection and configuration by libraries like Datadog tracing.

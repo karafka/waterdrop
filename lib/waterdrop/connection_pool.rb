@@ -70,6 +70,16 @@ module WaterDrop
         ensure_connection_pool_gem!
 
         @default_pool = new(size: size, timeout: timeout, &producer_config)
+
+        # Emit global event for pool setup
+        WaterDrop.instrumentation.instrument(
+          'connection_pool.setup',
+          pool: @default_pool,
+          size: size,
+          timeout: timeout
+        )
+
+        @default_pool
       end
 
       # Executes a block with a producer from the global pool
@@ -105,13 +115,28 @@ module WaterDrop
       def shutdown
         return unless @default_pool
 
+        pool = @default_pool
         @default_pool.shutdown
         @default_pool = nil
+
+        # Emit global event for pool shutdown
+        WaterDrop.instrumentation.instrument(
+          'connection_pool.shutdown',
+          pool: pool
+        )
       end
 
       # Reload the global connection pool
       def reload
-        @default_pool&.reload
+        return unless @default_pool
+
+        @default_pool.reload
+
+        # Emit global event for pool reload
+        WaterDrop.instrumentation.instrument(
+          'connection_pool.reload',
+          pool: @default_pool
+        )
       end
 
       # Check if the global connection pool is active (configured)
@@ -167,6 +192,14 @@ module WaterDrop
           end
         end
       end
+
+      # Emit event when a connection pool is created
+      WaterDrop.instrumentation.instrument(
+        'connection_pool.created',
+        pool: self,
+        size: size,
+        timeout: timeout
+      )
     end
 
     # Get pool statistics
@@ -184,6 +217,12 @@ module WaterDrop
       @pool.shutdown do |producer|
         producer.close! if producer&.status&.active?
       end
+
+      # Emit event after pool is shut down
+      WaterDrop.instrumentation.instrument(
+        'connection_pool.shutdown',
+        pool: self
+      )
     end
 
     # Reload all connections in the pool
@@ -192,6 +231,12 @@ module WaterDrop
       @pool.reload do |producer|
         producer.close! if producer&.status&.active?
       end
+
+      # Emit event after pool is reloaded
+      WaterDrop.instrumentation.instrument(
+        'connection_pool.reloaded',
+        pool: self
+      )
     end
 
     # Returns the underlying connection_pool instance
