@@ -2,6 +2,7 @@
 
 ## 2.8.9 (Unreleased)
 - [Enhancement] Add connection pool lifecycle events to global instrumentation for improved observability. Events include `connection_pool.created`, `connection_pool.setup`, `connection_pool.shutdown`, `connection_pool.reload`, and `connection_pool.reloaded`.
+- [Enhancement] Add default connection pool transaction direct API.
 
 ## 2.8.8 (2025-09-23)
 - [Feature] Add `WaterDrop::ConnectionPool` for efficient connection pooling using the proven `connection_pool` gem.
