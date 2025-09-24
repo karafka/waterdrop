@@ -146,6 +146,25 @@ module WaterDrop
         !@default_pool.nil?
       end
 
+      # Execute a transaction with a producer from the global connection pool
+      # Only available when connection pool is configured
+      #
+      # @param block [Proc] Block to execute within a transaction
+      # @yield [producer] Producer from the global pool with an active transaction
+      # @return [Object] Result of the block
+      # @raise [RuntimeError] If no global pool is configured
+      #
+      # @example
+      #   WaterDrop::ConnectionPool.transaction do |producer|
+      #     producer.produce(topic: 'events', payload: 'data1')
+      #     producer.produce(topic: 'events', payload: 'data2')
+      #   end
+      def transaction(&block)
+        raise 'No global connection pool configured. Call setup first.' unless @default_pool
+
+        @default_pool.transaction(&block)
+      end
+
       private
 
       # Ensures the connection_pool gem is available (class method)
@@ -239,6 +258,24 @@ module WaterDrop
       )
     end
 
+    # Execute a transaction with a producer from this connection pool
+    #
+    # @yield [producer] Producer from the pool with an active transaction
+    # @return [Object] Result of the block
+    #
+    # @example
+    #   pool.transaction do |producer|
+    #     producer.produce(topic: 'events', payload: 'data1')
+    #     producer.produce(topic: 'events', payload: 'data2')
+    #   end
+    def transaction
+      with do |producer|
+        producer.transaction do
+          yield(producer)
+        end
+      end
+    end
+
     # Returns the underlying connection_pool instance
     # This allows access to advanced connection_pool features if needed
     #
@@ -261,6 +298,22 @@ module WaterDrop
     #   end
     def with(&block)
       ConnectionPool.with(&block)
+    end
+
+    # Execute a transaction with a producer from the global connection pool
+    # Only available when connection pool is configured
+    #
+    # @param block [Proc] Block to execute within a transaction
+    # @yield [producer] Producer from the global pool with an active transaction
+    # @return [Object] Result of the block
+    #
+    # @example
+    #   WaterDrop.transaction do |producer|
+    #     producer.produce(topic: 'events', payload: 'data1')
+    #     producer.produce(topic: 'events', payload: 'data2')
+    #   end
+    def transaction(&block)
+      ConnectionPool.transaction(&block)
     end
 
     # Access the global connection pool

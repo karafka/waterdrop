@@ -3,6 +3,8 @@
 RSpec.describe_current do
   after { described_class.shutdown }
 
+  let(:instrumentation) { WaterDrop.instrumentation }
+
   describe '#initialize' do
     context 'when connection_pool gem is available' do
       before do
@@ -1011,18 +1013,18 @@ RSpec.describe_current do
 
     before do
       # Subscribe to all connection pool events
-      WaterDrop.instrumentation.subscribe('connection_pool.created') { |event| events << event }
-      WaterDrop.instrumentation.subscribe('connection_pool.setup') { |event| events << event }
-      WaterDrop.instrumentation.subscribe('connection_pool.shutdown') { |event| events << event }
-      WaterDrop.instrumentation.subscribe('connection_pool.reload') { |event| events << event }
-      WaterDrop.instrumentation.subscribe('connection_pool.reloaded') { |event| events << event }
+      instrumentation.subscribe('connection_pool.created') { |event| events << event }
+      instrumentation.subscribe('connection_pool.setup') { |event| events << event }
+      instrumentation.subscribe('connection_pool.shutdown') { |event| events << event }
+      instrumentation.subscribe('connection_pool.reload') { |event| events << event }
+      instrumentation.subscribe('connection_pool.reloaded') { |event| events << event }
     end
 
     describe 'pool lifecycle events' do
       context 'when creating a new pool' do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1045,7 +1047,7 @@ RSpec.describe_current do
 
         it 'emits connection_pool.setup event' do
           pool = described_class.setup(size: 3, timeout: 10) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
 
@@ -1061,7 +1063,7 @@ RSpec.describe_current do
       context 'when shutting down global pool' do
         before do
           described_class.setup(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1079,7 +1081,7 @@ RSpec.describe_current do
       context 'when reloading global pool' do
         before do
           described_class.setup(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1101,7 +1103,7 @@ RSpec.describe_current do
       context 'when shutting down instance pool' do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1119,7 +1121,7 @@ RSpec.describe_current do
       context 'when reloading instance pool' do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1140,7 +1142,7 @@ RSpec.describe_current do
     describe 'event ordering' do
       let(:pool) do
         described_class.new(size: 1) do |config|
-          config.kafka = { 'bootstrap.servers': 'localhost:9092' }
+          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
           config.deliver = false
         end
       end
@@ -1163,6 +1165,105 @@ RSpec.describe_current do
         shutdown_index = event_ids.index('connection_pool.shutdown')
         expect(shutdown_index).to eq(event_ids.size - 1)
       end
+    end
+  end
+
+  describe '#transaction' do
+    let(:pool) do
+      described_class.new(size: 2) do |config, index|
+        config.kafka = {
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
+          'transactional.id': "test-tx-#{index}"
+        }
+        config.deliver = false
+      end
+    end
+
+    after { pool.shutdown }
+
+    context 'when transaction succeeds' do
+      it 'executes the block within a transaction and returns result' do
+        result = pool.transaction do |producer|
+          expect(producer).to be_a(WaterDrop::Producer)
+          'success'
+        end
+
+        expect(result).to eq('success')
+      end
+    end
+
+    context 'when transaction fails' do
+      it 'raises the exception from the block' do
+        error_raised = StandardError.new('test error')
+
+        expect do
+          pool.transaction do |_producer|
+            raise error_raised
+          end
+        end.to raise_error(StandardError, 'test error')
+      end
+    end
+  end
+
+  describe '.transaction (class method)' do
+    before do
+      described_class.setup(size: 2) do |config, index|
+        config.kafka = {
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
+          'transactional.id': "test-global-tx-#{index}"
+        }
+        config.deliver = false
+      end
+    end
+
+    after do
+      described_class.shutdown if described_class.active?
+    end
+
+    context 'when global pool is configured' do
+      it 'executes transaction using the global pool' do
+        result = described_class.transaction do |producer|
+          expect(producer).to be_a(WaterDrop::Producer)
+          'global_success'
+        end
+
+        expect(result).to eq('global_success')
+      end
+    end
+
+    context 'when global pool is not configured' do
+      before { described_class.shutdown }
+
+      it 'raises an error' do
+        expect do
+          described_class.transaction { |producer| }
+        end.to raise_error(RuntimeError, 'No global connection pool configured. Call setup first.')
+      end
+    end
+  end
+
+  describe 'WaterDrop.transaction convenience method' do
+    before do
+      described_class.setup(size: 2) do |config, index|
+        config.kafka = {
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
+          'transactional.id': "test-convenience-tx-#{index}"
+        }
+        config.deliver = false
+      end
+    end
+
+    after do
+      described_class.shutdown if described_class.active?
+    end
+
+    it 'delegates to ConnectionPool.transaction' do
+      result = WaterDrop.transaction do |producer|
+        expect(producer).to be_a(WaterDrop::Producer)
+        'convenience_success'
+      end
+
+      expect(result).to eq('convenience_success')
     end
   end
 end
