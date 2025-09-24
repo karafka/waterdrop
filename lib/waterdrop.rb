@@ -17,7 +17,7 @@ module WaterDrop
       Pathname.new(File.expand_path('..', __dir__))
     end
 
-    # @return [WaterDrop::Instrumentation::ClassMonitor] global instrumentation monitor for
+    # @return [WaterDrop::Instrumentation::ClassMonitor] global monitor for
     #   class-level event subscriptions. This allows external libraries to subscribe to WaterDrop
     #   lifecycle events without needing producer instance references.
     #
@@ -25,13 +25,16 @@ module WaterDrop
     #   instance events
     #
     # @example Subscribe to producer creation events
-    #   WaterDrop.instrumentation.subscribe('producer.created') do |event|
+    #   WaterDrop.monitor.subscribe('producer.created') do |event|
     #     producer = event[:producer]
     #     # Configure producer or add middleware
     #   end
-    def instrumentation
+    def monitor
       @instrumentation ||= Instrumentation::ClassMonitor.new
     end
+
+    # @deprecated Use #monitor instead. This method is provided for backward compatibility only.
+    alias instrumentation monitor
   end
 end
 

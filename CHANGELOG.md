@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.10 (2025-09-24)
+- [Enhancement] Add `WaterDrop.monitor` method as the preferred alias for `WaterDrop.instrumentation` to align with per-producer API naming convention. The `instrumentation` method remains available as a deprecated alias for backward compatibility.
+
 ## 2.8.9 (2025-09-23)
 - [Enhancement] Add connection pool lifecycle events to global instrumentation for improved observability. Events include `connection_pool.created`, `connection_pool.setup`, `connection_pool.shutdown`, `connection_pool.reload`, and `connection_pool.reloaded`.
 - [Enhancement] Add default connection pool transactional direct API.
