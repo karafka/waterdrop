@@ -22,7 +22,7 @@ RSpec.describe_current do
       end
 
       it 'creates a connection pool with custom settings' do
-        pool = described_class.new(size: 10, timeout: 3) do |config|
+        pool = described_class.new(size: 10, timeout: 3000) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -367,7 +367,7 @@ RSpec.describe_current do
       end
 
       it 'sets up a global connection pool with custom settings' do
-        described_class.setup(size: 15, timeout: 3) do |config|
+        described_class.setup(size: 15, timeout: 3000) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -804,7 +804,7 @@ RSpec.describe_current do
 
     context 'when pool timeout is exceeded' do
       let(:small_pool) do
-        described_class.new(size: 1, timeout: 0.1) do |config|
+        described_class.new(size: 1, timeout: 100) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -831,7 +831,7 @@ RSpec.describe_current do
   describe 'fiber safety' do
     describe 'fiber safety with async operations' do
       let(:fiber_pool) do
-        described_class.new(size: 3, timeout: 2) do |config|
+        described_class.new(size: 3, timeout: 2000) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -942,7 +942,7 @@ RSpec.describe_current do
 
     describe 'global pool fiber safety' do
       before do
-        described_class.setup(size: 2, timeout: 1) do |config|
+        described_class.setup(size: 2, timeout: 1000) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -999,7 +999,7 @@ RSpec.describe_current do
 
     describe 'mixed thread and fiber operations' do
       let(:mixed_pool) do
-        described_class.new(size: 4, timeout: 1) do |config|
+        described_class.new(size: 4, timeout: 1000) do |config|
           config.deliver = false
           config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
         end
@@ -1121,7 +1121,7 @@ RSpec.describe_current do
           expect(created_event).not_to be_nil
           expect(created_event[:pool]).to eq(pool)
           expect(created_event[:size]).to eq(2)
-          expect(created_event[:timeout]).to eq(5)
+          expect(created_event[:timeout]).to eq(5000)
         end
       end
 
@@ -1131,7 +1131,7 @@ RSpec.describe_current do
         end
 
         it 'emits connection_pool.setup event' do
-          pool = described_class.setup(size: 3, timeout: 10) do |config|
+          pool = described_class.setup(size: 3, timeout: 10_000) do |config|
             config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
             config.deliver = false
           end
@@ -1141,7 +1141,7 @@ RSpec.describe_current do
           expect(setup_event).not_to be_nil
           expect(setup_event[:pool]).to eq(pool)
           expect(setup_event[:size]).to eq(3)
-          expect(setup_event[:timeout]).to eq(10)
+          expect(setup_event[:timeout]).to eq(10_000)
         end
       end
 

@@ -47,7 +47,7 @@ module WaterDrop
       # Sets up a global connection pool
       #
       # @param size [Integer] Pool size (default: 5)
-      # @param timeout [Numeric] Connection timeout in seconds (default: 5)
+      # @param timeout [Numeric] Connection timeout in milliseconds (default: 5000)
       # @param producer_config [Proc] Block to configure each producer in the pool
       # @yield [config, index] Block to configure each producer in the pool, receives config and
       #   pool index
@@ -66,7 +66,7 @@ module WaterDrop
       #       'transactional.id': "my-app-#{index}"
       #     }
       #   end
-      def setup(size: 5, timeout: 5, &producer_config)
+      def setup(size: 5, timeout: 5000, &producer_config)
         ensure_connection_pool_gem!
 
         @default_pool = new(size: size, timeout: timeout, &producer_config)
@@ -194,18 +194,18 @@ module WaterDrop
     # Creates a new WaterDrop connection pool
     #
     # @param size [Integer] Pool size (default: 5)
-    # @param timeout [Numeric] Connection timeout in seconds (default: 5)
+    # @param timeout [Numeric] Connection timeout in milliseconds (default: 5000)
     # @param producer_config [Proc] Block to configure each producer in the pool
     # @yield [config, index] Block to configure each producer in the pool, receives config and
     #   pool index
-    def initialize(size: 5, timeout: 5, &producer_config)
+    def initialize(size: 5, timeout: 5000, &producer_config)
       self.class.send(:ensure_connection_pool_gem!)
 
       @producer_config = producer_config
       @pool_index = 0
       @pool_mutex = Mutex.new
 
-      @pool = ::ConnectionPool.new(size: size, timeout: timeout) do
+      @pool = ::ConnectionPool.new(size: size, timeout: timeout / 1000.0) do
         producer_index = @pool_mutex.synchronize { @pool_index += 1 }
 
         WaterDrop::Producer.new do |config|
