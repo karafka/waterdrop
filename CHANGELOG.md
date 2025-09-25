@@ -1,9 +1,7 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.8.10 (2025-09-25)
 - [Enhancement] Add `#close` alias for `WaterDrop::ConnectionPool#shutdown` to align with producer API for consistent interface across both individual producers and connection pools.
-
-## 2.8.10 (2025-09-24)
 - [Enhancement] Add `WaterDrop.monitor` method as the preferred alias for `WaterDrop.instrumentation` to align with per-producer API naming convention. The `instrumentation` method remains available as a deprecated alias for backward compatibility.
 
 ## 2.8.9 (2025-09-23)
