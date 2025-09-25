@@ -240,6 +240,64 @@ RSpec.describe_current do
     end
   end
 
+  describe '#close' do
+    let(:pool) do
+      described_class.new(size: 2) do |config|
+        config.deliver = false
+        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+      end
+    end
+
+    before { require 'connection_pool' }
+
+    it 'is an alias for shutdown and behaves identically' do
+      # Access a producer to ensure it's created
+      pool.with(&:id)
+
+      expect { pool.close }.not_to raise_error
+    end
+
+    it 'calls close! on active producers during close (same as shutdown)' do
+      producers = []
+
+      # Capture producers by using them
+      2.times do
+        pool.with { |producer| producers << producer }
+      end
+
+      # Mock the close! method on the producers
+      producers.each do |producer|
+        allow(producer).to receive(:close!).and_call_original
+        allow(producer.status).to receive(:active?).and_return(true)
+      end
+
+      pool.close
+    end
+
+    it 'handles inactive producers during close' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be inactive
+      status = instance_double(WaterDrop::Producer::Status, active?: false)
+      allow(producer).to receive(:status).and_return(status)
+
+      expect { pool.close }.not_to raise_error
+    end
+
+    it 'handles nil status during close' do
+      # Create and capture a producer to mock specifically
+      producer = nil
+      pool.with { |p| producer = p }
+
+      # Mock the specific producer's status to be nil - this covers the &. safe navigation
+      allow(producer).to receive(:status).and_return(nil)
+
+      expect { pool.close }.not_to raise_error
+    end
+  end
+
   describe '#reload' do
     let(:pool) do
       described_class.new(size: 2) do |config|
@@ -467,6 +525,33 @@ RSpec.describe_current do
       context 'when global pool is not configured' do
         it 'does not raise an error' do
           expect { described_class.shutdown }.not_to raise_error
+        end
+      end
+    end
+
+    describe '.close' do
+      context 'when global pool is configured' do
+        before do
+          described_class.setup do |config|
+            config.deliver = false
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          end
+        end
+
+        it 'is an alias for shutdown and closes the global pool' do
+          expect { described_class.close }.not_to raise_error
+          expect(described_class.default_pool).to be_nil
+        end
+
+        it 'allows close to be called multiple times' do
+          described_class.close
+          expect { described_class.close }.not_to raise_error
+        end
+      end
+
+      context 'when global pool is not configured' do
+        it 'does not raise an error (same as shutdown)' do
+          expect { described_class.close }.not_to raise_error
         end
       end
     end

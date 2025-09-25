@@ -126,6 +126,11 @@ module WaterDrop
         )
       end
 
+      # Alias for shutdown to align with producer API
+      # WaterDrop producers use #close, so we alias connection pool #shutdown to #close
+      # for API consistency across both individual producers and connection pools
+      alias close shutdown
+
       # Reload the global connection pool
       def reload
         return unless @default_pool
@@ -243,6 +248,11 @@ module WaterDrop
         pool: self
       )
     end
+
+    # Alias for shutdown to align with producer API
+    # WaterDrop producers use #close, so we alias connection pool #shutdown to #close
+    # for API consistency across both individual producers and connection pools
+    alias close shutdown
 
     # Reload all connections in the pool
     # Useful for configuration changes or error recovery
