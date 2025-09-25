@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## 2.8.11 (2025-09-25)
-- **Breaking Change**: Connection pool timeout parameter now accepts milliseconds instead of seconds for consistency with other WaterDrop timeouts. The default timeout has been changed from `5` seconds to `5000` milliseconds (equivalent value). If you were previously using custom timeout values, multiply your existing values by 1000.
+- [Fix] Connection pool timeout parameter now accepts milliseconds instead of seconds for consistency with other WaterDrop timeouts. The default timeout has been changed from `5` seconds to `5000` milliseconds (equivalent value).
 
 ## 2.8.10 (2025-09-25)
 - [Enhancement] Add `#close` alias for `WaterDrop::ConnectionPool#shutdown` to align with producer API for consistent interface across both individual producers and connection pools.
