@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.8.11 (2025-09-25)
 - [Enhancement] Add `#close` alias for `WaterDrop::ConnectionPool#shutdown` to align with producer API for consistent interface across both individual producers and connection pools.
 
 ## 2.8.10 (2025-09-24)
