@@ -1,11 +1,9 @@
 # WaterDrop changelog
 
-## 2.8.12 (2025-09-27)
+## 2.8.11 (2025-09-27)
 - [Enhancement] Provide fast-track for middleware-less flows (20% faster) for single message, 5000x faster for batches.
 - [Enhancement] Optimize middlewares application by around 20%.
 - [Change] Remove Ruby `3.1` according to the EOL schedule.
-
-## 2.8.11 (2025-09-25)
 - [Fix] Connection pool timeout parameter now accepts milliseconds instead of seconds for consistency with other WaterDrop timeouts. The default timeout has been changed from `5` seconds to `5000` milliseconds (equivalent value).
 
 ## 2.8.10 (2025-09-25)
