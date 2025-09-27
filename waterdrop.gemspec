@@ -20,7 +20,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'karafka-rdkafka', '>= 0.20.0'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
-  spec.required_ruby_version = '>= 3.1.0'
+  spec.required_ruby_version = '>= 3.2.0'
 
   spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(spec)/}) }
   spec.executables   = []
