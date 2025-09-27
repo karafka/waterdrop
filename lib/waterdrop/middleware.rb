@@ -6,6 +6,7 @@ module WaterDrop
     def initialize
       @mutex = Mutex.new
       @steps = []
+      @count = 0
     end
 
     # Runs middleware on a single message prior to validation
@@ -16,6 +17,8 @@ module WaterDrop
     # @note You need to decide yourself whether you don't use the message hash data anywhere else
     #   and you want to save on memory by modifying it in place or do you want to do a deep copy
     def run(message)
+      return message if @count.zero?
+
       @steps.each do |step|
         message = step.call(message)
       end
@@ -24,10 +27,18 @@ module WaterDrop
     end
 
     # @param messages [Array<Hash>] messages on which we want to run middlewares
-    # @return [Array<Hash>] transformed messages
+    # @return [Array<Hash>] transformed messages or same messages if no transformation
     def run_many(messages)
-      messages.map do |message|
-        run(message)
+      # Skip middleware processing entirely if no middleware steps are configured
+      return messages if @count.zero?
+
+      # Use each_with_object to avoid creating intermediate arrays for large batches
+      messages.each_with_object([]) do |message, result|
+        @steps.each do |step|
+          message = step.call(message)
+        end
+
+        result << message
       end
     end
 
@@ -36,6 +47,7 @@ module WaterDrop
     def prepend(step)
       @mutex.synchronize do
         @steps.prepend step
+        @count += 1
       end
     end
 
@@ -44,6 +56,7 @@ module WaterDrop
     def append(step)
       @mutex.synchronize do
         @steps.append step
+        @count += 1
       end
     end
   end
