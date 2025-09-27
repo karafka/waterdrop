@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.12 (Unreleased)
+## 2.8.12 (2025-09-27)
 - [Enhancement] Provide fast-track for middleware-less flows (20% faster) for single message, 5000x faster for batches.
 - [Enhancement] Optimize middlewares application by around 20%.
 - [Change] Remove Ruby `3.1` according to the EOL schedule.
