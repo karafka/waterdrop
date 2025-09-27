@@ -47,7 +47,7 @@ module WaterDrop
     def prepend(step)
       @mutex.synchronize do
         @steps.prepend step
-        @count += 1
+        @count = @steps.size
       end
     end
 
@@ -56,7 +56,7 @@ module WaterDrop
     def append(step)
       @mutex.synchronize do
         @steps.append step
-        @count += 1
+        @count = @steps.size
       end
     end
   end
