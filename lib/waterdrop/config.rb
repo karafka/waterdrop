@@ -134,6 +134,10 @@ module WaterDrop
     # to overwrite the whole hash if they want to
     # @param config [Karafka::Core::Configurable::Node] config of this producer
     def merge_kafka_defaults!(config)
+      # Duplicate the kafka config so we can mutate it internally if needed without polluting the
+      # user provided object
+      config.kafka = config.kafka.dup
+
       KAFKA_DEFAULTS.each do |key, value|
         next if config.kafka.key?(key)
 
