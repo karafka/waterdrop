@@ -37,5 +37,19 @@ RSpec.describe_current do
         end.to raise_error(Rdkafka::Config::ClientCreationError)
       end
     end
+
+    context 'when kafka configuration is frozen' do
+      let(:frozen_kafka_config) do
+        {
+          'bootstrap.servers': BOOTSTRAP_SERVERS,
+          'client.id': 'test-client'
+        }.freeze
+      end
+
+      it 'not raise FrozenError when setting frozen kafka config' do
+        expect { config.setup { |config| config.kafka = frozen_kafka_config } }
+          .not_to raise_error
+      end
+    end
   end
 end
