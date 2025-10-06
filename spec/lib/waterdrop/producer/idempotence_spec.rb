@@ -73,16 +73,38 @@ RSpec.describe_current do
       it 'expect to instrument producer.reloaded event during reload' do
         call_count = 0
 
-        # Mock produce on any Rdkafka::Producer instance (including after reload)
-        # rubocop:disable RSpec/AnyInstance
-        allow_any_instance_of(Rdkafka::Producer).to receive(:produce) do
+        # Stub the initial client's produce method
+        allow(producer.client).to receive(:produce) do
           call_count += 1
           raise fatal_error if call_count == 1
 
           # Return a successful delivery handle
           instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
         end
-        # rubocop:enable RSpec/AnyInstance
+
+        # Create a mock builder instance
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+
+        # Stub Builder.new to return our mock builder
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+
+        # Stub the builder's call method to return a mock client
+        allow(mock_builder).to receive(:call) do
+          mock_client = instance_double(Rdkafka::Producer)
+
+          allow(mock_client).to receive(:produce) do
+            call_count += 1
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+
+          # Mock other required methods for reload
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+
+          mock_client
+        end
 
         # This should trigger one reload and succeed on retry
         producer.produce_sync(message)
@@ -98,17 +120,40 @@ RSpec.describe_current do
 
         produce_call_count = 0
 
-        # Mock produce on any Rdkafka::Producer instance (including after reload)
-        # This will cause 2 reloads (attempts 1 and 2), then succeed on 3rd try
-        # rubocop:disable RSpec/AnyInstance
-        allow_any_instance_of(Rdkafka::Producer).to receive(:produce) do
+        # Stub the initial client's produce method to fail twice
+        allow(producer.client).to receive(:produce) do
           produce_call_count += 1
           raise fatal_error if produce_call_count <= 2
 
           # Return a successful delivery handle
           instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
         end
-        # rubocop:enable RSpec/AnyInstance
+
+        # Create a mock builder instance
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+
+        # Stub Builder.new to return our mock builder
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+
+        # Stub the builder's call method to return mock clients
+        allow(mock_builder).to receive(:call) do
+          mock_client = instance_double(Rdkafka::Producer)
+
+          allow(mock_client).to receive(:produce) do
+            produce_call_count += 1
+            raise fatal_error if produce_call_count <= 2
+
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+
+          # Mock other required methods for reload
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+
+          mock_client
+        end
 
         # This should trigger two reloads and succeed on third attempt
         producer.produce_sync(message)
