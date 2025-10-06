@@ -21,7 +21,12 @@ RSpec.describe_current do
       instrument_on_wait_queue_full: true,
       max_attempts_on_transaction_command: 1,
       idle_disconnect_timeout: 0,
+      reload_on_idempotent_fatal_error: false,
+      wait_backoff_on_idempotent_fatal_error: 5_000,
+      max_attempts_on_idempotent_fatal_error: 5,
       reload_on_transaction_fatal_error: true,
+      wait_backoff_on_transaction_fatal_error: 1_000,
+      max_attempts_on_transaction_fatal_error: 10,
       oauth: {
         token_provider_listener: false
       },

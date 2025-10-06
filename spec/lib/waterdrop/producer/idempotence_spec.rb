@@ -71,13 +71,21 @@ RSpec.describe_current do
       end
 
       it 'expect to instrument producer.reloaded event during reload' do
-        # Ensure client exists first
-        producer.client
+        call_count = 0
 
-        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
+        # Mock produce on any Rdkafka::Producer instance (including after reload)
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(Rdkafka::Producer).to receive(:produce) do
+          call_count += 1
+          raise fatal_error if call_count == 1
 
-        # Directly test the reload method
-        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 1)
+          # Return a successful delivery handle
+          instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+        end
+        # rubocop:enable RSpec/AnyInstance
+
+        # This should trigger one reload and succeed on retry
+        producer.produce_sync(message)
 
         expect(reloaded_events.size).to eq(1)
         expect(reloaded_events.first[:producer_id]).to eq(producer.id)
@@ -88,14 +96,22 @@ RSpec.describe_current do
         reloaded_events = []
         producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
 
-        # Ensure client exists
-        producer.client
+        produce_call_count = 0
 
-        # Simulate multiple reloads
-        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
+        # Mock produce on any Rdkafka::Producer instance (including after reload)
+        # This will cause 2 reloads (attempts 1 and 2), then succeed on 3rd try
+        # rubocop:disable RSpec/AnyInstance
+        allow_any_instance_of(Rdkafka::Producer).to receive(:produce) do
+          produce_call_count += 1
+          raise fatal_error if produce_call_count <= 2
 
-        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 1)
-        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 2)
+          # Return a successful delivery handle
+          instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+        end
+        # rubocop:enable RSpec/AnyInstance
+
+        # This should trigger two reloads and succeed on third attempt
+        producer.produce_sync(message)
 
         expect(reloaded_events.size).to eq(2)
         expect(reloaded_events[0][:attempt]).to eq(1)

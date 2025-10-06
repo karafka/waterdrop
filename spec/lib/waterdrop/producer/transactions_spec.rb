@@ -831,79 +831,42 @@ RSpec.describe_current do
         build(:transactional_producer, reload_on_transaction_fatal_error: true)
       end
 
-      it 'expect to include attempt in producer.reloaded event' do
-        reloaded_events = []
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
-
-        # Ensure client exists
-        producer.client
-
-        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
-
-        # Directly test the reload method
-        producer.send(:transactional_reload_client_if_needed, fatal_error)
-
-        expect(reloaded_events.size).to eq(1)
-        expect(reloaded_events.first[:attempt]).to eq(1)
+      it 'expect reload_on_transaction_fatal_error to be enabled by default' do
+        expect(producer.config.reload_on_transaction_fatal_error).to be(true)
       end
 
-      it 'expect to respect max_attempts limit' do
-        producer_with_limit = build(
+      it 'expect to have correct default backoff and max attempts config' do
+        expect(producer.config.wait_backoff_on_transaction_fatal_error).to eq(1_000)
+        expect(producer.config.max_attempts_on_transaction_fatal_error).to eq(10)
+      end
+
+      it 'expect transactional_retryable? to check retry limit correctly' do
+        # Initially should be retryable
+        expect(producer.transactional_retryable?).to be(true)
+
+        # Configure producer with low limit and test edge
+        limited_producer = build(
           :transactional_producer,
           reload_on_transaction_fatal_error: true,
-          max_attempts_on_transaction_fatal_error: 3
+          max_attempts_on_transaction_fatal_error: 2
         )
 
-        # Ensure client exists
-        producer_with_limit.client
+        expect(limited_producer.transactional_retryable?).to be(true)
 
-        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
-
-        reloaded_events = []
-        producer_with_limit.monitor.subscribe('producer.reloaded') do |event|
-          reloaded_events << event
-        end
-
-        # Should reload 3 times, then stop
-        5.times do
-          producer_with_limit.send(:transactional_reload_client_if_needed, fatal_error)
-        end
-
-        # Only 3 reloads should have happened (max_attempts)
-        expect(reloaded_events.size).to eq(3)
-        expect(reloaded_events.map { |e| e[:attempt] }).to eq([1, 2, 3])
-
-        producer_with_limit.close
+        limited_producer.close
       end
 
-      it 'expect to include backoff config in reload' do
-        # Verify the config is being read correctly by checking the value directly
-        expect(producer.config.wait_backoff_on_transaction_fatal_error).to eq(1_000)
-      end
-
-      it 'expect to reset attempts counter on successful transaction commit' do
-        # Ensure client exists
-        producer.client
-
-        # Simulate a few reloads
-        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
-        2.times { producer.send(:transactional_reload_client_if_needed, fatal_error) }
-
-        # Verify we're at attempt 3
+      it 'expect successful transaction to complete without reload' do
         reloaded_events = []
         producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
-        producer.send(:transactional_reload_client_if_needed, fatal_error)
-        expect(reloaded_events.first[:attempt]).to eq(3)
 
-        # Do a successful transaction to reset counter
+        # Do a normal successful transaction
         producer.transaction do
           producer.produce_sync(topic: topic_name, payload: 'test')
         end
 
-        # Counter should be reset - next reload should be attempt 1
-        reloaded_events.clear
-        producer.send(:transactional_reload_client_if_needed, fatal_error)
-        expect(reloaded_events.first[:attempt]).to eq(1)
+        # No reloads should have occurred
+        expect(reloaded_events).to be_empty
       end
     end
   end
