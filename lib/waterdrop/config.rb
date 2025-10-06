@@ -61,7 +61,7 @@ module WaterDrop
     #   recoverable, in a high number it still may mean issues.
     #   Waiting is one of the recommended strategies.
     setting :wait_on_queue_full, default: true
-    # option [Integer] how long (in seconds) should we backoff before a retry when queue is full
+    # option [Integer] how long (in ms) should we backoff before a retry when queue is full
     #   The retry will happen with the same message and backoff should give us some time to
     #   dispatch previously buffered messages.
     setting :wait_backoff_on_queue_full, default: 100
@@ -79,6 +79,22 @@ module WaterDrop
     # to keep going or should we stop. Since we will open a new instance and the failed transaction
     # anyhow rolls back, we should be able to safely reload.
     setting :reload_on_transaction_fatal_error, default: true
+    # option [Boolean] When a fatal error occurs on idempotent producer, should we automatically
+    #   close and recreate the underlying producer to recover and continue sending messages. This
+    #   allows automatic recovery from fatal librdkafka errors in idempotent producers.
+    setting :reload_on_idempotent_fatal_error, default: false
+    # option [Numeric] How long to wait (in ms) before retrying after reloading on idempotent
+    #   fatal error. This backoff prevents rapid reload loops from overloading the system.
+    setting :wait_backoff_on_idempotent_fatal_error, default: 5_000
+    # option [Integer] How many times to attempt reloading on idempotent fatal error before giving
+    #   up. This prevents infinite reload loops if the producer never recovers.
+    setting :max_attempts_on_idempotent_fatal_error, default: 5
+    # option [Numeric] How long to wait (in ms) before continuing after reloading on transactional
+    #   fatal error. This backoff prevents rapid reload loops from overloading the system.
+    setting :wait_backoff_on_transaction_fatal_error, default: 1_000
+    # option [Integer] How many times to attempt reloading on transactional fatal error before
+    #   giving up. This prevents infinite reload loops if the producer never recovers.
+    setting :max_attempts_on_transaction_fatal_error, default: 10
     # option [Integer] Idle disconnect timeout in milliseconds. When set to 0, idle disconnection
     #   is disabled. When set to a positive value, WaterDrop will automatically disconnect
     #   producers that haven't sent any messages for the specified time period. This helps preserve

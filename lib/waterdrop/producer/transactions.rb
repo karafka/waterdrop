@@ -4,16 +4,10 @@ module WaterDrop
   class Producer
     # Transactions related producer functionalities
     module Transactions
-      # We should never reload producer if it was fenced, otherwise we could end up with some sort
-      # of weird race-conditions
-      NON_RELOADABLE_ERRORS = %i[
-        fenced
-      ].freeze
-
       # Contract to validate that input for transactional offset storage is correct
       CONTRACT = Contracts::TransactionalOffset.new
 
-      private_constant :CONTRACT, :NON_RELOADABLE_ERRORS
+      private_constant :CONTRACT
 
       # Creates a transaction.
       #
@@ -99,6 +93,9 @@ module WaterDrop
               transactional_instrument(:committed) { client.commit_transaction }
             end
 
+            # Reset attempts counter on successful transaction commit
+            @transaction_fatal_error_attempts = 0
+
             result
           # We need to handle any interrupt including critical in order not to have the transaction
           # running. This will also handle things like `IRB::Abort`
@@ -135,9 +132,16 @@ module WaterDrop
 
       # @return [Boolean] Is this producer a transactional one
       def transactional?
-        return @transactional if instance_variable_defined?(:'@transactional')
+        return @transactional unless @transactional.nil?
 
         @transactional = config.kafka.to_h.key?(:'transactional.id')
+      end
+
+      # Checks if we can still retry reloading after a transactional fatal error
+      #
+      # @return [Boolean] true if we haven't exceeded the max reload attempts yet
+      def transactional_retryable?
+        @transaction_fatal_error_attempts < config.max_attempts_on_transaction_fatal_error
       end
 
       # Marks given message as consumed inside of a transaction.
@@ -279,12 +283,19 @@ module WaterDrop
 
         return unless rd_error.is_a?(Rdkafka::RdkafkaError)
         return unless config.reload_on_transaction_fatal_error
-        return if NON_RELOADABLE_ERRORS.include?(rd_error.code)
+        return if NON_RELOADABLE_FATAL_ERRORS.include?(rd_error.code)
+
+        # Check if we've exceeded max reload attempts
+        return unless transactional_retryable?
+
+        # Increment attempts before reload
+        @transaction_fatal_error_attempts += 1
 
         @operating_mutex.synchronize do
           @monitor.instrument(
             'producer.reloaded',
-            producer_id: id
+            producer_id: id,
+            attempt: @transaction_fatal_error_attempts
           ) do
             @client.flush(current_variant.max_wait_timeout)
             purge
@@ -292,6 +303,9 @@ module WaterDrop
             @client = Builder.new.call(self, @config)
           end
         end
+
+        # Wait before continuing to avoid rapid reload loops
+        sleep(config.wait_backoff_on_transaction_fatal_error / 1_000.0)
       end
     end
   end

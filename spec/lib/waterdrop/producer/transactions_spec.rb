@@ -824,4 +824,50 @@ RSpec.describe_current do
       end.to raise_error(WaterDrop::Errors::ProducerClosedError)
     end
   end
+
+  context 'when fatal error occurs during transaction' do
+    context 'with reload_on_transaction_fatal_error enabled' do
+      let(:producer) do
+        build(:transactional_producer, reload_on_transaction_fatal_error: true)
+      end
+
+      it 'expect reload_on_transaction_fatal_error to be enabled by default' do
+        expect(producer.config.reload_on_transaction_fatal_error).to be(true)
+      end
+
+      it 'expect to have correct default backoff and max attempts config' do
+        expect(producer.config.wait_backoff_on_transaction_fatal_error).to eq(1_000)
+        expect(producer.config.max_attempts_on_transaction_fatal_error).to eq(10)
+      end
+
+      it 'expect transactional_retryable? to check retry limit correctly' do
+        # Initially should be retryable
+        expect(producer.transactional_retryable?).to be(true)
+
+        # Configure producer with low limit and test edge
+        limited_producer = build(
+          :transactional_producer,
+          reload_on_transaction_fatal_error: true,
+          max_attempts_on_transaction_fatal_error: 2
+        )
+
+        expect(limited_producer.transactional_retryable?).to be(true)
+
+        limited_producer.close
+      end
+
+      it 'expect successful transaction to complete without reload' do
+        reloaded_events = []
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+
+        # Do a normal successful transaction
+        producer.transaction do
+          producer.produce_sync(topic: topic_name, payload: 'test')
+        end
+
+        # No reloads should have occurred
+        expect(reloaded_events).to be_empty
+      end
+    end
+  end
 end

@@ -14,6 +14,12 @@ module Factories
         wait_timeout_on_queue_full: 1_000,
         max_payload_size: 1_000_012,
         idle_disconnect_timeout: 0,
+        reload_on_idempotent_fatal_error: false,
+        wait_backoff_on_idempotent_fatal_error: 5_000,
+        max_attempts_on_idempotent_fatal_error: 5,
+        reload_on_transaction_fatal_error: true,
+        wait_backoff_on_transaction_fatal_error: 1_000,
+        max_attempts_on_transaction_fatal_error: 10,
         kafka: {
           'bootstrap.servers': BOOTSTRAP_SERVERS,
           'statistics.interval.ms': 100,
@@ -32,6 +38,18 @@ module Factories
         config.wait_timeout_on_queue_full = attributes[:wait_timeout_on_queue_full]
         config.max_payload_size = attributes[:max_payload_size]
         config.idle_disconnect_timeout = attributes[:idle_disconnect_timeout]
+        config.reload_on_idempotent_fatal_error =
+          attributes[:reload_on_idempotent_fatal_error]
+        config.wait_backoff_on_idempotent_fatal_error =
+          attributes[:wait_backoff_on_idempotent_fatal_error]
+        config.max_attempts_on_idempotent_fatal_error =
+          attributes[:max_attempts_on_idempotent_fatal_error]
+        config.reload_on_transaction_fatal_error =
+          attributes[:reload_on_transaction_fatal_error]
+        config.wait_backoff_on_transaction_fatal_error =
+          attributes[:wait_backoff_on_transaction_fatal_error]
+        config.max_attempts_on_transaction_fatal_error =
+          attributes[:max_attempts_on_transaction_fatal_error]
       end
 
       instance.monitor.subscribe(
