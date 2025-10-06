@@ -8,6 +8,7 @@ module WaterDrop
     include Async
     include Buffer
     include Transactions
+    include Idempotence
     include ClassMonitor
     include ::Karafka::Core::Helpers::Time
     include ::Karafka::Core::Taggable
@@ -21,13 +22,21 @@ module WaterDrop
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
     ].freeze
 
+    # We should never reload producer on certain fatal errors as they may indicate state that
+    # cannot be recovered by simply recreating the client
+    NON_RELOADABLE_FATAL_ERRORS = %i[
+      fenced
+    ].freeze
+
     # Empty hash to save on memory allocations
     EMPTY_HASH = {}.freeze
 
     # Empty array to save on memory allocations
     EMPTY_ARRAY = [].freeze
 
-    private_constant :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
+    private_constant(
+      :SUPPORTED_FLOW_ERRORS, :NON_RELOADABLE_FATAL_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
+    )
 
     def_delegators :config
 
@@ -57,6 +66,10 @@ module WaterDrop
       @default_variant = nil
       @client = nil
       @closing_thread_id = nil
+      @idempotent = nil
+      @transactional = nil
+      @idempotent_fatal_error_attempts = 0
+      @transaction_fatal_error_attempts = 0
 
       @status = Status.new
       @messages = []
@@ -208,15 +221,6 @@ module WaterDrop
     end
 
     alias variant with
-
-    # @return [Boolean] true if current producer is idempotent
-    def idempotent?
-      # Every transactional producer is idempotent by default always
-      return true if transactional?
-      return @idempotent if instance_variable_defined?(:'@idempotent')
-
-      @idempotent = config.kafka.to_h.fetch(:'enable.idempotence', false)
-    end
 
     # Returns and caches the middleware object that may be used
     # @return [WaterDrop::Producer::Middleware]
@@ -476,12 +480,46 @@ module WaterDrop
         message[:topic_config] = current_variant.topic_config
       end
 
-      if transactional?
-        transaction { client.produce(**message) }
-      else
-        client.produce(**message)
-      end
+      result = if transactional?
+                 transaction { client.produce(**message) }
+               else
+                 client.produce(**message)
+               end
+
+      # Reset attempts counter on successful produce
+      @idempotent_fatal_error_attempts = 0
+
+      result
     rescue SUPPORTED_FLOW_ERRORS.first => e
+      # Check if this is a fatal error on an idempotent producer and we should reload
+      if idempotent_reloadable?(e)
+        # Check if we've exceeded max reload attempts
+        raise unless idempotent_retryable?
+
+        # Increment attempts before reload
+        @idempotent_fatal_error_attempts += 1
+
+        # Instrument error.occurred before attempting reload for visibility
+        @monitor.instrument(
+          'error.occurred',
+          producer_id: id,
+          error: e,
+          type: 'librdkafka.idempotent_fatal_error',
+          attempt: @idempotent_fatal_error_attempts
+        )
+
+        # Attempt to reload the producer
+        idempotent_reload_client_on_fatal_error(e, @idempotent_fatal_error_attempts)
+
+        # Wait before retrying to avoid rapid reload loops
+        sleep(@config.wait_backoff_on_idempotent_fatal_error / 1_000.0)
+
+        # After reload, retry the produce operation
+        @operations_in_progress.decrement
+
+        retry
+      end
+
       # Unless we want to wait and retry and it's a full queue, we raise normally
       raise unless @config.wait_on_queue_full
       raise unless e.code == :queue_full

@@ -1,0 +1,196 @@
+# frozen_string_literal: true
+
+RSpec.describe_current do
+  subject(:producer) { build(:producer) }
+
+  after { producer.close }
+
+  describe '#idempotent?' do
+    context 'when producer is transactional' do
+      subject(:producer) { build(:transactional_producer) }
+
+      it 'expect to return true as all transactional producers are idempotent' do
+        expect(producer.idempotent?).to be(true)
+      end
+    end
+
+    context 'when producer has enable.idempotence set to true' do
+      subject(:producer) { build(:idempotent_producer) }
+
+      it 'expect to return true' do
+        expect(producer.idempotent?).to be(true)
+      end
+    end
+
+    context 'when producer has enable.idempotence set to false' do
+      subject(:producer) do
+        build(
+          :producer,
+          kafka: { 'bootstrap.servers': BOOTSTRAP_SERVERS, 'enable.idempotence': false }
+        )
+      end
+
+      it 'expect to return false' do
+        expect(producer.idempotent?).to be(false)
+      end
+    end
+
+    context 'when producer does not have enable.idempotence configured' do
+      subject(:producer) { build(:producer) }
+
+      it 'expect to return false by default' do
+        expect(producer.idempotent?).to be(false)
+      end
+    end
+
+    context 'when idempotent? is called multiple times' do
+      subject(:producer) { build(:idempotent_producer) }
+
+      it 'expect to cache the result' do
+        first_result = producer.idempotent?
+        expect(producer.idempotent?).to eq(first_result)
+        expect(producer.instance_variable_defined?(:'@idempotent')).to be(true)
+      end
+    end
+  end
+
+  describe 'fatal error handling' do
+    let(:topic_name) { "it-#{SecureRandom.uuid}" }
+    let(:message) { build(:valid_message, topic: topic_name) }
+
+    context 'when fatal error occurs with reload_on_idempotent_fatal_error enabled' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      let(:fatal_error) { Rdkafka::RdkafkaError.new(-150, fatal: true) }
+      let(:reloaded_events) { [] }
+
+      before do
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+      end
+
+      it 'expect to instrument producer.reloaded event during reload' do
+        # Ensure client exists first
+        producer.client
+
+        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
+
+        # Directly test the reload method
+        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 1)
+
+        expect(reloaded_events.size).to eq(1)
+        expect(reloaded_events.first[:producer_id]).to eq(producer.id)
+        expect(reloaded_events.first[:attempt]).to eq(1)
+      end
+
+      it 'expect to include attempt number in instrumentation' do
+        reloaded_events = []
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+
+        # Ensure client exists
+        producer.client
+
+        # Simulate multiple reloads
+        fatal_error = Rdkafka::RdkafkaError.new(-150, fatal: true)
+
+        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 1)
+        producer.send(:idempotent_reload_client_on_fatal_error, fatal_error, 2)
+
+        expect(reloaded_events.size).to eq(2)
+        expect(reloaded_events[0][:attempt]).to eq(1)
+        expect(reloaded_events[1][:attempt]).to eq(2)
+      end
+    end
+
+    context 'when fatal error occurs with reload_on_idempotent_fatal_error disabled' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: false)
+      end
+
+      let(:fatal_error) { Rdkafka::RdkafkaError.new(-150, fatal: true) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(fatal_error)
+      end
+
+      it 'expect to raise the fatal error without reload' do
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+    end
+
+    context 'when non-reloadable fatal error (fenced) occurs' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      # Fenced error - code -144 from librdkafka for producer fenced
+      let(:fenced_error) { Rdkafka::RdkafkaError.new(-144, fatal: true) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(fenced_error)
+      end
+
+      it 'expect not to reload and raise the error' do
+        # This should raise because fenced errors are non-reloadable
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+    end
+
+    context 'when fatal error occurs on transactional producer' do
+      subject(:producer) do
+        build(:transactional_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      let(:fatal_error) { Rdkafka::RdkafkaError.new(-150, fatal: true) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(fatal_error)
+      end
+
+      it 'expect not to use idempotent reload path' do
+        # Transactional producers should not use the idempotent reload path
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+    end
+
+    context 'when fatal error occurs on non-idempotent producer' do
+      subject(:producer) do
+        build(:producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      let(:fatal_error) { Rdkafka::RdkafkaError.new(-150, fatal: true) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(fatal_error)
+      end
+
+      it 'expect not to reload as producer is not idempotent' do
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+    end
+
+    context 'when non-fatal error occurs' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      # Non-fatal error like queue_full
+      let(:queue_full_error) { Rdkafka::RdkafkaError.new(-184, fatal: false) }
+
+      before do
+        allow(producer.client).to receive(:produce).and_raise(queue_full_error)
+      end
+
+      it 'expect not to reload for non-fatal errors' do
+        # Should follow normal error handling path, not reload
+        expect { producer.produce_sync(message) }
+          .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+    end
+  end
+end

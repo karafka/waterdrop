@@ -51,5 +51,94 @@ RSpec.describe_current do
           .not_to raise_error
       end
     end
+
+    context 'when reload_on_idempotent_fatal_error is configured' do
+      it 'allows setting to true' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.reload_on_idempotent_fatal_error = true
+          end
+        end.not_to raise_error
+      end
+
+      it 'allows setting to false' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.reload_on_idempotent_fatal_error = false
+          end
+        end.not_to raise_error
+      end
+
+      it 'defaults to false' do
+        config.setup { |config| config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS } }
+        expect(config.config.reload_on_idempotent_fatal_error).to be(false)
+      end
+    end
+
+    context 'when wait_backoff_on_idempotent_fatal_error is configured' do
+      it 'allows setting a positive value' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.wait_backoff_on_idempotent_fatal_error = 10_000
+          end
+        end.not_to raise_error
+      end
+
+      it 'defaults to 5000' do
+        config.setup { |config| config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS } }
+        expect(config.config.wait_backoff_on_idempotent_fatal_error).to eq(5_000)
+      end
+    end
+
+    context 'when max_attempts_on_idempotent_fatal_error is configured' do
+      it 'allows setting a positive value' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.max_attempts_on_idempotent_fatal_error = 10
+          end
+        end.not_to raise_error
+      end
+
+      it 'defaults to 5' do
+        config.setup { |config| config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS } }
+        expect(config.config.max_attempts_on_idempotent_fatal_error).to eq(5)
+      end
+    end
+
+    context 'when wait_backoff_on_transaction_fatal_error is configured' do
+      it 'allows setting a positive value' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.wait_backoff_on_transaction_fatal_error = 2_000
+          end
+        end.not_to raise_error
+      end
+
+      it 'defaults to 1000' do
+        config.setup { |config| config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS } }
+        expect(config.config.wait_backoff_on_transaction_fatal_error).to eq(1_000)
+      end
+    end
+
+    context 'when max_attempts_on_transaction_fatal_error is configured' do
+      it 'allows setting a positive value' do
+        expect do
+          config.setup do |config|
+            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.max_attempts_on_transaction_fatal_error = 10
+          end
+        end.not_to raise_error
+      end
+
+      it 'defaults to 10' do
+        config.setup { |config| config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS } }
+        expect(config.config.max_attempts_on_transaction_fatal_error).to eq(10)
+      end
+    end
   end
 end

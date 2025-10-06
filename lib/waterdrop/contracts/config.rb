@@ -27,6 +27,11 @@ module WaterDrop
       required(:wait_backoff_on_transaction_command) { |val| val.is_a?(Numeric) && val >= 0 }
       required(:max_attempts_on_transaction_command) { |val| val.is_a?(Integer) && val >= 1 }
       required(:reload_on_transaction_fatal_error) { |val| [true, false].include?(val) }
+      required(:reload_on_idempotent_fatal_error) { |val| [true, false].include?(val) }
+      required(:wait_backoff_on_idempotent_fatal_error) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:max_attempts_on_idempotent_fatal_error) { |val| val.is_a?(Integer) && val >= 1 }
+      required(:wait_backoff_on_transaction_fatal_error) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:max_attempts_on_transaction_fatal_error) { |val| val.is_a?(Integer) && val >= 1 }
       required(:idle_disconnect_timeout) do |val|
         val.is_a?(Integer) && (val.zero? || val >= 30_000)
       end
