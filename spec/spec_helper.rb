@@ -46,7 +46,7 @@ if coverage
   end
 end
 
-Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].sort.each { |f| require f }
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
 require_relative 'support/factories'
 require_relative 'support/factories/message'

@@ -279,8 +279,10 @@ RSpec.describe_current do
   end
 
   describe '#on_transaction_marked_as_consumed' do
+    let(:test_message) { Struct.new(:topic, :partition, :offset, keyword_init: true) }
+
     before do
-      details[:message] = OpenStruct.new(
+      details[:message] = test_message.new(
         topic: rand.to_s,
         partition: 0,
         offset: 100

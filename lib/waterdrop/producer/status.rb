@@ -38,6 +38,14 @@ module WaterDrop
       end
 
       LIFECYCLE.each do |state|
+        # @example
+        #   def initial?
+        #     @current == :initial
+        #   end
+        #
+        #   def initial!
+        #     @current = :initial
+        #   end
         module_eval <<-RUBY, __FILE__, __LINE__ + 1
           # @return [Boolean] true if current status is as we want, otherwise false
           def #{state}?

@@ -35,7 +35,7 @@ RSpec.describe_current do
   end
 
   context 'when the delivery_callback is executed' do
-    let(:delivery_report) { ::Rdkafka::Producer::DeliveryReport.new(rand, rand) }
+    let(:delivery_report) { Rdkafka::Producer::DeliveryReport.new(rand, rand) }
     let(:callback_event) do
       callback_event = nil
 

@@ -84,7 +84,6 @@ module WaterDrop
 
       # Executes a block with a producer from the global pool
       #
-      # @param block [Proc] Block to execute with a producer
       # @yield [producer] Producer from the global pool
       # @return [Object] Result of the block
       # @raise [RuntimeError] If no global pool is configured
@@ -93,10 +92,10 @@ module WaterDrop
       #   WaterDrop::ConnectionPool.with do |producer|
       #     producer.produce_sync(topic: 'events', payload: 'data')
       #   end
-      def with(&block)
+      def with(...)
         raise 'No global connection pool configured. Call setup first.' unless @default_pool
 
-        @default_pool.with(&block)
+        @default_pool.with(...)
       end
 
       # Get statistics about the global pool
@@ -154,7 +153,6 @@ module WaterDrop
       # Execute a transaction with a producer from the global connection pool
       # Only available when connection pool is configured
       #
-      # @param block [Proc] Block to execute within a transaction
       # @yield [producer] Producer from the global pool with an active transaction
       # @return [Object] Result of the block
       # @raise [RuntimeError] If no global pool is configured
@@ -164,10 +162,10 @@ module WaterDrop
       #     producer.produce(topic: 'events', payload: 'data1')
       #     producer.produce(topic: 'events', payload: 'data2')
       #   end
-      def transaction(&block)
+      def transaction(...)
         raise 'No global connection pool configured. Call setup first.' unless @default_pool
 
-        @default_pool.transaction(&block)
+        @default_pool.transaction(...)
       end
 
       private
@@ -298,7 +296,6 @@ module WaterDrop
     # Execute a block with a producer from the global connection pool
     # Only available when connection pool is configured
     #
-    # @param block [Proc] Block to execute with a producer
     # @yield [producer] Producer from the global pool
     # @return [Object] Result of the block
     #
@@ -306,14 +303,13 @@ module WaterDrop
     #   WaterDrop.with do |producer|
     #     producer.produce_sync(topic: 'events', payload: 'data')
     #   end
-    def with(&block)
-      ConnectionPool.with(&block)
+    def with(...)
+      ConnectionPool.with(...)
     end
 
     # Execute a transaction with a producer from the global connection pool
     # Only available when connection pool is configured
     #
-    # @param block [Proc] Block to execute within a transaction
     # @yield [producer] Producer from the global pool with an active transaction
     # @return [Object] Result of the block
     #
@@ -322,8 +318,8 @@ module WaterDrop
     #     producer.produce(topic: 'events', payload: 'data1')
     #     producer.produce(topic: 'events', payload: 'data2')
     #   end
-    def transaction(&block)
-      ConnectionPool.transaction(&block)
+    def transaction(...)
+      ConnectionPool.transaction(...)
     end
 
     # Access the global connection pool

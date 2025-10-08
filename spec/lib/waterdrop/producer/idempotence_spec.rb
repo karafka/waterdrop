@@ -49,7 +49,7 @@ RSpec.describe_current do
       it 'expect to cache the result' do
         first_result = producer.idempotent?
         expect(producer.idempotent?).to eq(first_result)
-        expect(producer.instance_variable_defined?(:'@idempotent')).to be(true)
+        expect(producer.instance_variable_defined?(:@idempotent)).to be(true)
       end
     end
   end

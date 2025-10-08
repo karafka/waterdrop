@@ -346,7 +346,7 @@ RSpec.describe_current do
     before { require 'connection_pool' }
 
     it 'returns the underlying connection pool instance' do
-      expect(pool.pool).to be_a(::ConnectionPool)
+      expect(pool.pool).to be_a(ConnectionPool)
     end
   end
 
@@ -1321,7 +1321,7 @@ RSpec.describe_current do
 
       it 'raises an error' do
         expect do
-          described_class.transaction { |producer| }
+          described_class.transaction { |_producer| nil }
         end.to raise_error(RuntimeError, 'No global connection pool configured. Call setup first.')
       end
     end

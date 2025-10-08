@@ -13,7 +13,7 @@ module WaterDrop
         notifications_bus = WaterDrop::Instrumentation::Notifications.new,
         namespace = nil
       )
-        super(notifications_bus, namespace)
+        super
       end
     end
   end

@@ -7,7 +7,7 @@ RSpec.describe_current do
   let(:config) do
     {
       id: SecureRandom.uuid,
-      logger: Logger.new('/dev/null'),
+      logger: Logger.new(File::NULL),
       monitor: WaterDrop::Instrumentation::Monitor.new,
       deliver: false,
       client_class: WaterDrop::Clients::Rdkafka,

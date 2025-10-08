@@ -3,11 +3,12 @@
 RSpec.describe_current do
   subject(:contract_result) { described_class.new.call(input) }
 
+  let(:message_stub) { Struct.new(:topic, :partition, :offset, keyword_init: true) }
   let(:consumer) { instance_double(Rdkafka::Consumer, consumer_group_metadata_pointer: true) }
   let(:topic) { 'test_topic' }
   let(:partition) { 0 }
   let(:offset) { 10 }
-  let(:message) { OpenStruct.new(topic: topic, partition: partition, offset: offset) }
+  let(:message) { message_stub.new(topic: topic, partition: partition, offset: offset) }
   let(:offset_metadata) { 'metadata' }
   let(:input) do
     {

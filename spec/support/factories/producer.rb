@@ -8,7 +8,7 @@ module Factories
     def producer_factory(overrides = {})
       defaults = {
         deliver: true,
-        logger: Logger.new('/dev/null', level: Logger::DEBUG),
+        logger: Logger.new(File::NULL, level: Logger::DEBUG),
         max_wait_timeout: 30_000,
         wait_on_queue_full: false,
         wait_timeout_on_queue_full: 1_000,
@@ -53,7 +53,7 @@ module Factories
       end
 
       instance.monitor.subscribe(
-        ::WaterDrop::Instrumentation::LoggerListener.new(attributes[:logger])
+        WaterDrop::Instrumentation::LoggerListener.new(attributes[:logger])
       )
 
       instance

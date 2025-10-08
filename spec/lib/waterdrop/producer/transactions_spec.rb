@@ -3,6 +3,10 @@
 RSpec.describe_current do
   subject(:producer) { build(:transactional_producer) }
 
+  let(:transactional_message_stub) { Struct.new(:topic, :partition, :offset, keyword_init: true) }
+  let(:transactional_consumer_stub) do
+    Struct.new(:consumer_group_metadata_pointer, :dummy, keyword_init: true)
+  end
   let(:transactional_id) { SecureRandom.uuid }
   let(:critical_error) { Exception }
   let(:topic_name) { "it-#{SecureRandom.uuid}" }
@@ -35,8 +39,8 @@ RSpec.describe_current do
     subject(:producer) { build(:producer) }
 
     it 'expect to raise with info that this functionality is not configured' do
-      expect { producer.transaction {} }
-        .to raise_error(::WaterDrop::Errors::ProducerNotTransactionalError)
+      expect { producer.transaction { nil } }
+        .to raise_error(WaterDrop::Errors::ProducerNotTransactionalError)
     end
 
     it { expect(producer.transactional?).to be(false) }
@@ -45,7 +49,7 @@ RSpec.describe_current do
 
   context 'when we make a transaction without sending any messages' do
     it 'expect not to crash and do nothing' do
-      expect { producer.transaction {} }.not_to raise_error
+      expect { producer.transaction { nil } }.not_to raise_error
     end
   end
 
@@ -406,8 +410,8 @@ RSpec.describe_current do
     end
 
     it 'expect to fence out the previous one' do
-      producer1.transaction {}
-      producer2.transaction {}
+      producer1.transaction { nil }
+      producer2.transaction { nil }
 
       expect do
         producer1.transaction do
@@ -417,8 +421,8 @@ RSpec.describe_current do
     end
 
     it 'expect not to fence out the new one' do
-      producer1.transaction {}
-      producer2.transaction {}
+      producer1.transaction { nil }
+      producer2.transaction { nil }
 
       expect do
         producer2.transaction do
@@ -466,7 +470,7 @@ RSpec.describe_current do
     end
 
     it 'expect to retry and continue' do
-      expect { producer.transaction {} }.not_to raise_error
+      expect { producer.transaction { nil } }.not_to raise_error
     end
   end
 
@@ -607,7 +611,7 @@ RSpec.describe_current do
   end
 
   context 'when trying to mark as consumed in a transaction' do
-    let(:message) { OpenStruct.new(topic: topic_name, partition: 0, offset: 100) }
+    let(:message) { transactional_message_stub.new(topic: topic_name, partition: 0, offset: 100) }
 
     context 'when we try mark as consumed without a transaction' do
       it 'expect to raise an error' do
@@ -617,7 +621,8 @@ RSpec.describe_current do
     end
 
     context 'when we try mark as consumed with invalid arguments' do
-      let(:consumer) { OpenStruct.new }
+      let(:invalid_consumer_stub) { Struct.new(:dummy, keyword_init: true) }
+      let(:consumer) { invalid_consumer_stub.new(dummy: nil) }
 
       before { allow(producer.client).to receive(:send_offsets_to_transaction) }
 
@@ -631,7 +636,9 @@ RSpec.describe_current do
 
     # Full e2e integration of this is checked in Karafka as we do not operate on consumers here
     context 'when trying mark as consumed inside a transaction' do
-      let(:consumer) { OpenStruct.new(consumer_group_metadata_pointer: 1) }
+      let(:consumer) do
+        transactional_consumer_stub.new(consumer_group_metadata_pointer: 1, dummy: nil)
+      end
 
       before do
         allow(producer.client).to receive(:send_offsets_to_transaction)
@@ -820,7 +827,7 @@ RSpec.describe_current do
 
     it 'expect not to allow it' do
       expect do
-        producer.transaction {}
+        producer.transaction { nil }
       end.to raise_error(WaterDrop::Errors::ProducerClosedError)
     end
   end

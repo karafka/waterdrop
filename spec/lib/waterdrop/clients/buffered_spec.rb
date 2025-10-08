@@ -3,6 +3,9 @@
 RSpec.describe_current do
   subject(:client) { described_class.new(producer) }
 
+  let(:buffered_message_stub) { Struct.new(:topic, :partition, :offset, keyword_init: true) }
+  let(:buffered_consumer_stub) { Struct.new(:consumer_group_metadata_pointer, keyword_init: true) }
+
   let(:topic_name) { "it-#{SecureRandom}" }
 
   let(:producer) do
@@ -195,7 +198,7 @@ RSpec.describe_current do
 
     context 'when we try to store offset without a transaction' do
       let(:topic) { "it-#{SecureRandom.uuid}" }
-      let(:message) { OpenStruct.new(topic: topic, partition: 0, offset: 10) }
+      let(:message) { buffered_message_stub.new(topic: topic, partition: 0, offset: 10) }
 
       it 'expect to raise an error' do
         expect { producer.transaction_mark_as_consumed(nil, message) }
@@ -205,8 +208,8 @@ RSpec.describe_current do
 
     context 'when trying to store offset with transaction' do
       let(:topic) { "it-#{SecureRandom.uuid}" }
-      let(:consumer) { OpenStruct.new(consumer_group_metadata_pointer: nil) }
-      let(:message) { OpenStruct.new(topic: topic, partition: 0, offset: 10) }
+      let(:consumer) { buffered_consumer_stub.new(consumer_group_metadata_pointer: nil) }
+      let(:message) { buffered_message_stub.new(topic: topic, partition: 0, offset: 10) }
 
       it do
         expect do

@@ -3,15 +3,20 @@
 RSpec.describe_current do
   subject(:callback) { described_class.new(producer_id, transactional, monitor) }
 
+  let(:delivery_report_stub) do
+    Struct.new(:offset, :partition, :topic_name, :error, :label, keyword_init: true)
+  end
   let(:producer) { build(:producer) }
   let(:producer_id) { SecureRandom.uuid }
   let(:transactional) { producer.transactional? }
-  let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
+  let(:monitor) { WaterDrop::Instrumentation::Monitor.new }
   let(:delivery_report) do
-    OpenStruct.new(
+    delivery_report_stub.new(
       offset: rand(100),
       partition: rand(100),
-      topic_name: rand(100).to_s
+      topic_name: rand(100).to_s,
+      error: 0,
+      label: nil
     )
   end
 

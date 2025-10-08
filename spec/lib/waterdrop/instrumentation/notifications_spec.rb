@@ -21,7 +21,7 @@ RSpec.describe_current do
 
   describe '#subscribe' do
     context 'when we have a block based listener' do
-      let(:subscription) { monitor.subscribe(event_name) {} }
+      let(:subscription) { monitor.subscribe(event_name) { nil } }
 
       context 'when we try to subscribe to an unsupported event' do
         let(:event_name) { 'unsupported' }
@@ -75,7 +75,7 @@ RSpec.describe_current do
 
     context 'when producer is configured' do
       before do
-        producer.setup {}
+        producer.setup { nil }
 
         events_names.each do |event_name|
           producer.monitor.subscribe(event_name) do |event|
@@ -90,7 +90,7 @@ RSpec.describe_current do
 
     context 'when producer is connected' do
       before do
-        producer.setup {}
+        producer.setup { nil }
 
         events_names.each do |event_name|
           producer.monitor.subscribe(event_name) do |event|
@@ -109,7 +109,7 @@ RSpec.describe_current do
 
     context 'when producer is closed' do
       before do
-        producer.setup {}
+        producer.setup { nil }
 
         events_names.each do |event_name|
           producer.monitor.subscribe(event_name) do |event|

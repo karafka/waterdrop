@@ -87,13 +87,12 @@ module WaterDrop
     end
 
     # Sets up the whole configuration and initializes all that is needed
-    # @param block [Block] configuration block
-    def setup(&block)
+    def setup(...)
       raise Errors::ProducerAlreadyConfiguredError, id unless @status.initial?
 
       @config = Config
                 .new
-                .setup(&block)
+                .setup(...)
                 .config
 
       @id = @config.id
@@ -528,7 +527,7 @@ module WaterDrop
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
 
-      label = caller_locations(2, 1)[0].label.split(' ').last.split('#').last
+      label = caller_locations(2, 1)[0].label.split.last.split('#').last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep

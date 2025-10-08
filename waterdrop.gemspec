@@ -7,7 +7,7 @@ require 'waterdrop/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'waterdrop'
-  spec.version       = ::WaterDrop::VERSION
+  spec.version       = WaterDrop::VERSION
   spec.platform      = Gem::Platform::RUBY
   spec.authors       = ['Maciej Mensfeld']
   spec.email         = %w[contact@karafka.io]

@@ -56,7 +56,7 @@ RSpec.describe_current do
 
       let(:expected_error) { WaterDrop::Errors::ProducerAlreadyConfiguredError }
 
-      it { expect { producer.setup {} }.to raise_error(expected_error) }
+      it { expect { producer.setup { nil } }.to raise_error(expected_error) }
     end
 
     context 'when producer was not yet configured' do
@@ -279,7 +279,7 @@ RSpec.describe_current do
       # This will be reached when we dispatch a lot of messages
       before do
         # Simulate flush failure
-        allow(producer.client).to receive(:flush).and_raise(::Rdkafka::RdkafkaError.new(1))
+        allow(producer.client).to receive(:flush).and_raise(Rdkafka::RdkafkaError.new(1))
       end
 
       it 'expect to close and not to raise any errors' do
