@@ -74,14 +74,15 @@ module WaterDrop
         Transactions
       ].each do |scope|
         scope.instance_methods(false).each do |method_name|
-          # def produce_async(*args, &block)
-          #   ref = Fiber.current.waterdrop_clients ||= {}
-          #   ref[@producer.id] = self
+          # @example
+          #   def produce_async(*args, &block)
+          #     ref = Fiber.current.waterdrop_clients ||= {}
+          #     ref[@producer.id] = self
           #
-          #   @producer.produce_async(*args, &block)
-          # ensure
-          #   ref[@producer.id] = nil
-          # end
+          #     @producer.produce_async(*args, &block)
+          #   ensure
+          #     ref[@producer.id] = nil
+          #   end
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def #{method_name}(*args, &block)
               ref = Fiber.current.waterdrop_clients ||= {}

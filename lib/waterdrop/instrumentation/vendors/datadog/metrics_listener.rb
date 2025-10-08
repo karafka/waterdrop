@@ -91,15 +91,16 @@ module WaterDrop
             produced_sync
             produced_async
           ].each do |event_scope|
-            # def on_message_produced_sync(event)
-            #   report_message(event[:message][:topic], :produced_sync)
-            # end
-            #
-            # def on_messages_produced_sync(event)
-            #   event[:messages].each do |message|
-            #     report_message(message[:topic], :produced_sync)
+            # @example
+            #   def on_message_produced_sync(event)
+            #     report_message(event[:message][:topic], :produced_sync)
             #   end
-            # end
+            #
+            #   def on_messages_produced_sync(event)
+            #     event[:messages].each do |message|
+            #       report_message(message[:topic], :produced_sync)
+            #     end
+            #   end
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Karafka::Core::Monitoring::Event]
               def on_message_#{event_scope}(event)
@@ -120,13 +121,14 @@ module WaterDrop
             message_buffered
             messages_buffered
           ].each do |event_scope|
-            # def on_message_buffered(event)
-            #   histogram(
-            #     'buffer.size',
-            #     event[:buffer].size,
-            #     tags: default_tags
-            #   )
-            # end
+            # @example
+            #   def on_message_buffered(event)
+            #     histogram(
+            #       'buffer.size',
+            #       event[:buffer].size,
+            #       tags: default_tags
+            #     )
+            #   end
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Karafka::Core::Monitoring::Event]
               def on_#{event_scope}(event)
@@ -145,11 +147,12 @@ module WaterDrop
             flushed_sync
             flushed_async
           ].each do |event_scope|
-            # def on_buffer_flushed_sync(event)
-            #   event[:messages].each do |message|
-            #     report_message(message[:topic], :flushed_sync)
+            # @example
+            #   def on_buffer_flushed_sync(event)
+            #     event[:messages].each do |message|
+            #       report_message(message[:topic], :flushed_sync)
+            #     end
             #   end
-            # end
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               # @param event [Karafka::Core::Monitoring::Event]
               def on_buffer_#{event_scope}(event)
@@ -169,12 +172,13 @@ module WaterDrop
             increment
             decrement
           ].each do |metric_type|
-            # def count(key, *args)
-            #   client.count(
-            #     namespaced_metric(key),
-            #     *args
-            #   )
-            # end
+            # @example
+            #   def count(key, *args)
+            #     client.count(
+            #       namespaced_metric(key),
+            #       *args
+            #     )
+            #   end
             class_eval <<~METHODS, __FILE__, __LINE__ + 1
               def #{metric_type}(key, *args)
                 client.#{metric_type}(
