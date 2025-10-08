@@ -88,11 +88,11 @@ producer.close
 concurrent_during_calls = 0
 timing_data[:producer_calls].each do |call|
   concurrent_worker = timing_data[:worker_ticks].select do |tick|
-    tick[:time] >= call[:start_time] && tick[:time] <= call[:end_time]
+    tick[:time].between?(call[:start_time], call[:end_time])
   end
 
   concurrent_counter = timing_data[:counter_ticks].select do |tick|
-    tick[:time] >= call[:start_time] && tick[:time] <= call[:end_time]
+    tick[:time].between?(call[:start_time], call[:end_time])
   end
 
   concurrent_during_calls += (concurrent_worker.size + concurrent_counter.size)

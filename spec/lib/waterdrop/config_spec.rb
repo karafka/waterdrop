@@ -7,7 +7,7 @@ RSpec.describe_current do
 
   describe '#setup' do
     context 'when configuration has errors' do
-      let(:error_class) { ::WaterDrop::Errors::ConfigurationInvalidError }
+      let(:error_class) { WaterDrop::Errors::ConfigurationInvalidError }
       let(:setup) { described_class.new.setup { |config| config.kafka = { 'a' => true } } }
 
       it 'raise ConfigurationInvalidError exception' do

@@ -6,10 +6,8 @@ module WaterDrop
     # and match our expectations
     class TransactionalOffset < ::Karafka::Core::Contractable::Contract
       configure do |config|
-        config.error_messages = YAML.safe_load(
-          File.read(
-            File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-          )
+        config.error_messages = YAML.safe_load_file(
+          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
         ).fetch('en').fetch('validations').fetch('transactional_offset')
       end
 

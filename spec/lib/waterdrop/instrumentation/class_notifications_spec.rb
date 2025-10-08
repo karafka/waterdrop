@@ -44,7 +44,7 @@ RSpec.describe_current do
       # subscribing to class events works (which means they were registered)
       described_class::EVENTS.each do |event_name|
         expect do
-          notifications.subscribe(event_name) { |event| }
+          notifications.subscribe(event_name) { |_event| nil }
         end.not_to raise_error
       end
     end
@@ -53,13 +53,13 @@ RSpec.describe_current do
   describe '#subscribe' do
     it 'allows subscribing to registered class events' do
       expect do
-        notifications.subscribe('producer.created') { |event| }
+        notifications.subscribe('producer.created') { |_event| nil }
       end.not_to raise_error
     end
 
     it 'raises error when subscribing to unregistered events' do
       expect do
-        notifications.subscribe('message.produced_sync') { |event| }
+        notifications.subscribe('message.produced_sync') { |_event| nil }
       end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
     end
   end
@@ -80,7 +80,7 @@ RSpec.describe_current do
     it 'class events are not available in instance notifications' do
       described_class::EVENTS.each do |event_name|
         expect do
-          instance_notifications.subscribe(event_name) { |event| }
+          instance_notifications.subscribe(event_name) { |_event| nil }
         end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
       end
     end
@@ -90,7 +90,7 @@ RSpec.describe_current do
 
       sample_instance_events.each do |event_name|
         expect do
-          notifications.subscribe(event_name) { |event| }
+          notifications.subscribe(event_name) { |_event| nil }
         end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
       end
     end

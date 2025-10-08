@@ -68,7 +68,7 @@ RSpec.describe_current do
 
       instance_events.each do |event_name|
         expect do
-          monitor.subscribe(event_name) { |event| }
+          monitor.subscribe(event_name) { |_event| nil }
         end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
       end
     end

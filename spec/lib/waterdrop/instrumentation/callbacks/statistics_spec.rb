@@ -5,7 +5,7 @@ RSpec.describe_current do
 
   let(:producer_id) { SecureRandom.uuid }
   let(:client_name) { SecureRandom.uuid }
-  let(:monitor) { ::WaterDrop::Instrumentation::Monitor.new }
+  let(:monitor) { WaterDrop::Instrumentation::Monitor.new }
 
   describe '#call' do
     let(:changed) { [] }

@@ -6,10 +6,8 @@ module WaterDrop
     # we provide to producer are valid and usable
     class Message < ::Karafka::Core::Contractable::Contract
       configure do |config|
-        config.error_messages = YAML.safe_load(
-          File.read(
-            File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-          )
+        config.error_messages = YAML.safe_load_file(
+          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
         ).fetch('en').fetch('validations').fetch('message')
       end
 
@@ -49,7 +47,7 @@ module WaterDrop
 
           # Headers can be either strings or arrays of strings
           next if value.is_a?(String)
-          next if value.is_a?(Array) && value.all? { |value| value.is_a?(String) }
+          next if value.is_a?(Array) && value.all?(String)
 
           errors << [%i[headers], :invalid_value_type]
         end

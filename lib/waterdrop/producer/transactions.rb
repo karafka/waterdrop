@@ -192,18 +192,16 @@ module WaterDrop
       # This allows us to simplify the async and sync batch dispatchers because we can ensure that
       # their internal dispatches will be wrapped only with a single transaction and not
       # a transaction per message
-      # @param block [Proc] code we want to run
-      def with_transaction_if_transactional(&block)
-        transactional? ? transaction(&block) : yield
+      def with_transaction_if_transactional(...)
+        transactional? ? transaction(...) : yield
       end
 
       # Instruments the transactional operation with producer id
       #
       # @param key [Symbol] transaction operation key
       # @param details [Hash] additional instrumentation details
-      # @param block [Proc] block to run inside the instrumentation or nothing if not given
-      def transactional_instrument(key, details = EMPTY_HASH, &block)
-        @monitor.instrument("transaction.#{key}", details.merge(producer_id: id), &block)
+      def transactional_instrument(key, details = EMPTY_HASH, ...)
+        @monitor.instrument("transaction.#{key}", details.merge(producer_id: id), ...)
       end
 
       # Error handling for transactional operations is a bit special. There are three types of
