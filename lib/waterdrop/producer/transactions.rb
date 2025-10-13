@@ -63,8 +63,6 @@ module WaterDrop
         @transaction_mutex.synchronize do
           ensure_active!
 
-          @reloaded = false
-
           transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
               transactional_instrument(:started) { client.begin_transaction }
@@ -311,7 +309,6 @@ module WaterDrop
           # Clear cached state that depends on config
           # We always clear @transactional as it might have been modified via the event
           @transactional = nil
-          @reloaded = true
 
           @monitor.instrument(
             'producer.reloaded',
