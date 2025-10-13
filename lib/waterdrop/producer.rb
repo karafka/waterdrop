@@ -559,5 +559,15 @@ module WaterDrop
     ensure
       @operations_in_progress.decrement
     end
+
+    # Reloads the client
+    # @note This should be used only within proper mutexes internally
+    def reload!
+      @client.flush(current_variant.max_wait_timeout)
+      purge
+      @client.close
+      @client = nil
+      @status.configured!
+    end
   end
 end

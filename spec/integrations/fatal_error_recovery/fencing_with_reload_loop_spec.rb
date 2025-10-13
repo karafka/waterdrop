@@ -66,9 +66,13 @@ begin
     producer2.produce_sync(topic: topic_name, payload: 'message2')
   end
 
-  # This will trigger reload loop: fenced -> reload -> fenced -> reload...
   producer1.transaction do
     producer1.produce_sync(topic: topic_name, payload: 'message3')
+  end
+
+  # This will trigger reload loop: fenced -> reload -> fenced -> reload...
+  producer2.transaction do
+    producer2.produce_sync(topic: topic_name, payload: 'message2')
   end
 rescue Rdkafka::RdkafkaError => e
   exit(1) unless e.code == :fenced

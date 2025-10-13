@@ -77,10 +77,7 @@ module WaterDrop
             producer_id: id,
             attempt: attempt
           ) do
-            @client.flush(current_variant.max_wait_timeout)
-            purge
-            @client.close
-            @client = Builder.new.call(self, @config)
+            reload!
           end
         end
       end
