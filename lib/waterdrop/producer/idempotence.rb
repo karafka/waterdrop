@@ -50,12 +50,28 @@ module WaterDrop
       # old client, and create a new client instance to continue operations.
       #
       # @param attempt [Integer] the current reload attempt number
+      # @param error [Rdkafka::RdkafkaError] the error that triggered the reload
       #
       # @note This is only called for idempotent, non-transactional producers when
       #   `reload_on_idempotent_fatal_error` is enabled
       # @note After reload, the producer will automatically retry the failed operation
-      def idempotent_reload_client_on_fatal_error(attempt)
+      def idempotent_reload_client_on_fatal_error(attempt, error)
         @operating_mutex.synchronize do
+          # Emit producer.reload event before reload
+          # Users can subscribe to this event and modify event[:caller].config.kafka to change
+          # producer config
+          @monitor.instrument(
+            'producer.reload',
+            producer_id: id,
+            error: error,
+            attempt: attempt,
+            caller: self
+          )
+
+          # Clear cached state that depends on config
+          # We always clear @idempotent as it might have been modified via the event
+          @idempotent = nil
+
           @monitor.instrument(
             'producer.reloaded',
             producer_id: id,

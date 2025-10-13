@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Enhancement] Make `fenced` error skip-reload behavior configurable via new `non_reloadable_errors` setting (defaults to `[:fenced]` for backward compatibility).
+- [Enhancement] Add `producer.reload` event allowing config modification before reload to escape fencing loops (#706).
 
 ## 2.8.12 (2025-10-10)
 - [Enhancement] Introduce `reload_on_idempotent_fatal_error` to automatically reload librdkafka producer after fatal errors on idempotent (non-transactional) producers.
