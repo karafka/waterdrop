@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.8.13 (Unreleased)
 - [Enhancement] Make `fenced` error skip-reload behavior configurable via new `non_reloadable_errors` setting (defaults to `[:fenced]` for backward compatibility).
 - [Enhancement] Add `producer.reload` event allowing config modification before reload to escape fencing loops (#706).
 
