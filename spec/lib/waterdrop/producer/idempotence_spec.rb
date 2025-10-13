@@ -70,7 +70,10 @@ RSpec.describe_current do
         producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
       end
 
-      it 'expect to instrument producer.reloaded event during reload' do
+      it 'expect to instrument producer.reload and producer.reloaded events during reload' do
+        reload_events = []
+        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+
         call_count = 0
 
         # Stub the initial client's produce method
@@ -109,6 +112,14 @@ RSpec.describe_current do
         # This should trigger one reload and succeed on retry
         producer.produce_sync(message)
 
+        # Verify producer.reload event was emitted
+        expect(reload_events.size).to eq(1)
+        expect(reload_events.first[:producer_id]).to eq(producer.id)
+        expect(reload_events.first[:error]).to eq(fatal_error)
+        expect(reload_events.first[:attempt]).to eq(1)
+        expect(reload_events.first[:caller]).to eq(producer)
+
+        # Verify producer.reloaded event was emitted
         expect(reloaded_events.size).to eq(1)
         expect(reloaded_events.first[:producer_id]).to eq(producer.id)
         expect(reloaded_events.first[:attempt]).to eq(1)
@@ -209,6 +220,71 @@ RSpec.describe_current do
         end
 
         expect(reloaded_events).to be_empty
+      end
+    end
+
+    context 'when config modification is done via producer.reload event' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      let(:fatal_error) { Rdkafka::RdkafkaError.new(-150, fatal: true) }
+      let(:reload_events) { [] }
+
+      before do
+        # Subscribe to producer.reload and modify config directly
+        producer.monitor.subscribe('producer.reload') do |event|
+          # User modifies kafka config via event[:caller].config
+          event[:caller].config.kafka[:'enable.idempotence'] = false
+        end
+
+        producer.monitor.subscribe('producer.reloaded') { |event| reload_events << event }
+      end
+
+      it 'expect to apply config.kafka changes from the event' do
+        call_count = 0
+
+        # Stub the initial client's produce method
+        allow(producer.client).to receive(:produce) do
+          call_count += 1
+          raise fatal_error if call_count == 1
+
+          # Return a successful delivery handle
+          instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+        end
+
+        # Create a mock builder instance
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+
+        # Stub Builder.new to return our mock builder
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+
+        # Stub the builder's call method to return a mock client
+        allow(mock_builder).to receive(:call) do |_prod, config|
+          # Verify config was updated
+          expect(config.kafka[:'enable.idempotence']).to eq(false)
+
+          mock_client = instance_double(Rdkafka::Producer)
+          allow(mock_client).to receive(:produce) do
+            call_count += 1
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+
+          mock_client
+        end
+
+        # This should trigger reload with config change
+        producer.produce_sync(message)
+
+        # Verify reload happened
+        expect(reload_events.size).to eq(1)
+
+        # Verify cached state was cleared
+        expect(producer.instance_variable_get(:@idempotent)).to be_nil
       end
     end
 

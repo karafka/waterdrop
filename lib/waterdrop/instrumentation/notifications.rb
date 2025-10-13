@@ -10,6 +10,7 @@ module WaterDrop
         producer.connected
         producer.closing
         producer.closed
+        producer.reload
         producer.reloaded
         producer.disconnecting
         producer.disconnected

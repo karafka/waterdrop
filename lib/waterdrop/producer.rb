@@ -502,7 +502,7 @@ module WaterDrop
         )
 
         # Attempt to reload the producer
-        idempotent_reload_client_on_fatal_error(@idempotent_fatal_error_attempts)
+        idempotent_reload_client_on_fatal_error(@idempotent_fatal_error_attempts, e)
 
         # Wait before retrying to avoid rapid reload loops
         sleep(@config.wait_backoff_on_idempotent_fatal_error / 1_000.0)
@@ -558,6 +558,16 @@ module WaterDrop
       retry
     ensure
       @operations_in_progress.decrement
+    end
+
+    # Reloads the client
+    # @note This should be used only within proper mutexes internally
+    def reload!
+      @client.flush(current_variant.max_wait_timeout)
+      purge
+      @client.close
+      @client = nil
+      @status.configured!
     end
   end
 end

@@ -285,20 +285,37 @@ module WaterDrop
 
         # Check if we've exceeded max reload attempts
         return unless transactional_retryable?
+        # We bubble up transactional errors, so there are cases where when fencing is not
+        # considered a non-reloadable, two layers of error handling would attempt to reload the
+        # client causing double reload. This halts reload if we're in a configured state as it
+        # means, we've already reloaded and we are not even yet connected
+        return if @status.configured?
 
         # Increment attempts before reload
         @transaction_fatal_error_attempts += 1
 
         @operating_mutex.synchronize do
+          # Emit producer.reload event before reload
+          # Users can subscribe to this event and modify event[:caller].config.kafka to change
+          # producer config. This is useful for escaping fencing loops by changing transactional.id
+          @monitor.instrument(
+            'producer.reload',
+            producer_id: id,
+            error: rd_error,
+            attempt: @transaction_fatal_error_attempts,
+            caller: self
+          )
+
+          # Clear cached state that depends on config
+          # We always clear @transactional as it might have been modified via the event
+          @transactional = nil
+
           @monitor.instrument(
             'producer.reloaded',
             producer_id: id,
             attempt: @transaction_fatal_error_attempts
           ) do
-            @client.flush(current_variant.max_wait_timeout)
-            purge
-            @client.close
-            @client = Builder.new.call(self, @config)
+            reload!
           end
         end
 
