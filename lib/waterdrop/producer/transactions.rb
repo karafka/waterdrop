@@ -281,7 +281,7 @@ module WaterDrop
 
         return unless rd_error.is_a?(Rdkafka::RdkafkaError)
         return unless config.reload_on_transaction_fatal_error
-        return if NON_RELOADABLE_FATAL_ERRORS.include?(rd_error.code)
+        return if config.non_reloadable_errors.include?(rd_error.code)
 
         # Check if we've exceeded max reload attempts
         return unless transactional_retryable?

@@ -188,15 +188,27 @@ RSpec.describe_current do
 
       # Fenced error - code -144 from librdkafka for producer fenced
       let(:fenced_error) { Rdkafka::RdkafkaError.new(-144, fatal: true) }
+      let(:reloaded_events) { [] }
 
       before do
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
         allow(producer.client).to receive(:produce).and_raise(fenced_error)
       end
 
       it 'expect not to reload and raise the error' do
-        # This should raise because fenced errors are non-reloadable
+        # This should raise because fenced errors are non-reloadable by default
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
+      end
+
+      it 'expect not to emit producer.reloaded event' do
+        begin
+          producer.produce_sync(message)
+        rescue WaterDrop::Errors::ProduceError
+          nil
+        end
+
+        expect(reloaded_events).to be_empty
       end
     end
 

@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Enhancement] Make `fenced` error skip-reload behavior configurable via new `non_reloadable_errors` setting (defaults to `[:fenced]` for backward compatibility).
+
 ## 2.8.12 (2025-10-10)
 - [Enhancement] Introduce `reload_on_idempotent_fatal_error` to automatically reload librdkafka producer after fatal errors on idempotent (non-transactional) producers.
 - [Enhancement] Add configurable backoff and retry limits for fatal error recovery to prevent infinite reload loops:

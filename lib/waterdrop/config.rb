@@ -95,6 +95,20 @@ module WaterDrop
     # option [Integer] How many times to attempt reloading on transactional fatal error before
     #   giving up. This prevents infinite reload loops if the producer never recovers.
     setting :max_attempts_on_transaction_fatal_error, default: 10
+    # option [Array<Symbol>] List of fatal error codes that should NOT trigger producer reload.
+    #   These errors represent states that cannot be recovered by simply recreating the client.
+    #
+    #   WARNING: Modifying this setting can cause infinite reload loops if not properly understood.
+    #   The default includes :fenced errors because:
+    #   - Fencing occurs when another producer with the same transactional.id takes over
+    #   - This is an unrecoverable state - reloading won't help as the other producer is active
+    #   - Attempting to reload on fenced errors creates: produce -> fenced -> reload -> produce ->
+    #     fenced -> reload (infinite loop)
+    #
+    #   Only remove :fenced from this list if you have explicit logic to handle producer fencing
+    #   in your application (e.g., coordinated transactional.id assignment, manual intervention).
+    #   In most cases, you should keep the default value.
+    setting :non_reloadable_errors, default: %i[fenced]
     # option [Integer] Idle disconnect timeout in milliseconds. When set to 0, idle disconnection
     #   is disabled. When set to a positive value, WaterDrop will automatically disconnect
     #   producers that haven't sent any messages for the specified time period. This helps preserve

@@ -22,12 +22,6 @@ module WaterDrop
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
     ].freeze
 
-    # We should never reload producer on certain fatal errors as they may indicate state that
-    # cannot be recovered by simply recreating the client
-    NON_RELOADABLE_FATAL_ERRORS = %i[
-      fenced
-    ].freeze
-
     # Empty hash to save on memory allocations
     EMPTY_HASH = {}.freeze
 
@@ -35,7 +29,7 @@ module WaterDrop
     EMPTY_ARRAY = [].freeze
 
     private_constant(
-      :SUPPORTED_FLOW_ERRORS, :NON_RELOADABLE_FATAL_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
+      :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
     )
 
     def_delegators :config
