@@ -1,0 +1,79 @@
+PATH
+  remote: /home/mencio/Software/Karafka/waterdrop
+  specs:
+    waterdrop (2.8.12)
+      karafka-core (>= 2.4.9, < 3.0.0)
+      karafka-rdkafka (>= 0.20.0)
+      zeitwerk (~> 2.3)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ffi (1.17.2)
+    ffi (1.17.2-aarch64-linux-gnu)
+    ffi (1.17.2-aarch64-linux-musl)
+    ffi (1.17.2-arm-linux-gnu)
+    ffi (1.17.2-arm-linux-musl)
+    ffi (1.17.2-arm64-darwin)
+    ffi (1.17.2-x86-linux-gnu)
+    ffi (1.17.2-x86-linux-musl)
+    ffi (1.17.2-x86_64-darwin)
+    ffi (1.17.2-x86_64-linux-gnu)
+    ffi (1.17.2-x86_64-linux-musl)
+    json (2.15.1)
+    karafka-core (2.5.7)
+      karafka-rdkafka (>= 0.20.0)
+      logger (>= 1.6.0)
+    karafka-rdkafka (0.22.2)
+      ffi (~> 1.15)
+      json (> 2.0)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.22.2-aarch64-linux-gnu)
+      ffi (~> 1.15)
+      json (> 2.0)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.22.2-arm64-darwin)
+      ffi (~> 1.15)
+      json (> 2.0)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.22.2-x86_64-linux-gnu)
+      ffi (~> 1.15)
+      json (> 2.0)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    karafka-rdkafka (0.22.2-x86_64-linux-musl)
+      ffi (~> 1.15)
+      json (> 2.0)
+      logger
+      mini_portile2 (~> 2.6)
+      rake (> 12)
+    logger (1.7.0)
+    mini_portile2 (2.8.9)
+    rake (13.3.0)
+    zeitwerk (2.7.3)
+
+PLATFORMS
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  ruby
+  x86-linux-gnu
+  x86-linux-musl
+  x86_64-darwin
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+DEPENDENCIES
+  waterdrop!
+
+BUNDLED WITH
+   2.7.1

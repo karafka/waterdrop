@@ -30,6 +30,9 @@ module WaterDrop
       required(:max_attempts_on_idempotent_fatal_error) { |val| val.is_a?(Integer) && val >= 1 }
       required(:wait_backoff_on_transaction_fatal_error) { |val| val.is_a?(Numeric) && val >= 0 }
       required(:max_attempts_on_transaction_fatal_error) { |val| val.is_a?(Integer) && val >= 1 }
+      required(:non_reloadable_errors) do |val|
+        val.is_a?(Array) && val.all?(Symbol)
+      end
       required(:idle_disconnect_timeout) do |val|
         val.is_a?(Integer) && (val.zero? || val >= 30_000)
       end

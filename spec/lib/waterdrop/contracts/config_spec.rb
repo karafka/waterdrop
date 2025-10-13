@@ -27,6 +27,7 @@ RSpec.describe_current do
       reload_on_transaction_fatal_error: true,
       wait_backoff_on_transaction_fatal_error: 1_000,
       max_attempts_on_transaction_fatal_error: 10,
+      non_reloadable_errors: %i[fenced],
       oauth: {
         token_provider_listener: false
       },
@@ -401,6 +402,52 @@ RSpec.describe_current do
 
   context 'when idle_disconnect_timeout is above minimum' do
     before { config[:idle_disconnect_timeout] = 60_000 }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when non_reloadable_errors is missing' do
+    before { config.delete(:non_reloadable_errors) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
+  end
+
+  context 'when non_reloadable_errors is nil' do
+    before { config[:non_reloadable_errors] = nil }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
+  end
+
+  context 'when non_reloadable_errors is not an array' do
+    before { config[:non_reloadable_errors] = :fenced }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
+  end
+
+  context 'when non_reloadable_errors contains non-symbol values' do
+    before { config[:non_reloadable_errors] = [:fenced, 'string_value', 123] }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
+  end
+
+  context 'when non_reloadable_errors is an empty array' do
+    before { config[:non_reloadable_errors] = [] }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when non_reloadable_errors is an array of symbols' do
+    before { config[:non_reloadable_errors] = %i[fenced some_other_error] }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context 'when non_reloadable_errors is default value' do
+    before { config[:non_reloadable_errors] = %i[fenced] }
 
     it { expect(contract_result).to be_success }
   end

@@ -23,13 +23,13 @@ module WaterDrop
       #   - Producer is idempotent
       #   - Producer is not transactional
       #   - reload_on_idempotent_fatal_error config is enabled
-      #   - Error is not in the NON_RELOADABLE_FATAL_ERRORS list
+      #   - Error is not in the non_reloadable_errors config list
       def idempotent_reloadable?(error)
         return false unless error.fatal?
         return false unless idempotent?
         return false if transactional?
         return false unless config.reload_on_idempotent_fatal_error
-        return false if NON_RELOADABLE_FATAL_ERRORS.include?(error.code)
+        return false if config.non_reloadable_errors.include?(error.code)
 
         true
       end
