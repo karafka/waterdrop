@@ -24,7 +24,7 @@
 ## 2.8.11 (2025-09-27)
 - [Enhancement] Provide fast-track for middleware-less flows (20% faster) for single message, 5000x faster for batches.
 - [Enhancement] Optimize middlewares application by around 20%.
-- [Change] Remove Ruby `3.1` according to the EOL schedule.
+- **[EOL]** Remove Ruby `3.1` according to the EOL schedule.
 - [Fix] Connection pool timeout parameter now accepts milliseconds instead of seconds for consistency with other WaterDrop timeouts. The default timeout has been changed from `5` seconds to `5000` milliseconds (equivalent value).
 
 ## 2.8.10 (2025-09-25)
@@ -38,7 +38,7 @@
 ## 2.8.8 (2025-09-23)
 - [Feature] Add `WaterDrop::ConnectionPool` for efficient connection pooling using the proven `connection_pool` gem.
 - [Feature] Add `WaterDrop.instrumentation` class-level instrumentation for producer lifecycle events. This allows external libraries to subscribe to `producer.created` and `producer.configured` events without needing producer instance references, enabling middleware injection and configuration by libraries like Datadog tracing.
-- [Change] Remove Ruby `3.1` specs according to the EOL schedule.
+- **[EOL]** Remove Ruby `3.1` specs according to the EOL schedule.
 
 ## 2.8.7 (2025-09-02)
 - [Enhancement] Disable Nagle algorithm by default (improves latency / aligned with librdkafka)
