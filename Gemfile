@@ -5,7 +5,7 @@ source 'https://rubygems.org'
 gemspec
 
 # Relaxed from 2.7 because we support Ruby 3.1
-gem 'zeitwerk', '~> 2.6.18'
+gem 'zeitwerk', '~> 2.7.0'
 
 group :development do
   gem 'byebug'
