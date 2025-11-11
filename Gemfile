@@ -17,4 +17,5 @@ group :test do
   gem 'rspec'
   gem 'simplecov'
   gem 'warning'
+  gem 'yard-lint'
 end

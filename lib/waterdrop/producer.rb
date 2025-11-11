@@ -205,8 +205,13 @@ module WaterDrop
 
     # Builds the variant alteration and returns it.
     #
-    # @param args [Object] anything `Producer::Variant` initializer accepts
+    # @param args [Hash] variant configuration options
+    # @option args [Integer, nil] :max_wait_timeout alteration to max wait timeout or nil to use
+    #   default
+    # @option args [Hash] :topic_config extra topic configuration that can be altered
+    # @option args [Boolean] :default is this a default variant or an altered one
     # @return [WaterDrop::Producer::Variant] variant proxy to use with alterations
+    # @see https://karafka.io/docs/Librdkafka-Configuration/#topic-configuration-properties
     def with(**args)
       ensure_active!
 

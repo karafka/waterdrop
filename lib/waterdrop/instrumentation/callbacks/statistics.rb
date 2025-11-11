@@ -10,7 +10,7 @@ module WaterDrop
       #   previous statistics emit but from the beginning of the process. We decorate it with diff
       #   of all the numeric values against the data from the previous callback emit
       class Statistics
-        # @param producer_id [String] id of the current producer
+        # @param producer_id [String]
         # @param client_name [String] rdkafka client name
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
         def initialize(producer_id, client_name, monitor)

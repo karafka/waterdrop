@@ -5,7 +5,7 @@ module WaterDrop
     module Callbacks
       # Callback that kicks in when error occurs and is published in a background thread
       class Error
-        # @param producer_id [String] id of the current producer
+        # @param producer_id [String]
         # @param client_name [String] rdkafka client name
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
         def initialize(producer_id, client_name, monitor)
