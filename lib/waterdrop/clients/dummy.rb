@@ -49,6 +49,9 @@ module WaterDrop
       # @param topic [String, Symbol] topic where we want to dispatch message
       # @param partition [Integer] target partition
       # @param _args [Hash] remaining details that are ignored in the dummy mode
+      # @option _args [String] :payload message payload
+      # @option _args [String, nil] :key message key
+      # @option _args [Hash, nil] :headers message headers
       # @return [Handle] delivery handle
       def produce(topic:, partition: 0, **_args)
         Handle.new(topic.to_s, partition, @counters["#{topic}#{partition}"] += 1)

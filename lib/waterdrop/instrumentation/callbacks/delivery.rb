@@ -22,7 +22,7 @@ module WaterDrop
 
         private_constant :RD_KAFKA_RESP_PURGE_QUEUE, :RD_KAFKA_RESP_PURGE_INFLIGHT, :PURGE_ERRORS
 
-        # @param producer_id [String] id of the current producer
+        # @param producer_id [String]
         # @param transactional [Boolean] is this handle for a transactional or regular producer
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
         def initialize(producer_id, transactional, monitor)
