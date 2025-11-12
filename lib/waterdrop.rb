@@ -42,5 +42,7 @@ loader = Zeitwerk::Loader.for_gem
 loader.inflector.inflect('waterdrop' => 'WaterDrop')
 # Do not load vendors instrumentation components. Those need to be required manually if needed
 loader.ignore("#{__dir__}/waterdrop/instrumentation/vendors/**/*.rb")
+# Do not load testing components. Those need to be required manually in test environments
+loader.ignore("#{__dir__}/waterdrop/producer/testing.rb")
 loader.setup
 loader.eager_load

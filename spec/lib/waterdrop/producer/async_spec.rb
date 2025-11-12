@@ -312,7 +312,7 @@ RSpec.describe_current do
     end
 
     context 'when producing after fatal error is triggered' do
-      it 'detects fatal error state during produce_async' do
+      it 'detects fatal error state and fails on subsequent produce_async' do
         # First verify producer works
         handle = producer.produce_async(message)
         expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
@@ -327,7 +327,14 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # After fatal error injection, producer is in fatal state
+        # Now try to produce after fatal error - should fail
+        expect do
+          producer.produce_async(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Fatal error should still be present
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
       it 'can produce async successfully before fatal error injection' do
@@ -379,14 +386,14 @@ RSpec.describe_current do
     end
 
     let(:topic_name) { "it-#{SecureRandom.uuid}" }
-    let(:messages) { 3.times.map { build(:valid_message, topic: topic_name) } }
+    let(:messages) { Array.new(3) { build(:valid_message, topic: topic_name) } }
 
     before do
       producer.singleton_class.include(WaterDrop::Producer::Testing)
     end
 
     context 'when producing batch after fatal error is triggered' do
-      it 'detects fatal error state during produce_many_async' do
+      it 'detects fatal error state and fails on subsequent produce_many_async' do
         # First verify producer works with async batches
         handles = producer.produce_many_async(messages)
         expect(handles).to be_an(Array)
@@ -406,7 +413,14 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # After fatal error injection, producer is in fatal state
+        # Now try to produce batch after fatal error - should fail
+        expect do
+          producer.produce_many_async(messages)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Fatal error should still be present
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
       it 'can produce async batches successfully before fatal error injection' do
@@ -446,6 +460,71 @@ RSpec.describe_current do
 
         # No fatal error yet
         expect(producer.fatal_error).to be_nil
+      end
+    end
+  end
+
+  describe 'fatal error testing without reload enabled' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: false
+      )
+    end
+
+    let(:topic_name) { "it-#{SecureRandom.uuid}" }
+    let(:message) { build(:valid_message, topic: topic_name) }
+    let(:messages) { Array.new(3) { build(:valid_message, topic: topic_name) } }
+    let(:reload_events) { [] }
+    let(:reloaded_events) { [] }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+      producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+      producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+    end
+
+    context 'when produce_async is called after fatal error without reload' do
+      it 'raises error consistently without attempting reload' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'No reload async test')
+
+        # Multiple produce_async attempts should all fail
+        3.times do
+          expect do
+            producer.produce_async(message)
+          end.to raise_error(WaterDrop::Errors::ProduceError)
+
+          # Fatal error should persist after each attempt
+          expect(producer.fatal_error).not_to be_nil
+          expect(producer.fatal_error[:error_code]).to eq(47)
+        end
+
+        # No reload events should have been emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+      end
+    end
+
+    context 'when produce_many_async is called after fatal error without reload' do
+      it 'raises error consistently without attempting reload' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'No reload async batch test')
+
+        # Multiple produce_many_async attempts should all fail
+        3.times do
+          expect do
+            producer.produce_many_async(messages)
+          end.to raise_error(WaterDrop::Errors::ProduceError)
+
+          # Fatal error should persist after each attempt
+          expect(producer.fatal_error).not_to be_nil
+          expect(producer.fatal_error[:error_code]).to eq(47)
+        end
+
+        # No reload events should have been emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
       end
     end
   end

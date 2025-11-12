@@ -783,5 +783,88 @@ RSpec.describe_current do
         expect(producer.fatal_error[:error_code]).to eq(47)
       end
     end
+
+    context 'when calling produce methods after fatal state is reached' do
+      subject(:producer) do
+        build(
+          :idempotent_producer,
+          reload_on_idempotent_fatal_error: false
+        )
+      end
+
+      let(:messages) { Array.new(3) { build(:valid_message, topic: topic_name) } }
+
+      before do
+        producer.singleton_class.include(WaterDrop::Producer::Testing)
+        # Trigger fatal error to put producer in fatal state
+        producer.trigger_test_fatal_error(47, 'Producer in fatal state')
+      end
+
+      it 'produce_sync raises error when producer is in fatal state' do
+        expect do
+          producer.produce_sync(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Verify fatal error persists
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
+      end
+
+      it 'produce_async raises error when producer is in fatal state' do
+        expect do
+          producer.produce_async(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Verify fatal error persists
+        expect(producer.fatal_error).not_to be_nil
+      end
+
+      it 'produce_many_sync raises error when producer is in fatal state' do
+        expect do
+          producer.produce_many_sync(messages)
+        end.to raise_error(WaterDrop::Errors::ProduceManyError)
+
+        # Verify fatal error persists
+        expect(producer.fatal_error).not_to be_nil
+      end
+
+      it 'produce_many_async raises error when producer is in fatal state' do
+        expect do
+          producer.produce_many_async(messages)
+        end.to raise_error(WaterDrop::Errors::ProduceManyError)
+
+        # Verify fatal error persists
+        expect(producer.fatal_error).not_to be_nil
+      end
+
+      it 'all produce methods fail consistently in fatal state' do
+        # Try each method multiple times to verify consistent behavior
+        3.times do
+          expect { producer.produce_sync(message) }.to raise_error(WaterDrop::Errors::ProduceError)
+          expect { producer.produce_async(message) }.to raise_error(WaterDrop::Errors::ProduceError)
+          expect { producer.produce_many_sync(messages) }.to raise_error(WaterDrop::Errors::ProduceManyError)
+          expect { producer.produce_many_async(messages) }.to raise_error(WaterDrop::Errors::ProduceManyError)
+        end
+
+        # Fatal error should still be present after all attempts
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
+      end
+
+      it 'documents that producer remains unusable after fatal error without reload' do
+        # First attempt fails
+        expect { producer.produce_sync(message) }.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Producer is still in fatal state
+        expect(producer.fatal_error).not_to be_nil
+
+        # Subsequent attempts also fail
+        expect { producer.produce_sync(message) }.to raise_error(WaterDrop::Errors::ProduceError)
+        expect { producer.produce_async(message) }.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Fatal error persists - producer needs reload or recreation
+        expect(producer.fatal_error[:error_code]).to eq(47)
+      end
+    end
   end
 end

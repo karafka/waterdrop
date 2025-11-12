@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# Require the rdkafka testing module
-require 'rdkafka/producer/testing'
-
 module WaterDrop
   class Producer
     # Testing utilities for WaterDrop Producer instances.
@@ -13,14 +10,19 @@ module WaterDrop
     #
     # @note This module should only be used in test environments.
     # @note Requires karafka-rdkafka >= 0.23.1 which includes Rdkafka::Testing support.
+    # @note This module is not auto-loaded by Zeitwerk and must be manually required.
     #
     # @example Including for a single producer instance
+    #   require 'waterdrop/producer/testing'
+    #
     #   producer = WaterDrop::Producer.new
     #   producer.singleton_class.include(WaterDrop::Producer::Testing)
     #   producer.trigger_test_fatal_error(47, "Test producer fencing")
     #
     # @example Including for all producers in a test suite
     #   # In spec_helper.rb or test setup:
+    #   require 'waterdrop/producer/testing'
+    #
     #   WaterDrop::Producer.include(WaterDrop::Producer::Testing)
     #
     # @example Testing idempotent producer reload on fatal error
@@ -96,12 +98,15 @@ module WaterDrop
       private
 
       # Ensures the underlying rdkafka client has testing support available.
-      # Automatically includes Rdkafka::Testing if not already present.
+      # Automatically requires and includes Rdkafka::Testing if not already present.
       #
       # @return [void]
       # @api private
       def ensure_testing_support!
         return if client.respond_to?(:trigger_test_fatal_error)
+
+        # Require the rdkafka testing module if not already loaded
+        require 'rdkafka/producer/testing' unless defined?(::Rdkafka::Testing)
 
         client.singleton_class.include(::Rdkafka::Testing)
       end
