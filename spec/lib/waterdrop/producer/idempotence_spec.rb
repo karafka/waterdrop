@@ -341,5 +341,447 @@ RSpec.describe_current do
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
     end
+
+    context 'when using Testing helper to trigger real fatal errors' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      before do
+        # Include the Testing module to enable fatal error injection
+        producer.singleton_class.include(WaterDrop::Producer::Testing)
+      end
+
+      it 'expect to trigger a fatal error and have it queryable' do
+        # Trigger a real fatal error using the testing helper
+        result = producer.trigger_test_fatal_error(47, 'Test producer epoch error')
+
+        # Verify the trigger was successful
+        expect(result).to eq(0)
+
+        # Verify the fatal error is now present and queryable
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+        expect(fatal_error[:error_string]).to include('test_fatal_error')
+      end
+
+      it 'expect to detect fatal error state after triggering' do
+        # Trigger a real fatal error
+        producer.trigger_test_fatal_error(47, 'Injected test error')
+
+        # Verify fatal error is present and has correct error code
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+      end
+    end
+
+    context 'with real fatal error injection and reload testing' do
+      subject(:producer) do
+        build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
+      end
+
+      before do
+        producer.singleton_class.include(WaterDrop::Producer::Testing)
+      end
+
+      it 'can inject fatal errors with various error codes' do
+        # Error code 47 (INVALID_PRODUCER_EPOCH)
+        result = producer.trigger_test_fatal_error(47, 'Simulated producer fencing')
+        expect(result).to eq(0)
+
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+        expect(fatal_error[:error_string]).to be_a(String)
+        expect(fatal_error[:error_string]).not_to be_empty
+      end
+
+      it 'persists fatal error state across multiple queries' do
+        producer.trigger_test_fatal_error(47, 'Test error persistence')
+
+        # Query multiple times
+        first_query = producer.fatal_error
+        second_query = producer.fatal_error
+        third_query = producer.fatal_error
+
+        expect(first_query).to eq(second_query)
+        expect(second_query).to eq(third_query)
+        expect(first_query[:error_code]).to eq(47)
+      end
+
+      it 'maintains fatal error state after triggering' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'Test fatal error state')
+
+        # Verify error is present
+        expect(producer.fatal_error).not_to be_nil
+
+        # Error state should persist
+        sleep 0.1
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
+      end
+
+      it 'detects real fatal errors correctly' do
+        # First, produce a message successfully to ensure producer is working
+        report = producer.produce_sync(message)
+        expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+        expect(report.error).to be_nil
+
+        # Now inject a real fatal error
+        producer.trigger_test_fatal_error(47, 'Test reload trigger')
+
+        # Verify the fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+      end
+
+      it 'can create new producer after fatal error for recovery' do
+        # Trigger fatal error on first producer
+        producer.trigger_test_fatal_error(47, 'First producer fatal')
+        expect(producer.fatal_error).not_to be_nil
+
+        # Close it
+        producer.close
+
+        # Create new producer - should work fine
+        new_producer = build(:idempotent_producer)
+        new_producer.singleton_class.include(WaterDrop::Producer::Testing)
+
+        # Verify new producer has no fatal error
+        expect(new_producer.fatal_error).to be_nil
+
+        # Should be able to produce
+        expect do
+          new_producer.produce_sync(message)
+        end.not_to raise_error
+
+        new_producer.close
+      end
+    end
+
+    context 'with real fatal error injection and reload event instrumentation' do
+      subject(:producer) do
+        build(
+          :idempotent_producer,
+          reload_on_idempotent_fatal_error: true,
+          max_attempts_on_idempotent_fatal_error: 3,
+          wait_backoff_on_idempotent_fatal_error: 100
+        )
+      end
+
+      let(:reload_events) { [] }
+      let(:reloaded_events) { [] }
+      let(:error_events) { [] }
+
+      before do
+        producer.singleton_class.include(WaterDrop::Producer::Testing)
+        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+        producer.monitor.subscribe('error.occurred') { |event| error_events << event }
+      end
+
+      it 'emits producer.reload and producer.reloaded events when fatal error triggers reload' do
+        # Track the initial client to detect when reload happens
+        initial_client = producer.client
+
+        # Stub the initial client to raise fatal error once, then succeed
+        call_count = 0
+        allow(initial_client).to receive(:produce) do
+          call_count += 1
+          if call_count == 1
+            # Trigger real fatal error before raising
+            producer.trigger_test_fatal_error(47, 'Test reload with real fatal error')
+            # Raise the error to trigger reload path
+            raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+          else
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+        end
+
+        # Mock the builder to return a new client after reload
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+        allow(mock_builder).to receive(:call) do
+          mock_client = instance_double(Rdkafka::Producer)
+          allow(mock_client).to receive(:produce) do
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+          mock_client
+        end
+
+        # This should trigger reload
+        producer.produce_sync(message)
+
+        # Verify producer.reload event was emitted
+        expect(reload_events.size).to eq(1)
+        expect(reload_events.first[:producer_id]).to eq(producer.id)
+        expect(reload_events.first[:error]).to be_a(Rdkafka::RdkafkaError)
+        expect(reload_events.first[:error].fatal?).to be(true)
+        expect(reload_events.first[:attempt]).to eq(1)
+        expect(reload_events.first[:caller]).to eq(producer)
+
+        # Verify producer.reloaded event was emitted
+        expect(reloaded_events.size).to eq(1)
+        expect(reloaded_events.first[:producer_id]).to eq(producer.id)
+        expect(reloaded_events.first[:attempt]).to eq(1)
+      end
+
+      it 'emits multiple reload events for multiple fatal error attempts' do
+        initial_client = producer.client
+
+        # Trigger fatal error upfront so it's set in librdkafka state
+        producer.trigger_test_fatal_error(47, 'Pre-set fatal error')
+
+        # Stub to fail twice, then succeed
+        call_count = 0
+        allow(initial_client).to receive(:produce) do
+          call_count += 1
+          if call_count <= 2
+            raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+          else
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+        end
+
+        # Mock the builder for reload
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+        allow(mock_builder).to receive(:call) do
+          mock_client = instance_double(Rdkafka::Producer)
+          allow(mock_client).to receive(:produce) do
+            call_count += 1
+            if call_count <= 2
+              raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+            else
+              instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+            end
+          end
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+          mock_client
+        end
+
+        # This should trigger two reloads
+        producer.produce_sync(message)
+
+        # Verify multiple reload events
+        expect(reload_events.size).to eq(2)
+        expect(reload_events[0][:attempt]).to eq(1)
+        expect(reload_events[1][:attempt]).to eq(2)
+
+        # Verify multiple reloaded events
+        expect(reloaded_events.size).to eq(2)
+        expect(reloaded_events[0][:attempt]).to eq(1)
+        expect(reloaded_events[1][:attempt]).to eq(2)
+      end
+
+      it 'includes error.occurred event with fatal error details' do
+        initial_client = producer.client
+
+        # Stub to raise fatal error once
+        call_count = 0
+        allow(initial_client).to receive(:produce) do
+          call_count += 1
+          if call_count == 1
+            producer.trigger_test_fatal_error(47, 'Test error.occurred event')
+            raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+          else
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+        end
+
+        # Mock the builder
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+        allow(mock_builder).to receive(:call) do
+          mock_client = instance_double(Rdkafka::Producer)
+          allow(mock_client).to receive(:produce) do
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+          mock_client
+        end
+
+        # This should trigger reload
+        producer.produce_sync(message)
+
+        # Verify error.occurred event was emitted
+        expect(error_events.size).to be >= 1
+        fatal_error_events = error_events.select { |e| e[:type] == 'librdkafka.idempotent_fatal_error' }
+        expect(fatal_error_events).not_to be_empty
+        expect(fatal_error_events.first[:producer_id]).to eq(producer.id)
+        expect(fatal_error_events.first[:error]).to be_a(Rdkafka::RdkafkaError)
+        expect(fatal_error_events.first[:attempt]).to eq(1)
+      end
+
+      it 'allows config modification in producer.reload event with real fatal errors' do
+        config_modified = false
+
+        # Subscribe to reload event and modify config
+        producer.monitor.subscribe('producer.reload') do |event|
+          event[:caller].config.kafka[:'enable.idempotence'] = false
+          config_modified = true
+        end
+
+        initial_client = producer.client
+
+        # Stub to raise fatal error once
+        call_count = 0
+        allow(initial_client).to receive(:produce) do
+          call_count += 1
+          if call_count == 1
+            producer.trigger_test_fatal_error(47, 'Test config modification')
+            raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+          else
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+        end
+
+        # Mock the builder to verify config was modified
+        mock_builder = instance_double(WaterDrop::Producer::Builder)
+        allow(WaterDrop::Producer::Builder).to receive(:new).and_return(mock_builder)
+        allow(mock_builder).to receive(:call) do |_prod, config|
+          # Verify config was updated in the reload event
+          expect(config.kafka[:'enable.idempotence']).to eq(false)
+
+          mock_client = instance_double(Rdkafka::Producer)
+          allow(mock_client).to receive(:produce) do
+            instance_double(Rdkafka::Producer::DeliveryHandle, wait: nil)
+          end
+          allow(mock_client).to receive(:flush)
+          allow(mock_client).to receive(:close)
+          allow(mock_client).to receive(:closed?).and_return(false)
+          allow(mock_client).to receive(:purge)
+          mock_client
+        end
+
+        # This should trigger reload with config modification
+        producer.produce_sync(message)
+
+        # Verify config was modified
+        expect(config_modified).to be(true)
+        expect(reload_events.size).to eq(1)
+        expect(reloaded_events.size).to eq(1)
+      end
+
+      it 'does not emit reload events when fatal error is non-reloadable' do
+        # Set fenced error as non-reloadable (default behavior)
+        expect(producer.config.non_reloadable_errors).to include(:fenced)
+
+        initial_client = producer.client
+
+        # Stub to raise fenced error
+        allow(initial_client).to receive(:produce) do
+          producer.trigger_test_fatal_error(47, 'Non-reloadable fenced error')
+          # Fenced error - code -144 from librdkafka
+          raise Rdkafka::RdkafkaError.new(-144, fatal: true)
+        end
+
+        # Should raise without reloading
+        expect do
+          producer.produce_sync(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Verify no reload events were emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+      end
+    end
+
+    context 'when reload is disabled for idempotent producer' do
+      subject(:producer) do
+        build(
+          :idempotent_producer,
+          reload_on_idempotent_fatal_error: false,
+          max_attempts_on_idempotent_fatal_error: 3,
+          wait_backoff_on_idempotent_fatal_error: 100
+        )
+      end
+
+      let(:reload_events) { [] }
+      let(:reloaded_events) { [] }
+
+      before do
+        producer.singleton_class.include(WaterDrop::Producer::Testing)
+        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+      end
+
+      it 'keeps throwing errors without reload when reload is disabled' do
+        initial_client = producer.client
+
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error with reload disabled')
+
+        # Stub to always raise fatal error
+        allow(initial_client).to receive(:produce) do
+          raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+        end
+
+        # First attempt should raise
+        expect do
+          producer.produce_sync(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Second attempt should also raise (no reload)
+        expect do
+          producer.produce_sync(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Third attempt should also raise (no reload)
+        expect do
+          producer.produce_sync(message)
+        end.to raise_error(WaterDrop::Errors::ProduceError)
+
+        # Verify no reload events were emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+      end
+
+      it 'does not attempt reload even with multiple produce attempts' do
+        initial_client = producer.client
+        produce_attempts = 0
+
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error without reload')
+
+        # Stub to count produce attempts
+        allow(initial_client).to receive(:produce) do
+          produce_attempts += 1
+          raise Rdkafka::RdkafkaError.new(-150, fatal: true)
+        end
+
+        # Multiple produce attempts
+        5.times do
+          begin
+            producer.produce_sync(message)
+          rescue WaterDrop::Errors::ProduceError
+            # Expected to fail
+          end
+        end
+
+        # All attempts should have hit the same client (no reload)
+        expect(produce_attempts).to eq(5)
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+
+        # Fatal error should still be present
+        expect(producer.fatal_error).not_to be_nil
+        expect(producer.fatal_error[:error_code]).to eq(47)
+      end
+    end
   end
 end

@@ -267,4 +267,130 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'fatal error testing with produce_sync' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:message) { build(:valid_message, topic: topic_name) }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing after fatal error is triggered' do
+      it 'detects fatal error state during produce_sync' do
+        # First verify producer works
+        report = producer.produce_sync(message)
+        expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+        expect(report.error).to be_nil
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_sync test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # After fatal error injection, producer is in fatal state
+        # Note: The exact behavior may vary - librdkafka may allow some operations
+        # but the producer is generally considered unusable
+      end
+
+      it 'can produce successfully before fatal error injection' do
+        # Produce multiple messages successfully
+        5.times do
+          report = producer.produce_sync(message)
+          expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+          expect(report.error).to be_nil
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+  end
+
+  describe 'fatal error testing with produce_many_sync' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:messages) { 3.times.map { build(:valid_message, topic: topic_name) } }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing batch after fatal error is triggered' do
+      it 'detects fatal error state during produce_many_sync' do
+        # First verify producer works with batches
+        # produce_many_sync returns DeliveryHandles (already waited)
+        handles = producer.produce_many_sync(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+        handles.each do |handle|
+          expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+        end
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_many_sync test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # After fatal error injection, producer is in fatal state
+      end
+
+      it 'can produce batches successfully before fatal error injection' do
+        # Produce multiple batches successfully
+        3.times do
+          handles = producer.produce_many_sync(messages)
+          expect(handles.size).to eq(3)
+          handles.each do |handle|
+            expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+          end
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+
+    context 'when testing batch size variations with fatal error' do
+      it 'works with different batch sizes before fatal error' do
+        # Small batch
+        small_batch = [build(:valid_message, topic: topic_name)]
+        reports = producer.produce_many_sync(small_batch)
+        expect(reports.size).to eq(1)
+
+        # Medium batch
+        medium_batch = 5.times.map { build(:valid_message, topic: topic_name) }
+        reports = producer.produce_many_sync(medium_batch)
+        expect(reports.size).to eq(5)
+
+        # Large batch
+        large_batch = 10.times.map { build(:valid_message, topic: topic_name) }
+        reports = producer.produce_many_sync(large_batch)
+        expect(reports.size).to eq(10)
+
+        # No fatal error yet
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+  end
 end

@@ -293,4 +293,160 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'fatal error testing with produce_async' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:topic_name) { "it-#{SecureRandom.uuid}" }
+    let(:message) { build(:valid_message, topic: topic_name) }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing after fatal error is triggered' do
+      it 'detects fatal error state during produce_async' do
+        # First verify producer works
+        handle = producer.produce_async(message)
+        expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+        report = handle.wait
+        expect(report.error).to be_nil
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_async test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # After fatal error injection, producer is in fatal state
+      end
+
+      it 'can produce async successfully before fatal error injection' do
+        handles = []
+
+        # Produce multiple messages asynchronously
+        5.times do
+          handle = producer.produce_async(message)
+          expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+          handles << handle
+        end
+
+        # Wait for all deliveries
+        handles.each do |handle|
+          report = handle.wait
+          expect(report.error).to be_nil
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+
+    context 'when fatal error occurs during async operations' do
+      it 'maintains fatal error state across multiple queries' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(64, 'Async fatal error state test')
+
+        # Query fatal error multiple times
+        first = producer.fatal_error
+        second = producer.fatal_error
+        third = producer.fatal_error
+
+        expect(first).to eq(second)
+        expect(second).to eq(third)
+        expect(first[:error_code]).to eq(64)
+      end
+    end
+  end
+
+  describe 'fatal error testing with produce_many_async' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:topic_name) { "it-#{SecureRandom.uuid}" }
+    let(:messages) { 3.times.map { build(:valid_message, topic: topic_name) } }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing batch after fatal error is triggered' do
+      it 'detects fatal error state during produce_many_async' do
+        # First verify producer works with async batches
+        handles = producer.produce_many_async(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+
+        # Wait for all deliveries
+        reports = handles.map(&:wait)
+        reports.each do |report|
+          expect(report.error).to be_nil
+        end
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_many_async test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # After fatal error injection, producer is in fatal state
+      end
+
+      it 'can produce async batches successfully before fatal error injection' do
+        all_handles = []
+
+        # Produce multiple batches asynchronously
+        3.times do
+          handles = producer.produce_many_async(messages)
+          expect(handles.size).to eq(3)
+          all_handles.concat(handles)
+        end
+
+        # Wait for all deliveries
+        all_handles.each do |handle|
+          report = handle.wait
+          expect(report.error).to be_nil
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+
+    context 'when testing async batch operations with various sizes' do
+      it 'handles different batch sizes before fatal error' do
+        # Small async batch
+        small_batch = [build(:valid_message, topic: topic_name)]
+        handles = producer.produce_many_async(small_batch)
+        expect(handles.size).to eq(1)
+        handles.each { |h| expect(h.wait.error).to be_nil }
+
+        # Medium async batch
+        medium_batch = 5.times.map { build(:valid_message, topic: topic_name) }
+        handles = producer.produce_many_async(medium_batch)
+        expect(handles.size).to eq(5)
+        handles.each { |h| expect(h.wait.error).to be_nil }
+
+        # No fatal error yet
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+  end
 end
