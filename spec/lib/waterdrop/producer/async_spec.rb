@@ -328,9 +328,16 @@ RSpec.describe_current do
         expect(fatal_error[:error_code]).to eq(47)
 
         # Now try to produce after fatal error - should fail
-        expect do
+        error = nil
+        begin
           producer.produce_async(message)
-        end.to raise_error(WaterDrop::Errors::ProduceError)
+        rescue WaterDrop::Errors::ProduceError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Fatal error should still be present
         expect(producer.fatal_error).not_to be_nil
@@ -414,9 +421,16 @@ RSpec.describe_current do
         expect(fatal_error[:error_code]).to eq(47)
 
         # Now try to produce batch after fatal error - should fail
-        expect do
+        error = nil
+        begin
           producer.produce_many_async(messages)
-        end.to raise_error(WaterDrop::Errors::ProduceError)
+        rescue WaterDrop::Errors::ProduceError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Fatal error should still be present
         expect(producer.fatal_error).not_to be_nil
@@ -489,11 +503,13 @@ RSpec.describe_current do
         # Trigger fatal error
         producer.trigger_test_fatal_error(47, 'No reload async test')
 
-        # Multiple produce_async attempts should all fail
+        # Multiple produce_async attempts should all fail with fatal error
         3.times do
-          expect do
-            producer.produce_async(message)
-          end.to raise_error(WaterDrop::Errors::ProduceError)
+          expect { producer.produce_async(message) }
+            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
 
           # Fatal error should persist after each attempt
           expect(producer.fatal_error).not_to be_nil
@@ -511,11 +527,13 @@ RSpec.describe_current do
         # Trigger fatal error
         producer.trigger_test_fatal_error(47, 'No reload async batch test')
 
-        # Multiple produce_many_async attempts should all fail
+        # Multiple produce_many_async attempts should all fail with fatal error
         3.times do
-          expect do
-            producer.produce_many_async(messages)
-          end.to raise_error(WaterDrop::Errors::ProduceError)
+          expect { producer.produce_many_async(messages) }
+            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
 
           # Fatal error should persist after each attempt
           expect(producer.fatal_error).not_to be_nil

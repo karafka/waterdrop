@@ -801,9 +801,16 @@ RSpec.describe_current do
       end
 
       it 'produce_sync raises error when producer is in fatal state' do
-        expect do
+        error = nil
+        begin
           producer.produce_sync(message)
-        end.to raise_error(WaterDrop::Errors::ProduceError)
+        rescue WaterDrop::Errors::ProduceError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Verify fatal error persists
         expect(producer.fatal_error).not_to be_nil
@@ -811,27 +818,48 @@ RSpec.describe_current do
       end
 
       it 'produce_async raises error when producer is in fatal state' do
-        expect do
+        error = nil
+        begin
           producer.produce_async(message)
-        end.to raise_error(WaterDrop::Errors::ProduceError)
+        rescue WaterDrop::Errors::ProduceError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Verify fatal error persists
         expect(producer.fatal_error).not_to be_nil
       end
 
       it 'produce_many_sync raises error when producer is in fatal state' do
-        expect do
+        error = nil
+        begin
           producer.produce_many_sync(messages)
-        end.to raise_error(WaterDrop::Errors::ProduceManyError)
+        rescue WaterDrop::Errors::ProduceManyError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Verify fatal error persists
         expect(producer.fatal_error).not_to be_nil
       end
 
       it 'produce_many_async raises error when producer is in fatal state' do
-        expect do
+        error = nil
+        begin
           producer.produce_many_async(messages)
-        end.to raise_error(WaterDrop::Errors::ProduceManyError)
+        rescue WaterDrop::Errors::ProduceManyError => e
+          error = e
+        end
+
+        expect(error).not_to be_nil
+        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
+        expect(error.cause.fatal?).to be(true)
 
         # Verify fatal error persists
         expect(producer.fatal_error).not_to be_nil
@@ -840,10 +868,26 @@ RSpec.describe_current do
       it 'all produce methods fail consistently in fatal state' do
         # Try each method multiple times to verify consistent behavior
         3.times do
-          expect { producer.produce_sync(message) }.to raise_error(WaterDrop::Errors::ProduceError)
-          expect { producer.produce_async(message) }.to raise_error(WaterDrop::Errors::ProduceError)
-          expect { producer.produce_many_sync(messages) }.to raise_error(WaterDrop::Errors::ProduceManyError)
-          expect { producer.produce_many_async(messages) }.to raise_error(WaterDrop::Errors::ProduceManyError)
+          expect { producer.produce_sync(message) }
+            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
+          expect { producer.produce_async(message) }
+            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
+          expect { producer.produce_many_sync(messages) }
+            .to raise_error(WaterDrop::Errors::ProduceManyError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
+          expect { producer.produce_many_async(messages) }
+            .to raise_error(WaterDrop::Errors::ProduceManyError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
         end
 
         # Fatal error should still be present after all attempts
