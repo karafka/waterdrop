@@ -312,7 +312,7 @@ RSpec.describe_current do
     end
 
     context 'when producing after fatal error is triggered' do
-      it 'detects fatal error state and fails on subsequent produce_async' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_async' do
         # First verify producer works
         handle = producer.produce_async(message)
         expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
@@ -327,21 +327,11 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # Now try to produce after fatal error - should fail
-        error = nil
-        begin
-          producer.produce_async(message)
-        rescue WaterDrop::Errors::ProduceError => e
-          error = e
-        end
-
-        expect(error).not_to be_nil
-        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
-        expect(error.cause.fatal?).to be(true)
-
-        # Fatal error should still be present
-        expect(producer.fatal_error).not_to be_nil
-        expect(producer.fatal_error[:error_code]).to eq(47)
+        # Now try to produce after fatal error - should succeed after reload
+        handle = producer.produce_async(message)
+        expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+        report = handle.wait
+        expect(report.error).to be_nil
       end
 
       it 'can produce async successfully before fatal error injection' do
@@ -400,7 +390,7 @@ RSpec.describe_current do
     end
 
     context 'when producing batch after fatal error is triggered' do
-      it 'detects fatal error state and fails on subsequent produce_many_async' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_many_async' do
         # First verify producer works with async batches
         handles = producer.produce_many_async(messages)
         expect(handles).to be_an(Array)
@@ -420,21 +410,16 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # Now try to produce batch after fatal error - should fail
-        error = nil
-        begin
-          producer.produce_many_async(messages)
-        rescue WaterDrop::Errors::ProduceError => e
-          error = e
+        # Now try to produce batch after fatal error - should succeed after reload
+        handles = producer.produce_many_async(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+
+        # All deliveries should succeed
+        reports = handles.map(&:wait)
+        reports.each do |report|
+          expect(report.error).to be_nil
         end
-
-        expect(error).not_to be_nil
-        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
-        expect(error.cause.fatal?).to be(true)
-
-        # Fatal error should still be present
-        expect(producer.fatal_error).not_to be_nil
-        expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
       it 'can produce async batches successfully before fatal error injection' do
@@ -467,7 +452,7 @@ RSpec.describe_current do
         handles.each { |h| expect(h.wait.error).to be_nil }
 
         # Medium async batch
-        medium_batch = 5.times.map { build(:valid_message, topic: topic_name) }
+        medium_batch = Array.new(5) { build(:valid_message, topic: topic_name) }
         handles = producer.produce_many_async(medium_batch)
         expect(handles.size).to eq(5)
         handles.each { |h| expect(h.wait.error).to be_nil }

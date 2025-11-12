@@ -49,8 +49,9 @@ RSpec.describe_current do
           # We can't easily remove it, so just verify the method works
           expect { producer.trigger_test_fatal_error(47, 'test') }.not_to raise_error
         else
-          expect(producer.client).to receive(:singleton_class).and_call_original
+          allow(producer.client).to receive(:singleton_class).and_call_original
           producer.trigger_test_fatal_error(47, 'test')
+          expect(producer.client).to have_received(:singleton_class)
         end
       end
     end
@@ -131,9 +132,6 @@ RSpec.describe_current do
       # Verify fatal error is present before produce
       expect(producer.fatal_error).not_to be_nil
       expect(producer.fatal_error[:error_code]).to eq(47)
-
-      # Note: The behavior when producing after a fatal error depends on librdkafka internals
-      # We've verified that the testing helper correctly triggers and queries fatal errors
     end
   end
 

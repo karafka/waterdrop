@@ -285,7 +285,7 @@ RSpec.describe_current do
     end
 
     context 'when producing after fatal error is triggered' do
-      it 'detects fatal error state and fails on subsequent produce_sync' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_sync' do
         # First verify producer works
         report = producer.produce_sync(message)
         expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
@@ -299,21 +299,10 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # Now try to produce after fatal error - should fail
-        error = nil
-        begin
-          producer.produce_sync(message)
-        rescue WaterDrop::Errors::ProduceError => e
-          error = e
-        end
-
-        expect(error).not_to be_nil
-        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
-        expect(error.cause.fatal?).to be(true)
-
-        # Fatal error should still be present
-        expect(producer.fatal_error).not_to be_nil
-        expect(producer.fatal_error[:error_code]).to eq(47)
+        # Now try to produce after fatal error - should succeed after reload
+        report = producer.produce_sync(message)
+        expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+        expect(report.error).to be_nil
       end
 
       it 'can produce successfully before fatal error injection' do
@@ -328,21 +317,16 @@ RSpec.describe_current do
         expect(producer.fatal_error).to be_nil
       end
 
-      it 'multiple produce_sync calls fail after fatal error' do
+      it 'multiple produce_sync calls succeed after fatal error via reload' do
         # Trigger fatal error
         producer.trigger_test_fatal_error(47, 'Multiple calls test')
 
-        # Multiple attempts should all fail with fatal error in cause
+        # Multiple attempts should all succeed after reload
         3.times do
-          expect { producer.produce_sync(message) }
-            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
-              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
-              expect(e.cause.fatal?).to be(true)
-            }
+          report = producer.produce_sync(message)
+          expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+          expect(report.error).to be_nil
         end
-
-        # Fatal error persists
-        expect(producer.fatal_error[:error_code]).to eq(47)
       end
     end
   end
@@ -364,7 +348,7 @@ RSpec.describe_current do
     end
 
     context 'when producing batch after fatal error is triggered' do
-      it 'detects fatal error state and fails on subsequent produce_many_sync' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_many_sync' do
         # First verify producer works with batches
         # produce_many_sync returns DeliveryHandles (already waited)
         handles = producer.produce_many_sync(messages)
@@ -382,21 +366,11 @@ RSpec.describe_current do
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
 
-        # Now try to produce batch after fatal error - should fail
-        error = nil
-        begin
-          producer.produce_many_sync(messages)
-        rescue WaterDrop::Errors::ProduceManyError => e
-          error = e
-        end
-
-        expect(error).not_to be_nil
-        expect(error.cause).to be_a(Rdkafka::RdkafkaError)
-        expect(error.cause.fatal?).to be(true)
-
-        # Fatal error should still be present
-        expect(producer.fatal_error).not_to be_nil
-        expect(producer.fatal_error[:error_code]).to eq(47)
+        # Now try to produce batch after fatal error - should succeed after reload
+        handles = producer.produce_many_sync(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+        expect(handles).to all(be_a(Rdkafka::Producer::DeliveryHandle))
       end
 
       it 'can produce batches successfully before fatal error injection' do
@@ -404,9 +378,7 @@ RSpec.describe_current do
         3.times do
           handles = producer.produce_many_sync(messages)
           expect(handles.size).to eq(3)
-          handles.each do |handle|
-            expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
-          end
+          expect(handles).to all(be_a(Rdkafka::Producer::DeliveryHandle))
         end
 
         # Verify no fatal error before injection
@@ -422,12 +394,12 @@ RSpec.describe_current do
         expect(reports.size).to eq(1)
 
         # Medium batch
-        medium_batch = 5.times.map { build(:valid_message, topic: topic_name) }
+        medium_batch = Array.new(5) { build(:valid_message, topic: topic_name) }
         reports = producer.produce_many_sync(medium_batch)
         expect(reports.size).to eq(5)
 
         # Large batch
-        large_batch = 10.times.map { build(:valid_message, topic: topic_name) }
+        large_batch = Array.new(10) { build(:valid_message, topic: topic_name) }
         reports = producer.produce_many_sync(large_batch)
         expect(reports.size).to eq(10)
 
