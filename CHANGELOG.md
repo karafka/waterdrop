@@ -1,5 +1,12 @@
 # WaterDrop changelog
 
+## 2.8.14 (Unreleased)
+- [Fix] Fatal error replacement not working without exact error unwind from the fatal envelope
+- [Testing] Add `WaterDrop::Producer::Testing` module for injecting and querying librdkafka fatal errors in tests.
+- [Testing] Add `#trigger_test_fatal_error(error_code, reason)` method to simulate fatal errors without requiring actual broker-side conditions.
+- [Testing] Add `#fatal_error` method to query current fatal error state for validation in tests.
+- [Testing] Add comprehensive test coverage for fatal error injection, reload behavior, and event instrumentation with real librdkafka errors.
+
 ## 2.8.13 (2025-10-31)
 - [Enhancement] Make `fenced` error skip-reload behavior configurable via new `non_reloadable_errors` setting (defaults to `[:fenced]` for backward compatibility).
 - [Enhancement] Add `producer.reload` event allowing config modification before reload to escape fencing loops (#706).

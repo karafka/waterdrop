@@ -267,4 +267,213 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe 'fatal error testing with produce_sync' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:message) { build(:valid_message, topic: topic_name) }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing after fatal error is triggered' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_sync' do
+        # First verify producer works
+        report = producer.produce_sync(message)
+        expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+        expect(report.error).to be_nil
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_sync test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # Now try to produce after fatal error - should succeed after reload
+        report = producer.produce_sync(message)
+        expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+        expect(report.error).to be_nil
+      end
+
+      it 'can produce successfully before fatal error injection' do
+        # Produce multiple messages successfully
+        5.times do
+          report = producer.produce_sync(message)
+          expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+          expect(report.error).to be_nil
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+
+      it 'multiple produce_sync calls succeed after fatal error via reload' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'Multiple calls test')
+
+        # Multiple attempts should all succeed after reload
+        3.times do
+          report = producer.produce_sync(message)
+          expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
+          expect(report.error).to be_nil
+        end
+      end
+    end
+  end
+
+  describe 'fatal error testing with produce_many_sync' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: true,
+        max_attempts_on_idempotent_fatal_error: 3,
+        wait_backoff_on_idempotent_fatal_error: 100
+      )
+    end
+
+    let(:messages) { Array.new(3) { build(:valid_message, topic: topic_name) } }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+    end
+
+    context 'when producing batch after fatal error is triggered' do
+      it 'detects fatal error state and recovers via reload on subsequent produce_many_sync' do
+        # First verify producer works with batches
+        # produce_many_sync returns DeliveryHandles (already waited)
+        handles = producer.produce_many_sync(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+        handles.each do |handle|
+          expect(handle).to be_a(Rdkafka::Producer::DeliveryHandle)
+        end
+
+        # Trigger a fatal error
+        producer.trigger_test_fatal_error(47, 'Fatal error for produce_many_sync test')
+
+        # Verify fatal error is present
+        fatal_error = producer.fatal_error
+        expect(fatal_error).not_to be_nil
+        expect(fatal_error[:error_code]).to eq(47)
+
+        # Now try to produce batch after fatal error - should succeed after reload
+        handles = producer.produce_many_sync(messages)
+        expect(handles).to be_an(Array)
+        expect(handles.size).to eq(3)
+        expect(handles).to all(be_a(Rdkafka::Producer::DeliveryHandle))
+      end
+
+      it 'can produce batches successfully before fatal error injection' do
+        # Produce multiple batches successfully
+        3.times do
+          handles = producer.produce_many_sync(messages)
+          expect(handles.size).to eq(3)
+          expect(handles).to all(be_a(Rdkafka::Producer::DeliveryHandle))
+        end
+
+        # Verify no fatal error before injection
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+
+    context 'when testing batch size variations with fatal error' do
+      it 'works with different batch sizes before fatal error' do
+        # Small batch
+        small_batch = [build(:valid_message, topic: topic_name)]
+        reports = producer.produce_many_sync(small_batch)
+        expect(reports.size).to eq(1)
+
+        # Medium batch
+        medium_batch = Array.new(5) { build(:valid_message, topic: topic_name) }
+        reports = producer.produce_many_sync(medium_batch)
+        expect(reports.size).to eq(5)
+
+        # Large batch
+        large_batch = Array.new(10) { build(:valid_message, topic: topic_name) }
+        reports = producer.produce_many_sync(large_batch)
+        expect(reports.size).to eq(10)
+
+        # No fatal error yet
+        expect(producer.fatal_error).to be_nil
+      end
+    end
+  end
+
+  describe 'fatal error testing without reload enabled' do
+    subject(:producer) do
+      build(
+        :idempotent_producer,
+        reload_on_idempotent_fatal_error: false
+      )
+    end
+
+    let(:message) { build(:valid_message, topic: topic_name) }
+    let(:messages) { Array.new(3) { build(:valid_message, topic: topic_name) } }
+    let(:reload_events) { [] }
+    let(:reloaded_events) { [] }
+
+    before do
+      producer.singleton_class.include(WaterDrop::Producer::Testing)
+      producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+      producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+    end
+
+    context 'when produce_sync is called after fatal error without reload' do
+      it 'raises error consistently without attempting reload' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'No reload test')
+
+        # Multiple produce_sync attempts should all fail with fatal error
+        3.times do
+          expect { producer.produce_sync(message) }
+            .to raise_error(WaterDrop::Errors::ProduceError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
+
+          # Fatal error should persist after each attempt
+          expect(producer.fatal_error).not_to be_nil
+          expect(producer.fatal_error[:error_code]).to eq(47)
+        end
+
+        # No reload events should have been emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+      end
+    end
+
+    context 'when produce_many_sync is called after fatal error without reload' do
+      it 'raises error consistently without attempting reload' do
+        # Trigger fatal error
+        producer.trigger_test_fatal_error(47, 'No reload batch test')
+
+        # Multiple produce_many_sync attempts should all fail with fatal error
+        3.times do
+          expect { producer.produce_many_sync(messages) }
+            .to raise_error(WaterDrop::Errors::ProduceManyError) { |e|
+              expect(e.cause).to be_a(Rdkafka::RdkafkaError)
+              expect(e.cause.fatal?).to be(true)
+            }
+
+          # Fatal error should persist after each attempt
+          expect(producer.fatal_error).not_to be_nil
+          expect(producer.fatal_error[:error_code]).to eq(47)
+        end
+
+        # No reload events should have been emitted
+        expect(reload_events).to be_empty
+        expect(reloaded_events).to be_empty
+      end
+    end
+  end
 end
