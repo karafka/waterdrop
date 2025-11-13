@@ -8,6 +8,7 @@ module WaterDrop
       # @return [Integer] current value
       attr_reader :value
 
+      # Creates a new counter initialized to 0
       def initialize
         @value = 0
         @mutex = Mutex.new

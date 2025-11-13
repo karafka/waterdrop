@@ -3,6 +3,7 @@
 module WaterDrop
   # Simple middleware layer for manipulating messages prior to their validation
   class Middleware
+    # Creates a new middleware chain with no registered steps
     def initialize
       @mutex = Mutex.new
       @steps = []
