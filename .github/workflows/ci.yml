@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '3.5.0-preview1'
+          - '4.0.0-preview2'
           - '3.4'
           - '3.3'
           - '3.2'
@@ -42,12 +42,12 @@ jobs:
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Remove platform-specific ffi entries for Ruby previews
-        if: contains(matrix.ruby, '3.5')
+        if: contains(matrix.ruby, 'preview')
         run: |
           sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@2a7b30092b0caf9c046252510f9273b4875f3db9 # v1.254.0
+        uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -118,7 +118,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@2a7b30092b0caf9c046252510f9273b4875f3db9 # v1.254.0
+        uses: ruby/setup-ruby@8aeb6ff8030dd539317f8e1769a044873b56ea71 # v1.268.0
         with:
           ruby-version: '3.4'
           bundler-cache: true
