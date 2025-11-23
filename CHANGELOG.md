@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.8.15 (2025-11-23)
+- [Enhancement] Skip statistics decoration and emission when no listeners are subscribed to `statistics.emitted` events to reduce overhead.
+- [Enhancement] Support late subscription to `statistics.emitted` by checking for listeners on each emission (every 5 seconds).
+
 ## 2.8.14 (2025-11-14)
 - [Fix] Fatal error replacement not working without exact error unwind from the fatal envelope
 - [Testing] Add `WaterDrop::Producer::Testing` module for injecting and querying librdkafka fatal errors in tests.
