@@ -91,4 +91,34 @@ RSpec.describe_current do
     it { expect(event[:statistics]).to eq(statistics) }
     it { expect(event[:statistics]['val_d']).to eq(0) }
   end
+
+  describe 'late subscription support' do
+    let(:events) { [] }
+    let(:statistics) { { 'name' => client_name, 'msg_count' => 100 } }
+
+    context 'when no one is listening initially' do
+      it 'expect not to emit statistics' do
+        callback.call(statistics)
+        expect(events).to be_empty
+      end
+    end
+
+    context 'when subscriber is added after initialization' do
+      it 'expect to emit statistics for subsequent calls' do
+        # First call with no listeners
+        callback.call(statistics)
+        expect(events).to be_empty
+
+        # Subscribe late
+        monitor.subscribe('statistics.emitted') do |event|
+          events << event
+        end
+
+        # Second call should now emit
+        callback.call(statistics)
+        expect(events).not_to be_empty
+        expect(events.size).to eq(1)
+      end
+    end
+  end
 end

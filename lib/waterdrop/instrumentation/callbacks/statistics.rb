@@ -29,6 +29,10 @@ module WaterDrop
           # all the time.
           return unless @client_name == statistics['name']
 
+          # Skip if no one is listening. We check on each emission to support late subscribers
+          # since statistics are emitted every 5 seconds, this check is cheap enough
+          return unless listening?
+
           @monitor.instrument(
             'statistics.emitted',
             producer_id: @producer_id,
@@ -45,6 +49,15 @@ module WaterDrop
             producer_id: @producer_id,
             type: 'callbacks.statistics.error'
           )
+        end
+
+        private
+
+        # Check if anyone is listening to statistics events
+        # @return [Boolean] true if there are listeners
+        def listening?
+          listeners = @monitor.listeners['statistics.emitted']
+          listeners && !listeners.empty?
         end
       end
     end
