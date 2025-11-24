@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.8.15 (2025-11-23)
+## 2.8.15 (2025-11-24)
 - [Enhancement] Skip statistics decoration and emission when no listeners are subscribed to `statistics.emitted` events to reduce overhead.
 - [Enhancement] Support late subscription to `statistics.emitted` by checking for listeners on each emission (every 5 seconds).
 
