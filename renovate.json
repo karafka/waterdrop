@@ -3,19 +3,20 @@
   "extends": [
     "config:recommended"
   ],
-  "github-actions": {
-    "enabled": true,
-    "pinDigests": true
-  },
   "includePaths": [
     "Gemfile",
     "waterdrop.gemspec",
-    "spec/integrations/**/Gemfile"
+    "spec/integrations/**/Gemfile",
+    ".github/workflows/**"
   ],
   "packageRules": [
     {
       "matchDepPatterns": ["*"],
       "minimumReleaseAge": "7 days"
+    },
+    {
+      "matchManagers": ["github-actions"],
+      "pinDigests": true
     },
     {
       "matchFileNames": [
