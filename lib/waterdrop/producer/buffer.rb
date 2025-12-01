@@ -52,8 +52,8 @@ module WaterDrop
       end
 
       # Flushes the internal buffer to Kafka in a sync way
-      # @return [Array<Rdkafka::Producer::DeliveryReport>] delivery reports for messages that were
-      #   flushed
+      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
+      #   flushed (handles are in final state, call `#create_result` to get delivery report)
       def flush_sync
         @monitor.instrument(
           'buffer.flushed_sync',
@@ -66,8 +66,8 @@ module WaterDrop
 
       # Method for triggering the buffer
       # @param sync [Boolean] should it flush in a sync way
-      # @return [Array<Rdkafka::Producer::DeliveryHandle, Rdkafka::Producer::DeliveryReport>]
-      #   delivery handles for async or delivery reports for sync
+      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles (in final state for
+      #   sync, pending for async)
       # @raise [Errors::ProduceManyError] when there was a failure in flushing
       # @note We use this method underneath to provide a different instrumentation for sync and
       #   async flushing within the public API

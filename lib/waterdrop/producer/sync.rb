@@ -8,7 +8,7 @@ module WaterDrop
       #
       # @param message [Hash] hash that complies with the {Contracts::Message} contract
       #
-      # @return [Rdkafka::Producer::DeliveryHandle] delivery report
+      # @return [Rdkafka::Producer::DeliveryReport] delivery report
       #
       # @raise [Rdkafka::RdkafkaError] When adding the message to rdkafka's queue failed
       # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and the
@@ -49,13 +49,20 @@ module WaterDrop
       # @param messages [Array<Hash>] array with messages that comply with the
       #   {Contracts::Message} contract
       #
-      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery reports
+      # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
+      #   sent (can be used to verify offset, partition, etc via `#create_result`)
       #
       # @raise [Rdkafka::RdkafkaError] When adding the messages to rdkafka's queue failed
       # @raise [Rdkafka::Producer::WaitTimeoutError] When the timeout has been reached and some
       #   handles are still pending
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
+      #
+      # @note We return delivery handles instead of delivery reports to ensure consistent return
+      #   types for both success and error flows. In case of partial failures (e.g., mid-batch
+      #   errors), returning handles guarantees the same type in the `dispatched` collection,
+      #   allowing uniform error handling. Each handle is in its final state after this method
+      #   returns, so you can call `handle.create_result` to obtain the delivery report if needed.
       def produce_many_sync(messages)
         messages = middleware.run_many(messages)
         messages.each { |message| validate_message!(message) }
