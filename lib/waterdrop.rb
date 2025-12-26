@@ -44,5 +44,10 @@ loader.inflector.inflect('waterdrop' => 'WaterDrop')
 loader.ignore("#{__dir__}/waterdrop/instrumentation/vendors/**/*.rb")
 # Do not load testing components. Those need to be required manually in test environments
 loader.ignore("#{__dir__}/waterdrop/producer/testing.rb")
+# Patches are applied manually after Zeitwerk loads all components
+loader.ignore("#{__dir__}/waterdrop/patches/**/*.rb")
 loader.setup
 loader.eager_load
+
+# Load patches after all components are loaded
+require 'waterdrop/patches/rdkafka_producer'
