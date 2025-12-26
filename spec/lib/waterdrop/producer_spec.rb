@@ -175,6 +175,56 @@ RSpec.describe_current do
     end
   end
 
+  describe "#queue_size" do
+    context "when producer is not configured" do
+      subject(:producer) { described_class.new }
+
+      it { expect(producer.queue_size).to eq(0) }
+      it { expect(producer.queue_length).to eq(0) }
+    end
+
+    context "when producer is configured but not connected" do
+      subject(:producer) { build(:producer) }
+
+      it { expect(producer.queue_size).to eq(0) }
+    end
+
+    context "when producer is connected with no pending messages" do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      it { expect(producer.queue_size).to eq(0) }
+    end
+
+    context "when producer is connected and message was produced synchronously" do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      before { producer.produce_sync(topic: topic_name, payload: "test") }
+
+      # After sync produce completes, queue should be empty
+      it { expect(producer.queue_size).to eq(0) }
+    end
+
+    context "when producer is closed" do
+      subject(:producer) { build(:producer).tap(&:client).tap(&:close) }
+
+      it { expect(producer.queue_size).to eq(0) }
+    end
+
+    context "when called concurrently" do
+      subject(:producer) { build(:producer).tap(&:client) }
+
+      it "handles concurrent access safely" do
+        threads = Array.new(10) do
+          Thread.new { producer.queue_size }
+        end
+
+        results = threads.map(&:value)
+        expect(results).to all(be_a(Integer))
+        expect(results).to all(be >= 0)
+      end
+    end
+  end
+
   describe "#idempotent?" do
     context "when producer is transactional" do
       subject(:producer) { build(:transactional_producer) }

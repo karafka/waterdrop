@@ -57,6 +57,15 @@ module WaterDrop
         Handle.new(topic.to_s, partition, @counters["#{topic}#{partition}"] += 1)
       end
 
+      # Returns 0 as dummy client doesn't queue any real messages
+      #
+      # @return [Integer] always 0
+      def queue_size
+        0
+      end
+
+      alias_method :queue_length, :queue_size
+
       # @param _args [Object] anything really, this dummy is suppose to support anything
       def respond_to_missing?(*_args)
         true
