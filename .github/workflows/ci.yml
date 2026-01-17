@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         ruby:
-          - '4.0.0-preview2'
+          - '4.0'
           - '3.4'
           - '3.3'
           - '3.2'
@@ -41,13 +41,13 @@ jobs:
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
-      - name: Remove platform-specific ffi entries for Ruby previews
-        if: contains(matrix.ruby, 'preview')
+      - name: Remove platform-specific ffi entries for unsupported Ruby versions
+        if: contains(matrix.ruby, 'preview') || startsWith(matrix.ruby, '4.')
         run: |
           sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
+        uses: ruby/setup-ruby@4c24fa5ec04b2e79eb40571b1cee2a0d2b705771 # v1.278.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -101,7 +101,7 @@ jobs:
           chmod +x coditsu_script.sh
       - name: Verify Coditsu script checksum
         run: |
-          EXPECTED_SHA256="0aecc5aa010f53fca264548a41467a2b0a1208d750ce1da3e98a217304cacbbc"
+          EXPECTED_SHA256="7dc7f736b81ad79cfa065ceb87506908dfcd1ec1202f384426d72342396f7377"
           ACTUAL_SHA256=$(sha256sum coditsu_script.sh | awk '{ print $1 }')
           if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256" ]; then
             echo "::error::Checksum verification failed. Expected $EXPECTED_SHA256 but got $ACTUAL_SHA256."
@@ -117,10 +117,13 @@ jobs:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
           fetch-depth: 0
+      - name: Remove platform-specific ffi entries for unsupported Ruby versions
+        run: |
+          sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
       - name: Set up Ruby
-        uses: ruby/setup-ruby@d354de180d0c9e813cfddfcbdc079945d4be589b # v1.275.0
+        uses: ruby/setup-ruby@4c24fa5ec04b2e79eb40571b1cee2a0d2b705771 # v1.278.0
         with:
-          ruby-version: '3.4.8'
+          ruby-version: '4.0.0'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
