@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Feature] Add `Producer#queue_size` (alias: `#queue_length`) to return the count of messages pending in the librdkafka queue. This counts messages that have been dispatched to librdkafka but not yet transmitted to the Kafka broker.
+
 ## 2.8.15 (2025-11-24)
 - [Enhancement] Skip statistics decoration and emission when no listeners are subscribed to `statistics.emitted` events to reduce overhead.
 - [Enhancement] Support late subscription to `statistics.emitted` by checking for listeners on each emission (every 5 seconds).
