@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## 2.8.16 (Unreleased)
+- [Change] Update to use `max_wait_timeout_ms` parameter in rdkafka `AbstractHandle#wait` for consistency with librdkafka conventions.
+- [Change] Require `karafka-rdkafka` `>=` `0.24.0` due to `max_wait_timeout_ms` API change.
+
 ## 2.8.15 (2025-11-24)
 - [Enhancement] Skip statistics decoration and emission when no listeners are subscribed to `statistics.emitted` events to reduce overhead.
 - [Enhancement] Support late subscription to `statistics.emitted` by checking for listeners on each emission (every 5 seconds).
