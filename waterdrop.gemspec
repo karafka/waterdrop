@@ -17,7 +17,7 @@ Gem::Specification.new do |spec|
   spec.licenses      = %w[LGPL-3.0-only Commercial]
 
   spec.add_dependency 'karafka-core', '>= 2.4.9', '< 3.0.0'
-  spec.add_dependency 'karafka-rdkafka', '>= 0.23.1'
+  spec.add_dependency 'karafka-rdkafka', '>= 0.24.0.rc1'
   spec.add_dependency 'zeitwerk', '~> 2.3'
 
   spec.required_ruby_version = '>= 3.2.0'

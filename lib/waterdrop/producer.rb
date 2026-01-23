@@ -438,8 +438,7 @@ module WaterDrop
     #   final result and it is an error.
     def wait(handler, raise_response_error: true)
       handler.wait(
-        # rdkafka max_wait_timeout is in seconds and we use ms
-        max_wait_timeout: current_variant.max_wait_timeout / 1_000.0,
+        max_wait_timeout_ms: current_variant.max_wait_timeout,
         raise_response_error: raise_response_error
       )
     end
