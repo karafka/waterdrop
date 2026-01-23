@@ -4,6 +4,7 @@
     "config:recommended"
   ],
   "includePaths": [
+    ".ruby-version",
     "Gemfile",
     "waterdrop.gemspec",
     "spec/integrations/**/Gemfile",
