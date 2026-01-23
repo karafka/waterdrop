@@ -29,6 +29,14 @@
       ],
       "groupName": "integration test dependencies",
       "commitMessageTopic": "integration test dependencies"
+    },
+    {
+      "description": "Group ruby/setup-ruby action with ruby version updates",
+      "matchPackageNames": [
+        "ruby/setup-ruby",
+        "ruby"
+      ],
+      "groupName": "ruby setup"
     }
   ]
 }
