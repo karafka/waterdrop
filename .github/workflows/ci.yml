@@ -17,8 +17,6 @@ jobs:
   specs:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    env:
-      BUNDLE_FORCE_RUBY_PLATFORM: ${{ matrix.force_ruby_platform }}
     strategy:
       fail-fast: false
       matrix:
@@ -27,9 +25,6 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
-        force_ruby_platform:
-          - true
-          - false
         include:
           - ruby: '3.4'
             coverage: 'true'
@@ -40,11 +35,6 @@ jobs:
 
       - name: Install package dependencies
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
-
-      - name: Remove platform-specific ffi entries for unsupported Ruby versions
-        if: contains(matrix.ruby, 'preview') || startsWith(matrix.ruby, '4.')
-        run: |
-          sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
 
       - name: Set up Ruby
         uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8 # v1.286.0
@@ -117,9 +107,6 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
-      - name: Remove platform-specific ffi entries for unsupported Ruby versions
-        run: |
-          sed -i '/^\s*ffi (.*-.*)$/d' Gemfile.lock
       - name: Set up Ruby
         uses: ruby/setup-ruby@90be1154f987f4dc0fe0dd0feedac9e473aa4ba8 # v1.286.0
         with:
