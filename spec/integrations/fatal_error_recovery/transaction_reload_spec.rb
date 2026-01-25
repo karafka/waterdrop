@@ -8,11 +8,11 @@
 # with transactional fatal error recovery enabled. The fencing test covers the actual
 # fatal error scenario where reload should NOT happen (fencing is unrecoverable).
 
-require 'waterdrop'
-require 'logger'
-require 'securerandom'
+require "waterdrop"
+require "logger"
+require "securerandom"
 
-BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 # Track instrumentation events
 reload_events = []
@@ -22,11 +22,11 @@ error_events = []
 transactional_id = "tx-reload-test-#{SecureRandom.uuid}"
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
-    'bootstrap.servers': BOOTSTRAP_SERVERS,
-    'transactional.id': transactional_id,
-    'transaction.timeout.ms': 30_000,
-    'message.timeout.ms': 30_000,
-    'enable.idempotence': true
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
+    "transactional.id": transactional_id,
+    "transaction.timeout.ms": 30_000,
+    "message.timeout.ms": 30_000,
+    "enable.idempotence": true
   }
   config.max_wait_timeout = 30_000
   config.reload_on_transaction_fatal_error = true
@@ -35,15 +35,15 @@ producer = WaterDrop::Producer.new do |config|
   config.logger = Logger.new($stdout, level: Logger::INFO)
 end
 
-producer.monitor.subscribe('producer.reloaded') { |event| reload_events << event }
-producer.monitor.subscribe('error.occurred') { |event| error_events << event }
+producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
+producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 
 topic_name = "it-tx-reload-#{SecureRandom.hex(6)}"
 
 # Verify configuration is set correctly
 config_valid = producer.config.reload_on_transaction_fatal_error == true &&
-               producer.config.wait_backoff_on_transaction_fatal_error == 100 &&
-               producer.config.max_attempts_on_transaction_fatal_error == 3
+  producer.config.wait_backoff_on_transaction_fatal_error == 100 &&
+  producer.config.max_attempts_on_transaction_fatal_error == 3
 
 # Produce messages in transactions
 successful_transactions = 0

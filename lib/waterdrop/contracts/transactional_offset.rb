@@ -7,8 +7,8 @@ module WaterDrop
     class TransactionalOffset < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load_file(
-          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-        ).fetch('en').fetch('validations').fetch('transactional_offset')
+          File.join(WaterDrop.gem_root, "config", "locales", "errors.yml")
+        ).fetch("en").fetch("validations").fetch("transactional_offset")
       end
 
       required(:consumer) { |val| val.respond_to?(:consumer_group_metadata_pointer) }

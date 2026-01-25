@@ -3,8 +3,8 @@
 RSpec.describe_current do
   subject(:notifications) { described_class.new }
 
-  describe '::EVENTS' do
-    it 'contains only class-level events' do
+  describe "::EVENTS" do
+    it "contains only class-level events" do
       expected_events = %w[
         producer.created
         producer.configured
@@ -18,7 +18,7 @@ RSpec.describe_current do
       expect(described_class::EVENTS).to eq(expected_events)
     end
 
-    it 'does not contain instance-level events' do
+    it "does not contain instance-level events" do
       instance_events = %w[
         producer.connected
         producer.closed
@@ -34,12 +34,12 @@ RSpec.describe_current do
     end
   end
 
-  describe '#initialize' do
-    it 'creates notifications instance without errors' do
+  describe "#initialize" do
+    it "creates notifications instance without errors" do
       expect(notifications).to be_a(described_class)
     end
 
-    it 'calls register_event for all class events' do
+    it "calls register_event for all class events" do
       # We can't directly test if events are registered, but we can test that
       # subscribing to class events works (which means they were registered)
       described_class::EVENTS.each do |event_name|
@@ -50,34 +50,34 @@ RSpec.describe_current do
     end
   end
 
-  describe '#subscribe' do
-    it 'allows subscribing to registered class events' do
+  describe "#subscribe" do
+    it "allows subscribing to registered class events" do
       expect do
-        notifications.subscribe('producer.created') { |_event| nil }
+        notifications.subscribe("producer.created") { |_event| nil }
       end.not_to raise_error
     end
 
-    it 'raises error when subscribing to unregistered events' do
+    it "raises error when subscribing to unregistered events" do
       expect do
-        notifications.subscribe('message.produced_sync') { |_event| nil }
+        notifications.subscribe("message.produced_sync") { |_event| nil }
       end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
     end
   end
 
-  describe 'inheritance' do
-    it 'inherits from Karafka::Core::Monitoring::Notifications' do
+  describe "inheritance" do
+    it "inherits from Karafka::Core::Monitoring::Notifications" do
       expect(described_class).to be < Karafka::Core::Monitoring::Notifications
     end
   end
 
-  describe 'separation from instance notifications' do
+  describe "separation from instance notifications" do
     let(:instance_notifications) { WaterDrop::Instrumentation::Notifications.new }
 
-    it 'has different event sets' do
+    it "has different event sets" do
       expect(described_class::EVENTS).not_to eq(WaterDrop::Instrumentation::Notifications::EVENTS)
     end
 
-    it 'class events are not available in instance notifications' do
+    it "class events are not available in instance notifications" do
       described_class::EVENTS.each do |event_name|
         expect do
           instance_notifications.subscribe(event_name) { |_event| nil }
@@ -85,7 +85,7 @@ RSpec.describe_current do
       end
     end
 
-    it 'instance events are not available in class notifications' do
+    it "instance events are not available in class notifications" do
       sample_instance_events = %w[message.produced_async producer.connected error.occurred]
 
       sample_instance_events.each do |event_name|

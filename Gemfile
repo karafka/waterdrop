@@ -1,20 +1,20 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
 gemspec
 
 # Relaxed from 2.7 because we support Ruby 3.1
-gem 'zeitwerk', '~> 2.7.0'
+gem "zeitwerk", "~> 2.7.0"
 
 group :development do
-  gem 'byebug'
+  gem "byebug"
 end
 
 group :test do
-  gem 'connection_pool'
-  gem 'ostruct'
-  gem 'rspec'
-  gem 'simplecov'
-  gem 'warning'
+  gem "connection_pool"
+  gem "ostruct"
+  gem "rspec"
+  gem "simplecov"
+  gem "warning"
 end

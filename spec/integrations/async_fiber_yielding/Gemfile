@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source 'https://rubygems.org'
+source "https://rubygems.org"
 
-gem 'async'
-gem 'waterdrop', path: ENV.fetch('WATERDROP_GEM_DIR', nil)
+gem "async"
+gem "waterdrop", path: ENV.fetch("WATERDROP_GEM_DIR", nil)

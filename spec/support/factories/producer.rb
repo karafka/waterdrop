@@ -21,9 +21,9 @@ module Factories
         wait_backoff_on_transaction_fatal_error: 1_000,
         max_attempts_on_transaction_fatal_error: 10,
         kafka: {
-          'bootstrap.servers': BOOTSTRAP_SERVERS,
-          'statistics.interval.ms': 100,
-          'request.required.acks': 'all'
+          "bootstrap.servers": BOOTSTRAP_SERVERS,
+          "statistics.interval.ms": 100,
+          "request.required.acks": "all"
         }
       }
 
@@ -65,7 +65,7 @@ module Factories
       transient = {
         transactional_id: SecureRandom.uuid,
         transaction_timeout_ms: 30_000,
-        request_required_acks: 'all',
+        request_required_acks: "all",
         idempotent: true,
         queue_buffering_max_ms: 5
       }
@@ -74,13 +74,13 @@ module Factories
       producer_attrs = overrides.reject { |k, _| transient.key?(k) }
 
       kafka_config = {
-        'bootstrap.servers': BOOTSTRAP_SERVERS,
-        'request.required.acks': transient_attrs[:request_required_acks],
-        'transactional.id': transient_attrs[:transactional_id],
-        'transaction.timeout.ms': transient_attrs[:transaction_timeout_ms],
-        'message.timeout.ms': transient_attrs[:transaction_timeout_ms],
-        'enable.idempotence': transient_attrs[:idempotent],
-        'queue.buffering.max.ms': transient_attrs[:queue_buffering_max_ms]
+        "bootstrap.servers": BOOTSTRAP_SERVERS,
+        "request.required.acks": transient_attrs[:request_required_acks],
+        "transactional.id": transient_attrs[:transactional_id],
+        "transaction.timeout.ms": transient_attrs[:transaction_timeout_ms],
+        "message.timeout.ms": transient_attrs[:transaction_timeout_ms],
+        "enable.idempotence": transient_attrs[:idempotent],
+        "queue.buffering.max.ms": transient_attrs[:queue_buffering_max_ms]
       }
 
       producer_factory(
@@ -92,10 +92,10 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def limited_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': BOOTSTRAP_SERVERS,
-        'request.required.acks': 1,
-        'queue.buffering.max.messages': 1,
-        'queue.buffering.max.ms': 10_000
+        "bootstrap.servers": BOOTSTRAP_SERVERS,
+        "request.required.acks": 1,
+        "queue.buffering.max.messages": 1,
+        "queue.buffering.max.ms": 10_000
       }
 
       producer_factory(
@@ -110,10 +110,10 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def slow_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': BOOTSTRAP_SERVERS,
-        'request.required.acks': 1,
-        'queue.buffering.max.messages': 1,
-        'queue.buffering.max.ms': 1_000
+        "bootstrap.servers": BOOTSTRAP_SERVERS,
+        "request.required.acks": 1,
+        "queue.buffering.max.messages": 1,
+        "queue.buffering.max.ms": 1_000
       }
 
       producer_factory(
@@ -128,10 +128,10 @@ module Factories
     # @return [WaterDrop::Producer] producer
     def idempotent_producer_factory(overrides = {})
       kafka_config = {
-        'bootstrap.servers': BOOTSTRAP_SERVERS,
-        'statistics.interval.ms': 100,
-        'request.required.acks': 'all',
-        'enable.idempotence': true
+        "bootstrap.servers": BOOTSTRAP_SERVERS,
+        "statistics.interval.ms": 100,
+        "request.required.acks": "all",
+        "enable.idempotence": true
       }
 
       producer_factory(
@@ -152,10 +152,10 @@ module Factories
       producer_attrs = overrides.reject { |k, _| transient.key?(k) }
 
       kafka_config = {
-        'bootstrap.servers': 'localhost:9095',
-        'request.required.acks': 'all',
-        'transaction.timeout.ms': transient_attrs[:message_timeout_ms],
-        'message.timeout.ms': transient_attrs[:message_timeout_ms]
+        "bootstrap.servers": "localhost:9095",
+        "request.required.acks": "all",
+        "transaction.timeout.ms": transient_attrs[:message_timeout_ms],
+        "message.timeout.ms": transient_attrs[:message_timeout_ms]
       }
 
       producer_factory(

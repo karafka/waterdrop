@@ -106,7 +106,7 @@ module WaterDrop
         return if client.respond_to?(:trigger_test_fatal_error)
 
         # Require the rdkafka testing module if not already loaded
-        require 'rdkafka/producer/testing' unless defined?(::Rdkafka::Testing)
+        require "rdkafka/producer/testing" unless defined?(::Rdkafka::Testing)
 
         client.singleton_class.include(::Rdkafka::Testing)
       end

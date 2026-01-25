@@ -7,11 +7,11 @@
 # This simulates a scenario where the idempotent producer hits a fatal error
 # and verifies the producer can automatically recover and continue producing.
 
-require 'waterdrop'
-require 'logger'
-require 'securerandom'
+require "waterdrop"
+require "logger"
+require "securerandom"
 
-BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 # Track instrumentation events
 reload_events = []
@@ -20,10 +20,10 @@ error_events = []
 # Create idempotent producer with reload enabled
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
-    'bootstrap.servers': BOOTSTRAP_SERVERS,
-    'enable.idempotence': true,
-    'statistics.interval.ms': 100,
-    'request.required.acks': 'all'
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
+    "enable.idempotence": true,
+    "statistics.interval.ms": 100,
+    "request.required.acks": "all"
   }
   config.max_wait_timeout = 30_000
   config.reload_on_idempotent_fatal_error = true
@@ -32,8 +32,8 @@ producer = WaterDrop::Producer.new do |config|
   config.logger = Logger.new($stdout, level: Logger::INFO)
 end
 
-producer.monitor.subscribe('producer.reloaded') { |event| reload_events << event }
-producer.monitor.subscribe('error.occurred') { |event| error_events << event }
+producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
+producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 
 # Monkey patch to inject a fatal error on first produce call
 call_count = 0
@@ -43,7 +43,7 @@ producer.client.define_singleton_method(:produce) do |**kwargs|
   call_count += 1
   if call_count == 1
     # Simulate a fatal idempotent error on first call
-    error = Rdkafka::RdkafkaError.new(-138, 'Simulated fatal error')
+    error = Rdkafka::RdkafkaError.new(-138, "Simulated fatal error")
     # Mark it as fatal
     error.define_singleton_method(:fatal?) { true }
     raise error

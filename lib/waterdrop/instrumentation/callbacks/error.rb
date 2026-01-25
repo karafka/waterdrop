@@ -26,22 +26,22 @@ module WaterDrop
           return unless @client_name == client_name
 
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: error,
             producer_id: @producer_id,
-            type: 'librdkafka.error'
+            type: "librdkafka.error"
           )
         # This runs from the rdkafka thread, thus we want to safe-guard it and prevent absolute
         # crashes even if the instrumentation code fails. If it would bubble-up, it could crash
         # the rdkafka background thread
-        rescue StandardError => e
+        rescue => e
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
             producer_id: @producer_id,
-            type: 'callbacks.error.error'
+            type: "callbacks.error.error"
           )
         end
       end

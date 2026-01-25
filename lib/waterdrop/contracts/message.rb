@@ -7,8 +7,8 @@ module WaterDrop
     class Message < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load_file(
-          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-        ).fetch('en').fetch('validations').fetch('message')
+          File.join(WaterDrop.gem_root, "config", "locales", "errors.yml")
+        ).fetch("en").fetch("validations").fetch("message")
       end
 
       # Regex to check that topic has a valid format

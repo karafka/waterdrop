@@ -13,7 +13,7 @@ module WaterDrop
         ensure_active!
 
         @monitor.instrument(
-          'message.buffered',
+          "message.buffered",
           producer_id: id,
           message: message,
           buffer: @messages
@@ -30,7 +30,7 @@ module WaterDrop
         ensure_active!
 
         @monitor.instrument(
-          'messages.buffered',
+          "messages.buffered",
           producer_id: id,
           messages: messages,
           buffer: @messages
@@ -45,7 +45,7 @@ module WaterDrop
       #   flushed
       def flush_async
         @monitor.instrument(
-          'buffer.flushed_async',
+          "buffer.flushed_async",
           producer_id: id,
           messages: @messages
         ) { flush(false) }
@@ -56,7 +56,7 @@ module WaterDrop
       #   flushed (handles are in final state, call `#create_result` to get delivery report)
       def flush_sync
         @monitor.instrument(
-          'buffer.flushed_sync',
+          "buffer.flushed_sync",
           producer_id: id,
           messages: @messages
         ) { flush(true) }

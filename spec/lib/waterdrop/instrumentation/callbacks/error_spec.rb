@@ -8,71 +8,71 @@ RSpec.describe_current do
   let(:monitor) { WaterDrop::Instrumentation::Monitor.new }
   let(:error) { Rdkafka::RdkafkaError.new(1, []) }
 
-  describe '#call' do
+  describe "#call" do
     let(:changed) { [] }
 
     before do
-      monitor.subscribe('error.occurred') do |event|
+      monitor.subscribe("error.occurred") do |event|
         changed << event[:error]
       end
 
       callback.call(client_name, error)
     end
 
-    context 'when occurred error refer different producer' do
-      subject(:callback) { described_class.new(producer_id, 'other', monitor) }
+    context "when occurred error refer different producer" do
+      subject(:callback) { described_class.new(producer_id, "other", monitor) }
 
-      it 'expect not to emit them' do
+      it "expect not to emit them" do
         expect(changed).to be_empty
       end
     end
 
-    context 'when occurred error refer to expected producer' do
-      it 'expects to emit them' do
+    context "when occurred error refer to expected producer" do
+      it "expects to emit them" do
         expect(changed).to eq([error])
       end
     end
   end
 
-  describe 'occurred event data format' do
+  describe "occurred event data format" do
     let(:changed) { [] }
     let(:event) { changed.first }
 
     before do
-      monitor.subscribe('error.occurred') do |stat|
+      monitor.subscribe("error.occurred") do |stat|
         changed << stat
       end
 
       callback.call(client_name, error)
     end
 
-    it { expect(event.id).to eq('error.occurred') }
+    it { expect(event.id).to eq("error.occurred") }
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:error]).to eq(error) }
-    it { expect(event[:type]).to eq('librdkafka.error') }
+    it { expect(event[:type]).to eq("librdkafka.error") }
   end
 
-  context 'when librdkafka error handling handler contains error' do
+  context "when librdkafka error handling handler contains error" do
     let(:tracked_errors) { [] }
 
     before do
-      monitor.subscribe('error.occurred') do |event|
-        next unless event[:type] == 'librdkafka.error'
+      monitor.subscribe("error.occurred") do |event|
+        next unless event[:type] == "librdkafka.error"
 
         raise
       end
 
       local_errors = tracked_errors
 
-      monitor.subscribe('error.occurred') do |event|
+      monitor.subscribe("error.occurred") do |event|
         local_errors << event
       end
     end
 
-    it 'expect to contain in, notify and continue as we do not want to crash rdkafka' do
+    it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
       expect { callback.call(client_name, error) }.not_to raise_error
       expect(tracked_errors.size).to eq(1)
-      expect(tracked_errors.first[:type]).to eq('callbacks.error.error')
+      expect(tracked_errors.first[:type]).to eq("callbacks.error.error")
     end
   end
 end

@@ -20,7 +20,7 @@ module WaterDrop
           RdKafkaMetric = Struct.new(:type, :scope, :name, :key_location)
 
           # Namespace under which the DD metrics should be published
-          setting :namespace, default: 'waterdrop'
+          setting :namespace, default: "waterdrop"
 
           # Datadog client that we should use to publish the metrics
           setting :client
@@ -35,19 +35,19 @@ module WaterDrop
           # Note, that the once with `_d` come from WaterDrop, not rdkafka or Kafka
           setting :rd_kafka_metrics, default: [
             # Client metrics
-            RdKafkaMetric.new(:count, :root, 'calls', 'tx_d'),
-            RdKafkaMetric.new(:histogram, :root, 'queue.size', 'msg_cnt'),
+            RdKafkaMetric.new(:count, :root, "calls", "tx_d"),
+            RdKafkaMetric.new(:histogram, :root, "queue.size", "msg_cnt"),
 
             # Broker metrics
-            RdKafkaMetric.new(:count, :brokers, 'deliver.attempts', 'txretries_d'),
-            RdKafkaMetric.new(:count, :brokers, 'deliver.errors', 'txerrs_d'),
-            RdKafkaMetric.new(:count, :brokers, 'receive.errors', 'rxerrs_d'),
-            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.avg', %w[outbuf_latency avg]),
-            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.p95', %w[outbuf_latency p95]),
-            RdKafkaMetric.new(:gauge, :brokers, 'queue.latency.p99', %w[outbuf_latency p99]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.avg', %w[rtt avg]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p95', %w[rtt p95]),
-            RdKafkaMetric.new(:gauge, :brokers, 'network.latency.p99', %w[rtt p99])
+            RdKafkaMetric.new(:count, :brokers, "deliver.attempts", "txretries_d"),
+            RdKafkaMetric.new(:count, :brokers, "deliver.errors", "txerrs_d"),
+            RdKafkaMetric.new(:count, :brokers, "receive.errors", "rxerrs_d"),
+            RdKafkaMetric.new(:gauge, :brokers, "queue.latency.avg", %w[outbuf_latency avg]),
+            RdKafkaMetric.new(:gauge, :brokers, "queue.latency.p95", %w[outbuf_latency p95]),
+            RdKafkaMetric.new(:gauge, :brokers, "queue.latency.p99", %w[outbuf_latency p99]),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.avg", %w[rtt avg]),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.p95", %w[rtt p95]),
+            RdKafkaMetric.new(:gauge, :brokers, "network.latency.p99", %w[rtt p99])
           ].freeze
 
           configure
@@ -78,13 +78,13 @@ module WaterDrop
           #
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_error_occurred(_event)
-            count('error_occurred', 1, tags: default_tags)
+            count("error_occurred", 1, tags: default_tags)
           end
 
           # Increases acknowledged messages counter
           # @param _event [Karafka::Core::Monitoring::Event]
           def on_message_acknowledged(_event)
-            increment('acknowledged', tags: default_tags)
+            increment("acknowledged", tags: default_tags)
           end
 
           %i[
@@ -216,26 +216,26 @@ module WaterDrop
                 tags: default_tags
               )
             when :brokers
-              statistics.fetch('brokers').each_value do |broker_statistics|
+              statistics.fetch("brokers").each_value do |broker_statistics|
                 # Skip bootstrap nodes
                 # Bootstrap nodes have nodeid -1, other nodes have positive
                 # node ids
-                next if broker_statistics['nodeid'] == -1
+                next if broker_statistics["nodeid"] == -1
 
                 public_send(
                   metric.type,
                   metric.name,
                   broker_statistics.dig(*metric.key_location),
-                  tags: default_tags + ["broker:#{broker_statistics['nodename']}"]
+                  tags: default_tags + ["broker:#{broker_statistics["nodename"]}"]
                 )
               end
             when :topics
-              statistics.fetch('topics').each_value do |topic_statistics|
+              statistics.fetch("topics").each_value do |topic_statistics|
                 public_send(
                   metric.type,
                   metric.name,
                   topic_statistics.dig(*metric.key_location),
-                  tags: default_tags + ["topic:#{topic_statistics['topic']}"]
+                  tags: default_tags + ["topic:#{topic_statistics["topic"]}"]
                 )
               end
             else

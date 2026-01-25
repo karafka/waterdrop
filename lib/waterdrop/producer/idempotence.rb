@@ -10,7 +10,7 @@ module WaterDrop
         return true if transactional?
         return @idempotent unless @idempotent.nil?
 
-        @idempotent = config.kafka.to_h.fetch(:'enable.idempotence', false)
+        @idempotent = config.kafka.to_h.fetch(:"enable.idempotence", false)
       end
 
       # Checks if the given error should trigger an idempotent producer reload
@@ -61,7 +61,7 @@ module WaterDrop
           # Users can subscribe to this event and modify event[:caller].config.kafka to change
           # producer config
           @monitor.instrument(
-            'producer.reload',
+            "producer.reload",
             producer_id: id,
             error: error,
             attempt: attempt,
@@ -73,7 +73,7 @@ module WaterDrop
           @idempotent = nil
 
           @monitor.instrument(
-            'producer.reloaded',
+            "producer.reloaded",
             producer_id: id,
             attempt: attempt
           ) do

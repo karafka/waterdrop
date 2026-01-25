@@ -27,20 +27,20 @@ module WaterDrop
           return unless @bearer.name == bearer_name
 
           @monitor.instrument(
-            'oauthbearer.token_refresh',
+            "oauthbearer.token_refresh",
             bearer: @bearer,
             caller: self
           )
         # This runs from the rdkafka thread, thus we want to safe-guard it and prevent absolute
         # crashes even if the instrumentation code fails. If it would bubble-up, it could crash
         # the rdkafka background thread
-        rescue StandardError => e
+        rescue => e
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
             producer_id: @producer_id,
-            type: 'callbacks.oauthbearer_token_refresh.error'
+            type: "callbacks.oauthbearer_token_refresh.error"
           )
         end
       end

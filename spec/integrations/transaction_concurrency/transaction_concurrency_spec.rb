@@ -9,16 +9,16 @@
 # - Proper isolation between concurrent transactions
 # - No deadlocks or race conditions in transaction lifecycle
 
-require 'waterdrop'
-require 'securerandom'
+require "waterdrop"
+require "securerandom"
 
 THREAD_COUNT = 5
 MESSAGES_PER_THREAD = 10
 
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
-    'bootstrap.servers': ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092'),
-    'transactional.id': "it-tx-concurrent-#{SecureRandom.hex(6)}"
+    "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
+    "transactional.id": "it-tx-concurrent-#{SecureRandom.hex(6)}"
   }
 end
 
@@ -49,7 +49,7 @@ threads = Array.new(THREAD_COUNT) do |thread_index|
         successful_transactions << "thread-#{thread_index}-tx-#{msg_index}"
       end
     end
-  rescue StandardError => e
+  rescue => e
     mutex.synchronize do
       errors << { thread: thread_index, error: e.message }
     end

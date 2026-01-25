@@ -8,18 +8,18 @@
 # delays from topic creation on every produce_sync call. This tests that WaterDrop operations
 # properly yield control in the async ecosystem during actual Kafka operations.
 
-require 'async'
-require 'waterdrop'
-require 'logger'
-require 'securerandom'
+require "async"
+require "waterdrop"
+require "logger"
+require "securerandom"
 
 producer = WaterDrop::Producer.new do |config|
-  config.kafka = { 'bootstrap.servers': ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092') }
+  config.kafka = { "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092") }
 end
 
 message_template = {
-  payload: 'integration test payload',
-  key: 'test_key'
+  payload: "integration test payload",
+  key: "test_key"
 }
 
 # Timing data for analysis

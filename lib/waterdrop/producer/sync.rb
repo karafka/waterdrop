@@ -20,7 +20,7 @@ module WaterDrop
         validate_message!(message)
 
         @monitor.instrument(
-          'message.produced_sync',
+          "message.produced_sync",
           producer_id: id,
           message: message
         ) do
@@ -33,11 +33,11 @@ module WaterDrop
           raise Errors::ProduceError, e.inspect
         rescue Errors::ProduceError => ex
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             producer_id: id,
             message: message,
             error: ex,
-            type: 'message.produce_sync'
+            type: "message.produce_sync"
           )
 
           raise ex
@@ -70,7 +70,7 @@ module WaterDrop
         dispatched = []
         inline_error = nil
 
-        @monitor.instrument('messages.produced_sync', producer_id: id, messages: messages) do
+        @monitor.instrument("messages.produced_sync", producer_id: id, messages: messages) do
           # While most of the librdkafka errors are async and not inline, there are some like
           # buffer overflow that can leak in during the `#produce` itself. When this happens, we
           # still (since it's a sync mode) need to wait on deliveries of things that were
@@ -106,7 +106,7 @@ module WaterDrop
         re_raised = Errors::ProduceManyError.new(dispatched, e.inspect)
 
         @monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           producer_id: id,
           messages: messages,
           # If it is a transactional producer nothing was successfully dispatched on error, thus
@@ -115,7 +115,7 @@ module WaterDrop
           # isolation level.
           dispatched: transactional? ? EMPTY_ARRAY : dispatched,
           error: re_raised,
-          type: 'messages.produce_many_sync'
+          type: "messages.produce_many_sync"
         )
 
         raise re_raised

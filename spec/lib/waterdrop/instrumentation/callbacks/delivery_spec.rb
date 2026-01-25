@@ -22,55 +22,55 @@ RSpec.describe_current do
 
   after { producer.close }
 
-  describe '#call' do
+  describe "#call" do
     let(:changed) { [] }
     let(:event) { changed.first }
 
     before do
-      monitor.subscribe('message.acknowledged') do |event|
+      monitor.subscribe("message.acknowledged") do |event|
         changed << event
       end
 
       callback.call(delivery_report)
     end
 
-    it { expect(event.id).to eq('message.acknowledged') }
+    it { expect(event.id).to eq("message.acknowledged") }
     it { expect(event[:producer_id]).to eq(producer_id) }
     it { expect(event[:offset]).to eq(delivery_report.offset) }
     it { expect(event[:partition]).to eq(delivery_report.partition) }
     it { expect(event[:topic]).to eq(delivery_report.topic_name) }
 
-    context 'when delivery handler code contains an error' do
+    context "when delivery handler code contains an error" do
       let(:tracked_errors) { [] }
 
       before do
-        monitor.subscribe('message.acknowledged') do
+        monitor.subscribe("message.acknowledged") do
           raise
         end
 
         local_errors = tracked_errors
 
-        monitor.subscribe('error.occurred') do |event|
+        monitor.subscribe("error.occurred") do |event|
           local_errors << event
         end
       end
 
-      it 'expect to contain in, notify and continue as we do not want to crash rdkafka' do
+      it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
         expect { callback.call(delivery_report) }.not_to raise_error
         expect(tracked_errors.size).to eq(1)
-        expect(tracked_errors.first[:type]).to eq('callbacks.delivery.error')
+        expect(tracked_errors.first[:type]).to eq("callbacks.delivery.error")
       end
     end
   end
 
-  describe '#when we do an end-to-end delivery report check' do
-    context 'when there is a message that was successfully delivered' do
+  describe "#when we do an end-to-end delivery report check" do
+    context "when there is a message that was successfully delivered" do
       let(:changed) { [] }
       let(:event) { changed.first }
       let(:message) { build(:valid_message) }
 
       before do
-        producer.monitor.subscribe('message.acknowledged') do |event|
+        producer.monitor.subscribe("message.acknowledged") do |event|
           changed << event
         end
 
@@ -84,19 +84,19 @@ RSpec.describe_current do
       it { expect(event[:topic]).to eq(message[:topic]) }
     end
 
-    context 'when there is a message that was not successfully delivered async' do
+    context "when there is a message that was not successfully delivered async" do
       let(:changed) { [] }
       let(:event) { changed.last }
 
       before do
-        producer.monitor.subscribe('error.occurred') do |event|
+        producer.monitor.subscribe("error.occurred") do |event|
           changed << event
         end
 
         100.times do
           # We force it to bypass the validations, so we trigger an error on delivery
           # otherwise we would be stopped by WaterDrop itself
-          producer.send(:client).produce(topic: '$%^&*', payload: '1')
+          producer.send(:client).produce(topic: "$%^&*", payload: "1")
         rescue Rdkafka::RdkafkaError
           nil
         end
@@ -107,21 +107,21 @@ RSpec.describe_current do
       it { expect(event.payload[:error]).to be_a(Rdkafka::RdkafkaError) }
       it { expect(event.payload[:partition]).to eq(-1) }
       it { expect(event.payload[:offset]).to eq(-1001) }
-      it { expect(event.payload[:topic]).to eq('$%^&*') }
+      it { expect(event.payload[:topic]).to eq("$%^&*") }
     end
 
-    context 'when there is a message that was not successfully delivered sync' do
+    context "when there is a message that was not successfully delivered sync" do
       let(:changed) { [] }
       let(:event) { changed.first }
 
       before do
-        producer.monitor.subscribe('error.occurred') do |event|
+        producer.monitor.subscribe("error.occurred") do |event|
           changed << event
         end
 
         # Intercept the error so it won't bubble up as we want to check the notifications pipeline
         begin
-          producer.send(:client).produce(topic: '$%^&*', payload: '1').wait
+          producer.send(:client).produce(topic: "$%^&*", payload: "1").wait
         rescue Rdkafka::RdkafkaError
           nil
         end
@@ -134,14 +134,14 @@ RSpec.describe_current do
       it { expect(event.payload[:offset]).to eq(-1001) }
     end
 
-    context 'when there is an inline thrown erorrs' do
+    context "when there is an inline thrown erorrs" do
       let(:changed) { [] }
       let(:errors) { [] }
       let(:event) { changed.first }
       let(:producer) { build(:limited_producer) }
 
       before do
-        producer.monitor.subscribe('error.occurred') do |event|
+        producer.monitor.subscribe("error.occurred") do |event|
           changed << event
         end
 
@@ -162,17 +162,17 @@ RSpec.describe_current do
       it { expect(event[:error].cause).to be_a(Rdkafka::RdkafkaError) }
     end
 
-    context 'when there is a producer with non-transactional purge' do
+    context "when there is a producer with non-transactional purge" do
       let(:producer) { build(:slow_producer) }
       let(:errors) { [] }
       let(:purges) { [] }
 
       before do
-        producer.monitor.subscribe('error.occurred') do |event|
+        producer.monitor.subscribe("error.occurred") do |event|
           errors << event[:error]
         end
 
-        producer.monitor.subscribe('message.purged') do |event|
+        producer.monitor.subscribe("message.purged") do |event|
           purges << event[:error]
         end
 
@@ -182,12 +182,12 @@ RSpec.describe_current do
         sleep(0.01) until errors.size.positive?
       end
 
-      it 'expect to have it in the errors' do
+      it "expect to have it in the errors" do
         expect(errors.first).to be_a(Rdkafka::RdkafkaError)
         expect(errors.first.code).to eq(:purge_queue)
       end
 
-      it 'expect not to publish purge notification' do
+      it "expect not to publish purge notification" do
         expect(purges).to be_empty
       end
     end

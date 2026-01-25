@@ -28,8 +28,8 @@ module WaterDrop
 
       configure do |config|
         config.error_messages = YAML.safe_load_file(
-          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-        ).fetch('en').fetch('validations').fetch('variant')
+          File.join(WaterDrop.gem_root, "config", "locales", "errors.yml")
+        ).fetch("en").fetch("validations").fetch("variant")
       end
 
       required(:default) { |val| BOOLEANS.include?(val) }
@@ -40,10 +40,10 @@ module WaterDrop
         next true unless errors.empty?
 
         errors = config
-                 .fetch(:topic_config)
-                 .keys
-                 .reject { |key| key.is_a?(Symbol) }
-                 .map { |key| [[:kafka, key], :kafka_key_must_be_a_symbol] }
+          .fetch(:topic_config)
+          .keys
+          .reject { |key| key.is_a?(Symbol) }
+          .map { |key| [[:kafka, key], :kafka_key_must_be_a_symbol] }
 
         errors
       end
@@ -53,10 +53,10 @@ module WaterDrop
         next true unless errors.empty?
 
         errors = config
-                 .fetch(:topic_config)
-                 .keys
-                 .reject { |key| TOPIC_CONFIG_KEYS.include?(key) }
-                 .map { |key| [[:kafka, key], :kafka_key_not_per_topic] }
+          .fetch(:topic_config)
+          .keys
+          .reject { |key| TOPIC_CONFIG_KEYS.include?(key) }
+          .map { |key| [[:kafka, key], :kafka_key_not_per_topic] }
 
         errors
       end
@@ -70,10 +70,10 @@ module WaterDrop
         next true unless config.fetch(:transactional)
 
         errors = config
-                 .fetch(:topic_config)
-                 .keys
-                 .select { |key| key.to_s.include?('acks') }
-                 .map { |key| [[:kafka, key], :kafka_key_acks_not_changeable] }
+          .fetch(:topic_config)
+          .keys
+          .select { |key| key.to_s.include?("acks") }
+          .map { |key| [[:kafka, key], :kafka_key_acks_not_changeable] }
 
         errors
       end
@@ -85,10 +85,10 @@ module WaterDrop
         next true unless config.fetch(:idempotent)
 
         errors = config
-                 .fetch(:topic_config)
-                 .keys
-                 .select { |key| key.to_s.include?('acks') }
-                 .map { |key| [[:kafka, key], :kafka_key_acks_not_changeable] }
+          .fetch(:topic_config)
+          .keys
+          .select { |key| key.to_s.include?("acks") }
+          .map { |key| [[:kafka, key], :kafka_key_acks_not_changeable] }
 
         errors
       end

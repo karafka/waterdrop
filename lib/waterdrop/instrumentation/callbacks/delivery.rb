@@ -47,13 +47,13 @@ module WaterDrop
         # This runs from the rdkafka thread, thus we want to safe-guard it and prevent absolute
         # crashes even if the instrumentation code fails. If it would bubble-up, it could crash
         # the rdkafka background thread
-        rescue StandardError => e
+        rescue => e
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
             producer_id: @producer_id,
-            type: 'callbacks.delivery.error'
+            type: "callbacks.delivery.error"
           )
         end
 
@@ -62,7 +62,7 @@ module WaterDrop
         # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
         def instrument_acknowledged(delivery_report)
           @monitor.instrument(
-            'message.acknowledged',
+            "message.acknowledged",
             caller: self,
             producer_id: @producer_id,
             offset: delivery_report.offset,
@@ -76,7 +76,7 @@ module WaterDrop
         # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
         def instrument_purged(delivery_report)
           @monitor.instrument(
-            'message.purged',
+            "message.purged",
             caller: self,
             error: build_error(delivery_report),
             producer_id: @producer_id,
@@ -85,14 +85,14 @@ module WaterDrop
             topic: delivery_report.topic_name,
             delivery_report: delivery_report,
             label: delivery_report.label,
-            type: 'librdkafka.dispatch_error'
+            type: "librdkafka.dispatch_error"
           )
         end
 
         # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
         def instrument_error(delivery_report)
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: build_error(delivery_report),
             producer_id: @producer_id,
@@ -101,7 +101,7 @@ module WaterDrop
             topic: delivery_report.topic_name,
             delivery_report: delivery_report,
             label: delivery_report.label,
-            type: 'librdkafka.dispatch_error'
+            type: "librdkafka.dispatch_error"
           )
         end
 

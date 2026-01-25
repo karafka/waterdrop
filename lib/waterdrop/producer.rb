@@ -70,7 +70,7 @@ module WaterDrop
 
       # Instrument producer creation for global listeners
       class_monitor.instrument(
-        'producer.created',
+        "producer.created",
         producer: self,
         producer_id: @id
       )
@@ -85,9 +85,9 @@ module WaterDrop
       raise Errors::ProducerAlreadyConfiguredError, id unless @status.initial?
 
       @config = Config
-                .new
-                .setup(...)
-                .config
+        .new
+        .setup(...)
+        .config
 
       @id = @config.id
       @monitor = @config.monitor
@@ -99,7 +99,7 @@ module WaterDrop
 
         # Instrument producer configuration for global listeners
         class_monitor.instrument(
-          'producer.configured',
+          "producer.configured",
           producer: self,
           producer_id: @id,
           config: @config
@@ -121,7 +121,7 @@ module WaterDrop
 
       # Instrument producer configuration for global listeners
       class_monitor.instrument(
-        'producer.configured',
+        "producer.configured",
         producer: self,
         producer_id: @id,
         config: @config
@@ -166,7 +166,7 @@ module WaterDrop
         @client = Builder.new.call(self, @config)
 
         @status.connected!
-        @monitor.instrument('producer.connected', producer_id: id)
+        @monitor.instrument("producer.connected", producer_id: id)
       end
 
       @client
@@ -189,7 +189,7 @@ module WaterDrop
     #   purge the internal WaterDrop buffer but will also purge the librdkafka queue as well as
     #   will cancel any outgoing messages dispatches.
     def purge
-      @monitor.instrument('buffer.purged', producer_id: id) do
+      @monitor.instrument("buffer.purged", producer_id: id) do
         @buffer_mutex.synchronize do
           @messages = []
         end
@@ -218,7 +218,7 @@ module WaterDrop
       Variant.new(self, **args)
     end
 
-    alias variant with
+    alias_method :variant, :with
 
     # Returns and caches the middleware object that may be used
     # @return [WaterDrop::Producer::Middleware]
@@ -261,9 +261,9 @@ module WaterDrop
             return false unless @operations_in_progress.value.zero?
 
             @status.disconnecting!
-            @monitor.instrument('producer.disconnecting', producer_id: id)
+            @monitor.instrument("producer.disconnecting", producer_id: id)
 
-            @monitor.instrument('producer.disconnected', producer_id: id) do
+            @monitor.instrument("producer.disconnected", producer_id: id) do
               # Close the client
               @client.close
               @client = nil
@@ -311,11 +311,11 @@ module WaterDrop
           return unless @status.active?
 
           @monitor.instrument(
-            'producer.closed',
+            "producer.closed",
             producer_id: id
           ) do
             @status.closing!
-            @monitor.instrument('producer.closing', producer_id: id)
+            @monitor.instrument("producer.closing", producer_id: id)
 
             # No need for auto-gc if everything got closed by us
             # This should be used only in case a producer was not closed properly and forgotten
@@ -391,20 +391,20 @@ module WaterDrop
           @buffer_mutex.unlock
         end
       else
-        parts << 'buffer_size=busy'
+        parts << "buffer_size=busy"
       end
 
       # Check if client is connected without triggering connection
       parts << if @status.connected?
-                 'connected=true'
-               else
-                 'connected=false'
-               end
+        "connected=true"
+      else
+        "connected=false"
+      end
 
       parts << "operations=#{@operations_in_progress.value}"
-      parts << 'in_transaction=true' if @transaction_mutex.locked?
+      parts << "in_transaction=true" if @transaction_mutex.locked?
 
-      "#<#{self.class.name}:#{format('%#x', object_id)} #{parts.join(' ')}>"
+      "#<#{self.class.name}:#{format("%#x", object_id)} #{parts.join(" ")}>"
     end
 
     private
@@ -478,10 +478,10 @@ module WaterDrop
       end
 
       result = if transactional?
-                 transaction { client.produce(**message) }
-               else
-                 client.produce(**message)
-               end
+        transaction { client.produce(**message) }
+      else
+        client.produce(**message)
+      end
 
       # Reset attempts counter on successful produce
       @idempotent_fatal_error_attempts = 0
@@ -498,10 +498,10 @@ module WaterDrop
 
         # Instrument error.occurred before attempting reload for visibility
         @monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           producer_id: id,
           error: e,
-          type: 'librdkafka.idempotent_fatal_error',
+          type: "librdkafka.idempotent_fatal_error",
           attempt: @idempotent_fatal_error_attempts
         )
 
@@ -525,7 +525,7 @@ module WaterDrop
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
 
-      label = caller_locations(2, 1)[0].label.split.last.split('#').last
+      label = caller_locations(2, 1)[0].label.split.last.split("#").last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
@@ -545,7 +545,7 @@ module WaterDrop
           # If this type of event happens too often, it may indicate that the buffer settings are
           # not well configured.
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             producer_id: id,
             message: message,
             error: e,

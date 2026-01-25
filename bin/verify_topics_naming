@@ -8,18 +8,18 @@
 #
 # It also ensures we have one convention that we can follow.
 
-require 'bundler'
+require "bundler"
 Bundler.setup(:default, :test, :integrations)
-require 'rdkafka'
+require "rdkafka"
 
-admin = Rdkafka::Config.new('bootstrap.servers': 'localhost:9092').admin
+admin = Rdkafka::Config.new("bootstrap.servers": "localhost:9092").admin
 
 invalid = admin
-          .metadata
-          .topics
-          .map { |topic| topic[:topic_name] }
-          .select { |topic| !topic.start_with?('it-') }
-          .select { |topic| topic.length <= 6 }
+  .metadata
+  .topics
+  .map { |topic| topic[:topic_name] }
+  .select { |topic| !topic.start_with?("it-") }
+  .select { |topic| topic.length <= 6 }
 
 admin.close
 

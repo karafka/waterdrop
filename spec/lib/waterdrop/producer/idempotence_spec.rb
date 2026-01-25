@@ -5,48 +5,48 @@ RSpec.describe_current do
 
   after { producer.close }
 
-  describe '#idempotent?' do
-    context 'when producer is transactional' do
+  describe "#idempotent?" do
+    context "when producer is transactional" do
       subject(:producer) { build(:transactional_producer) }
 
-      it 'expect to return true as all transactional producers are idempotent' do
+      it "expect to return true as all transactional producers are idempotent" do
         expect(producer.idempotent?).to be(true)
       end
     end
 
-    context 'when producer has enable.idempotence set to true' do
+    context "when producer has enable.idempotence set to true" do
       subject(:producer) { build(:idempotent_producer) }
 
-      it 'expect to return true' do
+      it "expect to return true" do
         expect(producer.idempotent?).to be(true)
       end
     end
 
-    context 'when producer has enable.idempotence set to false' do
+    context "when producer has enable.idempotence set to false" do
       subject(:producer) do
         build(
           :producer,
-          kafka: { 'bootstrap.servers': BOOTSTRAP_SERVERS, 'enable.idempotence': false }
+          kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS, "enable.idempotence": false }
         )
       end
 
-      it 'expect to return false' do
+      it "expect to return false" do
         expect(producer.idempotent?).to be(false)
       end
     end
 
-    context 'when producer does not have enable.idempotence configured' do
+    context "when producer does not have enable.idempotence configured" do
       subject(:producer) { build(:producer) }
 
-      it 'expect to return false by default' do
+      it "expect to return false by default" do
         expect(producer.idempotent?).to be(false)
       end
     end
 
-    context 'when idempotent? is called multiple times' do
+    context "when idempotent? is called multiple times" do
       subject(:producer) { build(:idempotent_producer) }
 
-      it 'expect to cache the result' do
+      it "expect to cache the result" do
         first_result = producer.idempotent?
         expect(producer.idempotent?).to eq(first_result)
         expect(producer.instance_variable_defined?(:@idempotent)).to be(true)
@@ -54,11 +54,11 @@ RSpec.describe_current do
     end
   end
 
-  describe 'fatal error handling' do
+  describe "fatal error handling" do
     let(:topic_name) { "it-#{SecureRandom.uuid}" }
     let(:message) { build(:valid_message, topic: topic_name) }
 
-    context 'when fatal error occurs with reload_on_idempotent_fatal_error enabled' do
+    context "when fatal error occurs with reload_on_idempotent_fatal_error enabled" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -67,12 +67,12 @@ RSpec.describe_current do
       let(:reloaded_events) { [] }
 
       before do
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
       end
 
-      it 'expect to instrument producer.reload and producer.reloaded events during reload' do
+      it "expect to instrument producer.reload and producer.reloaded events during reload" do
         reload_events = []
-        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
+        producer.monitor.subscribe("producer.reload") { |event| reload_events << event }
 
         call_count = 0
 
@@ -125,9 +125,9 @@ RSpec.describe_current do
         expect(reloaded_events.first[:attempt]).to eq(1)
       end
 
-      it 'expect to include attempt number in instrumentation' do
+      it "expect to include attempt number in instrumentation" do
         reloaded_events = []
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
 
         produce_call_count = 0
 
@@ -175,7 +175,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when fatal error occurs with reload_on_idempotent_fatal_error disabled' do
+    context "when fatal error occurs with reload_on_idempotent_fatal_error disabled" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: false)
       end
@@ -186,13 +186,13 @@ RSpec.describe_current do
         allow(producer.client).to receive(:produce).and_raise(fatal_error)
       end
 
-      it 'expect to raise the fatal error without reload' do
+      it "expect to raise the fatal error without reload" do
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
     end
 
-    context 'when non-reloadable fatal error (fenced) occurs' do
+    context "when non-reloadable fatal error (fenced) occurs" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -202,17 +202,17 @@ RSpec.describe_current do
       let(:reloaded_events) { [] }
 
       before do
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
         allow(producer.client).to receive(:produce).and_raise(fenced_error)
       end
 
-      it 'expect not to reload and raise the error' do
+      it "expect not to reload and raise the error" do
         # This should raise because fenced errors are non-reloadable by default
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
 
-      it 'expect not to emit producer.reloaded event' do
+      it "expect not to emit producer.reloaded event" do
         begin
           producer.produce_sync(message)
         rescue WaterDrop::Errors::ProduceError
@@ -223,7 +223,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when config modification is done via producer.reload event' do
+    context "when config modification is done via producer.reload event" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -233,15 +233,15 @@ RSpec.describe_current do
 
       before do
         # Subscribe to producer.reload and modify config directly
-        producer.monitor.subscribe('producer.reload') do |event|
+        producer.monitor.subscribe("producer.reload") do |event|
           # User modifies kafka config via event[:caller].config
-          event[:caller].config.kafka[:'enable.idempotence'] = false
+          event[:caller].config.kafka[:"enable.idempotence"] = false
         end
 
-        producer.monitor.subscribe('producer.reloaded') { |event| reload_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
       end
 
-      it 'expect to apply config.kafka changes from the event' do
+      it "expect to apply config.kafka changes from the event" do
         call_count = 0
 
         # Stub the initial client's produce method
@@ -262,7 +262,7 @@ RSpec.describe_current do
         # Stub the builder's call method to return a mock client
         allow(mock_builder).to receive(:call) do |_prod, config|
           # Verify config was updated
-          expect(config.kafka[:'enable.idempotence']).to be(false)
+          expect(config.kafka[:"enable.idempotence"]).to be(false)
 
           mock_client = instance_double(Rdkafka::Producer)
           allow(mock_client).to receive(:produce) do
@@ -288,7 +288,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when fatal error occurs on transactional producer' do
+    context "when fatal error occurs on transactional producer" do
       subject(:producer) do
         build(:transactional_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -299,14 +299,14 @@ RSpec.describe_current do
         allow(producer.client).to receive(:produce).and_raise(fatal_error)
       end
 
-      it 'expect not to use idempotent reload path' do
+      it "expect not to use idempotent reload path" do
         # Transactional producers should not use the idempotent reload path
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
     end
 
-    context 'when fatal error occurs on non-idempotent producer' do
+    context "when fatal error occurs on non-idempotent producer" do
       subject(:producer) do
         build(:producer, reload_on_idempotent_fatal_error: true)
       end
@@ -317,13 +317,13 @@ RSpec.describe_current do
         allow(producer.client).to receive(:produce).and_raise(fatal_error)
       end
 
-      it 'expect not to reload as producer is not idempotent' do
+      it "expect not to reload as producer is not idempotent" do
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
     end
 
-    context 'when non-fatal error occurs' do
+    context "when non-fatal error occurs" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -335,14 +335,14 @@ RSpec.describe_current do
         allow(producer.client).to receive(:produce).and_raise(queue_full_error)
       end
 
-      it 'expect not to reload for non-fatal errors' do
+      it "expect not to reload for non-fatal errors" do
         # Should follow normal error handling path, not reload
         expect { producer.produce_sync(message) }
           .to raise_error(WaterDrop::Errors::ProduceError)
       end
     end
 
-    context 'when using Testing helper to trigger real fatal errors' do
+    context "when using Testing helper to trigger real fatal errors" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -352,9 +352,9 @@ RSpec.describe_current do
         producer.singleton_class.include(WaterDrop::Producer::Testing)
       end
 
-      it 'expect to trigger a fatal error and have it queryable' do
+      it "expect to trigger a fatal error and have it queryable" do
         # Trigger a real fatal error using the testing helper
-        result = producer.trigger_test_fatal_error(47, 'Test producer epoch error')
+        result = producer.trigger_test_fatal_error(47, "Test producer epoch error")
 
         # Verify the trigger was successful
         expect(result).to eq(0)
@@ -363,12 +363,12 @@ RSpec.describe_current do
         fatal_error = producer.fatal_error
         expect(fatal_error).not_to be_nil
         expect(fatal_error[:error_code]).to eq(47)
-        expect(fatal_error[:error_string]).to include('test_fatal_error')
+        expect(fatal_error[:error_string]).to include("test_fatal_error")
       end
 
-      it 'expect to detect fatal error state after triggering' do
+      it "expect to detect fatal error state after triggering" do
         # Trigger a real fatal error
-        producer.trigger_test_fatal_error(47, 'Injected test error')
+        producer.trigger_test_fatal_error(47, "Injected test error")
 
         # Verify fatal error is present and has correct error code
         fatal_error = producer.fatal_error
@@ -377,7 +377,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'with real fatal error injection and reload testing' do
+    context "with real fatal error injection and reload testing" do
       subject(:producer) do
         build(:idempotent_producer, reload_on_idempotent_fatal_error: true)
       end
@@ -386,9 +386,9 @@ RSpec.describe_current do
         producer.singleton_class.include(WaterDrop::Producer::Testing)
       end
 
-      it 'can inject fatal errors with various error codes' do
+      it "can inject fatal errors with various error codes" do
         # Error code 47 (INVALID_PRODUCER_EPOCH)
-        result = producer.trigger_test_fatal_error(47, 'Simulated producer fencing')
+        result = producer.trigger_test_fatal_error(47, "Simulated producer fencing")
         expect(result).to eq(0)
 
         fatal_error = producer.fatal_error
@@ -398,8 +398,8 @@ RSpec.describe_current do
         expect(fatal_error[:error_string]).not_to be_empty
       end
 
-      it 'persists fatal error state across multiple queries' do
-        producer.trigger_test_fatal_error(47, 'Test error persistence')
+      it "persists fatal error state across multiple queries" do
+        producer.trigger_test_fatal_error(47, "Test error persistence")
 
         # Query multiple times
         first_query = producer.fatal_error
@@ -411,9 +411,9 @@ RSpec.describe_current do
         expect(first_query[:error_code]).to eq(47)
       end
 
-      it 'maintains fatal error state after triggering' do
+      it "maintains fatal error state after triggering" do
         # Trigger fatal error
-        producer.trigger_test_fatal_error(47, 'Test fatal error state')
+        producer.trigger_test_fatal_error(47, "Test fatal error state")
 
         # Verify error is present
         expect(producer.fatal_error).not_to be_nil
@@ -424,14 +424,14 @@ RSpec.describe_current do
         expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
-      it 'detects real fatal errors correctly' do
+      it "detects real fatal errors correctly" do
         # First, produce a message successfully to ensure producer is working
         report = producer.produce_sync(message)
         expect(report).to be_a(Rdkafka::Producer::DeliveryReport)
         expect(report.error).to be_nil
 
         # Now inject a real fatal error
-        producer.trigger_test_fatal_error(47, 'Test reload trigger')
+        producer.trigger_test_fatal_error(47, "Test reload trigger")
 
         # Verify the fatal error is present
         fatal_error = producer.fatal_error
@@ -439,9 +439,9 @@ RSpec.describe_current do
         expect(fatal_error[:error_code]).to eq(47)
       end
 
-      it 'can create new producer after fatal error for recovery' do
+      it "can create new producer after fatal error for recovery" do
         # Trigger fatal error on first producer
-        producer.trigger_test_fatal_error(47, 'First producer fatal')
+        producer.trigger_test_fatal_error(47, "First producer fatal")
         expect(producer.fatal_error).not_to be_nil
 
         # Close it
@@ -463,7 +463,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'with real fatal error injection and reload event instrumentation' do
+    context "with real fatal error injection and reload event instrumentation" do
       subject(:producer) do
         build(
           :idempotent_producer,
@@ -479,14 +479,14 @@ RSpec.describe_current do
 
       before do
         producer.singleton_class.include(WaterDrop::Producer::Testing)
-        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
-        producer.monitor.subscribe('error.occurred') { |event| error_events << event }
+        producer.monitor.subscribe("producer.reload") { |event| reload_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
+        producer.monitor.subscribe("error.occurred") { |event| error_events << event }
       end
 
-      it 'emits producer.reload and producer.reloaded events when fatal error triggers reload' do
+      it "emits producer.reload and producer.reloaded events when fatal error triggers reload" do
         # Trigger real fatal error using Testing API
-        producer.trigger_test_fatal_error(47, 'Test reload with real fatal error')
+        producer.trigger_test_fatal_error(47, "Test reload with real fatal error")
 
         # Verify fatal error is present
         expect(producer.fatal_error).not_to be_nil
@@ -510,9 +510,9 @@ RSpec.describe_current do
         expect(reloaded_events.first[:attempt]).to eq(1)
       end
 
-      it 'emits reload events when producer recovers from fatal error' do
+      it "emits reload events when producer recovers from fatal error" do
         # Trigger fatal error using Testing API
-        producer.trigger_test_fatal_error(47, 'Test reload event emission')
+        producer.trigger_test_fatal_error(47, "Test reload event emission")
 
         # Verify fatal error is present
         expect(producer.fatal_error).not_to be_nil
@@ -533,9 +533,9 @@ RSpec.describe_current do
         expect(reloaded_events.first[:producer_id]).to eq(producer.id)
       end
 
-      it 'includes error.occurred event with fatal error details' do
+      it "includes error.occurred event with fatal error details" do
         # Trigger fatal error using Testing API
-        producer.trigger_test_fatal_error(47, 'Test error.occurred event')
+        producer.trigger_test_fatal_error(47, "Test error.occurred event")
 
         # Produce should trigger reload and succeed
         report = producer.produce_sync(message)
@@ -545,7 +545,7 @@ RSpec.describe_current do
         expect(error_events.size).to be >= 1
 
         fatal_error_events = error_events.select do |e|
-          e[:type] == 'librdkafka.idempotent_fatal_error'
+          e[:type] == "librdkafka.idempotent_fatal_error"
         end
 
         expect(fatal_error_events).not_to be_empty
@@ -554,20 +554,20 @@ RSpec.describe_current do
         expect(fatal_error_events.first[:attempt]).to eq(1)
       end
 
-      it 'allows config modification in producer.reload event with real fatal errors' do
+      it "allows config modification in producer.reload event with real fatal errors" do
         config_modified = false
         modified_config = nil
 
         # Subscribe to reload event and capture config modification
-        producer.monitor.subscribe('producer.reload') do |event|
+        producer.monitor.subscribe("producer.reload") do |event|
           # Modify a valid kafka config setting
-          event[:caller].config.kafka[:'enable.idempotence'] = false
+          event[:caller].config.kafka[:"enable.idempotence"] = false
           config_modified = true
           modified_config = event[:caller].config
         end
 
         # Trigger fatal error using Testing API
-        producer.trigger_test_fatal_error(47, 'Test config modification')
+        producer.trigger_test_fatal_error(47, "Test config modification")
 
         # Produce should trigger reload and succeed
         report = producer.produce_sync(message)
@@ -576,13 +576,13 @@ RSpec.describe_current do
         # Verify config modification event was called
         expect(config_modified).to be(true)
         expect(modified_config).not_to be_nil
-        expect(modified_config.kafka[:'enable.idempotence']).to be(false)
+        expect(modified_config.kafka[:"enable.idempotence"]).to be(false)
         expect(reload_events.size).to be >= 1
         expect(reloaded_events.size).to be >= 1
       end
     end
 
-    context 'when reload is disabled for idempotent producer' do
+    context "when reload is disabled for idempotent producer" do
       subject(:producer) do
         build(
           :idempotent_producer,
@@ -597,15 +597,15 @@ RSpec.describe_current do
 
       before do
         producer.singleton_class.include(WaterDrop::Producer::Testing)
-        producer.monitor.subscribe('producer.reload') { |event| reload_events << event }
-        producer.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+        producer.monitor.subscribe("producer.reload") { |event| reload_events << event }
+        producer.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
       end
 
-      it 'keeps throwing errors without reload when reload is disabled' do
+      it "keeps throwing errors without reload when reload is disabled" do
         initial_client = producer.client
 
         # Trigger fatal error
-        producer.trigger_test_fatal_error(47, 'Fatal error with reload disabled')
+        producer.trigger_test_fatal_error(47, "Fatal error with reload disabled")
 
         # Stub to always raise fatal error
         allow(initial_client).to receive(:produce) do
@@ -632,12 +632,12 @@ RSpec.describe_current do
         expect(reloaded_events).to be_empty
       end
 
-      it 'does not attempt reload even with multiple produce attempts' do
+      it "does not attempt reload even with multiple produce attempts" do
         initial_client = producer.client
         produce_attempts = 0
 
         # Trigger fatal error
-        producer.trigger_test_fatal_error(47, 'Fatal error without reload')
+        producer.trigger_test_fatal_error(47, "Fatal error without reload")
 
         # Stub to count produce attempts
         allow(initial_client).to receive(:produce) do
@@ -663,7 +663,7 @@ RSpec.describe_current do
       end
     end
 
-    context 'when calling produce methods after fatal state is reached' do
+    context "when calling produce methods after fatal state is reached" do
       subject(:producer) do
         build(
           :idempotent_producer,
@@ -676,10 +676,10 @@ RSpec.describe_current do
       before do
         producer.singleton_class.include(WaterDrop::Producer::Testing)
         # Trigger fatal error to put producer in fatal state
-        producer.trigger_test_fatal_error(47, 'Producer in fatal state')
+        producer.trigger_test_fatal_error(47, "Producer in fatal state")
       end
 
-      it 'produce_sync raises error when producer is in fatal state' do
+      it "produce_sync raises error when producer is in fatal state" do
         error = nil
         begin
           producer.produce_sync(message)
@@ -696,7 +696,7 @@ RSpec.describe_current do
         expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
-      it 'produce_async raises error when producer is in fatal state' do
+      it "produce_async raises error when producer is in fatal state" do
         error = nil
         begin
           producer.produce_async(message)
@@ -712,7 +712,7 @@ RSpec.describe_current do
         expect(producer.fatal_error).not_to be_nil
       end
 
-      it 'produce_many_sync raises error when producer is in fatal state' do
+      it "produce_many_sync raises error when producer is in fatal state" do
         error = nil
         begin
           producer.produce_many_sync(messages)
@@ -728,7 +728,7 @@ RSpec.describe_current do
         expect(producer.fatal_error).not_to be_nil
       end
 
-      it 'produce_many_async raises error when producer is in fatal state' do
+      it "produce_many_async raises error when producer is in fatal state" do
         error = nil
         begin
           producer.produce_many_async(messages)
@@ -744,7 +744,7 @@ RSpec.describe_current do
         expect(producer.fatal_error).not_to be_nil
       end
 
-      it 'all produce methods fail consistently in fatal state' do
+      it "all produce methods fail consistently in fatal state" do
         # Try each method multiple times to verify consistent behavior
         3.times do
           expect { producer.produce_sync(message) }
@@ -774,7 +774,7 @@ RSpec.describe_current do
         expect(producer.fatal_error[:error_code]).to eq(47)
       end
 
-      it 'documents that producer remains unusable after fatal error without reload' do
+      it "documents that producer remains unusable after fatal error without reload" do
         # First attempt fails
         expect { producer.produce_sync(message) }.to raise_error(WaterDrop::Errors::ProduceError)
 

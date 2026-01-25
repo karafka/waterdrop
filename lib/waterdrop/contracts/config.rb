@@ -6,8 +6,8 @@ module WaterDrop
     class Config < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load_file(
-          File.join(WaterDrop.gem_root, 'config', 'locales', 'errors.yml')
-        ).fetch('en').fetch('validations').fetch('config')
+          File.join(WaterDrop.gem_root, "config", "locales", "errors.yml")
+        ).fetch("en").fetch("validations").fetch("config")
       end
 
       required(:id) { |val| val.is_a?(String) && !val.empty? }
@@ -49,10 +49,10 @@ module WaterDrop
         next true unless errors.empty?
 
         errors = config
-                 .fetch(:kafka)
-                 .keys
-                 .reject { |key| key.is_a?(Symbol) }
-                 .map { |key| [[:kafka, key], :kafka_key_must_be_a_symbol] }
+          .fetch(:kafka)
+          .keys
+          .reject { |key| key.is_a?(Symbol) }
+          .map { |key| [[:kafka, key], :kafka_key_must_be_a_symbol] }
 
         errors
       end
