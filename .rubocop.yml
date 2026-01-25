@@ -16,6 +16,12 @@ inherit_gem:
 AllCops:
   NewCops: enable
   TargetRubyVersion: 3.2
+  Include:
+    - "**/*.rb"
+    - "**/*.gemspec"
+    - "**/Gemfile"
+    - "**/Rakefile"
+    - Gemfile.lint
 
 # Disabled departments - not a Rails project, no Capybara/FactoryBot
 Capybara:
