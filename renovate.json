@@ -6,6 +6,7 @@
   "includePaths": [
     ".ruby-version",
     "Gemfile",
+    "Gemfile.lint",
     "waterdrop.gemspec",
     "spec/integrations/**/Gemfile",
     ".github/workflows/**"
