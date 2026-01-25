@@ -1,3 +1,10 @@
+PATH
+  remote: /home/mencio/Software/mensfeld/rubocop-spec_structure
+  specs:
+    rubocop-spec_structure (0.1.0)
+      lint_roller (~> 1.1)
+      rubocop (>= 1.72.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -83,6 +90,7 @@ PLATFORMS
 DEPENDENCIES
   rubocop-performance
   rubocop-rspec
+  rubocop-spec_structure!
   rubocop-thread_safety
   standard
   standard-performance
@@ -107,6 +115,7 @@ CHECKSUMS
   rubocop-performance (1.26.1) sha256=cd19b936ff196df85829d264b522fd4f98b6c89ad271fa52744a8c11b8f71834
   rubocop-rspec (3.9.0) sha256=8fa70a3619408237d789aeecfb9beef40576acc855173e60939d63332fdb55e2
   rubocop-rspec_rails (2.32.0) sha256=4a0d641c72f6ebb957534f539d9d0a62c47abd8ce0d0aeee1ef4701e892a9100
+  rubocop-spec_structure (0.1.0)
   rubocop-thread_safety (0.7.3) sha256=067cdd52fbf5deffc18995437e45b5194236eaff4f71de3375a1f6052e48f431
   ruby-progressbar (1.13.0) sha256=80fc9c47a9b640d6834e0dc7b3c94c9df37f08cb072b7761e4a71e22cff29b33
   standard (1.53.0) sha256=f3c9493385db7079d0abce6f7582f553122156997b81258cd361d3480eeacf9c

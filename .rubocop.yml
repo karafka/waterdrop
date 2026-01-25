@@ -6,6 +6,7 @@ plugins:
   - rubocop-performance
   - rubocop-rspec
   - rubocop-rspec_rails
+  - rubocop-spec_structure
   - rubocop-thread_safety
 
 inherit_gem:
@@ -69,6 +70,21 @@ RSpec/SpecFilePathFormat:
 Style/SlicingWithRange:
   Exclude:
     - bin/integrations
+
+# SpecStructure
+SpecStructure/SpecFileExists:
+  Exclude:
+    - lib/waterdrop/clients.rb
+    - lib/waterdrop/helpers.rb
+    - lib/waterdrop/instrumentation.rb
+    - lib/waterdrop/instrumentation/callbacks.rb
+    - lib/waterdrop/instrumentation/vendors.rb
+    - lib/waterdrop/instrumentation/vendors/datadog.rb
+
+SpecStructure/SourceFileExists:
+  Exclude:
+    - spec/support/**/*
+    - spec/integrations/**/*
 
 # ThreadSafety
 ThreadSafety/ClassAndModuleAttributes:
