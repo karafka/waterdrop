@@ -5,36 +5,36 @@ RSpec.describe_current do
 
   let(:instrumentation) { WaterDrop.instrumentation }
 
-  describe '#initialize' do
-    context 'when connection_pool gem is available' do
+  describe "#initialize" do
+    context "when connection_pool gem is available" do
       before do
-        require 'connection_pool'
+        require "connection_pool"
       end
 
-      it 'creates a connection pool with default settings' do
+      it "creates a connection pool with default settings" do
         pool = described_class.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         expect(pool.size).to eq(5)
         expect(pool.available).to eq(5)
       end
 
-      it 'creates a connection pool with custom settings' do
+      it "creates a connection pool with custom settings" do
         pool = described_class.new(size: 10, timeout: 3000) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         expect(pool.size).to eq(10)
         expect(pool.available).to eq(10)
       end
 
-      it 'configures producers correctly in the pool' do
+      it "configures producers correctly in the pool" do
         pool = described_class.new(size: 2) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           config.id = SecureRandom.uuid
         end
 
@@ -45,12 +45,12 @@ RSpec.describe_current do
         end
       end
 
-      it 'supports per-producer configuration with index parameter' do
+      it "supports per-producer configuration with index parameter" do
         producer_ids = []
 
         pool = described_class.new(size: 3) do |config, index|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           config.id = "producer-#{index}"
         end
 
@@ -70,14 +70,14 @@ RSpec.describe_current do
         expect(producer_ids.sort).to eq(%w[producer-1 producer-2 producer-3])
       end
 
-      it 'supports transactional producers with unique transaction IDs' do
+      it "supports transactional producers with unique transaction IDs" do
         transaction_ids = []
 
         pool = described_class.new(size: 2) do |config, index|
           config.deliver = false
           config.kafka = {
-            'bootstrap.servers': BOOTSTRAP_SERVERS,
-            'transactional.id': "tx-#{index}"
+            "bootstrap.servers": BOOTSTRAP_SERVERS,
+            "transactional.id": "tx-#{index}"
           }
         end
 
@@ -86,7 +86,7 @@ RSpec.describe_current do
         threads = Array.new(2) do
           Thread.new do
             pool.with do |producer|
-              tx_id = producer.config.kafka[:'transactional.id']
+              tx_id = producer.config.kafka[:"transactional.id"]
               mutex.synchronize do
                 transaction_ids << tx_id
               end
@@ -100,10 +100,10 @@ RSpec.describe_current do
         expect(transaction_ids.sort).to eq(%w[tx-1 tx-2])
       end
 
-      it 'maintains backward compatibility with single-parameter blocks' do
+      it "maintains backward compatibility with single-parameter blocks" do
         pool = described_class.new(size: 2) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         pool.with do |producer|
@@ -115,40 +115,40 @@ RSpec.describe_current do
     end
   end
 
-  describe '#with' do
+  describe "#with" do
     let(:pool) do
       described_class.new(size: 2) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'yields a configured producer' do
+    it "yields a configured producer" do
       pool.with do |producer|
         expect(producer).to be_a(WaterDrop::Producer)
         expect(producer.status.configured?).to be(true)
       end
     end
 
-    it 'returns the result of the block' do
+    it "returns the result of the block" do
       result = pool.with { |producer| "producer-#{producer.id}" }
       expect(result).to match(/producer-waterdrop-\w{12}/)
     end
 
-    it 'handles exceptions properly' do
+    it "handles exceptions properly" do
       expect do
-        pool.with { |_producer| raise StandardError, 'test error' }
-      end.to raise_error(StandardError, 'test error')
+        pool.with { |_producer| raise StandardError, "test error" }
+      end.to raise_error(StandardError, "test error")
     end
 
-    it 'ensures producer is returned to pool after exception' do
+    it "ensures producer is returned to pool after exception" do
       expect(pool.available).to eq(2)
 
       begin
-        pool.with { |_producer| raise StandardError, 'test error' }
-      rescue StandardError
+        pool.with { |_producer| raise StandardError, "test error" }
+      rescue
         # Expected
       end
 
@@ -156,24 +156,24 @@ RSpec.describe_current do
     end
   end
 
-  describe '#stats' do
+  describe "#stats" do
     let(:pool) do
       described_class.new(size: 3) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'returns pool statistics' do
+    it "returns pool statistics" do
       stats = pool.stats
       expect(stats).to be_a(Hash)
       expect(stats[:size]).to eq(3)
       expect(stats[:available]).to eq(3)
     end
 
-    it 'reflects pool usage' do
+    it "reflects pool usage" do
       pool.with do |_producer|
         stats = pool.stats
         expect(stats[:size]).to eq(3)
@@ -182,24 +182,24 @@ RSpec.describe_current do
     end
   end
 
-  describe '#shutdown' do
+  describe "#shutdown" do
     let(:pool) do
       described_class.new(size: 2) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'shuts down all producers in the pool' do
+    it "shuts down all producers in the pool" do
       # Access a producer to ensure it's created
       pool.with(&:id)
 
       expect { pool.shutdown }.not_to raise_error
     end
 
-    it 'calls close! on active producers during shutdown' do
+    it "calls close! on active producers during shutdown" do
       producers = []
 
       # Capture producers by using them
@@ -216,7 +216,7 @@ RSpec.describe_current do
       pool.shutdown
     end
 
-    it 'handles inactive producers during shutdown' do
+    it "handles inactive producers during shutdown" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -228,7 +228,7 @@ RSpec.describe_current do
       expect { pool.shutdown }.not_to raise_error
     end
 
-    it 'handles nil status during shutdown' do
+    it "handles nil status during shutdown" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -240,24 +240,24 @@ RSpec.describe_current do
     end
   end
 
-  describe '#close' do
+  describe "#close" do
     let(:pool) do
       described_class.new(size: 2) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'is an alias for shutdown and behaves identically' do
+    it "is an alias for shutdown and behaves identically" do
       # Access a producer to ensure it's created
       pool.with(&:id)
 
       expect { pool.close }.not_to raise_error
     end
 
-    it 'calls close! on active producers during close (same as shutdown)' do
+    it "calls close! on active producers during close (same as shutdown)" do
       producers = []
 
       # Capture producers by using them
@@ -274,7 +274,7 @@ RSpec.describe_current do
       pool.close
     end
 
-    it 'handles inactive producers during close' do
+    it "handles inactive producers during close" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -286,7 +286,7 @@ RSpec.describe_current do
       expect { pool.close }.not_to raise_error
     end
 
-    it 'handles nil status during close' do
+    it "handles nil status during close" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -298,21 +298,21 @@ RSpec.describe_current do
     end
   end
 
-  describe '#reload' do
+  describe "#reload" do
     let(:pool) do
       described_class.new(size: 2) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'reloads all connections in the pool' do
+    it "reloads all connections in the pool" do
       expect { pool.reload }.not_to raise_error
     end
 
-    it 'handles inactive producers during reload' do
+    it "handles inactive producers during reload" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -324,7 +324,7 @@ RSpec.describe_current do
       expect { pool.reload }.not_to raise_error
     end
 
-    it 'handles nil status during reload' do
+    it "handles nil status during reload" do
       # Create and capture a producer to mock specifically
       producer = nil
       pool.with { |p| producer = p }
@@ -336,56 +336,56 @@ RSpec.describe_current do
     end
   end
 
-  describe '#pool' do
+  describe "#pool" do
     let(:pool) do
       described_class.new do |config|
         config.deliver = false
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'returns the underlying connection pool instance' do
+    it "returns the underlying connection pool instance" do
       expect(pool.pool).to be_a(ConnectionPool)
     end
   end
 
-  describe 'class methods' do
-    before { require 'connection_pool' }
+  describe "class methods" do
+    before { require "connection_pool" }
 
-    describe '.setup' do
+    describe ".setup" do
       after { described_class.shutdown }
 
-      it 'sets up a global connection pool with default settings' do
+      it "sets up a global connection pool with default settings" do
         described_class.setup do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         expect(described_class.default_pool).to be_a(described_class)
         expect(described_class.default_pool.size).to eq(5)
       end
 
-      it 'sets up a global connection pool with custom settings' do
+      it "sets up a global connection pool with custom settings" do
         described_class.setup(size: 15, timeout: 3000) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         expect(described_class.default_pool).to be_a(described_class)
         expect(described_class.default_pool.size).to eq(15)
       end
 
-      it 'requires connection_pool gem when called' do
+      it "requires connection_pool gem when called" do
         expect { described_class.setup { |config| config.deliver = false } }.not_to raise_error
       end
 
-      it 'raises LoadError when connection_pool gem is not available' do
+      it "raises LoadError when connection_pool gem is not available" do
         # Hide the ConnectionPool constant to simulate gem not being available
-        hide_const('ConnectionPool')
+        hide_const("ConnectionPool")
 
         # Mock require to raise LoadError
-        allow(described_class).to receive(:require).with('connection_pool').and_raise(LoadError)
+        allow(described_class).to receive(:require).with("connection_pool").and_raise(LoadError)
 
         expect { described_class.setup { |config| config.deliver = false } }.to raise_error(
           LoadError,
@@ -393,10 +393,10 @@ RSpec.describe_current do
         )
       end
 
-      it 'supports per-producer configuration with index in global setup' do
+      it "supports per-producer configuration with index in global setup" do
         described_class.setup(size: 2) do |config, index|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           config.id = "global-#{index}"
         end
 
@@ -419,61 +419,61 @@ RSpec.describe_current do
       end
     end
 
-    describe '.with' do
-      context 'when global pool is configured' do
+    describe ".with" do
+      context "when global pool is configured" do
         before do
           described_class.setup(size: 3) do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
         after { described_class.shutdown }
 
-        it 'yields a producer from the global pool' do
+        it "yields a producer from the global pool" do
           described_class.with do |producer|
             expect(producer).to be_a(WaterDrop::Producer)
             expect(producer.status.configured?).to be(true)
           end
         end
 
-        it 'returns the result of the block' do
+        it "returns the result of the block" do
           result = described_class.with { |producer| "global-#{producer.id}" }
           expect(result).to match(/global-waterdrop-\w{12}/)
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'raises an error' do
+      context "when global pool is not configured" do
+        it "raises an error" do
           expect do
-            described_class.with { |_producer| 'test' }
+            described_class.with { |_producer| "test" }
           end.to raise_error(
             RuntimeError,
-            'No global connection pool configured. Call setup first.'
+            "No global connection pool configured. Call setup first."
           )
         end
       end
     end
 
-    describe '.stats' do
-      context 'when global pool is configured' do
+    describe ".stats" do
+      context "when global pool is configured" do
         before do
           described_class.setup(size: 7) do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
         after { described_class.shutdown }
 
-        it 'returns global pool statistics' do
+        it "returns global pool statistics" do
           stats = described_class.stats
           expect(stats).to be_a(Hash)
           expect(stats[:size]).to eq(7)
           expect(stats[:available]).to eq(7)
         end
 
-        it 'reflects global pool usage' do
+        it "reflects global pool usage" do
           described_class.with do |_producer|
             stats = described_class.stats
             expect(stats[:size]).to eq(7)
@@ -482,14 +482,14 @@ RSpec.describe_current do
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'returns nil' do
+      context "when global pool is not configured" do
+        it "returns nil" do
           expect(described_class.stats).to be_nil
         end
       end
 
-      context 'when global pool becomes nil during operation' do
-        it 'handles nil pool gracefully' do
+      context "when global pool becomes nil during operation" do
+        it "handles nil pool gracefully" do
           described_class.setup do |config|
             config.deliver = false
           end
@@ -502,116 +502,116 @@ RSpec.describe_current do
       end
     end
 
-    describe '.shutdown' do
-      context 'when global pool is configured' do
+    describe ".shutdown" do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
-        it 'shuts down the global pool' do
+        it "shuts down the global pool" do
           expect { described_class.shutdown }.not_to raise_error
           expect(described_class.default_pool).to be_nil
         end
 
-        it 'allows shutdown to be called multiple times' do
+        it "allows shutdown to be called multiple times" do
           described_class.shutdown
           expect { described_class.shutdown }.not_to raise_error
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'does not raise an error' do
+      context "when global pool is not configured" do
+        it "does not raise an error" do
           expect { described_class.shutdown }.not_to raise_error
         end
       end
     end
 
-    describe '.close' do
-      context 'when global pool is configured' do
+    describe ".close" do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
-        it 'is an alias for shutdown and closes the global pool' do
+        it "is an alias for shutdown and closes the global pool" do
           expect { described_class.close }.not_to raise_error
           expect(described_class.default_pool).to be_nil
         end
 
-        it 'allows close to be called multiple times' do
+        it "allows close to be called multiple times" do
           described_class.close
           expect { described_class.close }.not_to raise_error
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'does not raise an error (same as shutdown)' do
+      context "when global pool is not configured" do
+        it "does not raise an error (same as shutdown)" do
           expect { described_class.close }.not_to raise_error
         end
       end
     end
 
-    describe '.reload' do
-      context 'when global pool is configured' do
+    describe ".reload" do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
         after { described_class.shutdown }
 
-        it 'reloads the global pool' do
+        it "reloads the global pool" do
           expect { described_class.reload }.not_to raise_error
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'does not raise an error' do
+      context "when global pool is not configured" do
+        it "does not raise an error" do
           expect { described_class.reload }.not_to raise_error
         end
       end
 
-      context 'when global pool is nil' do
+      context "when global pool is nil" do
         before do
           described_class.instance_variable_set(:@default_pool, nil)
         end
 
-        it 'handles nil pool gracefully with safe navigation' do
+        it "handles nil pool gracefully with safe navigation" do
           expect { described_class.reload }.not_to raise_error
         end
       end
     end
 
-    describe '.active?' do
-      context 'when global pool is not configured' do
-        it 'returns false' do
+    describe ".active?" do
+      context "when global pool is not configured" do
+        it "returns false" do
           expect(described_class.active?).to be(false)
         end
       end
 
-      context 'when global pool is configured' do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
         after { described_class.shutdown }
 
-        it 'returns true' do
+        it "returns true" do
           expect(described_class.active?).to be(true)
         end
       end
 
-      context 'when after shutdown' do
+      context "when after shutdown" do
         before do
           described_class.setup do |config|
             config.deliver = false
@@ -619,76 +619,76 @@ RSpec.describe_current do
           described_class.shutdown
         end
 
-        it 'returns false' do
+        it "returns false" do
           expect(described_class.active?).to be(false)
         end
       end
     end
   end
 
-  describe 'method delegation' do
+  describe "method delegation" do
     let(:pool) do
       described_class.new(size: 3) do |config|
         config.deliver = false
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'delegates size to underlying pool' do
+    it "delegates size to underlying pool" do
       expect(pool.size).to eq(3)
     end
 
-    it 'delegates available to underlying pool' do
+    it "delegates available to underlying pool" do
       expect(pool.available).to eq(3)
     end
 
-    it 'delegates with to underlying pool' do
+    it "delegates with to underlying pool" do
       expect { |b| pool.with(&b) }.to yield_with_args(WaterDrop::Producer)
     end
   end
 
-  describe 'WaterDrop module convenience methods' do
-    before { require 'connection_pool' }
+  describe "WaterDrop module convenience methods" do
+    before { require "connection_pool" }
 
-    describe 'WaterDrop.with' do
-      context 'when global pool is configured' do
+    describe "WaterDrop.with" do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           end
         end
 
         after { described_class.shutdown }
 
-        it 'delegates to ConnectionPool.with' do
+        it "delegates to ConnectionPool.with" do
           WaterDrop.with do |producer|
             expect(producer).to be_a(WaterDrop::Producer)
             expect(producer.status.configured?).to be(true)
           end
         end
 
-        it 'returns the result of the block' do
+        it "returns the result of the block" do
           result = WaterDrop.with { |producer| "module-#{producer.id}" }
           expect(result).to match(/module-waterdrop-\w{12}/)
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'raises an error' do
+      context "when global pool is not configured" do
+        it "raises an error" do
           expect do
-            WaterDrop.with { |_producer| 'test' }
+            WaterDrop.with { |_producer| "test" }
           end.to raise_error(
             RuntimeError,
-            'No global connection pool configured. Call setup first.'
+            "No global connection pool configured. Call setup first."
           )
         end
       end
     end
 
-    describe 'WaterDrop.pool' do
-      context 'when global pool is configured' do
+    describe "WaterDrop.pool" do
+      context "when global pool is configured" do
         before do
           described_class.setup do |config|
             config.deliver = false
@@ -697,31 +697,31 @@ RSpec.describe_current do
 
         after { described_class.shutdown }
 
-        it 'returns the global connection pool' do
+        it "returns the global connection pool" do
           expect(WaterDrop.pool).to be_a(described_class)
           expect(WaterDrop.pool).to eq(described_class.default_pool)
         end
       end
 
-      context 'when global pool is not configured' do
-        it 'returns nil' do
+      context "when global pool is not configured" do
+        it "returns nil" do
           expect(WaterDrop.pool).to be_nil
         end
       end
     end
   end
 
-  describe 'concurrency' do
+  describe "concurrency" do
     let(:pool) do
       described_class.new(size: 3) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'handles concurrent access correctly' do
+    it "handles concurrent access correctly" do
       results = []
       threads = []
 
@@ -740,7 +740,7 @@ RSpec.describe_current do
       expect(results).to all(match(/thread-\d+-waterdrop-\w{12}/))
     end
 
-    it 'respects pool size limits under concurrent load' do
+    it "respects pool size limits under concurrent load" do
       in_use_count = []
       threads = []
       mutex = Mutex.new
@@ -766,17 +766,17 @@ RSpec.describe_current do
     end
   end
 
-  describe 'error handling' do
+  describe "error handling" do
     let(:pool) do
       described_class.new(size: 2) do |config|
         config.deliver = false
-        config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+        config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
       end
     end
 
-    before { require 'connection_pool' }
+    before { require "connection_pool" }
 
-    it 'handles producer configuration errors gracefully' do
+    it "handles producer configuration errors gracefully" do
       # Create a pool with invalid config - the error will occur when trying to use a producer
       broken_pool = described_class.new(size: 1) do |config|
         config.deliver = false
@@ -788,29 +788,29 @@ RSpec.describe_current do
       end.to raise_error(WaterDrop::Errors::ConfigurationInvalidError)
     end
 
-    it 'maintains pool integrity when producer operations fail' do
+    it "maintains pool integrity when producer operations fail" do
       expect(pool.available).to eq(2)
 
       expect do
         pool.with do |_producer|
           # Simulate a producer operation failure
-          raise StandardError, 'Producer operation failed'
+          raise StandardError, "Producer operation failed"
         end
-      end.to raise_error(StandardError, 'Producer operation failed')
+      end.to raise_error(StandardError, "Producer operation failed")
 
       # Pool should still be intact
       expect(pool.available).to eq(2)
     end
 
-    context 'when pool timeout is exceeded' do
+    context "when pool timeout is exceeded" do
       let(:small_pool) do
         described_class.new(size: 1, timeout: 100) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
-      it 'raises a timeout error when all connections are busy' do
+      it "raises a timeout error when all connections are busy" do
         thread1 = Thread.new do
           small_pool.with do |_producer|
             sleep(0.2) # Hold connection longer than timeout
@@ -820,7 +820,7 @@ RSpec.describe_current do
         sleep(0.01) # Give thread1 time to grab the connection
 
         expect do
-          small_pool.with { |_producer| 'should timeout' }
+          small_pool.with { |_producer| "should timeout" }
         end.to raise_error(ConnectionPool::TimeoutError)
 
         thread1.join
@@ -828,18 +828,18 @@ RSpec.describe_current do
     end
   end
 
-  describe 'fiber safety' do
-    describe 'fiber safety with async operations' do
+  describe "fiber safety" do
+    describe "fiber safety with async operations" do
       let(:fiber_pool) do
         described_class.new(size: 3, timeout: 2000) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
-      before { require 'connection_pool' }
+      before { require "connection_pool" }
 
-      it 'handles fiber-based concurrent access correctly' do
+      it "handles fiber-based concurrent access correctly" do
         results = []
         fibers = []
 
@@ -861,7 +861,7 @@ RSpec.describe_current do
         expect(results).to all(match(/fiber-\d+-waterdrop-\w{12}/))
       end
 
-      it 'maintains pool integrity with fiber yielding inside pool operations' do
+      it "maintains pool integrity with fiber yielding inside pool operations" do
         expect(fiber_pool.available).to eq(3)
 
         fiber = Fiber.new do
@@ -887,13 +887,13 @@ RSpec.describe_current do
         expect(fiber_pool.available).to eq(3)
       end
 
-      it 'handles exceptions in fibers correctly' do
+      it "handles exceptions in fibers correctly" do
         expect(fiber_pool.available).to eq(3)
 
         fiber = Fiber.new do
           fiber_pool.with do |_producer|
             Fiber.yield
-            raise StandardError, 'Fiber error'
+            raise StandardError, "Fiber error"
           end
         end
 
@@ -901,13 +901,13 @@ RSpec.describe_current do
 
         expect do
           fiber.resume
-        end.to raise_error(StandardError, 'Fiber error')
+        end.to raise_error(StandardError, "Fiber error")
 
         # Pool should still be intact after fiber exception
         expect(fiber_pool.available).to eq(3)
       end
 
-      it 'supports nested fiber operations with the pool' do
+      it "supports nested fiber operations with the pool" do
         results = []
 
         outer_fiber = Fiber.new do
@@ -940,15 +940,15 @@ RSpec.describe_current do
       end
     end
 
-    describe 'global pool fiber safety' do
+    describe "global pool fiber safety" do
       before do
         described_class.setup(size: 2, timeout: 1000) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
-      it 'handles fiber-based access to global pool' do
+      it "handles fiber-based access to global pool" do
         results = []
         fibers = []
 
@@ -967,7 +967,7 @@ RSpec.describe_current do
         expect(results).to all(match(/global-fiber-\d+-waterdrop-\w{12}/))
       end
 
-      it 'maintains global pool stats consistency with fiber operations' do
+      it "maintains global pool stats consistency with fiber operations" do
         initial_stats = described_class.stats
         expect(initial_stats[:size]).to eq(2)
         expect(initial_stats[:available]).to eq(2)
@@ -997,17 +997,17 @@ RSpec.describe_current do
       end
     end
 
-    describe 'mixed thread and fiber operations' do
+    describe "mixed thread and fiber operations" do
       let(:mixed_pool) do
         described_class.new(size: 4, timeout: 1000) do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
-      before { require 'connection_pool' }
+      before { require "connection_pool" }
 
-      it 'handles mixed thread and fiber access patterns' do
+      it "handles mixed thread and fiber access patterns" do
         results = []
         mutex = Mutex.new
 
@@ -1039,14 +1039,14 @@ RSpec.describe_current do
         threads.each(&:join)
 
         expect(results.size).to eq(4)
-        thread_results = results.select { |r| r.start_with?('thread-') }
-        fiber_results = results.select { |r| r.start_with?('fiber-') }
+        thread_results = results.select { |r| r.start_with?("thread-") }
+        fiber_results = results.select { |r| r.start_with?("fiber-") }
 
         expect(thread_results.size).to eq(2)
         expect(fiber_results.size).to eq(2)
       end
 
-      it 'maintains pool capacity limits with mixed concurrency' do
+      it "maintains pool capacity limits with mixed concurrency" do
         # This test ensures that the pool respects size limits regardless of
         # whether access comes from threads or fibers
 
@@ -1093,30 +1093,30 @@ RSpec.describe_current do
     end
   end
 
-  describe 'Connection Pool Events' do
+  describe "Connection Pool Events" do
     let(:events) { [] }
 
     before do
       # Subscribe to all connection pool events
-      instrumentation.subscribe('connection_pool.created') { |event| events << event }
-      instrumentation.subscribe('connection_pool.setup') { |event| events << event }
-      instrumentation.subscribe('connection_pool.shutdown') { |event| events << event }
-      instrumentation.subscribe('connection_pool.reload') { |event| events << event }
-      instrumentation.subscribe('connection_pool.reloaded') { |event| events << event }
+      instrumentation.subscribe("connection_pool.created") { |event| events << event }
+      instrumentation.subscribe("connection_pool.setup") { |event| events << event }
+      instrumentation.subscribe("connection_pool.shutdown") { |event| events << event }
+      instrumentation.subscribe("connection_pool.reload") { |event| events << event }
+      instrumentation.subscribe("connection_pool.reloaded") { |event| events << event }
     end
 
-    describe 'pool lifecycle events' do
-      context 'when creating a new pool' do
+    describe "pool lifecycle events" do
+      context "when creating a new pool" do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
 
-        it 'emits connection_pool.created event' do
+        it "emits connection_pool.created event" do
           pool
-          created_event = events.find { |e| e.id == 'connection_pool.created' }
+          created_event = events.find { |e| e.id == "connection_pool.created" }
 
           expect(created_event).not_to be_nil
           expect(created_event[:pool]).to eq(pool)
@@ -1125,18 +1125,18 @@ RSpec.describe_current do
         end
       end
 
-      context 'when setting up global pool' do
+      context "when setting up global pool" do
         after do
           described_class.shutdown if described_class.active?
         end
 
-        it 'emits connection_pool.setup event' do
+        it "emits connection_pool.setup event" do
           pool = described_class.setup(size: 3, timeout: 10_000) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
 
-          setup_event = events.find { |e| e.id == 'connection_pool.setup' }
+          setup_event = events.find { |e| e.id == "connection_pool.setup" }
 
           expect(setup_event).not_to be_nil
           expect(setup_event[:pool]).to eq(pool)
@@ -1145,28 +1145,28 @@ RSpec.describe_current do
         end
       end
 
-      context 'when shutting down global pool' do
+      context "when shutting down global pool" do
         before do
           described_class.setup(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
 
-        it 'emits connection_pool.shutdown event' do
+        it "emits connection_pool.shutdown event" do
           described_class.shutdown
 
-          shutdown_event = events.find { |e| e.id == 'connection_pool.shutdown' }
+          shutdown_event = events.find { |e| e.id == "connection_pool.shutdown" }
 
           expect(shutdown_event).not_to be_nil
           expect(shutdown_event[:pool]).not_to be_nil
         end
       end
 
-      context 'when reloading global pool' do
+      context "when reloading global pool" do
         before do
           described_class.setup(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
@@ -1175,48 +1175,48 @@ RSpec.describe_current do
           described_class.shutdown if described_class.active?
         end
 
-        it 'emits connection_pool.reload event' do
+        it "emits connection_pool.reload event" do
           described_class.reload
 
-          reload_event = events.find { |e| e.id == 'connection_pool.reload' }
+          reload_event = events.find { |e| e.id == "connection_pool.reload" }
 
           expect(reload_event).not_to be_nil
           expect(reload_event[:pool]).not_to be_nil
         end
       end
 
-      context 'when shutting down instance pool' do
+      context "when shutting down instance pool" do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
 
-        it 'emits shutdown event' do
+        it "emits shutdown event" do
           pool.shutdown
 
-          shutdown_event = events.find { |e| e.id == 'connection_pool.shutdown' }
+          shutdown_event = events.find { |e| e.id == "connection_pool.shutdown" }
 
           expect(shutdown_event).not_to be_nil
           expect(shutdown_event[:pool]).to eq(pool)
         end
       end
 
-      context 'when reloading instance pool' do
+      context "when reloading instance pool" do
         let(:pool) do
           described_class.new(size: 2) do |config|
-            config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+            config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
           end
         end
 
         after { pool.shutdown }
 
-        it 'emits reloaded event' do
+        it "emits reloaded event" do
           pool.reload
 
-          reloaded_event = events.find { |e| e.id == 'connection_pool.reloaded' }
+          reloaded_event = events.find { |e| e.id == "connection_pool.reloaded" }
 
           expect(reloaded_event).not_to be_nil
           expect(reloaded_event[:pool]).to eq(pool)
@@ -1224,15 +1224,15 @@ RSpec.describe_current do
       end
     end
 
-    describe 'event ordering' do
+    describe "event ordering" do
       let(:pool) do
         described_class.new(size: 1) do |config|
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
           config.deliver = false
         end
       end
 
-      it 'emits events in the correct order for pool operations' do
+      it "emits events in the correct order for pool operations" do
         pool.with { |producer| producer }
         pool.reload
         pool.shutdown
@@ -1240,25 +1240,25 @@ RSpec.describe_current do
         event_ids = events.map(&:id)
 
         # Pool creation comes first
-        expect(event_ids.first).to eq('connection_pool.created')
+        expect(event_ids.first).to eq("connection_pool.created")
 
         # Reload event
-        reload_index = event_ids.index('connection_pool.reloaded')
+        reload_index = event_ids.index("connection_pool.reloaded")
         expect(reload_index).to be > 0
 
         # Shutdown event comes last
-        shutdown_index = event_ids.index('connection_pool.shutdown')
+        shutdown_index = event_ids.index("connection_pool.shutdown")
         expect(shutdown_index).to eq(event_ids.size - 1)
       end
     end
   end
 
-  describe '#transaction' do
+  describe "#transaction" do
     let(:pool) do
       described_class.new(size: 2) do |config, index|
         config.kafka = {
-          'bootstrap.servers': BOOTSTRAP_SERVERS,
-          'transactional.id': "test-tx-#{index}"
+          "bootstrap.servers": BOOTSTRAP_SERVERS,
+          "transactional.id": "test-tx-#{index}"
         }
         config.deliver = false
       end
@@ -1266,36 +1266,36 @@ RSpec.describe_current do
 
     after { pool.shutdown }
 
-    context 'when transaction succeeds' do
-      it 'executes the block within a transaction and returns result' do
+    context "when transaction succeeds" do
+      it "executes the block within a transaction and returns result" do
         result = pool.transaction do |producer|
           expect(producer).to be_a(WaterDrop::Producer)
-          'success'
+          "success"
         end
 
-        expect(result).to eq('success')
+        expect(result).to eq("success")
       end
     end
 
-    context 'when transaction fails' do
-      it 'raises the exception from the block' do
-        error_raised = StandardError.new('test error')
+    context "when transaction fails" do
+      it "raises the exception from the block" do
+        error_raised = StandardError.new("test error")
 
         expect do
           pool.transaction do |_producer|
             raise error_raised
           end
-        end.to raise_error(StandardError, 'test error')
+        end.to raise_error(StandardError, "test error")
       end
     end
   end
 
-  describe '.transaction (class method)' do
+  describe ".transaction (class method)" do
     before do
       described_class.setup(size: 2) do |config, index|
         config.kafka = {
-          'bootstrap.servers': BOOTSTRAP_SERVERS,
-          'transactional.id': "test-global-tx-#{index}"
+          "bootstrap.servers": BOOTSTRAP_SERVERS,
+          "transactional.id": "test-global-tx-#{index}"
         }
         config.deliver = false
       end
@@ -1305,34 +1305,34 @@ RSpec.describe_current do
       described_class.shutdown if described_class.active?
     end
 
-    context 'when global pool is configured' do
-      it 'executes transaction using the global pool' do
+    context "when global pool is configured" do
+      it "executes transaction using the global pool" do
         result = described_class.transaction do |producer|
           expect(producer).to be_a(WaterDrop::Producer)
-          'global_success'
+          "global_success"
         end
 
-        expect(result).to eq('global_success')
+        expect(result).to eq("global_success")
       end
     end
 
-    context 'when global pool is not configured' do
+    context "when global pool is not configured" do
       before { described_class.shutdown }
 
-      it 'raises an error' do
+      it "raises an error" do
         expect do
           described_class.transaction { |_producer| nil }
-        end.to raise_error(RuntimeError, 'No global connection pool configured. Call setup first.')
+        end.to raise_error(RuntimeError, "No global connection pool configured. Call setup first.")
       end
     end
   end
 
-  describe 'WaterDrop.transaction convenience method' do
+  describe "WaterDrop.transaction convenience method" do
     before do
       described_class.setup(size: 2) do |config, index|
         config.kafka = {
-          'bootstrap.servers': BOOTSTRAP_SERVERS,
-          'transactional.id': "test-convenience-tx-#{index}"
+          "bootstrap.servers": BOOTSTRAP_SERVERS,
+          "transactional.id": "test-convenience-tx-#{index}"
         }
         config.deliver = false
       end
@@ -1342,13 +1342,13 @@ RSpec.describe_current do
       described_class.shutdown if described_class.active?
     end
 
-    it 'delegates to ConnectionPool.transaction' do
+    it "delegates to ConnectionPool.transaction" do
       result = WaterDrop.transaction do |producer|
         expect(producer).to be_a(WaterDrop::Producer)
-        'convenience_success'
+        "convenience_success"
       end
 
-      expect(result).to eq('convenience_success')
+      expect(result).to eq("convenience_success")
     end
   end
 end

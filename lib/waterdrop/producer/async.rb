@@ -18,7 +18,7 @@ module WaterDrop
         validate_message!(message)
 
         @monitor.instrument(
-          'message.produced_async',
+          "message.produced_async",
           producer_id: id,
           message: message
         ) { produce(message) }
@@ -29,11 +29,11 @@ module WaterDrop
           raise Errors::ProduceError, e.inspect
         rescue Errors::ProduceError => ex
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             producer_id: id,
             message: message,
             error: ex,
-            type: 'message.produce_async'
+            type: "message.produce_async"
           )
 
           raise ex
@@ -56,7 +56,7 @@ module WaterDrop
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(
-          'messages.produced_async',
+          "messages.produced_async",
           producer_id: id,
           messages: messages
         ) do
@@ -72,12 +72,12 @@ module WaterDrop
         re_raised = Errors::ProduceManyError.new(dispatched, e.inspect)
 
         @monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           producer_id: id,
           messages: messages,
           dispatched: dispatched,
           error: re_raised,
-          type: 'messages.produce_many_async'
+          type: "messages.produce_many_async"
         )
 
         raise re_raised

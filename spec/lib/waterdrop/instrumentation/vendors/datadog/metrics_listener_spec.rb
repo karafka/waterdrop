@@ -50,7 +50,7 @@ RSpec.describe_current do
 
   after { producer.close }
 
-  context 'when having some default tags present' do
+  context "when having some default tags present" do
     subject(:listener) do
       client = described_class.new
 
@@ -62,31 +62,31 @@ RSpec.describe_current do
       client
     end
 
-    context 'when publishing, default tags should be included' do
+    context "when publishing, default tags should be included" do
       before { producer.produce_sync(topic: topic, payload: rand.to_s) }
 
-      it 'expect to have proper metrics data in place' do
-        published_tags = dummy_client.buffer[:increment]['waterdrop.produced_sync'][0][0][:tags]
-        expect(published_tags).to include('test:me')
+      it "expect to have proper metrics data in place" do
+        published_tags = dummy_client.buffer[:increment]["waterdrop.produced_sync"][0][0][:tags]
+        expect(published_tags).to include("test:me")
       end
     end
   end
 
-  context 'when setting up a listener upon initialization' do
+  context "when setting up a listener upon initialization" do
     let(:listener) do
       described_class.new do |config|
         config.client = dummy_client
       end
     end
 
-    it 'expect to work' do
+    it "expect to work" do
       expect(listener.client).to eq(dummy_client)
     end
   end
 
   # Here we focus on metrics coming from rdkafka, we dispatch this single message just to have
   # some fluctuation
-  context 'when expecting emitted stats DD dispatch' do
+  context "when expecting emitted stats DD dispatch" do
     # Just to trigger some stats
     before do
       producer.produce_sync(topic: topic, payload: rand.to_s)
@@ -101,35 +101,35 @@ RSpec.describe_current do
     let(:broker_tag) { { tags: %w[broker:127.0.0.1:9092] } }
 
     # We add all expectations in one example not to sleep each time
-    it 'expect to have proper metrics in place' do
+    it "expect to have proper metrics in place" do
       # count
-      expect(counts['waterdrop.calls']).to include([0, { tags: [] }])
-      expect(counts['waterdrop.calls'].uniq.size).to be > 1
-      expect(counts['waterdrop.deliver.attempts']).to include([0, broker_tag])
-      expect(counts['waterdrop.deliver.errors']).to include([0, broker_tag])
-      expect(counts['waterdrop.receive.errors']).to include([0, broker_tag])
+      expect(counts["waterdrop.calls"]).to include([0, { tags: [] }])
+      expect(counts["waterdrop.calls"].uniq.size).to be > 1
+      expect(counts["waterdrop.deliver.attempts"]).to include([0, broker_tag])
+      expect(counts["waterdrop.deliver.errors"]).to include([0, broker_tag])
+      expect(counts["waterdrop.receive.errors"]).to include([0, broker_tag])
 
       # histogram
-      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
-      expect(histograms['waterdrop.queue.size']).to include([0, { tags: [] }])
+      expect(histograms["waterdrop.queue.size"]).to include([0, { tags: [] }])
+      expect(histograms["waterdrop.queue.size"]).to include([0, { tags: [] }])
 
       # gauge
-      expect(guages['waterdrop.queue.latency.avg'].uniq.size).to be > 1
-      expect(guages['waterdrop.queue.latency.avg']).to include([0, broker_tag])
-      expect(guages['waterdrop.queue.latency.p95'].uniq.size).to be > 1
-      expect(guages['waterdrop.queue.latency.p95']).to include([0, broker_tag])
-      expect(guages['waterdrop.queue.latency.p99'].uniq.size).to be > 1
-      expect(guages['waterdrop.queue.latency.p99']).to include([0, broker_tag])
-      expect(guages['waterdrop.network.latency.avg'].uniq.size).to be > 1
-      expect(guages['waterdrop.network.latency.avg']).to include([0, broker_tag])
-      expect(guages['waterdrop.network.latency.p95'].uniq.size).to be > 1
-      expect(guages['waterdrop.network.latency.p95']).to include([0, broker_tag])
-      expect(guages['waterdrop.network.latency.p99'].uniq.size).to be > 1
-      expect(guages['waterdrop.network.latency.p99']).to include([0, broker_tag])
+      expect(guages["waterdrop.queue.latency.avg"].uniq.size).to be > 1
+      expect(guages["waterdrop.queue.latency.avg"]).to include([0, broker_tag])
+      expect(guages["waterdrop.queue.latency.p95"].uniq.size).to be > 1
+      expect(guages["waterdrop.queue.latency.p95"]).to include([0, broker_tag])
+      expect(guages["waterdrop.queue.latency.p99"].uniq.size).to be > 1
+      expect(guages["waterdrop.queue.latency.p99"]).to include([0, broker_tag])
+      expect(guages["waterdrop.network.latency.avg"].uniq.size).to be > 1
+      expect(guages["waterdrop.network.latency.avg"]).to include([0, broker_tag])
+      expect(guages["waterdrop.network.latency.p95"].uniq.size).to be > 1
+      expect(guages["waterdrop.network.latency.p95"]).to include([0, broker_tag])
+      expect(guages["waterdrop.network.latency.p99"].uniq.size).to be > 1
+      expect(guages["waterdrop.network.latency.p99"]).to include([0, broker_tag])
     end
   end
 
-  context 'when producing sync' do
+  context "when producing sync" do
     before do
       producer.produce_sync(topic: topic, payload: rand.to_s)
 
@@ -141,12 +141,12 @@ RSpec.describe_current do
       )
     end
 
-    it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.produced_sync'].size).to eq(3)
+    it "expect to have proper metrics data in place" do
+      expect(dummy_client.buffer[:increment]["waterdrop.produced_sync"].size).to eq(3)
     end
   end
 
-  context 'when producing async' do
+  context "when producing async" do
     before do
       producer.produce_async(topic: topic, payload: rand.to_s)
 
@@ -158,12 +158,12 @@ RSpec.describe_current do
       )
     end
 
-    it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.produced_async'].size).to eq(3)
+    it "expect to have proper metrics data in place" do
+      expect(dummy_client.buffer[:increment]["waterdrop.produced_async"].size).to eq(3)
     end
   end
 
-  context 'when buffering' do
+  context "when buffering" do
     before do
       producer.buffer(topic: topic, payload: rand.to_s)
 
@@ -175,53 +175,53 @@ RSpec.describe_current do
       )
     end
 
-    it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:histogram]['waterdrop.buffer.size'].size).to eq(2)
+    it "expect to have proper metrics data in place" do
+      expect(dummy_client.buffer[:histogram]["waterdrop.buffer.size"].size).to eq(2)
     end
   end
 
-  context 'when flushing sync' do
+  context "when flushing sync" do
     before do
       producer.buffer(topic: topic, payload: rand.to_s)
       producer.flush_sync
     end
 
-    it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.flushed_sync'].size).to eq(1)
+    it "expect to have proper metrics data in place" do
+      expect(dummy_client.buffer[:increment]["waterdrop.flushed_sync"].size).to eq(1)
     end
   end
 
-  context 'when flushing async' do
+  context "when flushing async" do
     before do
       producer.buffer(topic: topic, payload: rand.to_s)
       producer.flush_async
     end
 
-    it 'expect to have proper metrics data in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.flushed_async'].size).to eq(1)
+    it "expect to have proper metrics data in place" do
+      expect(dummy_client.buffer[:increment]["waterdrop.flushed_async"].size).to eq(1)
     end
   end
 
-  context 'when message is acknowledged' do
+  context "when message is acknowledged" do
     before do
       producer.produce_sync(topic: topic, payload: rand.to_s)
       # We need to give the async callback a bit of time to kick in
       sleep(0.1)
     end
 
-    it 'expect to have a proper metric in place' do
-      expect(dummy_client.buffer[:increment]['waterdrop.acknowledged'].size).to eq(1)
+    it "expect to have a proper metric in place" do
+      expect(dummy_client.buffer[:increment]["waterdrop.acknowledged"].size).to eq(1)
     end
   end
 
-  context 'when error occurred' do
+  context "when error occurred" do
     let(:producer) do
       producer = build(
         :producer,
         kafka: {
-          'bootstrap.servers': 'localhost:9093',
-          'statistics.interval.ms': 100,
-          'message.timeout.ms': 100
+          "bootstrap.servers": "localhost:9093",
+          "statistics.interval.ms": 100,
+          "message.timeout.ms": 100
         }
       )
       producer.monitor.subscribe listener
@@ -233,29 +233,29 @@ RSpec.describe_current do
       sleep(1)
     end
 
-    it 'expect error count to increase' do
-      expect(dummy_client.buffer[:count]['waterdrop.error_occurred']).not_to be_empty
+    it "expect error count to increase" do
+      expect(dummy_client.buffer[:count]["waterdrop.error_occurred"]).not_to be_empty
     end
   end
 
-  context 'when we encounter a node with id -1' do
+  context "when we encounter a node with id -1" do
     let(:metric) { described_class.new.rd_kafka_metrics.last }
 
     let(:statistics) do
       {
-        'brokers' => {
-          'node_name' => { 'nodeid' => -1 }
+        "brokers" => {
+          "node_name" => { "nodeid" => -1 }
         }
       }
     end
 
-    it 'expect not to publish metrics on it' do
+    it "expect not to publish metrics on it" do
       expect { listener.send(:report_metric, metric, statistics) }.not_to raise_error
     end
   end
 
-  context 'when we try to publish a non-existing metric' do
-    let(:metric) { described_class::RdKafkaMetric.new(:count, :na, 'na') }
+  context "when we try to publish a non-existing metric" do
+    let(:metric) { described_class::RdKafkaMetric.new(:count, :na, "na") }
     let(:statistics) { {} }
 
     it do
@@ -263,7 +263,7 @@ RSpec.describe_current do
     end
   end
 
-  context 'when trying to publish a topic level metric' do
+  context "when trying to publish a topic level metric" do
     before do
       producer.produce_sync(topic: topic, payload: rand.to_s)
       sleep(1)
@@ -273,26 +273,26 @@ RSpec.describe_current do
     let(:guages) { dummy_client.buffer[:gauge] }
 
     let(:metric) do
-      described_class::RdKafkaMetric.new(:gauge, :topics, 'topics.batchcnt.avg', %w[batchcnt avg])
+      described_class::RdKafkaMetric.new(:gauge, :topics, "topics.batchcnt.avg", %w[batchcnt avg])
     end
 
     let(:statistics) do
       {
-        'name' => 'producer-1',
-        'brokers' => {},
-        'topics' => {
-          'test' => {
-            'topic' => 'test',
-            'batchcnt' => {
-              'avg' => 6956
+        "name" => "producer-1",
+        "brokers" => {},
+        "topics" => {
+          "test" => {
+            "topic" => "test",
+            "batchcnt" => {
+              "avg" => 6956
             }
           }
         }
       }
     end
 
-    it 'report metric will publish statistic with topic tag' do
-      expect(guages['waterdrop.topics.batchcnt.avg']).to eql [[6956, { tags: ['topic:test'] }]]
+    it "report metric will publish statistic with topic tag" do
+      expect(guages["waterdrop.topics.batchcnt.avg"]).to eql [[6956, { tags: ["topic:test"] }]]
     end
   end
 end

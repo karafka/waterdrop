@@ -10,8 +10,8 @@
 # - No resource leaks under concurrent load
 # - Successful message delivery from multiple threads
 
-require 'waterdrop'
-require 'securerandom'
+require "waterdrop"
+require "securerandom"
 
 # Pool size for this spec
 POOL_SIZE = 3
@@ -22,7 +22,7 @@ MESSAGES_PER_THREAD = 5
 
 # Create connection pool
 pool = WaterDrop::ConnectionPool.new(size: POOL_SIZE) do |config|
-  config.kafka = { 'bootstrap.servers': ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092') }
+  config.kafka = { "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092") }
 end
 
 # Track results
@@ -56,7 +56,7 @@ threads = Array.new(THREAD_COUNT) do |thread_index|
       # Small random delay to increase contention
       sleep(rand * 0.01)
     end
-  rescue StandardError => e
+  rescue => e
     mutex.synchronize do
       errors << { thread: thread_index, error: e.message, backtrace: e.backtrace[0..2] }
     end
@@ -74,14 +74,14 @@ pool.shutdown
 # Validate results
 expected_message_count = THREAD_COUNT * MESSAGES_PER_THREAD
 success = errors.empty? &&
-          successful_sends.size == expected_message_count &&
-          final_stats[:size] == POOL_SIZE
+  successful_sends.size == expected_message_count &&
+  final_stats[:size] == POOL_SIZE
 
 unless success
   puts "Errors encountered: #{errors.inspect}" unless errors.empty?
   puts "Expected #{expected_message_count} messages, got #{successful_sends.size}"
   puts "Final pool stats: #{final_stats.inspect}"
-  puts 'Pool stats size mismatch' if final_stats[:size] != POOL_SIZE
+  puts "Pool stats size mismatch" if final_stats[:size] != POOL_SIZE
 end
 
 exit(success ? 0 : 1)

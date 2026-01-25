@@ -32,319 +32,320 @@ RSpec.describe_current do
         token_provider_listener: false
       },
       kafka: {
-        'bootstrap.servers': "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
+        "bootstrap.servers": "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
       }
     }
   end
 
-  context 'when config is valid' do
+  context "when config is valid" do
     it { expect(contract_result).to be_success }
   end
 
-  context 'when id is missing' do
+  context "when id is missing" do
     before { config.delete(:id) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:id]).not_to be_empty }
   end
 
-  context 'when id is nil' do
+  context "when id is nil" do
     before { config[:id] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:id]).not_to be_empty }
   end
 
-  context 'when id is not a string' do
+  context "when id is not a string" do
     before { config[:id] = rand }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:id]).not_to be_empty }
   end
 
-  context 'when monitor is missing' do
+  context "when monitor is missing" do
     before { config.delete(:monitor) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:monitor]).not_to be_empty }
   end
 
-  context 'when monitor is nil' do
+  context "when monitor is nil" do
     before { config[:monitor] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:monitor]).not_to be_empty }
   end
 
-  context 'when client_class is missing' do
+  context "when client_class is missing" do
     before { config.delete(:client_class) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:client_class]).not_to be_empty }
   end
 
-  context 'when client_class is nil' do
+  context "when client_class is nil" do
     before { config[:client_class] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:client_class]).not_to be_empty }
   end
 
-  context 'when logger is missing' do
+  context "when logger is missing" do
     before { config.delete(:logger) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:logger]).not_to be_empty }
   end
 
-  context 'when logger is nil' do
+  context "when logger is nil" do
     before { config[:logger] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:logger]).not_to be_empty }
   end
 
-  context 'when deliver is missing' do
+  context "when deliver is missing" do
     before { config.delete(:deliver) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:deliver]).not_to be_empty }
   end
 
-  context 'when deliver is nil' do
+  context "when deliver is nil" do
     before { config[:deliver] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:deliver]).not_to be_empty }
   end
 
-  context 'when deliver is not a string' do
+  context "when deliver is not a string" do
     before { config[:deliver] = rand }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:deliver]).not_to be_empty }
   end
 
-  context 'when kafka is missing' do
+  context "when kafka is missing" do
     before { config.delete(:kafka) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:kafka]).not_to be_empty }
   end
 
-  context 'when kafka is an empty hash' do
+  context "when kafka is an empty hash" do
     before { config[:kafka] = {} }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:kafka]).not_to be_empty }
   end
 
-  context 'when kafka hash is present' do
-    context 'when there is a non-symbol key setting' do
-      before { config[:kafka] = { 'not_a_symbol' => true } }
+  context "when kafka hash is present" do
+    context "when there is a non-symbol key setting" do
+      before { config[:kafka] = { "not_a_symbol" => true } }
 
       it { expect(contract_result).not_to be_success }
     end
   end
 
-  context 'when max_payload_size is nil' do
+  context "when max_payload_size is nil" do
     before { config[:max_payload_size] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_payload_size]).not_to be_empty }
   end
 
-  context 'when max_payload_size is a negative int' do
+  context "when max_payload_size is a negative int" do
     before { config[:max_payload_size] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_payload_size]).not_to be_empty }
   end
 
-  context 'when max_payload_size is a negative float' do
+  context "when max_payload_size is a negative float" do
     before { config[:max_payload_size] = -0.1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_payload_size]).not_to be_empty }
   end
 
-  context 'when max_payload_size is 0' do
+  context "when max_payload_size is 0" do
     before { config[:max_payload_size] = 0 }
 
     it { expect(contract_result).not_to be_success }
   end
 
-  context 'when max_payload_size is positive int' do
+  context "when max_payload_size is positive int" do
     before { config[:max_payload_size] = 1 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when max_payload_size is positive float' do
+  context "when max_payload_size is positive float" do
     before { config[:max_payload_size] = 1.1 }
 
     it { expect(contract_result).not_to be_success }
   end
 
-  context 'when max_attempts_on_transaction_command is nil' do
+  context "when max_attempts_on_transaction_command is nil" do
     before { config[:max_attempts_on_transaction_command] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
   end
 
-  context 'when max_attempts_on_transaction_command is a negative int' do
+  context "when max_attempts_on_transaction_command is a negative int" do
     before { config[:max_attempts_on_transaction_command] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
   end
 
-  context 'when max_attempts_on_transaction_command is a negative float' do
+  context "when max_attempts_on_transaction_command is a negative float" do
     before { config[:max_attempts_on_transaction_command] = -0.1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_attempts_on_transaction_command]).not_to be_empty }
   end
 
-  context 'when max_attempts_on_transaction_command is 0' do
+  context "when max_attempts_on_transaction_command is 0" do
     before { config[:max_attempts_on_transaction_command] = 0 }
 
     it { expect(contract_result).not_to be_success }
   end
 
-  context 'when max_attempts_on_transaction_command is positive int' do
+  context "when max_attempts_on_transaction_command is positive int" do
     before { config[:max_attempts_on_transaction_command] = 1 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when max_attempts_on_transaction_command is positive float' do
+  context "when max_attempts_on_transaction_command is positive float" do
     before { config[:max_attempts_on_transaction_command] = 1.1 }
 
     it { expect(contract_result).not_to be_success }
   end
 
-  context 'when max_wait_timeout is missing' do
+  context "when max_wait_timeout is missing" do
     before { config.delete(:max_wait_timeout) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
   end
 
-  context 'when max_wait_timeout is nil' do
+  context "when max_wait_timeout is nil" do
     before { config[:max_wait_timeout] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
   end
 
-  context 'when max_wait_timeout is a negative int' do
+  context "when max_wait_timeout is a negative int" do
     before { config[:max_wait_timeout] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
   end
 
-  context 'when max_wait_timeout is a negative float' do
+  context "when max_wait_timeout is a negative float" do
     before { config[:max_wait_timeout] = -0.1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:max_wait_timeout]).not_to be_empty }
   end
 
-  context 'when max_wait_timeout is 0' do
+  context "when max_wait_timeout is 0" do
     before { config[:max_wait_timeout] = 0 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when max_wait_timeout is positive int' do
+  context "when max_wait_timeout is positive int" do
     before { config[:max_wait_timeout] = 1 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when max_wait_timeout is positive float' do
+  context "when max_wait_timeout is positive float" do
     before { config[:max_wait_timeout] = 1.1 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when wait_on_queue_full is not a boolean' do
+  context "when wait_on_queue_full is not a boolean" do
     before { config[:wait_on_queue_full] = 0 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_on_queue_full]).not_to be_empty }
   end
 
-  context 'when reload_on_transaction_fatal_error is not a boolean' do
+  context "when reload_on_transaction_fatal_error is not a boolean" do
     before { config[:reload_on_transaction_fatal_error] = 0 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:reload_on_transaction_fatal_error]).not_to be_empty }
   end
 
-  context 'when instrument_on_wait_queue_full is not a boolean' do
+  context "when instrument_on_wait_queue_full is not a boolean" do
     before { config[:instrument_on_wait_queue_full] = 0 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:instrument_on_wait_queue_full]).not_to be_empty }
   end
 
-  context 'when wait_backoff_on_queue_full is not a numeric' do
-    before { config[:wait_backoff_on_queue_full] = 'na' }
+  context "when wait_backoff_on_queue_full is not a numeric" do
+    before { config[:wait_backoff_on_queue_full] = "na" }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_backoff_on_queue_full]).not_to be_empty }
   end
 
-  context 'when wait_backoff_on_queue_full is less than 0' do
+  context "when wait_backoff_on_queue_full is less than 0" do
     before { config[:wait_backoff_on_queue_full] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_backoff_on_queue_full]).not_to be_empty }
   end
 
-  context 'when wait_backoff_on_transaction_command is not a numeric' do
-    before { config[:wait_backoff_on_transaction_command] = 'na' }
+  context "when wait_backoff_on_transaction_command is not a numeric" do
+    before { config[:wait_backoff_on_transaction_command] = "na" }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_backoff_on_transaction_command]).not_to be_empty }
   end
 
-  context 'when wait_backoff_on_transaction_command is less than 0' do
+  context "when wait_backoff_on_transaction_command is less than 0" do
     before { config[:wait_backoff_on_transaction_command] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_backoff_on_transaction_command]).not_to be_empty }
   end
 
-  context 'when wait_timeout_on_queue_full is not a numeric' do
-    before { config[:wait_timeout_on_queue_full] = 'na' }
+  context "when wait_timeout_on_queue_full is not a numeric" do
+    before { config[:wait_timeout_on_queue_full] = "na" }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
   end
 
-  context 'when wait_timeout_on_queue_full is less than 0' do
+  context "when wait_timeout_on_queue_full is less than 0" do
     before { config[:wait_timeout_on_queue_full] = -1 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:wait_timeout_on_queue_full]).not_to be_empty }
   end
 
-  context 'when oauth token_provider_listener does not respond to on_oauthbearer_token_refresh' do
+  context "when oauth token_provider_listener does not respond to on_oauthbearer_token_refresh" do
     before { config[:oauth][:token_provider_listener] = true }
 
     it { expect(contract_result).not_to be_success }
-    it { expect(contract_errors[:'oauth.token_provider_listener']).not_to be_empty }
+    it { expect(contract_errors[:"oauth.token_provider_listener"]).not_to be_empty }
   end
 
-  context 'when oauth token_provider_listener responds to on_oauthbearer_token_refresh' do
+  context "when oauth token_provider_listener responds to on_oauthbearer_token_refresh" do
     let(:listener) do
       Class.new do
-        def on_oauthbearer_token_refresh(_); end
+        def on_oauthbearer_token_refresh(_)
+        end
       end
     end
 
@@ -353,100 +354,100 @@ RSpec.describe_current do
     it { expect(contract_result).to be_success }
   end
 
-  context 'when idle_disconnect_timeout is missing' do
+  context "when idle_disconnect_timeout is missing" do
     before { config.delete(:idle_disconnect_timeout) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
   end
 
-  context 'when idle_disconnect_timeout is nil' do
+  context "when idle_disconnect_timeout is nil" do
     before { config[:idle_disconnect_timeout] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
   end
 
-  context 'when idle_disconnect_timeout is not an integer' do
+  context "when idle_disconnect_timeout is not an integer" do
     before { config[:idle_disconnect_timeout] = 30.5 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
   end
 
-  context 'when idle_disconnect_timeout is a negative integer' do
+  context "when idle_disconnect_timeout is a negative integer" do
     before { config[:idle_disconnect_timeout] = -1000 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
   end
 
-  context 'when idle_disconnect_timeout is below minimum (30 seconds)' do
+  context "when idle_disconnect_timeout is below minimum (30 seconds)" do
     before { config[:idle_disconnect_timeout] = 29_999 }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:idle_disconnect_timeout]).not_to be_empty }
   end
 
-  context 'when idle_disconnect_timeout is zero (disabled)' do
+  context "when idle_disconnect_timeout is zero (disabled)" do
     before { config[:idle_disconnect_timeout] = 0 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when idle_disconnect_timeout is exactly minimum (30 seconds)' do
+  context "when idle_disconnect_timeout is exactly minimum (30 seconds)" do
     before { config[:idle_disconnect_timeout] = 30_000 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when idle_disconnect_timeout is above minimum' do
+  context "when idle_disconnect_timeout is above minimum" do
     before { config[:idle_disconnect_timeout] = 60_000 }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when non_reloadable_errors is missing' do
+  context "when non_reloadable_errors is missing" do
     before { config.delete(:non_reloadable_errors) }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
   end
 
-  context 'when non_reloadable_errors is nil' do
+  context "when non_reloadable_errors is nil" do
     before { config[:non_reloadable_errors] = nil }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
   end
 
-  context 'when non_reloadable_errors is not an array' do
+  context "when non_reloadable_errors is not an array" do
     before { config[:non_reloadable_errors] = :fenced }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
   end
 
-  context 'when non_reloadable_errors contains non-symbol values' do
-    before { config[:non_reloadable_errors] = [:fenced, 'string_value', 123] }
+  context "when non_reloadable_errors contains non-symbol values" do
+    before { config[:non_reloadable_errors] = [:fenced, "string_value", 123] }
 
     it { expect(contract_result).not_to be_success }
     it { expect(contract_errors[:non_reloadable_errors]).not_to be_empty }
   end
 
-  context 'when non_reloadable_errors is an empty array' do
+  context "when non_reloadable_errors is an empty array" do
     before { config[:non_reloadable_errors] = [] }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when non_reloadable_errors is an array of symbols' do
+  context "when non_reloadable_errors is an array of symbols" do
     before { config[:non_reloadable_errors] = %i[fenced some_other_error] }
 
     it { expect(contract_result).to be_success }
   end
 
-  context 'when non_reloadable_errors is default value' do
+  context "when non_reloadable_errors is default value" do
     before { config[:non_reloadable_errors] = %i[fenced] }
 
     it { expect(contract_result).to be_success }

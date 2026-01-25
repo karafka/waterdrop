@@ -54,7 +54,7 @@ module WaterDrop
           client.start
 
           # Switch to the transactional mode if user provided the transactional id
-          client.init_transactions if kafka_config.key?(:'transactional.id')
+          client.init_transactions if kafka_config.key?(:"transactional.id")
 
           client
         end

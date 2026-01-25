@@ -3,61 +3,61 @@
 RSpec.describe_current do
   subject(:monitor) { described_class.new }
 
-  describe '#initialize' do
-    it 'creates a monitor instance without errors' do
+  describe "#initialize" do
+    it "creates a monitor instance without errors" do
       expect(monitor).to be_a(described_class)
     end
 
-    it 'accepts custom notifications bus parameter' do
+    it "accepts custom notifications bus parameter" do
       custom_bus = WaterDrop::Instrumentation::ClassNotifications.new
       custom_monitor = described_class.new(custom_bus)
 
       expect(custom_monitor).to be_a(described_class)
     end
 
-    it 'accepts namespace parameter without errors' do
+    it "accepts namespace parameter without errors" do
       expect do
-        described_class.new(nil, 'test')
+        described_class.new(nil, "test")
       end.not_to raise_error
     end
   end
 
-  describe '#subscribe' do
-    it 'allows subscribing to class-level events' do
+  describe "#subscribe" do
+    it "allows subscribing to class-level events" do
       events_received = []
 
-      monitor.subscribe('producer.created') do |event|
+      monitor.subscribe("producer.created") do |event|
         events_received << event
       end
 
-      monitor.instrument('producer.created', test_data: 'value')
+      monitor.instrument("producer.created", test_data: "value")
 
       expect(events_received.size).to eq(1)
-      expect(events_received.first[:test_data]).to eq('value')
+      expect(events_received.first[:test_data]).to eq("value")
     end
 
-    it 'allows subscribing to producer.configured events' do
+    it "allows subscribing to producer.configured events" do
       events_received = []
 
-      monitor.subscribe('producer.configured') do |event|
+      monitor.subscribe("producer.configured") do |event|
         events_received << event
       end
 
-      monitor.instrument('producer.configured', producer_id: 'test-id')
+      monitor.instrument("producer.configured", producer_id: "test-id")
 
       expect(events_received.size).to eq(1)
-      expect(events_received.first[:producer_id]).to eq('test-id')
+      expect(events_received.first[:producer_id]).to eq("test-id")
     end
 
-    it 'raises error when subscribing to non-class events' do
+    it "raises error when subscribing to non-class events" do
       expect do
-        monitor.subscribe('message.produced_async') do |event|
+        monitor.subscribe("message.produced_async") do |event|
           # This should not be allowed
         end
       end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
     end
 
-    it 'raises error when subscribing to instance-level events' do
+    it "raises error when subscribing to instance-level events" do
       instance_events = %w[
         producer.connected
         producer.closed
@@ -74,80 +74,80 @@ RSpec.describe_current do
     end
   end
 
-  describe '#instrument' do
-    it 'instruments class-level events successfully' do
+  describe "#instrument" do
+    it "instruments class-level events successfully" do
       events_received = []
 
-      monitor.subscribe('producer.created') do |event|
+      monitor.subscribe("producer.created") do |event|
         events_received << event
       end
 
-      result = monitor.instrument('producer.created', producer: 'test_producer') do
-        'instrumented_result'
+      result = monitor.instrument("producer.created", producer: "test_producer") do
+        "instrumented_result"
       end
 
-      expect(result).to eq('instrumented_result')
+      expect(result).to eq("instrumented_result")
       expect(events_received.size).to eq(1)
-      expect(events_received.first[:producer]).to eq('test_producer')
+      expect(events_received.first[:producer]).to eq("test_producer")
     end
 
-    it 'supports instrumenting without a block' do
+    it "supports instrumenting without a block" do
       events_received = []
 
-      monitor.subscribe('producer.configured') do |event|
+      monitor.subscribe("producer.configured") do |event|
         events_received << event
       end
 
-      monitor.instrument('producer.configured', config: 'test_config')
+      monitor.instrument("producer.configured", config: "test_config")
 
       expect(events_received.size).to eq(1)
-      expect(events_received.first[:config]).to eq('test_config')
+      expect(events_received.first[:config]).to eq("test_config")
     end
 
-    it 'raises error when instrumenting non-class events' do
+    it "raises error when instrumenting non-class events" do
       expect do
-        monitor.instrument('message.produced_sync', message: {})
+        monitor.instrument("message.produced_sync", message: {})
       end.to raise_error(Karafka::Core::Monitoring::Notifications::EventNotRegistered)
     end
   end
 
-  describe 'multiple subscribers' do
-    it 'notifies all subscribers for the same event' do
+  describe "multiple subscribers" do
+    it "notifies all subscribers for the same event" do
       events_received1 = []
       events_received2 = []
 
-      monitor.subscribe('producer.created') do |event|
+      monitor.subscribe("producer.created") do |event|
         events_received1 << event
       end
 
-      monitor.subscribe('producer.created') do |event|
+      monitor.subscribe("producer.created") do |event|
         events_received2 << event
       end
 
-      monitor.instrument('producer.created', producer_id: 'shared-test')
+      monitor.instrument("producer.created", producer_id: "shared-test")
 
       expect(events_received1.size).to eq(1)
       expect(events_received2.size).to eq(1)
-      expect(events_received1.first[:producer_id]).to eq('shared-test')
-      expect(events_received2.first[:producer_id]).to eq('shared-test')
+      expect(events_received1.first[:producer_id]).to eq("shared-test")
+      expect(events_received2.first[:producer_id]).to eq("shared-test")
     end
   end
 
-  describe 'inheritance' do
-    it 'inherits from Karafka::Core::Monitoring::Monitor' do
+  describe "inheritance" do
+    it "inherits from Karafka::Core::Monitoring::Monitor" do
       expect(described_class).to be < Karafka::Core::Monitoring::Monitor
     end
   end
 
-  describe 'integration with WaterDrop.instrumentation' do
+  describe "integration with WaterDrop.instrumentation" do
     let(:events_received) { [] }
 
     before do
-      WaterDrop.instrumentation.subscribe('producer.created') do |event|
+      WaterDrop.instrumentation.subscribe("producer.created") do |event|
         events_received << [:producer_created, event]
       end
 
-      WaterDrop.instrumentation.subscribe('producer.configured') do |event|
+      WaterDrop.instrumentation.subscribe("producer.configured") do |event|
         events_received << [:producer_configured, event]
       end
     end
@@ -157,10 +157,10 @@ RSpec.describe_current do
       WaterDrop.instance_variable_set(:@instrumentation, nil)
     end
 
-    context 'when creating a producer without configuration' do
+    context "when creating a producer without configuration" do
       let!(:producer) { WaterDrop::Producer.new }
 
-      it 'instruments producer.created event' do
+      it "instruments producer.created event" do
         created_events = events_received.select { |event| event.first == :producer_created }
 
         expect(created_events.size).to eq(1)
@@ -170,21 +170,21 @@ RSpec.describe_current do
         expect(event_data[:producer_id]).to be_nil # Not configured yet
       end
 
-      it 'does not instrument producer.configured event yet' do
+      it "does not instrument producer.configured event yet" do
         configured_events = events_received.select { |event| event.first == :producer_configured }
         expect(configured_events).to be_empty
       end
     end
 
-    context 'when creating a producer with configuration' do
+    context "when creating a producer with configuration" do
       let!(:producer) do
         WaterDrop::Producer.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
-      it 'instruments both producer.created and producer.configured events' do
+      it "instruments both producer.created and producer.configured events" do
         created_events = events_received.select { |event| event.first == :producer_created }
         configured_events = events_received.select { |event| event.first == :producer_configured }
 
@@ -199,22 +199,22 @@ RSpec.describe_current do
       end
     end
 
-    context 'when creating multiple producers' do
+    context "when creating multiple producers" do
       let!(:producer1) do
         WaterDrop::Producer.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
       end
 
       let!(:producer2) do
         WaterDrop::Producer.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': 'localhost:9093' }
+          config.kafka = { "bootstrap.servers": "localhost:9093" }
         end
       end
 
-      it 'instruments events for each producer separately' do
+      it "instruments events for each producer separately" do
         created_events = events_received.select { |event| event.first == :producer_created }
         configured_events = events_received.select { |event| event.first == :producer_configured }
 
@@ -230,12 +230,12 @@ RSpec.describe_current do
       end
     end
 
-    describe 'integration with external libraries' do
-      it 'allows external libraries to hook into producer lifecycle' do
+    describe "integration with external libraries" do
+      it "allows external libraries to hook into producer lifecycle" do
         middleware_applied = []
 
         # Simulate Datadog integration subscribing to events
-        WaterDrop.instrumentation.subscribe('producer.configured') do |event|
+        WaterDrop.instrumentation.subscribe("producer.configured") do |event|
           producer = event[:producer]
 
           # Simulate adding tracing middleware
@@ -245,7 +245,7 @@ RSpec.describe_current do
           producer.config.middleware.append(
             lambda do |message|
               message[:headers] ||= {}
-              message[:headers]['x-trace-id'] = 'test-trace-id'
+              message[:headers]["x-trace-id"] = "test-trace-id"
               message
             end
           )
@@ -254,17 +254,17 @@ RSpec.describe_current do
         # Create a producer
         producer = WaterDrop::Producer.new do |config|
           config.deliver = false
-          config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
         end
 
         # Verify middleware was applied
         expect(middleware_applied).to include(producer.id)
 
         # Test that middleware actually works
-        test_message = { topic: 'test', payload: 'test' }
+        test_message = { topic: "test", payload: "test" }
         processed_message = producer.middleware.run(test_message)
 
-        expect(processed_message[:headers]['x-trace-id']).to eq('test-trace-id')
+        expect(processed_message[:headers]["x-trace-id"]).to eq("test-trace-id")
       end
     end
   end

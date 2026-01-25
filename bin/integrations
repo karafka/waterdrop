@@ -4,14 +4,14 @@
 
 # All integration specs run with their own bundler context to avoid dependency conflicts.
 # All WaterDrop integration specs are pristine by default since they use isolated Gemfiles.
-raise 'This code needs to be executed WITHOUT bundle exec' if Kernel.const_defined?(:Bundler)
+raise "This code needs to be executed WITHOUT bundle exec" if Kernel.const_defined?(:Bundler)
 
-require 'open3'
-require 'fileutils'
-require 'pathname'
-require 'tmpdir'
+require "open3"
+require "fileutils"
+require "pathname"
+require "tmpdir"
 
-ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), '../')))
+ROOT_PATH = Pathname.new(File.expand_path(File.join(File.dirname(__FILE__), "../")))
 
 # How may bytes do we want to keep from the stdout in the buffer for when we need to print it
 MAX_BUFFER_OUTPUT = 307_200
@@ -36,9 +36,9 @@ class Scenario
   def initialize(path)
     @path = path
     # First 1024 characters from stdout
-    @stdout_head = ''
+    @stdout_head = ""
     # Last 1024 characters from stdout
-    @stdout_tail = ''
+    @stdout_tail = ""
   end
 
   # Starts running given scenario in a separate process
@@ -49,16 +49,15 @@ class Scenario
 
   # @return [String] integration spec name
   def name
-    @path.gsub("#{ROOT_PATH}/spec/integrations/", '')
+    @path.gsub("#{ROOT_PATH}/spec/integrations/", "")
   end
-
 
   # @return [Boolean] did this scenario finished or is it still running
   def finished?
     # If the thread is running too long, kill it
     if current_time - @started_at > MAX_RUN_TIME
       begin
-        Process.kill('TERM', pid)
+        Process.kill("TERM", pid)
       # It may finish right after we want to kill it, that's why we ignore this
       rescue Errno::ESRCH
       end
@@ -66,7 +65,7 @@ class Scenario
 
     # We read it so it won't grow as we use our default logger that prints to both test.log and
     # to stdout. Otherwise after reaching the buffer size, it would hang
-    buffer = ''
+    buffer = ""
     @stdout.read_nonblock(MAX_BUFFER_OUTPUT, buffer, exception: false)
     @stdout_head = buffer if @stdout_head.empty?
     @stdout_tail << buffer
@@ -101,19 +100,19 @@ class Scenario
   # Prints a status report when scenario is finished and stdout if it failed
   def report
     if success?
-      print "\e[#{32}m#{'.'}\e[0m"
+      print "\e[32m.\e[0m"
     else
-      buffer = ''
+      buffer = ""
 
       @stderr.read_nonblock(MAX_BUFFER_OUTPUT, buffer, exception: false)
 
       puts
-      puts "\e[#{31}m#{'[FAILED]'}\e[0m #{name}"
+      puts "\e[31m[FAILED]\e[0m #{name}"
       puts "Time taken: #{current_time - @started_at} seconds"
       puts "Exit code: #{exit_code}"
       puts "Exit status: #{exit_status}"
       puts @stdout_head
-      puts '...'
+      puts "..."
       puts @stdout_tail
       puts buffer
       puts
@@ -163,38 +162,38 @@ class Scenario
 end
 
 # Load all the specs
-specs = Dir[ROOT_PATH.join('spec/integrations/**/*_spec.rb')]
+specs = Dir[ROOT_PATH.join("spec/integrations/**/*_spec.rb")]
 
-FILTER_TYPE = ARGV[0] == '--exclude' ? 'exclude' : 'include'
+FILTER_TYPE = (ARGV[0] == "--exclude") ? "exclude" : "include"
 
 # Remove the exclude flag
-ARGV.shift if FILTER_TYPE == '--exclude'
+ARGV.shift if FILTER_TYPE == "--exclude"
 
 # If filters is provided, apply
 # Allows to provide several filters one after another and applies all of them
 ARGV.each do |filter|
   specs.delete_if do |name|
     case FILTER_TYPE
-    when 'include'
+    when "include"
       !name.include?(filter)
-    when 'exclude'
+    when "exclude"
       name.include?(filter)
     else
-      raise 'Invalid filter type'
+      raise "Invalid filter type"
     end
   end
 end
 
 # Randomize order
-seed = (ENV['SPECS_SEED'] || rand(0..10_000)).to_i
+seed = (ENV["SPECS_SEED"] || rand(0..10_000)).to_i
 
 puts "Random seed: #{seed}"
 
 scenarios = specs
-            .shuffle(random: Random.new(seed))
-            .map { |integration| Scenario.new(integration) }
+  .shuffle(random: Random.new(seed))
+  .map { |integration| Scenario.new(integration) }
 
-raise ArgumentError, "No integration specs with filters: #{ARGV.join(', ')}" if scenarios.empty?
+raise ArgumentError, "No integration specs with filters: #{ARGV.join(", ")}" if scenarios.empty?
 
 puts "Running #{scenarios.size} scenarios"
 
@@ -217,8 +216,8 @@ end
 puts
 puts "\nLongest scenarios:\n\n"
 
-finished_scenarios.sort_by(&:time_taken).reverse.first(10).each do |long_scenario|
-  puts "[#{'%6.2f' % long_scenario.time_taken}] #{long_scenario.name}"
+finished_scenarios.sort_by(&:time_taken).last(10).reverse_each do |long_scenario|
+  puts "[#{"%6.2f" % long_scenario.time_taken}] #{long_scenario.name}"
 end
 
 failed_scenarios = finished_scenarios.reject(&:success?)
@@ -232,7 +231,7 @@ else
   puts "\nFailed scenarios:\n\n"
 
   failed_scenarios.each do |scenario|
-    puts "\e[#{31}m#{'[FAILED]'}\e[0m #{scenario.name}"
+    puts "\e[31m[FAILED]\e[0m #{scenario.name}"
   end
 
   puts

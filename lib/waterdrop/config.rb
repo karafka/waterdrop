@@ -9,18 +9,18 @@ module WaterDrop
 
     # Defaults for kafka settings, that will be overwritten only if not present already
     KAFKA_DEFAULTS = {
-      'client.id': 'waterdrop',
+      "client.id": "waterdrop",
       # emit librdkafka statistics every five seconds. This is used in instrumentation.
       # When disabled, part of metrics will not be published and available.
-      'statistics.interval.ms': 5_000,
+      "statistics.interval.ms": 5_000,
       # We set it to a value that is lower than `max_wait_timeout` to have a final verdict upon
       # sync delivery
-      'message.timeout.ms': 50_000,
+      "message.timeout.ms": 50_000,
       # Must be more or equal to `message.timeout.ms` defaults
-      'transaction.timeout.ms': 55_000,
+      "transaction.timeout.ms": 55_000,
       # Lowers latency. Default in newer librdkafka but we want to make sure it is shipped to
       # users despite what librdkafka they run on
-      'socket.nagle.disable': true
+      "socket.nagle.disable": true
     }.freeze
 
     private_constant :KAFKA_DEFAULTS

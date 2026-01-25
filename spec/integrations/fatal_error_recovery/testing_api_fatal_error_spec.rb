@@ -10,20 +10,20 @@
 # 3. Producer with reload enabled can recover and produce after fatal error
 # 4. Producer without reload cannot produce after fatal error
 
-require 'waterdrop'
-require 'waterdrop/producer/testing'
-require 'logger'
-require 'securerandom'
+require "waterdrop"
+require "waterdrop/producer/testing"
+require "logger"
+require "securerandom"
 
-BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 topic_name = "it-testing-api-#{SecureRandom.hex(6)}"
 
 # Test 1: Producer with reload disabled - should NOT recover
 producer_no_reload = WaterDrop::Producer.new do |config|
   config.kafka = {
-    'bootstrap.servers': BOOTSTRAP_SERVERS,
-    'enable.idempotence': true
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
+    "enable.idempotence": true
   }
   config.max_wait_timeout = 30_000
   config.reload_on_idempotent_fatal_error = false
@@ -33,14 +33,14 @@ end
 producer_no_reload.singleton_class.include(WaterDrop::Producer::Testing)
 
 # Verify producer works initially
-report = producer_no_reload.produce_sync(topic: topic_name, payload: 'before-fatal')
+report = producer_no_reload.produce_sync(topic: topic_name, payload: "before-fatal")
 exit(1) unless report.is_a?(Rdkafka::Producer::DeliveryReport) && report.error.nil?
 
 # Verify no fatal error initially
 exit(1) unless producer_no_reload.fatal_error.nil?
 
 # Trigger fatal error
-result = producer_no_reload.trigger_test_fatal_error(47, 'Test no-reload behavior')
+result = producer_no_reload.trigger_test_fatal_error(47, "Test no-reload behavior")
 exit(1) unless result.zero?
 
 # Verify fatal error is present
@@ -52,7 +52,7 @@ exit(1) unless fatal_error[:error_string].is_a?(String) && !fatal_error[:error_s
 # Try to produce after fatal error - should fail
 produce_failed = false
 begin
-  producer_no_reload.produce_sync(topic: topic_name, payload: 'after-fatal')
+  producer_no_reload.produce_sync(topic: topic_name, payload: "after-fatal")
 rescue WaterDrop::Errors::ProduceError => e
   produce_failed = true
   # Verify the error contains fatal librdkafka error
@@ -73,8 +73,8 @@ reloaded_events = []
 
 producer_with_reload = WaterDrop::Producer.new do |config|
   config.kafka = {
-    'bootstrap.servers': BOOTSTRAP_SERVERS,
-    'enable.idempotence': true
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
+    "enable.idempotence": true
   }
   config.max_wait_timeout = 30_000
   config.reload_on_idempotent_fatal_error = true
@@ -85,15 +85,15 @@ end
 
 producer_with_reload.singleton_class.include(WaterDrop::Producer::Testing)
 
-producer_with_reload.monitor.subscribe('producer.reload') { |event| reload_events << event }
-producer_with_reload.monitor.subscribe('producer.reloaded') { |event| reloaded_events << event }
+producer_with_reload.monitor.subscribe("producer.reload") { |event| reload_events << event }
+producer_with_reload.monitor.subscribe("producer.reloaded") { |event| reloaded_events << event }
 
 # Verify producer works initially
-report = producer_with_reload.produce_sync(topic: topic_name, payload: 'before-fatal-2')
+report = producer_with_reload.produce_sync(topic: topic_name, payload: "before-fatal-2")
 exit(1) unless report.is_a?(Rdkafka::Producer::DeliveryReport) && report.error.nil?
 
 # Trigger fatal error
-result = producer_with_reload.trigger_test_fatal_error(47, 'Test reload behavior')
+result = producer_with_reload.trigger_test_fatal_error(47, "Test reload behavior")
 exit(1) unless result.zero?
 
 # Verify fatal error is present
@@ -103,7 +103,7 @@ exit(1) unless fatal_error[:error_code] == 47
 
 # Try to produce after fatal error - should succeed after reload
 begin
-  report = producer_with_reload.produce_sync(topic: topic_name, payload: 'after-fatal-reload')
+  report = producer_with_reload.produce_sync(topic: topic_name, payload: "after-fatal-reload")
   exit(1) unless report.is_a?(Rdkafka::Producer::DeliveryReport)
 rescue WaterDrop::Errors::ProduceError
   # Should not fail - reload should allow recovery

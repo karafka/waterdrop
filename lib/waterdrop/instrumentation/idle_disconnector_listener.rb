@@ -63,7 +63,7 @@ module WaterDrop
       # Handles statistics.emitted events to monitor message transmission activity
       # @param statistics [Hash] producer librdkafka statistics
       def call(statistics)
-        current_txmsgs = statistics.fetch('txmsgs', 0)
+        current_txmsgs = statistics.fetch("txmsgs", 0)
         current_time = monotonic_now
 
         # Update activity if messages changed
@@ -86,12 +86,12 @@ module WaterDrop
           # thread creation
           Thread.new do
             @producer.disconnect
-          rescue StandardError => e
+          rescue => e
             @producer.monitor.instrument(
-              'error.occurred',
+              "error.occurred",
               producer_id: @producer.id,
               error: e,
-              type: 'producer.disconnect.error'
+              type: "producer.disconnect.error"
             )
           end
         end

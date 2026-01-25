@@ -1,44 +1,44 @@
 # frozen_string_literal: true
 
-Warning[:performance] = true if RUBY_VERSION >= '3.3'
+Warning[:performance] = true if RUBY_VERSION >= "3.3"
 Warning[:deprecated] = true
 $VERBOSE = true
 
-require 'warning'
+require "warning"
 
 Warning.process do |warning|
   next unless warning.include?(Dir.pwd)
-  next if warning.include?('vendor/bundle')
+  next if warning.include?("vendor/bundle")
   # Allow OpenStruct usage only in specs
-  next if warning.include?('OpenStruct use') && warning.include?('_spec')
-  next if warning.include?('$CHILD_STATUS')
+  next if warning.include?("OpenStruct use") && warning.include?("_spec")
+  next if warning.include?("$CHILD_STATUS")
 
   raise "Warning in your code: #{warning}"
 end
 
-require 'ostruct'
-require 'securerandom'
-require 'logger'
+require "ostruct"
+require "securerandom"
+require "logger"
 
-coverage = !ENV.key?('GITHUB_WORKFLOW')
-coverage = true if ENV['GITHUB_COVERAGE'] == 'true'
+coverage = !ENV.key?("GITHUB_WORKFLOW")
+coverage = true if ENV["GITHUB_COVERAGE"] == "true"
 
 # Used to point out to Kafka location
 # Useful when we run specs on non-local clusters for extended testing
-BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 if coverage
-  require 'simplecov'
+  require "simplecov"
 
   # Don't include unnecessary stuff into rcov
   SimpleCov.start do
-    add_filter '/spec/'
-    add_filter '/vendor/'
-    add_filter '/gems/'
-    add_filter '/.bundle/'
-    add_filter '/doc/'
-    add_filter '/config/'
-    add_filter '/lib/waterdrop/patches/'
+    add_filter "/spec/"
+    add_filter "/vendor/"
+    add_filter "/gems/"
+    add_filter "/.bundle/"
+    add_filter "/doc/"
+    add_filter "/config/"
+    add_filter "/lib/waterdrop/patches/"
 
     merge_timeout 600
     minimum_coverage 100
@@ -48,9 +48,9 @@ end
 
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
 
-require_relative 'support/factories'
-require_relative 'support/factories/message'
-require_relative 'support/factories/producer'
+require_relative "support/factories"
+require_relative "support/factories/message"
+require_relative "support/factories/producer"
 
 RSpec.configure do |config|
   config.disable_monkey_patching!
@@ -65,9 +65,9 @@ RSpec.configure do |config|
   end
 end
 
-require 'karafka/core/helpers/rspec_locator'
-RSpec.extend Karafka::Core::Helpers::RSpecLocator.new(__FILE__, 'Waterdrop' => 'WaterDrop')
+require "karafka/core/helpers/rspec_locator"
+RSpec.extend Karafka::Core::Helpers::RSpecLocator.new(__FILE__, "Waterdrop" => "WaterDrop")
 
-require 'waterdrop'
-require 'waterdrop/producer/testing'
-require 'waterdrop/instrumentation/vendors/datadog/metrics_listener'
+require "waterdrop"
+require "waterdrop/producer/testing"
+require "waterdrop/instrumentation/vendors/datadog/metrics_listener"

@@ -27,27 +27,27 @@ module WaterDrop
           # rdkafka does not have per-instance statistics hook, thus we need to make sure that we
           # emit only stats that are related to current producer. Otherwise we would emit all of
           # all the time.
-          return unless @client_name == statistics['name']
+          return unless @client_name == statistics["name"]
 
           # Skip if no one is listening. We check on each emission to support late subscribers
           # since statistics are emitted every 5 seconds, this check is cheap enough
           return unless listening?
 
           @monitor.instrument(
-            'statistics.emitted',
+            "statistics.emitted",
             producer_id: @producer_id,
             statistics: @statistics_decorator.call(statistics)
           )
         # This runs from the rdkafka thread, thus we want to safe-guard it and prevent absolute
         # crashes even if the instrumentation code fails. If it would bubble-up, it could crash
         # the rdkafka background thread
-        rescue StandardError => e
+        rescue => e
           @monitor.instrument(
-            'error.occurred',
+            "error.occurred",
             caller: self,
             error: e,
             producer_id: @producer_id,
-            type: 'callbacks.statistics.error'
+            type: "callbacks.statistics.error"
           )
         end
 
@@ -56,7 +56,7 @@ module WaterDrop
         # Check if anyone is listening to statistics events
         # @return [Boolean] true if there are listeners
         def listening?
-          listeners = @monitor.listeners['statistics.emitted']
+          listeners = @monitor.listeners["statistics.emitted"]
           listeners && !listeners.empty?
         end
       end

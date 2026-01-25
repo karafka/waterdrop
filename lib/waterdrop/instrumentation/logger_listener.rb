@@ -117,36 +117,36 @@ module WaterDrop
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_buffer_purged(event)
-        info(event, 'Successfully purging buffer')
+        info(event, "Successfully purging buffer")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_closing(event)
-        info(event, 'Closing producer')
+        info(event, "Closing producer")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       # @note While this says "Closing producer", it produces a nice message with time taken:
       #   "Closing producer took 12 ms" indicating it happened in the past.
       def on_producer_closed(event)
-        info(event, 'Closing producer')
+        info(event, "Closing producer")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_disconnecting(event)
-        info(event, 'Disconnecting producer')
+        info(event, "Disconnecting producer")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       # @note While this says "Disconnecting producer", it produces a nice message with time taken:
       #   "Disconnecting producer took 5 ms" indicating it happened in the past.
       def on_producer_disconnected(event)
-        info(event, 'Disconnected producer')
+        info(event, "Disconnected producer")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_producer_reloaded(event)
-        info(event, 'Producer successfully reloaded')
+        info(event, "Producer successfully reloaded")
       end
 
       # @param event [Dry::Events::Event] event that happened with the error details
@@ -159,17 +159,17 @@ module WaterDrop
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_transaction_started(event)
-        info(event, 'Starting transaction')
+        info(event, "Starting transaction")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_transaction_aborted(event)
-        info(event, 'Aborting transaction')
+        info(event, "Aborting transaction")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_transaction_committed(event)
-        info(event, 'Committing transaction')
+        info(event, "Committing transaction")
       end
 
       # @param event [Dry::Events::Event] event that happened with the details
@@ -188,7 +188,7 @@ module WaterDrop
 
       # @param event [Dry::Events::Event] event that happened with the details
       def on_transaction_finished(event)
-        info(event, 'Processing transaction')
+        info(event, "Processing transaction")
       end
 
       private

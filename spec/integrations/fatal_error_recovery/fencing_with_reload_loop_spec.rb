@@ -9,11 +9,11 @@
 # "Attempting to reload on fenced errors creates: produce -> fenced -> reload -> produce ->
 #  fenced -> reload (infinite loop)"
 
-require 'waterdrop'
-require 'logger'
-require 'securerandom'
+require "waterdrop"
+require "logger"
+require "securerandom"
 
-BOOTSTRAP_SERVERS = ENV.fetch('BOOTSTRAP_SERVERS', '127.0.0.1:9092')
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 # How many attempts of endless loop before we're done
 MAX_RELOAD_ATTEMPTS = 10
 # Same ID for both producers
@@ -23,10 +23,10 @@ TRANSACTIONAL_ID = "fence-loop-test-#{SecureRandom.uuid}".freeze
 def configure_producer
   lambda do |config|
     config.kafka = {
-      'bootstrap.servers': BOOTSTRAP_SERVERS,
-      'transactional.id': TRANSACTIONAL_ID,
-      'transaction.timeout.ms': 30_000,
-      'message.timeout.ms': 30_000
+      "bootstrap.servers": BOOTSTRAP_SERVERS,
+      "transactional.id": TRANSACTIONAL_ID,
+      "transaction.timeout.ms": 30_000,
+      "message.timeout.ms": 30_000
     }
     config.max_wait_timeout = 5_000
     config.logger = Logger.new($stdout, level: Logger::INFO)
@@ -49,30 +49,30 @@ producer2 = WaterDrop::Producer.new(&configure_producer)
 
 # Subscribe to events for both producers
 [producer1, producer2].each do |producer|
-  producer.monitor.subscribe('producer.reloaded') { |event| reload_events << event }
-  producer.monitor.subscribe('error.occurred') { |event| error_events << event }
+  producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
+  producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 end
 
 topic_name = "it-fence-loop-#{SecureRandom.hex(6)}"
 
 # First transaction with producer1
 producer1.transaction do
-  producer1.produce_sync(topic: topic_name, payload: 'message1')
+  producer1.produce_sync(topic: topic_name, payload: "message1")
 end
 
 begin
   # This transaction will fence producer1
   producer2.transaction do
-    producer2.produce_sync(topic: topic_name, payload: 'message2')
+    producer2.produce_sync(topic: topic_name, payload: "message2")
   end
 
   producer1.transaction do
-    producer1.produce_sync(topic: topic_name, payload: 'message3')
+    producer1.produce_sync(topic: topic_name, payload: "message3")
   end
 
   # This will trigger reload loop: fenced -> reload -> fenced -> reload...
   producer2.transaction do
-    producer2.produce_sync(topic: topic_name, payload: 'message2')
+    producer2.produce_sync(topic: topic_name, payload: "message2")
   end
 rescue Rdkafka::RdkafkaError => e
   exit(1) unless e.code == :fenced

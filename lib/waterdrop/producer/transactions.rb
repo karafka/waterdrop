@@ -80,7 +80,7 @@ module WaterDrop
               if !e && !finished
                 raise(
                   Errors::EarlyTransactionExitNotAllowedError,
-                  <<~ERROR_MSG.tr("\n", ' ')
+                  <<~ERROR_MSG.tr("\n", " ")
                     Using `return`, `break` or `throw` to exit a transaction block is not allowed.
                     If the `throw` came from `Timeout.timeout(duration)`, pass an exception class as
                     a second argument so it doesn't use `throw` to abort its block.
@@ -110,7 +110,7 @@ module WaterDrop
                   client.abort_transaction
                 end
               end
-            rescue StandardError => e
+            rescue => e
               # If something from rdkafka leaks here, it means there was a non-retryable error that
               # bubbled up. In such cases if we should, we do reload the underling client
               transactional_reload_client_if_needed(e)
@@ -134,7 +134,7 @@ module WaterDrop
       def transactional?
         return @transactional unless @transactional.nil?
 
-        @transactional = config.kafka.to_h.key?(:'transactional.id')
+        @transactional = config.kafka.to_h.key?(:"transactional.id")
       end
 
       # Checks if we can still retry reloading after a transactional fatal error
@@ -229,7 +229,7 @@ module WaterDrop
         do_retry = e.retryable? && attempt < config.max_attempts_on_transaction_command
 
         @monitor.instrument(
-          'error.occurred',
+          "error.occurred",
           producer_id: id,
           caller: self,
           error: e,
@@ -299,7 +299,7 @@ module WaterDrop
           # Users can subscribe to this event and modify event[:caller].config.kafka to change
           # producer config. This is useful for escaping fencing loops by changing transactional.id
           @monitor.instrument(
-            'producer.reload',
+            "producer.reload",
             producer_id: id,
             error: rd_error,
             attempt: @transaction_fatal_error_attempts,
@@ -311,7 +311,7 @@ module WaterDrop
           @transactional = nil
 
           @monitor.instrument(
-            'producer.reloaded',
+            "producer.reloaded",
             producer_id: id,
             attempt: @transaction_fatal_error_attempts
           ) do

@@ -12,7 +12,7 @@ RSpec.describe_current do
 
     producer_config.setup do |config|
       config.deliver = should_deliver
-      config.kafka = { 'bootstrap.servers': BOOTSTRAP_SERVERS }
+      config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
     end
 
     producer_config.config
@@ -28,18 +28,18 @@ RSpec.describe_current do
   it { expect(client).to be_a(Rdkafka::Producer) }
   it { expect(client.delivery_callback).to be_a(WaterDrop::Instrumentation::Callbacks::Delivery) }
 
-  context 'when the delivery is off' do
+  context "when the delivery is off" do
     let(:deliver) { false }
 
     it { expect(client).to be_a(WaterDrop::Clients::Dummy) }
   end
 
-  context 'when the delivery_callback is executed' do
+  context "when the delivery_callback is executed" do
     let(:delivery_report) { Rdkafka::Producer::DeliveryReport.new(rand, rand) }
     let(:callback_event) do
       callback_event = nil
 
-      config.monitor.subscribe('message.acknowledged') do |event|
+      config.monitor.subscribe("message.acknowledged") do |event|
         callback_event = event
       end
 

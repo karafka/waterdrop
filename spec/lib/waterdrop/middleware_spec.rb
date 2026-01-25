@@ -5,11 +5,11 @@ RSpec.describe_current do
 
   let(:message) { build(:valid_message) }
 
-  context 'when no middlewares' do
+  context "when no middlewares" do
     it { expect { middleware.run(message) }.not_to(change { message }) }
   end
 
-  context 'when morphing middleware' do
+  context "when morphing middleware" do
     before do
       mid1 = lambda do |msg|
         msg[:test] = 1
@@ -22,7 +22,7 @@ RSpec.describe_current do
     it { expect { middleware.run(message) }.to(change { message[:test] }.from(nil).to(1)) }
   end
 
-  context 'when morphing middlewares' do
+  context "when morphing middlewares" do
     before do
       mid1 = lambda do |msg|
         msg[:test] = 1
@@ -42,7 +42,7 @@ RSpec.describe_current do
     it { expect { middleware.run(message) }.to(change { message[:test2] }.from(nil).to(2)) }
   end
 
-  context 'when non-morphing middleware' do
+  context "when non-morphing middleware" do
     before do
       mid1 = lambda do |msg|
         msg = msg.dup
@@ -57,7 +57,7 @@ RSpec.describe_current do
     it { expect(middleware.run(message)[:test]).to eq(1) }
   end
 
-  context 'when non-morphing middlewares' do
+  context "when non-morphing middlewares" do
     before do
       mid1 = lambda do |msg|
         msg = msg.dup
@@ -82,7 +82,7 @@ RSpec.describe_current do
     it { expect(middleware.run(message)[:test2]).to eq(2) }
   end
 
-  context 'when morphing middleware on many' do
+  context "when morphing middleware on many" do
     before do
       mid1 = lambda do |msg|
         msg[:test] = 1
@@ -95,7 +95,7 @@ RSpec.describe_current do
     it { expect { middleware.run_many([message]) }.to(change { message[:test] }.from(nil).to(1)) }
   end
 
-  context 'when morphing middlewares on many' do
+  context "when morphing middlewares on many" do
     before do
       mid1 = lambda do |msg|
         msg[:test] = 1
@@ -115,7 +115,7 @@ RSpec.describe_current do
     it { expect { middleware.run_many([message]) }.to(change { message[:test2] }.from(nil).to(2)) }
   end
 
-  context 'when non-morphing middleware on many' do
+  context "when non-morphing middleware on many" do
     before do
       mid1 = lambda do |msg|
         msg = msg.dup

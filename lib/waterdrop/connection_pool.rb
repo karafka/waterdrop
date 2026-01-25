@@ -73,7 +73,7 @@ module WaterDrop
 
         # Emit global event for pool setup
         WaterDrop.instrumentation.instrument(
-          'connection_pool.setup',
+          "connection_pool.setup",
           pool: @default_pool,
           size: size,
           timeout: timeout
@@ -93,7 +93,7 @@ module WaterDrop
       #     producer.produce_sync(topic: 'events', payload: 'data')
       #   end
       def with(...)
-        raise 'No global connection pool configured. Call setup first.' unless @default_pool
+        raise "No global connection pool configured. Call setup first." unless @default_pool
 
         @default_pool.with(...)
       end
@@ -120,7 +120,7 @@ module WaterDrop
 
         # Emit global event for pool shutdown
         WaterDrop.instrumentation.instrument(
-          'connection_pool.shutdown',
+          "connection_pool.shutdown",
           pool: pool
         )
       end
@@ -128,7 +128,7 @@ module WaterDrop
       # Alias for shutdown to align with producer API
       # WaterDrop producers use #close, so we alias connection pool #shutdown to #close
       # for API consistency across both individual producers and connection pools
-      alias close shutdown
+      alias_method :close, :shutdown
 
       # Reload the global connection pool
       def reload
@@ -138,7 +138,7 @@ module WaterDrop
 
         # Emit global event for pool reload
         WaterDrop.instrumentation.instrument(
-          'connection_pool.reload',
+          "connection_pool.reload",
           pool: @default_pool
         )
       end
@@ -163,7 +163,7 @@ module WaterDrop
       #     producer.produce(topic: 'events', payload: 'data2')
       #   end
       def transaction(...)
-        raise 'No global connection pool configured. Call setup first.' unless @default_pool
+        raise "No global connection pool configured. Call setup first." unless @default_pool
 
         @default_pool.transaction(...)
       end
@@ -175,7 +175,7 @@ module WaterDrop
       def ensure_connection_pool_gem!
         return if defined?(::ConnectionPool)
 
-        require 'connection_pool'
+        require "connection_pool"
       rescue LoadError
         raise LoadError, <<~ERROR
           WaterDrop::ConnectionPool requires the 'connection_pool' gem.
@@ -217,7 +217,7 @@ module WaterDrop
 
       # Emit event when a connection pool is created
       WaterDrop.instrumentation.instrument(
-        'connection_pool.created',
+        "connection_pool.created",
         pool: self,
         size: size,
         timeout: timeout
@@ -242,7 +242,7 @@ module WaterDrop
 
       # Emit event after pool is shut down
       WaterDrop.instrumentation.instrument(
-        'connection_pool.shutdown',
+        "connection_pool.shutdown",
         pool: self
       )
     end
@@ -250,7 +250,7 @@ module WaterDrop
     # Alias for shutdown to align with producer API
     # WaterDrop producers use #close, so we alias connection pool #shutdown to #close
     # for API consistency across both individual producers and connection pools
-    alias close shutdown
+    alias_method :close, :shutdown
 
     # Reload all connections in the pool
     # Useful for configuration changes or error recovery
@@ -261,7 +261,7 @@ module WaterDrop
 
       # Emit event after pool is reloaded
       WaterDrop.instrumentation.instrument(
-        'connection_pool.reloaded',
+        "connection_pool.reloaded",
         pool: self
       )
     end
