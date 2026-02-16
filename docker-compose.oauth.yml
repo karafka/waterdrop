@@ -14,8 +14,8 @@ services:
       test: ["CMD-SHELL", "curl -sf http://localhost:8080/realms/kafka || exit 1"]
       interval: 5s
       timeout: 10s
-      retries: 30
-      start_period: 30s
+      retries: 60
+      start_period: 60s
 
   kafka-oauth:
     image: confluentinc/cp-kafka:8.0.0
