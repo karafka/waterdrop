@@ -10,12 +10,19 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     volumes:
       - ./spec/integrations/oauth_token_refresh/keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/realms/kafka || exit 1"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+      start_period: 30s
 
   kafka-oauth:
     image: confluentinc/cp-kafka:8.0.0
     container_name: kafka-oauth
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     ports:
       - "9094:9094"
     environment:
