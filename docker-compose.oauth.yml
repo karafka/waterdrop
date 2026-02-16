@@ -11,11 +11,11 @@ services:
     volumes:
       - ./spec/integrations/oauth_token_refresh/keycloak-realm.json:/opt/keycloak/data/import/realm.json
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:8080/realms/kafka || exit 1"]
-      interval: 5s
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/kafka HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && timeout 1 cat <&3 | grep -q '200 OK'"]
+      interval: 10s
       timeout: 10s
-      retries: 60
-      start_period: 60s
+      retries: 30
+      start_period: 90s
 
   kafka-oauth:
     image: confluentinc/cp-kafka:8.0.0
