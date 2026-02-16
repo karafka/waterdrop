@@ -118,6 +118,66 @@ jobs:
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
 
+  oauth-integration:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        polling_mode:
+          - 'thread'
+          - 'fiber'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@09a7688d3b55cf0e976497ff046b70949eeaccfd # v1.288.0
+        with:
+          ruby-version: '4.0'
+          bundler-cache: true
+          bundler: 'latest'
+
+      - name: Start OAuth infrastructure (Keycloak + Kafka with SASL/OAUTHBEARER)
+        run: docker compose -f docker-compose.oauth.yml up -d
+
+      - name: Wait for Keycloak to be ready
+        run: |
+          echo "Waiting for Keycloak to be ready..."
+          for i in {1..60}; do
+            if curl -sf http://localhost:8080/realms/kafka > /dev/null 2>&1; then
+              echo "Keycloak is ready!"
+              break
+            fi
+            echo "Waiting... ($i/60)"
+            sleep 2
+          done
+
+      - name: Wait for Kafka OAuth broker to be ready
+        run: |
+          echo "Waiting for Kafka OAuth broker..."
+          sleep 10
+
+      - name: Install dependencies
+        run: |
+          gem install bundler --no-document
+          bundle config set without 'tools benchmarks docs development'
+          bundle install --jobs 4 --retry 3
+
+      - name: Run OAuth integration test
+        env:
+          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+        run: ./bin/integrations oauth_token_refresh
+
+      - name: Show Keycloak logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.oauth.yml logs keycloak
+
+      - name: Show Kafka OAuth logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.oauth.yml logs kafka-oauth
+
   ci-success:
     name: CI Success
     runs-on: ubuntu-latest
@@ -126,6 +186,7 @@ jobs:
       - rubocop
       - specs
       - yard-lint
+      - oauth-integration
     steps:
       - name: Check all jobs passed
         if: |

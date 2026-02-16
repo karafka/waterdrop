@@ -41,7 +41,9 @@ if coverage
     add_filter "/lib/waterdrop/patches/"
 
     merge_timeout 600
-    minimum_coverage 100
+    # Coverage is below 100% because thread mode and FD polling mode
+    # exercise different code paths, and each CI run only tests one mode
+    minimum_coverage 95
     enable_coverage :branch
   end
 end
