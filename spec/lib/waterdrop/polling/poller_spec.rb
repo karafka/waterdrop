@@ -82,8 +82,19 @@ RSpec.describe_current do
     # Recreate wakeup pipe to avoid stale data
     old_read = poller.instance_variable_get(:@wakeup_read)
     old_write = poller.instance_variable_get(:@wakeup_write)
-    old_read&.close rescue nil
-    old_write&.close rescue nil
+
+    begin
+      old_read&.close
+    rescue IOError
+      nil
+    end
+
+    begin
+      old_write&.close
+    rescue IOError
+      nil
+    end
+
     new_read, new_write = IO.pipe
     poller.instance_variable_set(:@wakeup_read, new_read)
     poller.instance_variable_set(:@wakeup_write, new_write)

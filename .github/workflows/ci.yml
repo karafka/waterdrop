@@ -75,7 +75,8 @@ jobs:
       - name: Run integration tests
         env:
           FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
-        run: ./bin/integrations
+        # Exclude oauth_token_refresh - requires separate Keycloak + OAuth Kafka infrastructure
+        run: ./bin/integrations --exclude oauth_token_refresh
 
       - name: Check Kafka logs for unexpected warnings
         run: bin/verify_kafka_warnings
