@@ -43,6 +43,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       # Required by Confluent image when SASL is enabled
-      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf"
+      # Also allow HTTP URLs for JWKS endpoint (Kafka 3.0+ blocks non-HTTPS by default)
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080"
     volumes:
       - ./spec/integrations/oauth_token_refresh/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf:ro

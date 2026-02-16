@@ -73,9 +73,13 @@ producer.monitor.subscribe("oauthbearer.token_refresh") do |event|
     token_data = fetch_token
 
     puts "Setting token on bearer..."
+    # lifetime_ms must be absolute expiry time in epoch milliseconds, not duration
+    expiry_time_ms = (Time.now.to_f * 1000).to_i + (token_data["expires_in"] * 1000)
+    puts "Token expires at: #{expiry_time_ms} (in #{token_data["expires_in"]}s)"
+
     event[:bearer].oauthbearer_set_token(
       token: token_data["access_token"],
-      lifetime_ms: token_data["expires_in"] * 1000,
+      lifetime_ms: expiry_time_ms,
       principal_name: CLIENT_ID
     )
     puts "Token set successfully!"
