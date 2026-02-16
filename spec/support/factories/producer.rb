@@ -6,6 +6,9 @@ module Factories
     # @param overrides [Hash] attributes we want to override
     # @return [WaterDrop::Producer] producer
     def producer_factory(overrides = {})
+      # Enable FD-based polling when FD_POLLING env var is set to 'true'
+      polling_mode = (ENV["FD_POLLING"] == "true") ? :fd : :thread
+
       defaults = {
         deliver: true,
         logger: Logger.new(File::NULL, level: Logger::DEBUG),
@@ -20,6 +23,8 @@ module Factories
         reload_on_transaction_fatal_error: true,
         wait_backoff_on_transaction_fatal_error: 1_000,
         max_attempts_on_transaction_fatal_error: 10,
+        polling_mode: polling_mode,
+        polling_fd_max_time: 100,
         kafka: {
           "bootstrap.servers": BOOTSTRAP_SERVERS,
           "statistics.interval.ms": 100,
@@ -50,6 +55,8 @@ module Factories
           attributes[:wait_backoff_on_transaction_fatal_error]
         config.max_attempts_on_transaction_fatal_error =
           attributes[:max_attempts_on_transaction_fatal_error]
+        config.polling.mode = attributes[:polling_mode]
+        config.polling.fd.max_time = attributes[:polling_fd_max_time]
       end
 
       instance.monitor.subscribe(

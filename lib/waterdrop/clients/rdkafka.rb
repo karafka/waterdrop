@@ -14,7 +14,13 @@ module WaterDrop
           kafka_config = producer.config.kafka.to_h
           monitor = producer.config.monitor
 
-          client = ::Rdkafka::Config.new(kafka_config).producer(native_kafka_auto_start: false)
+          # When FD polling is enabled, we disable the native librdkafka polling thread
+          # and use our own Ruby-based poller instead
+          producer_options = { native_kafka_auto_start: false }
+
+          producer_options[:run_polling_thread] = false if producer.fd_polling?
+
+          client = ::Rdkafka::Config.new(kafka_config).producer(**producer_options)
 
           # Register statistics runner for this particular type of callbacks
           ::Karafka::Core::Instrumentation.statistics_callbacks.add(
@@ -52,6 +58,10 @@ module WaterDrop
           monitor.subscribe(oauth_listener) if oauth_listener
 
           client.start
+
+          # Register with global poller if FD polling is enabled
+          # This must happen after client.start to ensure the client is ready
+          Polling::Poller.instance.register(producer, client) if producer.fd_polling?
 
           # Switch to the transactional mode if user provided the transactional id
           client.init_transactions if kafka_config.key?(:"transactional.id")

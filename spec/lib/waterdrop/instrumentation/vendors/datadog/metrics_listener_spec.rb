@@ -230,11 +230,20 @@ RSpec.describe_current do
 
     before do
       producer.produce_async(topic: topic, payload: rand.to_s)
-      sleep(1)
     end
 
     it "expect error count to increase" do
-      expect(dummy_client.buffer[:count]["waterdrop.error_occurred"]).not_to be_empty
+      # Wait for error callback with retries since it depends on librdkafka timing
+      error_received = false
+      20.times do
+        if dummy_client.buffer[:count]["waterdrop.error_occurred"].any?
+          error_received = true
+          break
+        end
+        sleep(0.25)
+      end
+
+      expect(error_received).to be(true)
     end
   end
 

@@ -25,8 +25,12 @@ jobs:
           - '3.4'
           - '3.3'
           - '3.2'
+        polling_mode:
+          - 'thread'
+          - 'fiber'
         include:
           - ruby: '3.4'
+            polling_mode: 'thread'
             coverage: 'true'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -65,9 +69,12 @@ jobs:
       - name: Run all tests
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
+          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
         run: bundle exec rspec
 
       - name: Run integration tests
+        env:
+          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
         run: ./bin/integrations
 
       - name: Check Kafka logs for unexpected warnings

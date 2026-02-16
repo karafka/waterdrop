@@ -264,6 +264,9 @@ module WaterDrop
             @monitor.instrument("producer.disconnecting", producer_id: id)
 
             @monitor.instrument("producer.disconnected", producer_id: id) do
+              # Unregister from poller before closing if fiber polling is enabled
+              unregister_from_poller
+
               # Close the client
               @client.close
               @client = nil
@@ -355,6 +358,9 @@ module WaterDrop
                 purge if force
               end
 
+              # Unregister from poller before closing if fiber polling is enabled
+              unregister_from_poller
+
               @client.close
 
               @client = nil
@@ -405,6 +411,13 @@ module WaterDrop
       parts << "in_transaction=true" if @transaction_mutex.locked?
 
       "#<#{self.class.name}:#{format("%#x", object_id)} #{parts.join(" ")}>"
+    end
+
+    # @return [Boolean] true if FD-based polling mode is enabled
+    def fd_polling?
+      return @fd_polling if defined?(@fd_polling)
+
+      @fd_polling = config.polling.mode == :fd
     end
 
     private
@@ -569,9 +582,24 @@ module WaterDrop
     def reload!
       @client.flush(current_variant.max_wait_timeout)
       purge
+      # Unregister from poller before closing if fiber polling is enabled
+      unregister_from_poller
       @client.close
       @client = nil
       @status.configured!
+    end
+
+    # Unregisters this producer from the global poller
+    #
+    # @note We check fd_polling? here to avoid instantiating the Poller singleton when not needed.
+    #   Thread-mode producers never register with the Poller, so calling Poller.instance would
+    #   unnecessarily create the singleton (with its pipes, mutex, etc.). The Poller.unregister
+    #   method also handles unregistered producers gracefully, but by checking here we avoid
+    #   the overhead of singleton instantiation for thread-mode users.
+    def unregister_from_poller
+      return unless fd_polling?
+
+      Polling::Poller.instance.unregister(self)
     end
   end
 end

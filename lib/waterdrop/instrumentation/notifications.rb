@@ -37,6 +37,11 @@ module WaterDrop
         buffer.flushed_sync
         buffer.purged
 
+        poller.started
+        poller.stopped
+        poller.producer_registered
+        poller.producer_unregistered
+
         statistics.emitted
 
         error.occurred

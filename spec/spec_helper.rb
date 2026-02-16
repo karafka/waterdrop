@@ -63,6 +63,37 @@ RSpec.configure do |config|
   config.expect_with :rspec do |expectations|
     expectations.include_chain_clauses_in_custom_matcher_descriptions = true
   end
+
+  # Clean up the Poller singleton after each test to prevent mock leakage
+  # This is needed because the Poller is a singleton that may hold references
+  # to test doubles from previous tests
+  config.after do
+    next unless ENV["FD_POLLING"]
+
+    poller = WaterDrop::Polling::Poller.instance
+
+    # Signal shutdown and wait for thread to stop
+    poller.instance_variable_set(:@shutdown, true)
+    thread = poller.instance_variable_get(:@thread)
+    if thread&.alive?
+      begin
+        poller.instance_variable_get(:@wakeup_write)&.write_nonblock("W")
+      rescue IOError, Errno::EPIPE, Errno::EAGAIN
+        nil
+      end
+      thread.join(0.5)
+      thread.kill if thread.alive?
+    end
+
+    # Clear all state
+    poller.instance_variable_set(:@thread, nil)
+    poller.instance_variable_set(:@producers, {})
+    poller.instance_variable_set(:@monitors, {})
+    poller.instance_variable_set(:@shutdown, false)
+    poller.instance_variable_set(:@ios_dirty, true)
+    poller.instance_variable_set(:@cached_ios, [])
+    poller.instance_variable_set(:@cached_io_to_state, {})
+  end
 end
 
 require "karafka/core/helpers/rspec_locator"
