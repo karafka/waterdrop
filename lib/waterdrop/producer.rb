@@ -426,6 +426,7 @@ module WaterDrop
     # @return [Boolean] true if FD-based polling mode is enabled
     def fd_polling?
       return @fd_polling if defined?(@fd_polling)
+      return false unless config
 
       @fd_polling = config.polling.mode == :fd
     end
