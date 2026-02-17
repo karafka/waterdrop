@@ -26,12 +26,17 @@ module WaterDrop
       public_class_method :new
 
       class << self
-        # Generates incremental IDs for poller instances
+        # Generates incremental IDs for poller instances (starting from 0)
         # @return [Integer] next poller ID
         def next_id
           @id_mutex ||= Mutex.new
           @id_counter ||= 0
-          @id_mutex.synchronize { @id_counter += 1 }
+
+          @id_mutex.synchronize do
+            id = @id_counter
+            @id_counter += 1
+            id
+          end
         end
       end
 
