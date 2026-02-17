@@ -11,14 +11,11 @@ require "waterdrop"
 require "securerandom"
 
 def poller_thread_alive?
-  poller = WaterDrop::Polling::Poller.instance
-  thread = poller.instance_variable_get(:@thread)
-  thread&.alive?
+  WaterDrop::Polling::Poller.instance.alive?
 end
 
 def poller_producer_count
-  poller = WaterDrop::Polling::Poller.instance
-  poller.instance_variable_get(:@producers).size
+  WaterDrop::Polling::Poller.instance.count
 end
 
 def create_fd_producer

@@ -67,34 +67,11 @@ RSpec.configure do |config|
   end
 
   # Clean up the Poller singleton after each test to prevent mock leakage
-  # This is needed because the Poller is a singleton that may hold references
-  # to test doubles from previous tests
+  # Reset the Poller singleton between tests to prevent state leakage
   config.after do
     next unless ENV["FD_POLLING"] == "true"
 
-    poller = WaterDrop::Polling::Poller.instance
-
-    # Signal shutdown and wait for thread to stop
-    poller.instance_variable_set(:@shutdown, true)
-    thread = poller.instance_variable_get(:@thread)
-    if thread&.alive?
-      wakeup_pipe = poller.instance_variable_get(:@wakeup_pipe)
-      wakeup_pipe&.signal
-      thread.join(0.5)
-      thread.kill if thread.alive?
-    end
-
-    # Close all State objects to prevent pipe leakage
-    producers = poller.instance_variable_get(:@producers)
-    producers&.each_value(&:close)
-
-    # Clear all state
-    poller.instance_variable_set(:@thread, nil)
-    poller.instance_variable_set(:@producers, {})
-    poller.instance_variable_set(:@shutdown, false)
-    poller.instance_variable_set(:@ios_dirty, true)
-    poller.instance_variable_set(:@cached_ios, [])
-    poller.instance_variable_set(:@cached_io_to_state, {})
+    WaterDrop::Polling::Poller.instance.shutdown!
   end
 end
 

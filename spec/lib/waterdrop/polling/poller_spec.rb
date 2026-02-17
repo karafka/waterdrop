@@ -55,53 +55,19 @@ RSpec.describe_current do
   end
 
   # Reset singleton state before each test to avoid mock leaking
-  before do
-    # Properly shutdown any running thread
-    poller.instance_variable_set(:@shutdown, true)
-    thread = poller.instance_variable_get(:@thread)
-    if thread&.alive?
-      thread.join(1)
-      thread.kill if thread.alive?
-    end
+  before { poller.shutdown! }
 
-    # Close all State objects to prevent pipe leakage
-    producers = poller.instance_variable_get(:@producers)
-    producers&.each_value(&:close)
-
-    # Reset all state
-    poller.instance_variable_set(:@thread, nil)
-    poller.instance_variable_set(:@producers, {})
-    poller.instance_variable_set(:@shutdown, false)
-    poller.instance_variable_set(:@ios_dirty, true)
-    poller.instance_variable_set(:@cached_ios, [])
-    poller.instance_variable_set(:@cached_io_to_state, {})
-  end
-
-  after do
-    # Ensure thread is stopped after each test
-    poller.instance_variable_set(:@shutdown, true)
-    thread = poller.instance_variable_get(:@thread)
-    if thread&.alive?
-      thread.join(1)
-      thread.kill if thread.alive?
-    end
-
-    # Close all State objects to prevent pipe leakage
-    producers = poller.instance_variable_get(:@producers)
-    producers&.each_value(&:close)
-  end
+  after { poller.shutdown! }
 
   describe "#register" do
     it "adds the producer to the registry" do
       poller.register(producer, client)
-      producers = poller.instance_variable_get(:@producers)
-      expect(producers).to have_key(producer_id)
+      expect(poller.count).to eq(1)
     end
 
     it "starts the polling thread" do
       poller.register(producer, client)
-      thread = poller.instance_variable_get(:@thread)
-      expect(thread).to be_alive
+      expect(poller.alive?).to be(true)
     end
 
     it "instruments producer registration" do
@@ -135,12 +101,83 @@ RSpec.describe_current do
     end
 
     it "stops the polling thread when last producer unregisters" do
-      thread = poller.instance_variable_get(:@thread)
-      expect(thread).to be_alive
+      expect(poller.alive?).to be(true)
 
       poller.unregister(producer)
 
-      expect(thread).not_to be_alive
+      expect(poller.alive?).to be(false)
+    end
+  end
+
+  describe "#alive?" do
+    context "when no producers are registered" do
+      it "returns false" do
+        expect(poller.alive?).to be(false)
+      end
+    end
+
+    context "when a producer is registered" do
+      before { poller.register(producer, client) }
+
+      it "returns true" do
+        expect(poller.alive?).to be(true)
+      end
+    end
+  end
+
+  describe "#count" do
+    context "when no producers are registered" do
+      it "returns 0" do
+        expect(poller.count).to eq(0)
+      end
+    end
+
+    context "when producers are registered" do
+      let(:producer2) do
+        double(
+          :waterdrop_producer,
+          id: "test-producer-2",
+          config: config,
+          monitor: monitor
+        )
+      end
+
+      before do
+        poller.register(producer, client)
+        poller.register(producer2, client)
+      end
+
+      it "returns the number of registered producers" do
+        expect(poller.count).to eq(2)
+      end
+    end
+  end
+
+  describe "#shutdown!" do
+    before { poller.register(producer, client) }
+
+    it "stops the polling thread" do
+      expect(poller.alive?).to be(true)
+      poller.shutdown!
+      expect(poller.alive?).to be(false)
+    end
+
+    it "clears all producers" do
+      expect(poller.count).to eq(1)
+      poller.shutdown!
+      expect(poller.count).to eq(0)
+    end
+
+    it "can be called multiple times safely" do
+      expect { 3.times { poller.shutdown! } }.not_to raise_error
+    end
+  end
+
+  describe "#in_poller_thread?" do
+    context "when called from main thread" do
+      it "returns false" do
+        expect(poller.in_poller_thread?).to be(false)
+      end
     end
   end
 end

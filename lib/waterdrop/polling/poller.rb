@@ -56,6 +56,42 @@ module WaterDrop
         Thread.current == @thread
       end
 
+      # Checks if the poller thread is alive
+      # @return [Boolean] true if the poller thread is running
+      def alive?
+        @thread&.alive? || false
+      end
+
+      # Returns the number of registered producers
+      # @return [Integer] number of producers
+      def count
+        @mutex.synchronize { @producers.size }
+      end
+
+      # Shuts down the poller and resets state
+      # @note This is primarily for testing to reset singleton state between tests
+      def shutdown!
+        @mutex.synchronize { @shutdown = true }
+
+        thread = @thread
+        if thread&.alive?
+          thread.join(5)
+          thread.kill if thread.alive?
+        end
+
+        @mutex.synchronize do
+          @producers.each_value { |state| state.close unless state.closed? }
+          @producers.clear
+          @thread = nil
+          @shutdown = false
+          @ios_dirty = true
+          @cached_ios = []
+          @cached_io_to_state = {}
+          @cached_states = []
+          @cached_result = nil
+        end
+      end
+
       # Registers a producer with the poller
       # @param producer [WaterDrop::Producer] the producer instance
       # @param client [Rdkafka::Producer] the rdkafka client
