@@ -811,13 +811,18 @@ RSpec.describe_current do
       end
 
       it "raises a timeout error when all connections are busy" do
+        # Use Queue to synchronize - ensures thread1 has grabbed the connection
+        # before main thread tries (eliminates race condition)
+        grabbed = Queue.new
+
         thread1 = Thread.new do
           small_pool.with do |_producer|
-            sleep(0.2) # Hold connection longer than timeout
+            grabbed << true
+            sleep(0.3) # Hold connection longer than timeout
           end
         end
 
-        sleep(0.1) # Give thread1 time to grab the connection
+        grabbed.pop # Wait for thread1 to signal it has the connection
 
         expect do
           small_pool.with { |_producer| "should timeout" }
