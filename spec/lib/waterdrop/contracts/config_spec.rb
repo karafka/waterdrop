@@ -31,6 +31,13 @@ RSpec.describe_current do
       oauth: {
         token_provider_listener: false
       },
+      polling: {
+        mode: :thread,
+        fd: {
+          max_time: 100,
+          periodic_poll_interval: 1000
+        }
+      },
       kafka: {
         "bootstrap.servers": "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
       }
@@ -449,6 +456,66 @@ RSpec.describe_current do
 
   context "when non_reloadable_errors is default value" do
     before { config[:non_reloadable_errors] = %i[fenced] }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.mode is missing" do
+    before { config[:polling].delete(:mode) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.mode"]).not_to be_empty }
+  end
+
+  context "when polling.mode is not a valid symbol" do
+    before { config[:polling][:mode] = :invalid }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.mode"]).not_to be_empty }
+  end
+
+  context "when polling.mode is :thread" do
+    before { config[:polling][:mode] = :thread }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.mode is :fd" do
+    before { config[:polling][:mode] = :fd }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.fd.max_time is missing" do
+    before { config[:polling][:fd].delete(:max_time) }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.fd.max_time"]).not_to be_empty }
+  end
+
+  context "when polling.fd.max_time is not an integer" do
+    before { config[:polling][:fd][:max_time] = "100" }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.fd.max_time"]).not_to be_empty }
+  end
+
+  context "when polling.fd.max_time is zero" do
+    before { config[:polling][:fd][:max_time] = 0 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.fd.max_time"]).not_to be_empty }
+  end
+
+  context "when polling.fd.max_time is negative" do
+    before { config[:polling][:fd][:max_time] = -1 }
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.fd.max_time"]).not_to be_empty }
+  end
+
+  context "when polling.fd.max_time is positive" do
+    before { config[:polling][:fd][:max_time] = 100 }
 
     it { expect(contract_result).to be_success }
   end

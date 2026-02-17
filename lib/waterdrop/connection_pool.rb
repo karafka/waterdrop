@@ -42,6 +42,8 @@ module WaterDrop
 
     class << self
       # Global connection pool instance
+      # @!attribute [rw] default_pool
+      #   @return [ConnectionPool, nil] the global connection pool instance
       attr_accessor :default_pool
 
       # Sets up a global connection pool

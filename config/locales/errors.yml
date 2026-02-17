@@ -26,6 +26,16 @@ en:
       non_reloadable_errors_format: must be an array of symbols
       oauth.token_provider_listener_format: 'must be false or respond to #on_oauthbearer_token_refresh'
       idle_disconnect_timeout_format: 'must be an integer that is equal to 0 or bigger than 30 000 (30 seconds)'
+      polling.mode_format: must be :thread or :fd
+      polling.fd.max_time_format: must be an integer that is equal or bigger than 1
+      polling.fd.periodic_poll_interval_format: must be an integer that is equal or bigger than 1
+
+    poller:
+      thread_priority_format: must be an integer between -3 and 3
+      poll_timeout_format: must be an integer that is equal or bigger than 1
+      backoff_min_format: must be an integer that is equal or bigger than 1
+      backoff_max_format: must be an integer that is equal or bigger than 1
+      backoff_max_must_be_gte_backoff_min: backoff_max must be greater than or equal to backoff_min
 
     variant:
       missing: must be present

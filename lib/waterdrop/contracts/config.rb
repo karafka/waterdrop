@@ -43,6 +43,15 @@ module WaterDrop
         end
       end
 
+      nested(:polling) do
+        required(:mode) { |val| %i[thread fd].include?(val) }
+
+        nested(:fd) do
+          required(:max_time) { |val| val.is_a?(Integer) && val >= 1 }
+          required(:periodic_poll_interval) { |val| val.is_a?(Integer) && val >= 100 }
+        end
+      end
+
       # rdkafka allows both symbols and strings as keys for config but then casts them to strings
       # This can be confusing, so we expect all keys to be symbolized
       virtual do |config, errors|

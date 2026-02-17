@@ -62,6 +62,7 @@ module WaterDrop
       @closing_thread_id = nil
       @idempotent = nil
       @transactional = nil
+      @fd_polling = nil
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
 
@@ -264,6 +265,9 @@ module WaterDrop
             @monitor.instrument("producer.disconnecting", producer_id: id)
 
             @monitor.instrument("producer.disconnected", producer_id: id) do
+              # Unregister from poller before closing if fiber polling is enabled
+              unregister_from_poller
+
               # Close the client
               @client.close
               @client = nil
@@ -298,6 +302,16 @@ module WaterDrop
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
     def close(force: false)
+      # When closing from within the FD poller thread (e.g., from a callback like
+      # message.acknowledged or error.occurred), we must delegate to a background thread.
+      # Close performs flush which waits for delivery reports, but delivery reports require
+      # the poller to poll. Since we're ON the poller thread inside a callback, this would
+      # deadlock. Spawning a thread allows the callback to return, letting the poller continue.
+      if fd_polling? && Polling::Poller.instance.in_poller_thread?
+        Thread.new { close(force: force) }
+        return
+      end
+
       # If we already own the transactional mutex, it means we are inside of a transaction and
       # it should not we allowed to close the producer in such a case.
       if @transaction_mutex.locked? && @transaction_mutex.owned?
@@ -355,6 +369,9 @@ module WaterDrop
                 purge if force
               end
 
+              # Unregister from poller before closing if fiber polling is enabled
+              unregister_from_poller
+
               @client.close
 
               @client = nil
@@ -405,6 +422,14 @@ module WaterDrop
       parts << "in_transaction=true" if @transaction_mutex.locked?
 
       "#<#{self.class.name}:#{format("%#x", object_id)} #{parts.join(" ")}>"
+    end
+
+    # @return [Boolean] true if FD-based polling mode is enabled
+    def fd_polling?
+      return @fd_polling unless @fd_polling.nil?
+      return false unless config
+
+      @fd_polling = config.polling.mode == :fd
     end
 
     private
@@ -569,9 +594,22 @@ module WaterDrop
     def reload!
       @client.flush(current_variant.max_wait_timeout)
       purge
+      # Unregister from poller before closing if fiber polling is enabled
+      unregister_from_poller
       @client.close
       @client = nil
       @status.configured!
+    end
+
+    # Unregisters this producer from the global poller
+    #
+    # @note We only unregister when fd_polling? is true because thread-mode producers never
+    #   register with the Poller. The Poller.unregister method handles unregistered producers
+    #   gracefully, but this guard avoids making unnecessary unregister calls in thread mode.
+    def unregister_from_poller
+      return unless fd_polling?
+
+      Polling::Poller.instance.unregister(self)
     end
   end
 end

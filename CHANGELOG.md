@@ -1,8 +1,12 @@
 # WaterDrop changelog
 
 ## 2.8.16 (Unreleased)
+- [Feature] Add FD-based polling mode (`config.polling.mode = :fd`) as an alternative to the default thread-based polling. FD mode uses a single Ruby thread with IO.select for efficient multiplexing, providing 39-54% higher throughput, lower memory usage, and fewer threads compared to the default thread mode.
+- [Feature] Add `config.polling.fd.max_time` setting (default: 100ms) to control maximum polling time per producer per cycle. This enables per-producer priority differentiation.
+- [Enhancement] Add `poll_nb` and `poll_drain` methods to rdkafka Producer for efficient non-blocking polling without GVL release overhead.
+- [Enhancement] Add `poller.producer_registered` and `poller.producer_unregistered` instrumentation events for FD mode.
 - [Change] Update to use `max_wait_timeout_ms` parameter in rdkafka `AbstractHandle#wait` for consistency with librdkafka conventions.
-- [Change] Require `karafka-rdkafka` `>=` `0.24.0` due to `max_wait_timeout_ms` API change.
+- [Change] Require `karafka-rdkafka` `>=` `0.24.0` due to `max_wait_timeout_ms` API change and FD polling support.
 
 ## 2.8.15 (2025-11-24)
 - [Enhancement] Skip statistics decoration and emission when no listeners are subscribed to `statistics.emitted` events to reduce overhead.

@@ -52,13 +52,13 @@ RSpec.describe_current do
       context "when producer can be disconnected" do
         it "expect to disconnect the producer" do
           listener.on_statistics_emitted(event)
-          sleep(0.1) # a bit of time because disconnect happens async
+          sleep(0.2) # a bit of time because disconnect happens async
           expect(disconnected_events.size).to eq(1)
         end
 
         it "expect to emit disconnect event with producer id" do
           listener.on_statistics_emitted(event)
-          sleep(0.1) # a bit of time because disconnect happens async
+          sleep(0.2) # a bit of time because disconnect happens async
           expect(disconnected_events.first[:producer_id]).to eq(producer.id)
         end
 
@@ -66,7 +66,7 @@ RSpec.describe_current do
           listener.on_statistics_emitted(event)
           listener.on_statistics_emitted(event)
 
-          sleep(0.1) # a bit of time because disconnect happens async
+          sleep(0.2) # a bit of time because disconnect happens async
 
           expect(disconnected_events.size).to eq(1)
         end

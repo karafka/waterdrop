@@ -140,6 +140,26 @@ module WaterDrop
       setting :token_provider_listener, default: false
     end
 
+    # Namespace for polling configuration
+    setting :polling do
+      # option [Symbol] Polling mode for handling producer callbacks
+      # :thread - uses librdkafka's native background polling threads (default)
+      # :fd - uses a single global Ruby thread with IO.select-based multiplexing
+      setting :mode, default: :thread
+
+      # Namespace for FD-based polling configuration (only used when mode is :fd)
+      setting :fd do
+        # option [Integer] Max milliseconds to poll a single producer before rotating to the next
+        # This prevents any single producer from monopolizing the polling thread
+        setting :max_time, default: 100
+
+        # option [Integer] Interval in milliseconds for periodic polling of idle producers
+        # When one producer is busy, other producers still need to be polled periodically
+        # to ensure OAuth token refresh and statistics callbacks fire on time
+        setting :periodic_poll_interval, default: 1_000
+      end
+    end
+
     # Configuration method
     # @yield Runs a block of code providing a config singleton instance to it
     # @yieldparam [WaterDrop::Config] WaterDrop config instance

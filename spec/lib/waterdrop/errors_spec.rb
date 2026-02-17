@@ -73,6 +73,12 @@ RSpec.describe_current do
     specify { expect(error).to be < described_class::BaseError }
   end
 
+  describe "PollerError" do
+    subject(:error) { described_class::PollerError }
+
+    specify { expect(error).to be < described_class::BaseError }
+  end
+
   # Aliases for better DX
   describe "root AbortTransaction" do
     subject(:error) { WaterDrop::AbortTransaction }

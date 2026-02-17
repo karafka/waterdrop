@@ -1,0 +1,56 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    command: start-dev --import-realm
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./spec/integrations/oauth_token_refresh/keycloak-realm.json:/opt/keycloak/data/import/realm.json
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/localhost/8080 && echo -e 'GET /realms/kafka HTTP/1.1\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && timeout 1 cat <&3 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 90s
+
+  kafka-oauth:
+    image: confluentinc/cp-kafka:8.0.0
+    container_name: kafka-oauth
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    ports:
+      - "9094:9094"
+    environment:
+      CLUSTER_ID: kafka-oauth-cluster-1
+      KAFKA_BROKER_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka-oauth:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,SASL_PLAINTEXT://:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-oauth:9092,SASL_PLAINTEXT://127.0.0.1:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,SASL_PLAINTEXT:SASL_PLAINTEXT
+      KAFKA_SASL_ENABLED_MECHANISMS: OAUTHBEARER
+      KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL: PLAINTEXT
+      # Per-listener callback handler
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_SERVER_CALLBACK_HANDLER_CLASS: org.apache.kafka.common.security.oauthbearer.OAuthBearerValidatorCallbackHandler
+      KAFKA_LISTENER_NAME_SASL__PLAINTEXT_OAUTHBEARER_SASL_JAAS_CONFIG: |
+        org.apache.kafka.common.security.oauthbearer.OAuthBearerLoginModule required;
+      # Global OAUTHBEARER settings for token validation
+      KAFKA_SASL_OAUTHBEARER_JWKS_ENDPOINT_URL: http://keycloak:8080/realms/kafka/protocol/openid-connect/certs
+      KAFKA_SASL_OAUTHBEARER_EXPECTED_AUDIENCE: kafka
+      # Note: Not setting expected issuer - Keycloak uses request URL which varies
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      # Required by Confluent image when SASL is enabled
+      # Also allow HTTP URLs for JWKS endpoint (Kafka 3.0+ blocks non-HTTPS by default)
+      KAFKA_OPTS: "-Djava.security.auth.login.config=/etc/kafka/kafka_server_jaas.conf -Dorg.apache.kafka.sasl.oauthbearer.allowed.urls=http://keycloak:8080/realms/kafka/protocol/openid-connect/certs"
+    volumes:
+      - ./spec/integrations/oauth_token_refresh/kafka_server_jaas.conf:/etc/kafka/kafka_server_jaas.conf:ro
