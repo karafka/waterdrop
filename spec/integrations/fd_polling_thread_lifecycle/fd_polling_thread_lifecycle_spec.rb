@@ -120,17 +120,17 @@ puts "Test 5: New producer works after all producers were closed..."
 
 producer3 = create_fd_producer
 
-unless poller_thread_alive?
-  puts "FAIL: Poller thread should restart when new producer registers"
-  exit 1
-end
-
-# Verify the new producer actually works
+# Produce first to trigger lazy client creation and registration
 begin
   producer3.produce_sync(topic: topic, payload: "message after restart")
 rescue => e
   puts "FAIL: New producer failed to produce: #{e.message}"
   producer3.close
+  exit 1
+end
+
+unless poller_thread_alive?
+  puts "FAIL: Poller thread should restart when new producer registers"
   exit 1
 end
 

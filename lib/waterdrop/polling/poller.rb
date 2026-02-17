@@ -158,6 +158,10 @@ module WaterDrop
           backoff_ms = backoff_ms.zero? ? BACKOFF_MIN_MS : [backoff_ms * 2, BACKOFF_MAX_MS].min
         end
       ensure
+        # Clear thread reference first so new registrations will start a fresh thread
+        # This prevents race where register sees old thread as alive during cleanup
+        @mutex.synchronize { @thread = nil }
+
         # When the poller thread exits (error or clean shutdown), close all remaining states
         # This releases any latches that might be waiting in unregister calls
         close_all_states
