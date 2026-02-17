@@ -591,11 +591,9 @@ module WaterDrop
 
     # Unregisters this producer from the global poller
     #
-    # @note We check fd_polling? here to avoid instantiating the Poller singleton when not needed.
-    #   Thread-mode producers never register with the Poller, so calling Poller.instance would
-    #   unnecessarily create the singleton (with its pipes, mutex, etc.). The Poller.unregister
-    #   method also handles unregistered producers gracefully, but by checking here we avoid
-    #   the overhead of singleton instantiation for thread-mode users.
+    # @note We only unregister when fd_polling? is true because thread-mode producers never
+    #   register with the Poller. The Poller.unregister method handles unregistered producers
+    #   gracefully, but this guard avoids making unnecessary unregister calls in thread mode.
     def unregister_from_poller
       return unless fd_polling?
 

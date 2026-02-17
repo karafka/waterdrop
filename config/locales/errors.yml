@@ -28,6 +28,7 @@ en:
       idle_disconnect_timeout_format: 'must be an integer that is equal to 0 or bigger than 30 000 (30 seconds)'
       polling.mode_format: must be :thread or :fd
       polling.fd.max_time_format: must be an integer that is equal or bigger than 1
+      polling.fd.periodic_poll_interval_format: must be an integer that is equal or bigger than 1
 
     variant:
       missing: must be present

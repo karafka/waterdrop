@@ -84,7 +84,7 @@ module WaterDrop
       # This matches the threaded polling behavior which drains without timeout
       # @param producer [WaterDrop::Producer] the producer instance
       def unregister(producer)
-        state = @mutex.synchronize { @producers[producer.id] }
+        state, thread = @mutex.synchronize { [@producers[producer.id], @thread] }
 
         return unless state
 
@@ -94,7 +94,9 @@ module WaterDrop
         # Wait for the state to be fully closed by the poller thread
         # This prevents race conditions where a new registration with the same
         # producer_id could be deleted by a pending close signal
-        state.wait_for_close
+        # Skip waiting if called from within the poller thread itself (e.g., from a callback)
+        # to avoid deadlock - the poller thread can't wait for itself
+        state.wait_for_close unless Thread.current == thread
 
         producer.monitor.instrument(
           "poller.producer_unregistered",
@@ -175,7 +177,8 @@ module WaterDrop
           state.monitor.instrument(
             "error.occurred",
             type: type,
-            error: error
+            error: error,
+            producer_id: state.producer_id
           )
         end
       end

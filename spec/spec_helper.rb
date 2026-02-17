@@ -70,7 +70,7 @@ RSpec.configure do |config|
   # This is needed because the Poller is a singleton that may hold references
   # to test doubles from previous tests
   config.after do
-    next unless ENV["FD_POLLING"]
+    next unless ENV["FD_POLLING"] == "true"
 
     poller = WaterDrop::Polling::Poller.instance
 
