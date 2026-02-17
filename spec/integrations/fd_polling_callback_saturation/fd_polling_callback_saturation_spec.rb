@@ -82,7 +82,6 @@ sleep(1.5)
 
 # Now produce messages from producer2 while producer1's stats callback will block
 # The messages are produced async, so they go into the queue immediately
-produce_start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 5.times { |i| producer2.produce_async(topic: topic, payload: "message-#{i}") }
 
 # Wait for the slow callback to complete plus some buffer
