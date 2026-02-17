@@ -108,10 +108,14 @@ RSpec.describe_current do
       expect(state.needs_periodic_poll?).to be(true)
     end
 
-    it "does not need periodic poll if interval has not passed" do
-      state.mark_polled!
-      sleep(0.01)
-      expect(state.needs_periodic_poll?).to be(false)
+    context "with large interval to avoid timing issues" do
+      let(:periodic_poll_interval) { 10_000 }
+
+      it "does not need periodic poll if interval has not passed" do
+        state.mark_polled!
+        sleep(0.01)
+        expect(state.needs_periodic_poll?).to be(false)
+      end
     end
   end
 

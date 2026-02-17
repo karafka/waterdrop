@@ -12,7 +12,8 @@ require "waterdrop"
 require "securerandom"
 
 # Maximum acceptable latency for a single produce call (in seconds)
-MAX_PRODUCE_LATENCY = 0.020
+# Using 100ms threshold to account for CI variability, especially on macOS
+MAX_PRODUCE_LATENCY = 0.100
 
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true

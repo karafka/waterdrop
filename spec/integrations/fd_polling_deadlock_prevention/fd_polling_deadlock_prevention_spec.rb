@@ -164,9 +164,18 @@ begin
       break
     end
 
-    sleep(0.1) while producer.status.active?
+    # Wait for producer to fully close with explicit deadline
+    deadline = Time.now + 5
+    until producer.status.closed?
+      if Time.now > deadline
+        puts "Test 5: Timed out waiting for producer to close"
+        failed = true
+        break
+      end
+      sleep(0.1)
+    end
 
-    unless producer.status.closed?
+    unless failed || producer.status.closed?
       puts "Test 5: Producer should be closed"
       failed = true
     end
