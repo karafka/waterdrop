@@ -116,8 +116,8 @@ end
 producer1.close
 producer2.close
 
-# Verify poller thread stopped
-sleep(0.2)
+# Verify poller thread stopped (use longer delay for macOS CI)
+sleep(1.0)
 if WaterDrop::Polling::Poller.instance.alive?
   puts "Poller thread should have stopped after all producers closed"
   failed = true
