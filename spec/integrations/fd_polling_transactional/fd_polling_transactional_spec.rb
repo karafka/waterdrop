@@ -39,20 +39,18 @@ topic = "it-fd-transactional-#{SecureRandom.hex(6)}"
 
 # Perform multiple transactions
 TRANSACTION_COUNT.times do |tx_index|
-  begin
-    producer.transaction do
-      MESSAGES_PER_TRANSACTION.times do |msg_index|
-        producer.produce_async(
-          topic: topic,
-          key: "tx-#{tx_index}",
-          payload: "message-#{tx_index}-#{msg_index}"
-        )
-      end
+  producer.transaction do
+    MESSAGES_PER_TRANSACTION.times do |msg_index|
+      producer.produce_async(
+        topic: topic,
+        key: "tx-#{tx_index}",
+        payload: "message-#{tx_index}-#{msg_index}"
+      )
     end
-  rescue => e
-    puts "Transaction #{tx_index} failed: #{e.message}"
-    errors << e.message
   end
+rescue => e
+  puts "Transaction #{tx_index} failed: #{e.message}"
+  errors << e.message
 end
 
 producer.close
