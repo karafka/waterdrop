@@ -817,7 +817,7 @@ RSpec.describe_current do
           end
         end
 
-        sleep(0.01) # Give thread1 time to grab the connection
+        sleep(0.05) # Give thread1 time to grab the connection
 
         expect do
           small_pool.with { |_producer| "should timeout" }

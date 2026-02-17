@@ -90,7 +90,8 @@ RSpec.describe_current do
   end
 
   describe "#mark_polled! and #needs_periodic_poll?" do
-    let(:periodic_poll_interval) { 20 }
+    # Use larger intervals to account for CI/macOS timing variability
+    let(:periodic_poll_interval) { 100 }
 
     it "needs periodic poll when never polled" do
       expect(state.needs_periodic_poll?).to be(true)
@@ -103,13 +104,13 @@ RSpec.describe_current do
 
     it "needs periodic poll after interval passes" do
       state.mark_polled!
-      sleep(0.025)
+      sleep(0.15)
       expect(state.needs_periodic_poll?).to be(true)
     end
 
     it "does not need periodic poll if interval has not passed" do
       state.mark_polled!
-      sleep(0.005)
+      sleep(0.01)
       expect(state.needs_periodic_poll?).to be(false)
     end
   end

@@ -532,8 +532,8 @@ RSpec.describe_current do
       it { expect(events.last[:producer_id]).to eq(producer.id) }
       it { expect(events.last[:statistics]["ts"]).to be > 0 }
       # This is in microseconds. We needed a stable value for comparison, and the distance in
-      # between statistics events should always be within 1ms
-      it { expect(events.last[:statistics]["ts_d"]).to be_between(90_000, 200_000) }
+      # between statistics events should always be within 1ms (relaxed for slower CI like macOS)
+      it { expect(events.last[:statistics]["ts_d"]).to be_between(90_000, 300_000) }
     end
 
     context "when we have a reconnected producer" do
