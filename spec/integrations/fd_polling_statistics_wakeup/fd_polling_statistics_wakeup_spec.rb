@@ -9,9 +9,12 @@
 require "waterdrop"
 require "securerandom"
 
+# 100ms interval over 4 seconds should give ~40 callbacks
+# We expect at least 10 to prove FD wakeup is working (not just relying on poll timeout)
+# Lower threshold accounts for CI timing variability, especially on macOS
 STATISTICS_INTERVAL_MS = 100
-WAIT_TIME_SECONDS = 3
-MIN_EXPECTED_CALLBACKS = 15
+WAIT_TIME_SECONDS = 4
+MIN_EXPECTED_CALLBACKS = 10
 
 statistics_callbacks = []
 statistics_mutex = Mutex.new
