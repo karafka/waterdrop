@@ -10,6 +10,8 @@ module WaterDrop
     #
     # Spawning one thread per producer is acceptable for 1-2 producers but in case of a system
     # with several (transactional for example) the cost becomes bigger and bigger.
+    #
+    # This implementation handles things by being event-driven instead of GLV releasing blocking.
     class Poller
       include Singleton
       include ::Karafka::Core::Helpers::Time
@@ -302,9 +304,13 @@ module WaterDrop
         drain_producer_queue(state)
 
         # Remove producer from registry and clean up
+        # If this was the last producer, signal shutdown to stop the thread immediately
         @mutex.synchronize do
           @producers.delete(state.producer_id)
           @ios_dirty = true
+
+          # Stop thread immediately when last producer unregisters to prevent resource leakage
+          @shutdown = true if @producers.empty?
         end
 
         state.close
