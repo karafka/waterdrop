@@ -6,6 +6,7 @@ require "forwardable"
 require "json"
 require "zeitwerk"
 require "securerandom"
+require "singleton"
 require "karafka-core"
 require "pathname"
 
