@@ -301,6 +301,16 @@ module WaterDrop
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
     def close(force: false)
+      # When closing from within the FD poller thread (e.g., from a callback like
+      # message.acknowledged or error.occurred), we must delegate to a background thread.
+      # Close performs flush which waits for delivery reports, but delivery reports require
+      # the poller to poll. Since we're ON the poller thread inside a callback, this would
+      # deadlock. Spawning a thread allows the callback to return, letting the poller continue.
+      if fd_polling? && Polling::Poller.instance.in_poller_thread?
+        Thread.new { close(force: force) }
+        return
+      end
+
       # If we already own the transactional mutex, it means we are inside of a transaction and
       # it should not we allowed to close the producer in such a case.
       if @transaction_mutex.locked? && @transaction_mutex.owned?

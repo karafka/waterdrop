@@ -49,6 +49,13 @@ module WaterDrop
         @ios_dirty = true
       end
 
+      # Checks if the current thread is the poller thread
+      # Used to detect when close is called from within a callback to avoid deadlock
+      # @return [Boolean] true if current thread is the poller thread
+      def in_poller_thread?
+        Thread.current == @thread
+      end
+
       # Registers a producer with the poller
       # @param producer [WaterDrop::Producer] the producer instance
       # @param client [Rdkafka::Producer] the rdkafka client
@@ -96,6 +103,7 @@ module WaterDrop
         # producer_id could be deleted by a pending close signal
         # Skip waiting if called from within the poller thread itself (e.g., from a callback)
         # to avoid deadlock - the poller thread can't wait for itself
+        # The cleanup will happen after the callback returns
         state.wait_for_close unless Thread.current == thread
 
         producer.monitor.instrument(
@@ -241,7 +249,13 @@ module WaterDrop
               handle_close_signal(state)
             else
               poll_producer(state)
-              any_polled = true
+              # Check if callback signaled close while we were polling
+              # (e.g., user code closed producer from within delivery callback)
+              if state.closing?
+                handle_close_signal(state)
+              else
+                any_polled = true
+              end
             end
           end
 

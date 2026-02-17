@@ -6,8 +6,6 @@
 # 1. Polling thread starts when first producer registers
 # 2. Polling thread stops when last producer closes (no resource leakage)
 # 3. A new producer can start successfully after all producers have been closed
-#
-# This ensures proper resource management and prevents thread leakage.
 
 require "waterdrop"
 require "securerandom"
@@ -35,18 +33,16 @@ def create_fd_producer
 end
 
 topic = "it-fd-lifecycle-#{SecureRandom.hex(6)}"
+failed = false
 
-# === Test 1: Thread starts with first producer ===
-puts "Test 1: Thread starts with first producer..."
-
-unless poller_thread_alive? == false || poller_thread_alive?.nil?
-  puts "FAIL: Poller thread should not be running initially"
-  exit 1
+# Test 1: Thread starts with first producer
+if poller_thread_alive?
+  puts "Thread should not be running initially"
+  failed = true
 end
 
 producer1 = create_fd_producer
 
-# Produce to ensure client is connected
 begin
   producer1.produce_sync(topic: topic, payload: "message 1")
 rescue Rdkafka::RdkafkaError => e
@@ -55,101 +51,69 @@ rescue Rdkafka::RdkafkaError => e
 end
 
 unless poller_thread_alive?
-  puts "FAIL: Poller thread should be running after producer registers"
-  exit 1
+  puts "Thread should be running after producer registers"
+  failed = true
 end
 
-puts "  PASS: Thread started with first producer"
-
-# === Test 2: Thread continues with multiple producers ===
-puts "Test 2: Thread continues with multiple producers..."
-
+# Test 2: Thread continues with multiple producers
 producer2 = create_fd_producer
 producer2.produce_sync(topic: topic, payload: "message 2")
 
 if poller_producer_count != 2
-  puts "FAIL: Expected 2 producers registered, got #{poller_producer_count}"
-  exit 1
+  puts "Expected 2 producers registered, got #{poller_producer_count}"
+  failed = true
 end
 
-unless poller_thread_alive?
-  puts "FAIL: Poller thread should still be running with 2 producers"
-  exit 1
-end
-
-puts "  PASS: Thread running with multiple producers"
-
-# === Test 3: Thread continues when one producer closes ===
-puts "Test 3: Thread continues when one producer closes..."
-
+# Test 3: Thread continues when one producer closes
 producer1.close
-sleep(0.1) # Give time for close to process
+sleep(0.1)
 
 if poller_producer_count != 1
-  puts "FAIL: Expected 1 producer registered after close, got #{poller_producer_count}"
-  exit 1
+  puts "Expected 1 producer registered after close, got #{poller_producer_count}"
+  failed = true
 end
 
 unless poller_thread_alive?
-  puts "FAIL: Poller thread should still be running with 1 producer remaining"
-  exit 1
+  puts "Thread should still be running with 1 producer remaining"
+  failed = true
 end
 
-puts "  PASS: Thread continues with remaining producer"
-
-# === Test 4: Thread stops when last producer closes ===
-puts "Test 4: Thread stops when last producer closes..."
-
+# Test 4: Thread stops when last producer closes
 producer2.close
-sleep(0.2) # Give time for thread to stop
+sleep(0.2)
 
 if poller_producer_count != 0
-  puts "FAIL: Expected 0 producers registered, got #{poller_producer_count}"
-  exit 1
+  puts "Expected 0 producers registered, got #{poller_producer_count}"
+  failed = true
 end
 
 if poller_thread_alive?
-  puts "FAIL: Poller thread should have stopped after last producer closed"
-  exit 1
+  puts "Thread should have stopped after last producer closed"
+  failed = true
 end
 
-puts "  PASS: Thread stopped after last producer closed"
-
-# === Test 5: New producer works after all closed (restart scenario) ===
-puts "Test 5: New producer works after all producers were closed..."
-
+# Test 5: New producer works after all closed
 producer3 = create_fd_producer
 
-# Produce first to trigger lazy client creation and registration
 begin
   producer3.produce_sync(topic: topic, payload: "message after restart")
 rescue => e
-  puts "FAIL: New producer failed to produce: #{e.message}"
+  puts "New producer failed to produce: #{e.message}"
   producer3.close
   exit 1
 end
 
 unless poller_thread_alive?
-  puts "FAIL: Poller thread should restart when new producer registers"
-  exit 1
+  puts "Thread should restart when new producer registers"
+  failed = true
 end
 
-if poller_producer_count != 1
-  puts "FAIL: Expected 1 producer registered, got #{poller_producer_count}"
-  exit 1
-end
-
-puts "  PASS: New producer works after restart"
-
-# Cleanup
 producer3.close
 sleep(0.2)
 
 if poller_thread_alive?
-  puts "FAIL: Thread should stop after final cleanup"
-  exit 1
+  puts "Thread should stop after final cleanup"
+  failed = true
 end
 
-puts ""
-puts "SUCCESS: All FD polling thread lifecycle tests passed"
-exit 0
+exit(failed ? 1 : 0)

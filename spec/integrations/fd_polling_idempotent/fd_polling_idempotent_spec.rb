@@ -26,7 +26,6 @@ producer = WaterDrop::Producer.new do |config|
   config.max_wait_timeout = 30_000
 end
 
-# Subscribe to delivery reports
 producer.monitor.subscribe("message.acknowledged") do |event|
   delivery_reports << {
     topic: event[:topic],
@@ -41,7 +40,6 @@ end
 
 topic = "it-fd-idempotent-#{SecureRandom.hex(6)}"
 
-# Produce messages
 handles = []
 MESSAGE_COUNT.times do |i|
   handles << producer.produce_async(
@@ -51,29 +49,25 @@ MESSAGE_COUNT.times do |i|
   )
 end
 
-# Wait for all deliveries
 handles.each(&:wait)
-
 producer.close
 
-# Validate results
+failed = false
+
 if errors.any?
-  puts "FAIL: Errors occurred during production"
-  errors.each { |e| puts "  - #{e}" }
-  exit 1
+  puts "Errors occurred during production: #{errors.inspect}"
+  failed = true
 end
 
 if delivery_reports.size != MESSAGE_COUNT
-  puts "FAIL: Expected #{MESSAGE_COUNT} delivery reports, got #{delivery_reports.size}"
-  exit 1
+  puts "Expected #{MESSAGE_COUNT} delivery reports, got #{delivery_reports.size}"
+  failed = true
 end
 
-# Check for duplicate offsets (would indicate non-idempotent behavior)
 offsets = delivery_reports.map { |r| [r[:partition], r[:offset]] }
 if offsets.uniq.size != offsets.size
-  puts "FAIL: Duplicate offsets detected - idempotency may be compromised"
-  exit 1
+  puts "Duplicate offsets detected"
+  failed = true
 end
 
-puts "SUCCESS: Idempotent producer with FD mode delivered #{MESSAGE_COUNT} messages"
-exit 0
+exit(failed ? 1 : 0)

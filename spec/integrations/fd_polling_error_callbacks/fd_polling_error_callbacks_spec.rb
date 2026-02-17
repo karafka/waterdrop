@@ -23,7 +23,6 @@ producer = WaterDrop::Producer.new do |config|
   config.max_wait_timeout = 30_000
 end
 
-# Subscribe to error callbacks
 producer.monitor.subscribe("error.occurred") do |event|
   error_callbacks << {
     type: event[:type],
@@ -31,14 +30,12 @@ producer.monitor.subscribe("error.occurred") do |event|
   }
 end
 
-# Subscribe to delivery reports
 producer.monitor.subscribe("message.acknowledged") do |event|
   delivery_reports << event[:offset]
 end
 
 topic = "it-fd-error-callbacks-#{SecureRandom.hex(6)}"
 
-# Produce messages normally - should succeed
 handles = []
 MESSAGE_COUNT.times do |i|
   handles << producer.produce_async(
@@ -47,22 +44,14 @@ MESSAGE_COUNT.times do |i|
   )
 end
 
-# Wait for all deliveries
 handles.each(&:wait)
-
 producer.close
 
-# Validate results
+failed = false
+
 if delivery_reports.size != MESSAGE_COUNT
-  puts "FAIL: Expected #{MESSAGE_COUNT} delivery reports, got #{delivery_reports.size}"
-  exit 1
+  puts "Expected #{MESSAGE_COUNT} delivery reports, got #{delivery_reports.size}"
+  failed = true
 end
 
-# Note: We don't expect errors in normal operation, but we verify the callback
-# mechanism is working by checking delivery reports were received (which uses
-# the same FD polling mechanism as error callbacks)
-
-puts "SUCCESS: FD mode error callback mechanism working"
-puts "  Delivery reports received: #{delivery_reports.size}"
-puts "  Error callbacks received: #{error_callbacks.size}"
-exit 0
+exit(failed ? 1 : 0)

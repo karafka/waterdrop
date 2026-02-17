@@ -26,7 +26,6 @@ producer = WaterDrop::Producer.new do |config|
   config.max_wait_timeout = 30_000
 end
 
-# Subscribe to delivery reports
 producer.monitor.subscribe("message.acknowledged") do |event|
   delivery_reports << event[:offset]
 end
@@ -37,7 +36,6 @@ end
 
 topic = "it-fd-transactional-#{SecureRandom.hex(6)}"
 
-# Perform multiple transactions
 TRANSACTION_COUNT.times do |tx_index|
   producer.transaction do
     MESSAGES_PER_TRANSACTION.times do |msg_index|
@@ -49,25 +47,22 @@ TRANSACTION_COUNT.times do |tx_index|
     end
   end
 rescue => e
-  puts "Transaction #{tx_index} failed: #{e.message}"
   errors << e.message
 end
 
 producer.close
 
-# Validate results
 expected_messages = TRANSACTION_COUNT * MESSAGES_PER_TRANSACTION
+failed = false
 
 if errors.any?
-  puts "FAIL: Errors occurred during transactions"
-  errors.each { |e| puts "  - #{e}" }
-  exit 1
+  puts "Errors occurred during transactions: #{errors.inspect}"
+  failed = true
 end
 
 if delivery_reports.size != expected_messages
-  puts "FAIL: Expected #{expected_messages} delivery reports, got #{delivery_reports.size}"
-  exit 1
+  puts "Expected #{expected_messages} delivery reports, got #{delivery_reports.size}"
+  failed = true
 end
 
-puts "SUCCESS: #{TRANSACTION_COUNT} transactions with #{expected_messages} messages completed"
-exit 0
+exit(failed ? 1 : 0)
