@@ -10,7 +10,7 @@ RSpec.describe_current do
 
   after do
     pipe.close
-  rescue StandardError
+  rescue
     # Ignore if pipe was never created
   end
 
@@ -20,8 +20,9 @@ RSpec.describe_current do
     end
 
     it "calls enable_queue_io_events on the client" do
-      expect(client).to receive(:enable_queue_io_events).with(kind_of(Integer))
+      allow(client).to receive(:enable_queue_io_events)
       described_class.new(client)
+      expect(client).to have_received(:enable_queue_io_events).with(kind_of(Integer))
     end
 
     context "when enable_queue_io_events raises" do

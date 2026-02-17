@@ -66,8 +66,9 @@ RSpec.describe_current do
 
   describe "#poll" do
     it "calls poll_drain_nb on the client" do
-      expect(client).to receive(:poll_drain_nb).with(max_poll_time).and_return(false)
+      allow(client).to receive(:poll_drain_nb).and_return(false)
       state.poll
+      expect(client).to have_received(:poll_drain_nb).with(max_poll_time)
     end
 
     it "returns the result from poll_drain_nb" do
