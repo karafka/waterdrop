@@ -35,6 +35,9 @@ module WaterDrop
       # @return [Integer] max milliseconds to poll this producer per cycle
       attr_reader :max_poll_time
 
+      # @return [Object] the producer's monitor for instrumentation
+      attr_reader :monitor
+
       # Creates a new state for a producer
       # @param producer_id [String] unique producer ID
       # @param client [Rdkafka::Producer] the rdkafka producer client

@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "singleton"
-
 module WaterDrop
   # Namespace for FD-based polling components
   # Contains the global Poller singleton and State class for managing producer polling
@@ -27,7 +25,6 @@ module WaterDrop
       def initialize
         @mutex = Mutex.new
         @producers = {}
-        @monitors = {}
         @thread = nil
         @shutdown = false
         @pid = Process.pid
@@ -57,7 +54,6 @@ module WaterDrop
 
         @mutex.synchronize do
           @producers[producer.id] = state
-          @monitors[producer.id] = producer.monitor
           @ios_dirty = true
           ensure_thread_running!
           signal_wakeup
@@ -86,9 +82,6 @@ module WaterDrop
         # producer_id could be deleted by a pending close signal
         state.wait_for_close
 
-        # Clean up monitor reference
-        @mutex.synchronize { @monitors.delete(producer.id) }
-
         producer.monitor.instrument(
           "poller.producer_unregistered",
           producer_id: producer.id
@@ -116,7 +109,6 @@ module WaterDrop
         # Reset state after fork
         @mutex = Mutex.new
         @producers = {}
-        @monitors = {}
         @thread = nil
         @shutdown = false
         @pid = Process.pid
@@ -190,10 +182,10 @@ module WaterDrop
       # @param type [String] error type identifier
       # @param error [Exception] the error to report
       def broadcast_error(type, error)
-        monitors = @mutex.synchronize { @monitors.values.dup }
+        states = @mutex.synchronize { @producers.values.dup }
 
-        monitors.each do |monitor|
-          monitor.instrument(
+        states.each do |state|
+          state.monitor.instrument(
             "error.occurred",
             type: type,
             error: error

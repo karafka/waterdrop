@@ -90,7 +90,6 @@ RSpec.configure do |config|
     # Clear all state
     poller.instance_variable_set(:@thread, nil)
     poller.instance_variable_set(:@producers, {})
-    poller.instance_variable_set(:@monitors, {})
     poller.instance_variable_set(:@shutdown, false)
     poller.instance_variable_set(:@ios_dirty, true)
     poller.instance_variable_set(:@cached_ios, [])
