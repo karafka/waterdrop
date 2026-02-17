@@ -62,6 +62,7 @@ module WaterDrop
       @closing_thread_id = nil
       @idempotent = nil
       @transactional = nil
+      @fd_polling = nil
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
 
@@ -425,7 +426,7 @@ module WaterDrop
 
     # @return [Boolean] true if FD-based polling mode is enabled
     def fd_polling?
-      return @fd_polling if defined?(@fd_polling)
+      return @fd_polling unless @fd_polling.nil?
       return false unless config
 
       @fd_polling = config.polling.mode == :fd
