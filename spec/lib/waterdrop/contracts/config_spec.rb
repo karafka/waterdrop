@@ -34,7 +34,8 @@ RSpec.describe_current do
       polling: {
         mode: :thread,
         fd: {
-          max_time: 100
+          max_time: 100,
+          periodic_poll_interval: 1000
         }
       },
       kafka: {

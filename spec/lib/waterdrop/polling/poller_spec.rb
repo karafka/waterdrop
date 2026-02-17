@@ -33,7 +33,7 @@ RSpec.describe_current do
   end
 
   let(:fd_config) do
-    double(:fd_config, max_time: 100)
+    double(:fd_config, max_time: 100, periodic_poll_interval: 1000)
   end
 
   let(:monitor) do
@@ -60,15 +60,13 @@ RSpec.describe_current do
     poller.instance_variable_set(:@shutdown, true)
     thread = poller.instance_variable_get(:@thread)
     if thread&.alive?
-      # Signal wakeup to unblock IO.select
-      begin
-        poller.instance_variable_get(:@wakeup_write)&.write_nonblock("W")
-      rescue IOError, Errno::EPIPE, Errno::EAGAIN
-        nil
-      end
       thread.join(1)
       thread.kill if thread.alive?
     end
+
+    # Close all State objects to prevent pipe leakage
+    producers = poller.instance_variable_get(:@producers)
+    producers&.each_value(&:close)
 
     # Reset all state
     poller.instance_variable_set(:@thread, nil)
@@ -77,26 +75,6 @@ RSpec.describe_current do
     poller.instance_variable_set(:@ios_dirty, true)
     poller.instance_variable_set(:@cached_ios, [])
     poller.instance_variable_set(:@cached_io_to_state, {})
-
-    # Recreate wakeup pipe to avoid stale data
-    old_read = poller.instance_variable_get(:@wakeup_read)
-    old_write = poller.instance_variable_get(:@wakeup_write)
-
-    begin
-      old_read&.close
-    rescue IOError
-      nil
-    end
-
-    begin
-      old_write&.close
-    rescue IOError
-      nil
-    end
-
-    new_read, new_write = IO.pipe
-    poller.instance_variable_set(:@wakeup_read, new_read)
-    poller.instance_variable_set(:@wakeup_write, new_write)
   end
 
   after do
@@ -104,14 +82,13 @@ RSpec.describe_current do
     poller.instance_variable_set(:@shutdown, true)
     thread = poller.instance_variable_get(:@thread)
     if thread&.alive?
-      begin
-        poller.instance_variable_get(:@wakeup_write)&.write_nonblock("W")
-      rescue IOError, Errno::EPIPE, Errno::EAGAIN
-        nil
-      end
       thread.join(1)
       thread.kill if thread.alive?
     end
+
+    # Close all State objects to prevent pipe leakage
+    producers = poller.instance_variable_get(:@producers)
+    producers&.each_value(&:close)
   end
 
   describe "#register" do
@@ -152,15 +129,17 @@ RSpec.describe_current do
     end
   end
 
-  describe "#shutdown" do
+  describe "thread lifecycle" do
     before do
       poller.register(producer, client)
     end
 
-    it "stops the polling thread" do
+    it "stops the polling thread when last producer unregisters" do
       thread = poller.instance_variable_get(:@thread)
       expect(thread).to be_alive
-      poller.shutdown
+
+      poller.unregister(producer)
+
       expect(thread).not_to be_alive
     end
   end

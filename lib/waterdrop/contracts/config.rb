@@ -48,6 +48,7 @@ module WaterDrop
 
         nested(:fd) do
           required(:max_time) { |val| val.is_a?(Integer) && val >= 1 }
+          required(:periodic_poll_interval) { |val| val.is_a?(Integer) && val >= 100 }
         end
       end
 

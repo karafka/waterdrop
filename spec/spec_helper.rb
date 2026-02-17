@@ -78,14 +78,15 @@ RSpec.configure do |config|
     poller.instance_variable_set(:@shutdown, true)
     thread = poller.instance_variable_get(:@thread)
     if thread&.alive?
-      begin
-        poller.instance_variable_get(:@wakeup_write)&.write_nonblock("W")
-      rescue IOError, Errno::EPIPE, Errno::EAGAIN
-        nil
-      end
+      wakeup_pipe = poller.instance_variable_get(:@wakeup_pipe)
+      wakeup_pipe&.signal
       thread.join(0.5)
       thread.kill if thread.alive?
     end
+
+    # Close all State objects to prevent pipe leakage
+    producers = poller.instance_variable_get(:@producers)
+    producers&.each_value(&:close)
 
     # Clear all state
     poller.instance_variable_set(:@thread, nil)

@@ -152,6 +152,11 @@ module WaterDrop
         # option [Integer] Max milliseconds to poll a single producer before rotating to the next
         # This prevents any single producer from monopolizing the polling thread
         setting :max_time, default: 100
+
+        # option [Integer] Interval in milliseconds for periodic polling of idle producers
+        # When one producer is busy, other producers still need to be polled periodically
+        # to ensure OAuth token refresh and statistics callbacks fire on time
+        setting :periodic_poll_interval, default: 1_000
       end
     end
 

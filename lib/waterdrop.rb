@@ -47,3 +47,7 @@ loader.ignore("#{__dir__}/waterdrop/instrumentation/vendors/**/*.rb")
 loader.ignore("#{__dir__}/waterdrop/producer/testing.rb")
 loader.setup
 loader.eager_load
+
+# Setup the poller. Even if users do not use it, it is few objects and we prevent any potential
+# race conditions later
+WaterDrop::Polling::Poller.instance
