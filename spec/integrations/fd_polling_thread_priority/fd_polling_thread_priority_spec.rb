@@ -58,8 +58,8 @@ if callback_thread_priority.nil?
   failed = true
 end
 
-# Verify thread name
-if callback_thread_name != "waterdrop.poller"
+# Verify thread name follows pattern waterdrop.poller#N
+unless callback_thread_name&.match?(/^waterdrop\.poller#\d+$/)
   puts "Unexpected thread name: #{callback_thread_name}"
   failed = true
 end
