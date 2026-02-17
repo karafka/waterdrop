@@ -21,19 +21,6 @@ module WaterDrop
       include Singleton
       include ::Karafka::Core::Helpers::Time
 
-      # Timeout for IO.select in seconds
-      # Normally we wake immediately when librdkafka signals events via queue pipe
-      # The timeout ensures OAuth/stats callbacks fire even when idle
-      POLL_TIMEOUT_S = 1.0
-
-      # Initial backoff in ms after an error
-      BACKOFF_MIN_MS = 100
-
-      # Maximum backoff in ms (30 seconds)
-      BACKOFF_MAX_MS = 30_000
-
-      private_constant :POLL_TIMEOUT_S, :BACKOFF_MIN_MS, :BACKOFF_MAX_MS
-
       def initialize
         @mutex = Mutex.new
         @producers = {}
@@ -89,6 +76,7 @@ module WaterDrop
           @cached_io_to_state = {}
           @cached_states = []
           @cached_result = nil
+          @poll_timeout_s = nil
         end
       end
 
@@ -175,6 +163,7 @@ module WaterDrop
         @shutdown = false
         @thread = Thread.new { polling_loop }
         @thread.name = "waterdrop.poller"
+        @thread.priority = Config.config.thread_priority
       end
 
       # Main polling loop that runs in a dedicated thread
@@ -201,7 +190,12 @@ module WaterDrop
         rescue => e
           # Report error and apply exponential backoff to prevent spam
           broadcast_error("poller.polling_loop", e)
-          backoff_ms = backoff_ms.zero? ? BACKOFF_MIN_MS : [backoff_ms * 2, BACKOFF_MAX_MS].min
+          backoff_ms =
+            if backoff_ms.zero?
+              Config.config.backoff_min
+            else
+              [backoff_ms * 2, Config.config.backoff_max].min
+            end
         end
       ensure
         # Clear thread reference first so new registrations will start a fresh thread
@@ -259,7 +253,7 @@ module WaterDrop
       # @param io_to_state [Hash{IO => State}] mapping from IO to state
       def poll_with_select(readable_ios, io_to_state)
         begin
-          ready = IO.select(readable_ios, nil, nil, POLL_TIMEOUT_S)
+          ready = IO.select(readable_ios, nil, nil, poll_timeout_s)
         rescue IOError, Errno::EBADF
           # An IO was closed - mark dirty to rebuild on next iteration
           @ios_dirty = true
@@ -383,6 +377,11 @@ module WaterDrop
         end
       rescue Rdkafka::ClosedProducerError
         # Producer was already closed, nothing more to drain
+      end
+
+      # @return [Float] poll_timeout converted to seconds (cached)
+      def poll_timeout_s
+        @poll_timeout_s ||= Config.config.poll_timeout / 1_000.0
       end
     end
   end

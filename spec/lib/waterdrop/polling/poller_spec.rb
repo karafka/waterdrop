@@ -107,6 +107,27 @@ RSpec.describe_current do
 
       expect(poller.alive?).to be(false)
     end
+
+    it "sets thread priority from Config" do
+      original_priority = WaterDrop::Polling::Config.config.thread_priority
+
+      begin
+        WaterDrop::Polling::Config.setup do |config|
+          config.thread_priority = -1
+        end
+
+        poller.shutdown!
+        poller.register(producer, client)
+
+        # Access thread via instance variable (acceptable for testing internals)
+        thread = poller.instance_variable_get(:@thread)
+        expect(thread.priority).to eq(-1)
+      ensure
+        WaterDrop::Polling::Config.setup do |config|
+          config.thread_priority = original_priority
+        end
+      end
+    end
   end
 
   describe "#alive?" do
