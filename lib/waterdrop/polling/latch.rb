@@ -36,9 +36,7 @@ module WaterDrop
       # Returns immediately if already released
       def wait
         @mutex.synchronize do
-          return if @released
-
-          @cv.wait(@mutex)
+          @cv.wait(@mutex) until @released
         end
       end
 

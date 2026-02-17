@@ -20,7 +20,6 @@ module WaterDrop
       # @raise [StandardError] if enable_queue_io_events fails
       def initialize(client)
         @reader, @writer = IO.pipe
-        @closed = false
 
         # Tell librdkafka to write to our pipe when events arrive on the main queue
         client.enable_queue_io_events(@writer.fileno)
@@ -46,14 +45,8 @@ module WaterDrop
 
       # Closes both ends of the pipe
       def close
-        @closed = true
         close_io(@reader)
         close_io(@writer)
-      end
-
-      # @return [Boolean] whether the pipe has been closed
-      def closed?
-        @closed
       end
 
       private

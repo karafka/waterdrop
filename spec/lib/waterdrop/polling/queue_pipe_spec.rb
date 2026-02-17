@@ -24,10 +24,6 @@ RSpec.describe_current do
       described_class.new(client)
     end
 
-    it "is not closed by default" do
-      expect(pipe.closed?).to be(false)
-    end
-
     context "when enable_queue_io_events raises" do
       let(:client) do
         double(:rdkafka_producer).tap do |c|
@@ -79,11 +75,6 @@ RSpec.describe_current do
   end
 
   describe "#close" do
-    it "marks the pipe as closed" do
-      pipe.close
-      expect(pipe.closed?).to be(true)
-    end
-
     it "closes the reader IO" do
       reader = pipe.reader
       pipe.close
