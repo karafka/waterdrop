@@ -41,8 +41,39 @@ RSpec.describe_current do
     end
   end
 
+  describe "#signal" do
+    it "makes the pipe readable" do
+      pipe.signal
+      ready = IO.select([pipe.reader], nil, nil, 0)
+      expect(ready).not_to be_nil
+    end
+
+    it "does not raise when called multiple times" do
+      expect do
+        3.times { pipe.signal }
+      end.not_to raise_error
+    end
+
+    it "does not raise after pipe is closed" do
+      pipe.close
+      expect { pipe.signal }.not_to raise_error
+    end
+  end
+
   describe "#drain" do
     it "does not raise when pipe is empty" do
+      expect { pipe.drain }.not_to raise_error
+    end
+
+    it "clears the pipe after signals" do
+      3.times { pipe.signal }
+      pipe.drain
+      ready = IO.select([pipe.reader], nil, nil, 0)
+      expect(ready).to be_nil
+    end
+
+    it "does not raise after pipe is closed" do
+      pipe.close
       expect { pipe.drain }.not_to raise_error
     end
   end
