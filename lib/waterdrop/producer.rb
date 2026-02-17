@@ -63,6 +63,7 @@ module WaterDrop
       @idempotent = nil
       @transactional = nil
       @fd_polling = nil
+      @poller = nil
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
 
@@ -436,7 +437,7 @@ module WaterDrop
     # @return [WaterDrop::Polling::Poller] custom poller if configured, otherwise the global
     #   singleton poller
     def poller
-      return @poller if defined?(@poller)
+      return @poller unless @poller.nil?
       return nil unless config
 
       @poller = config.polling.poller || Polling::Poller.instance
