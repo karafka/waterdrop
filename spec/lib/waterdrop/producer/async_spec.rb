@@ -154,7 +154,8 @@ RSpec.describe_current do
 
       it { expect(occurred).not_to be_empty }
       it { expect(error).to be_a(Rdkafka::RdkafkaError) }
-      it { expect(error.code).to eq(:msg_timed_out) }
+      # On slower systems (e.g., macOS CI), we may get :transport instead of :msg_timed_out
+      it { expect(%i[msg_timed_out transport]).to include(error.code) }
     end
 
     context "when inline error occurs and we retry on queue full but instrumentation off" do
