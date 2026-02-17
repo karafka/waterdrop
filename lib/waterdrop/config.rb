@@ -147,6 +147,13 @@ module WaterDrop
       # :fd - uses a single global Ruby thread with IO.select-based multiplexing
       setting :mode, default: :thread
 
+      # option [WaterDrop::Polling::Poller, nil] Custom poller instance for isolation
+      # When nil (default), uses the global singleton poller shared by all FD-mode producers
+      # When set to a Poller instance, uses that dedicated poller for this producer only
+      # This allows isolating producers from each other's callback processing
+      # Only valid when mode is :fd
+      setting :poller, default: nil
+
       # Namespace for FD-based polling configuration (only used when mode is :fd)
       setting :fd do
         # option [Integer] Max milliseconds to poll a single producer before rotating to the next

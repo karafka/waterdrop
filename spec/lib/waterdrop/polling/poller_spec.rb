@@ -201,5 +201,34 @@ RSpec.describe_current do
       end
     end
   end
+
+  describe "#id" do
+    it "returns a unique incremental integer" do
+      expect(poller.id).to be_a(Integer)
+    end
+  end
+
+  describe ".new" do
+    it "creates a new poller instance (not the singleton)" do
+      custom_poller = described_class.new
+      expect(custom_poller).not_to eq(poller)
+    end
+
+    it "assigns incremental IDs to new instances" do
+      poller1 = described_class.new
+      poller2 = described_class.new
+      expect(poller2.id).to be > poller1.id
+    end
+
+    it "includes the ID in the thread name" do
+      custom_poller = described_class.new
+      custom_poller.register(producer, client)
+
+      thread = custom_poller.instance_variable_get(:@thread)
+      expect(thread.name).to eq("waterdrop.poller##{custom_poller.id}")
+
+      custom_poller.shutdown!
+    end
+  end
 end
 # rubocop:enable RSpec/VerifiedDoubles, RSpec/MessageSpies

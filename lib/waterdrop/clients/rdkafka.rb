@@ -59,9 +59,10 @@ module WaterDrop
 
           client.start
 
-          # Register with global poller if FD polling is enabled
+          # Register with poller if FD polling is enabled
+          # Uses the producer's configured poller (custom or global singleton)
           # This must happen after client.start to ensure the client is ready
-          Polling::Poller.instance.register(producer, client) if producer.fd_polling?
+          producer.poller.register(producer, client) if producer.fd_polling?
 
           # Switch to the transactional mode if user provided the transactional id
           client.init_transactions if kafka_config.key?(:"transactional.id")
