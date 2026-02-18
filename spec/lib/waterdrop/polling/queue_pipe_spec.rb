@@ -1,11 +1,10 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/VerifiedDoubles
 RSpec.describe_current do
   subject(:pipe) { described_class.new(client) }
 
   let(:client) do
-    double(:rdkafka_producer, enable_queue_io_events: nil)
+    instance_double(Rdkafka::Producer, enable_queue_io_events: nil)
   end
 
   after do
@@ -27,7 +26,7 @@ RSpec.describe_current do
 
     context "when enable_queue_io_events raises" do
       let(:client) do
-        double(:rdkafka_producer).tap do |c|
+        instance_double(Rdkafka::Producer).tap do |c|
           allow(c).to receive(:enable_queue_io_events).and_raise(StandardError, "test error")
         end
       end
@@ -97,4 +96,3 @@ RSpec.describe_current do
     end
   end
 end
-# rubocop:enable RSpec/VerifiedDoubles

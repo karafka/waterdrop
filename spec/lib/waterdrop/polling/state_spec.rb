@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/VerifiedDoubles
-# We use unverified doubles because the FD APIs (enable_queue_io_events)
-# may not exist in the current karafka-rdkafka version
 RSpec.describe_current do
   subject(:state) { described_class.new(producer_id, client, monitor, max_poll_time, periodic_poll_interval) }
 
@@ -11,11 +8,11 @@ RSpec.describe_current do
   let(:periodic_poll_interval) { 1000 }
 
   let(:client) do
-    double(:rdkafka_producer, enable_queue_io_events: nil, poll_drain_nb: false, queue_size: 0)
+    instance_double(Rdkafka::Producer, enable_queue_io_events: nil, poll_drain_nb: false, queue_size: 0)
   end
 
   let(:monitor) do
-    double(:waterdrop_monitor).tap do |m|
+    instance_double(WaterDrop::Instrumentation::Monitor).tap do |m|
       allow(m).to receive(:instrument)
     end
   end
@@ -45,7 +42,7 @@ RSpec.describe_current do
 
     context "when enable_queue_io_events raises an error" do
       let(:failing_client) do
-        double(:rdkafka_producer, poll_drain_nb: false, queue_size: 0).tap do |c|
+        instance_double(Rdkafka::Producer, poll_drain_nb: false, queue_size: 0).tap do |c|
           allow(c).to receive(:enable_queue_io_events).and_raise(StandardError, "test error")
         end
       end
@@ -232,4 +229,3 @@ RSpec.describe_current do
     end
   end
 end
-# rubocop:enable RSpec/VerifiedDoubles

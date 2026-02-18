@@ -63,6 +63,7 @@ module WaterDrop
       @idempotent = nil
       @transactional = nil
       @fd_polling = nil
+      @poller = nil
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
 
@@ -307,7 +308,7 @@ module WaterDrop
       # Close performs flush which waits for delivery reports, but delivery reports require
       # the poller to poll. Since we're ON the poller thread inside a callback, this would
       # deadlock. Spawning a thread allows the callback to return, letting the poller continue.
-      if fd_polling? && Polling::Poller.instance.in_poller_thread?
+      if fd_polling? && poller.in_poller_thread?
         Thread.new { close(force: force) }
         return
       end
@@ -430,6 +431,16 @@ module WaterDrop
       return false unless config
 
       @fd_polling = config.polling.mode == :fd
+    end
+
+    # Returns the poller instance for this producer
+    # @return [WaterDrop::Polling::Poller] custom poller if configured, otherwise the global
+    #   singleton poller
+    def poller
+      return @poller unless @poller.nil?
+      return nil unless config
+
+      @poller = config.polling.poller || Polling::Poller.instance
     end
 
     private
@@ -601,7 +612,7 @@ module WaterDrop
       @status.configured!
     end
 
-    # Unregisters this producer from the global poller
+    # Unregisters this producer from its poller
     #
     # @note We only unregister when fd_polling? is true because thread-mode producers never
     #   register with the Poller. The Poller.unregister method handles unregistered producers
@@ -609,7 +620,7 @@ module WaterDrop
     def unregister_from_poller
       return unless fd_polling?
 
-      Polling::Poller.instance.unregister(self)
+      poller.unregister(self)
     end
   end
 end

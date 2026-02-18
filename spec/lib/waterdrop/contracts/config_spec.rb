@@ -33,6 +33,7 @@ RSpec.describe_current do
       },
       polling: {
         mode: :thread,
+        poller: nil,
         fd: {
           max_time: 100,
           periodic_poll_interval: 1000
@@ -484,6 +485,41 @@ RSpec.describe_current do
     before { config[:polling][:mode] = :fd }
 
     it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.poller is nil" do
+    before { config[:polling][:poller] = nil }
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.poller is a valid Poller instance with :fd mode" do
+    before do
+      config[:polling][:mode] = :fd
+      config[:polling][:poller] = WaterDrop::Polling::Poller.new
+    end
+
+    it { expect(contract_result).to be_success }
+  end
+
+  context "when polling.poller is set with :thread mode" do
+    before do
+      config[:polling][:mode] = :thread
+      config[:polling][:poller] = WaterDrop::Polling::Poller.new
+    end
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.poller"]).not_to be_empty }
+  end
+
+  context "when polling.poller is not a Poller instance" do
+    before do
+      config[:polling][:mode] = :fd
+      config[:polling][:poller] = "invalid"
+    end
+
+    it { expect(contract_result).not_to be_success }
+    it { expect(contract_errors[:"polling.poller"]).not_to be_empty }
   end
 
   context "when polling.fd.max_time is missing" do

@@ -21,7 +21,34 @@ module WaterDrop
       include Singleton
       include ::Karafka::Core::Helpers::Time
 
+      # Make new public so users can create dedicated poller instances for isolation
+      # The singleton instance remains available via Poller.instance for the default behavior
+      public_class_method :new
+
+      # Mutex for thread-safe ID generation - initialized at class load time
+      # to avoid race conditions with lazy initialization
+      ID_MUTEX = Mutex.new
+
+      # Counter for generating unique poller IDs
+      @id_counter = 0
+
+      class << self
+        # Generates incremental IDs for poller instances (starting from 0)
+        # @return [Integer] next poller ID
+        def next_id
+          ID_MUTEX.synchronize do
+            id = @id_counter
+            @id_counter += 1
+            id
+          end
+        end
+      end
+
+      # @return [Integer] unique identifier for this poller instance
+      attr_reader :id
+
       def initialize
+        @id = self.class.next_id
         @mutex = Mutex.new
         @producers = {}
         @thread = nil
@@ -162,7 +189,7 @@ module WaterDrop
 
         @shutdown = false
         @thread = Thread.new { polling_loop }
-        @thread.name = "waterdrop.poller"
+        @thread.name = "waterdrop.poller##{@id}"
         @thread.priority = Config.config.thread_priority
       end
 
