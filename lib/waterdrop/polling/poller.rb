@@ -25,14 +25,18 @@ module WaterDrop
       # The singleton instance remains available via Poller.instance for the default behavior
       public_class_method :new
 
+      # Mutex for thread-safe ID generation - initialized at class load time
+      # to avoid race conditions with lazy initialization
+      ID_MUTEX = Mutex.new
+
+      # Counter for generating unique poller IDs
+      @id_counter = 0
+
       class << self
         # Generates incremental IDs for poller instances (starting from 0)
         # @return [Integer] next poller ID
         def next_id
-          @id_mutex ||= Mutex.new
-          @id_counter ||= 0
-
-          @id_mutex.synchronize do
+          ID_MUTEX.synchronize do
             id = @id_counter
             @id_counter += 1
             id
