@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable RSpec/VerifiedDoubles, RSpec/MessageSpies
-# We use unverified doubles because the FD APIs (background_queue_fd, enable_queue_io_events)
-# may not exist in the current karafka-rdkafka version
 RSpec.describe_current do
   # Since Poller is a singleton, we need to be careful with testing
   # We'll test the instance methods through the singleton
@@ -10,45 +7,37 @@ RSpec.describe_current do
 
   let(:producer_id) { "test-producer-#{SecureRandom.hex(6)}" }
 
-  # Use doubles instead of instance_doubles because the FD APIs
-  # may not exist in the current karafka-rdkafka version
+  # Build config using real WaterDrop config structure
+  let(:producer_config) do
+    WaterDrop::Config.new.tap do |cfg|
+      cfg.configure do |c|
+        c.kafka = { "bootstrap.servers": "localhost:9092" }
+        c.polling.mode = :fd
+        c.polling.fd.max_time = 100
+        c.polling.fd.periodic_poll_interval = 1000
+      end
+    end
+  end
+
   let(:producer) do
-    double(
-      :waterdrop_producer,
+    instance_double(
+      WaterDrop::Producer,
       id: producer_id,
-      config: config,
+      config: producer_config.config,
       monitor: monitor
     )
   end
 
-  let(:config) do
-    double(
-      :waterdrop_config,
-      polling: polling_config
-    )
-  end
-
-  let(:polling_config) do
-    double(:polling_config, fd: fd_config)
-  end
-
-  let(:fd_config) do
-    double(:fd_config, max_time: 100, periodic_poll_interval: 1000)
-  end
-
   let(:monitor) do
-    double(:waterdrop_monitor).tap do |m|
+    instance_double(WaterDrop::Instrumentation::Monitor).tap do |m|
       allow(m).to receive(:instrument)
     end
   end
 
   let(:client) do
-    double(
-      :rdkafka_producer,
-      background_queue_fd: nil,
+    instance_double(
+      Rdkafka::Producer,
       enable_queue_io_events: nil,
-      poll: 0,
-      poll_nb: 0,
       poll_drain_nb: false,
       queue_size: 0
     )
@@ -71,12 +60,12 @@ RSpec.describe_current do
     end
 
     it "instruments producer registration" do
-      expect(monitor).to receive(:instrument).with(
+      poller.register(producer, client)
+
+      expect(monitor).to have_received(:instrument).with(
         "poller.producer_registered",
         producer_id: producer_id
       )
-
-      poller.register(producer, client)
     end
   end
 
@@ -86,12 +75,12 @@ RSpec.describe_current do
     end
 
     it "instruments producer unregistration" do
-      expect(monitor).to receive(:instrument).with(
+      poller.unregister(producer)
+
+      expect(monitor).to have_received(:instrument).with(
         "poller.producer_unregistered",
         producer_id: producer_id
       )
-
-      poller.unregister(producer)
     end
   end
 
@@ -155,10 +144,10 @@ RSpec.describe_current do
 
     context "when producers are registered" do
       let(:producer2) do
-        double(
-          :waterdrop_producer,
+        instance_double(
+          WaterDrop::Producer,
           id: "test-producer-2",
-          config: config,
+          config: producer_config.config,
           monitor: monitor
         )
       end
@@ -231,4 +220,3 @@ RSpec.describe_current do
     end
   end
 end
-# rubocop:enable RSpec/VerifiedDoubles, RSpec/MessageSpies
