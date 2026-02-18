@@ -106,6 +106,11 @@ RSpec.describe_current do
     it { expect(client.respond_to?(:test)).to be(true) }
   end
 
+  describe "#queue_size" do
+    it { expect(client.queue_size).to eq(0) }
+    it { expect(client.queue_length).to eq(0) }
+  end
+
   describe "#transaction" do
     let(:producer) do
       WaterDrop::Producer.new do |config|

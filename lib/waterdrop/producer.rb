@@ -174,6 +174,41 @@ module WaterDrop
       @client
     end
 
+    # Returns the number of messages in the librdkafka producer queue.
+    #
+    # This count includes:
+    # - Messages waiting to be sent to the broker
+    # - Messages currently in-flight (being transmitted)
+    # - Delivery reports waiting to be processed
+    #
+    # @return [Integer] the number of pending messages in the rdkafka queue, or 0 if the
+    #   producer is not connected
+    #
+    # @note This only counts messages in the rdkafka queue, not the internal WaterDrop buffer.
+    #   To get the internal buffer count, use `messages.size`.
+    #
+    # @note Returns 0 when the producer is not connected as there cannot be any pending
+    #   messages if we haven't connected.
+    #
+    # @example Check pending messages
+    #   producer.queue_size #=> 42
+    #
+    # @example Check total pending work (buffer + rdkafka queue)
+    #   internal_buffer = producer.messages.size
+    #   rdkafka_queue = producer.queue_size
+    #   total_pending = internal_buffer + rdkafka_queue
+    def queue_size
+      return 0 unless @status.connected?
+
+      @connecting_mutex.synchronize do
+        return 0 unless @client
+
+        @client.queue_size
+      end
+    end
+
+    alias_method :queue_length, :queue_size
+
     # Fetches and caches the partition count of a topic
     #
     # @param topic [String] topic for which we want to get the number of partitions
