@@ -16,7 +16,7 @@ It:
  - Supports multiple delivery policies
  - Supports per-topic configuration alterations (variants)
  - Works with [async](https://github.com/socketry/async) gems ecosystem
- - Works with Kafka `1.0+` and Ruby `3.1+`
+ - Works with Kafka `1.0+` and Ruby `3.2+`
  - Works with and without Karafka
 
 ## Documentation
