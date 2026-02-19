@@ -38,9 +38,10 @@ RSpec.describe_current do
     instance_double(
       Rdkafka::Producer,
       enable_queue_io_events: nil,
-      poll_drain_nb: false,
       queue_size: 0
-    )
+    ).tap do |c|
+      allow(c).to receive(:events_poll_nb_each)
+    end
   end
 
   # Reset singleton state before each test to avoid mock leaking

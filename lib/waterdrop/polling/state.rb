@@ -62,7 +62,19 @@ module WaterDrop
       # Polls the producer's event queue
       # @return [Boolean] true if no more events to process, false if stopped due to time limit
       def poll
-        @client.poll_drain_nb(@max_poll_time)
+        drained = true
+        deadline = monotonic_now + @max_poll_time
+
+        @client.events_poll_nb_each do |count|
+          if count.zero?
+            :stop
+          elsif monotonic_now >= deadline
+            drained = false
+            :stop
+          end
+        end
+
+        drained
       end
 
       # Checks if the producer's event queue is empty
