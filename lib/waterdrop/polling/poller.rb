@@ -343,7 +343,7 @@ module WaterDrop
       # Drains the producer's event queue by polling until empty or time quanta exceeded
       # @param state [State] the producer state
       def poll_producer(state)
-        # poll_drain_nb returns:
+        # state.poll returns:
         # - true when queue is empty (fully drained)
         # - false when timeout hit (more events may remain)
         drained = state.poll

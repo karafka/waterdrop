@@ -8,7 +8,9 @@ RSpec.describe_current do
   let(:periodic_poll_interval) { 1000 }
 
   let(:client) do
-    instance_double(Rdkafka::Producer, enable_queue_io_events: nil, poll_drain_nb: false, queue_size: 0)
+    instance_double(Rdkafka::Producer, enable_queue_io_events: nil, queue_size: 0).tap do |c|
+      allow(c).to receive(:events_poll_nb_each)
+    end
   end
 
   let(:monitor) do
@@ -42,7 +44,8 @@ RSpec.describe_current do
 
     context "when enable_queue_io_events raises an error" do
       let(:failing_client) do
-        instance_double(Rdkafka::Producer, poll_drain_nb: false, queue_size: 0).tap do |c|
+        instance_double(Rdkafka::Producer, queue_size: 0).tap do |c|
+          allow(c).to receive(:events_poll_nb_each)
           allow(c).to receive(:enable_queue_io_events).and_raise(StandardError, "test error")
         end
       end
@@ -62,15 +65,30 @@ RSpec.describe_current do
   end
 
   describe "#poll" do
-    it "calls poll_drain_nb on the client" do
-      allow(client).to receive(:poll_drain_nb).and_return(false)
+    it "calls events_poll_nb_each on the client" do
       state.poll
-      expect(client).to have_received(:poll_drain_nb).with(max_poll_time)
+      expect(client).to have_received(:events_poll_nb_each)
     end
 
-    it "returns the result from poll_drain_nb" do
-      allow(client).to receive(:poll_drain_nb).and_return(true)
+    it "returns true when queue drains before timeout" do
+      allow(client).to receive(:events_poll_nb_each)
       expect(state.poll).to be(true)
+    end
+
+    it "returns false when timeout is reached" do
+      # Simulate a long-running poll that exceeds the deadline
+      allow(client).to receive(:events_poll_nb_each) do |&block|
+        # Yield multiple times to simulate processing events
+        loop do
+          result = block.call(1)
+          break if result == :stop
+        end
+      end
+
+      # Use a very short max_poll_time to trigger timeout
+      short_state = described_class.new(producer_id, client, monitor, 0, periodic_poll_interval)
+      expect(short_state.poll).to be(false)
+      short_state.close
     end
   end
 
