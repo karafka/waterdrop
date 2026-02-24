@@ -7,11 +7,9 @@ AllValidators:
   - "--private"
   - "--protected"
   Exclude:
-  - "\\.git"
   - vendor/**/*
   - node_modules/**/*
   - spec/**/*
-  - test/**/*
   FailOnSeverity: convention
   MinCoverage: 100
   DiffMode:
