@@ -18,7 +18,7 @@ services:
       start_period: 90s
 
   kafka-oauth:
-    image: confluentinc/cp-kafka:8.0.0
+    image: confluentinc/cp-kafka:8.1.1
     container_name: kafka-oauth
     depends_on:
       keycloak:
