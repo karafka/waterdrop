@@ -9,7 +9,8 @@
     "Gemfile.lint",
     "waterdrop.gemspec",
     "spec/integrations/**/Gemfile",
-    ".github/workflows/**"
+    ".github/workflows/**",
+    "package.json"
   ],
   "packageRules": [
     {
