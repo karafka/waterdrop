@@ -1,17 +1,14 @@
 # frozen_string_literal: true
 
 plugins:
-  - rubocop-capybara
-  - rubocop-factory_bot
+  - rubocop-minitest
   - rubocop-performance
-  - rubocop-rspec
-  - rubocop-rspec_rails
   - rubocop-thread_safety
 
 inherit_gem:
   standard: config/base.yml
   standard-performance: config/base.yml
-  standard-rspec: config/base.yml
+  standard-minitest: config/base.yml
 
 AllCops:
   NewCops: enable
@@ -22,16 +19,6 @@ AllCops:
     - "**/Gemfile"
     - "**/Rakefile"
     - Gemfile.lint
-
-# Disabled departments - not a Rails project, no Capybara/FactoryBot
-Capybara:
-  Enabled: false
-
-FactoryBot:
-  Enabled: false
-
-RSpecRails:
-  Enabled: false
 
 # Layout
 Layout/LineLength:
@@ -45,30 +32,8 @@ Lint/RescueException:
   Exclude:
     - lib/waterdrop/producer/transactions.rb
 
-# RSpec
-RSpec:
-  Exclude:
-    - spec/integrations/**/*
-
-RSpec/ExampleLength:
-  Enabled: false
-
-RSpec/IndexedLet:
-  Enabled: false
-
-RSpec/MultipleExpectations:
-  Enabled: false
-
-RSpec/MultipleMemoizedHelpers:
-  Max: 20
-
-RSpec/NestedGroups:
-  Max: 4
-
-RSpec/NoExpectationExample:
-  Enabled: false
-
-RSpec/SpecFilePathFormat:
+# Minitest
+Minitest/MultipleAssertions:
   Enabled: false
 
 # Style

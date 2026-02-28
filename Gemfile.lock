@@ -12,8 +12,8 @@ GEM
     byebug (13.0.0)
       reline (>= 0.6.0)
     connection_pool (3.0.2)
-    diff-lcs (1.6.2)
     docile (1.4.1)
+    drb (2.2.3)
     ffi (1.17.3)
     ffi (1.17.3-aarch64-linux-gnu)
     ffi (1.17.3-aarch64-linux-musl)
@@ -62,23 +62,15 @@ GEM
       rake (> 12)
     logger (1.7.0)
     mini_portile2 (2.8.9)
+    minitest (6.0.2)
+      drb (~> 2.0)
+      prism (~> 1.5)
+    minitest-mock (5.27.0)
     ostruct (0.6.3)
+    prism (1.9.0)
     rake (13.3.1)
     reline (0.6.3)
       io-console (~> 0.5)
-    rspec (3.13.2)
-      rspec-core (~> 3.13.0)
-      rspec-expectations (~> 3.13.0)
-      rspec-mocks (~> 3.13.0)
-    rspec-core (3.13.6)
-      rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.5)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-mocks (3.13.6)
-      diff-lcs (>= 1.2.0, < 2.0)
-      rspec-support (~> 3.13.0)
-    rspec-support (3.13.6)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -104,8 +96,9 @@ PLATFORMS
 DEPENDENCIES
   byebug
   connection_pool
+  minitest
+  minitest-mock
   ostruct
-  rspec
   simplecov
   warning
   waterdrop!

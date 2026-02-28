@@ -70,7 +70,7 @@ jobs:
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
           FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
-        run: bundle exec rspec
+        run: bundle exec rake test
 
       - name: Run integration tests
         env:
@@ -294,7 +294,7 @@ jobs:
       - name: Run all tests
         env:
           FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
-        run: bundle exec rspec
+        run: bundle exec rake test
 
       - name: Run integration tests
         env:
