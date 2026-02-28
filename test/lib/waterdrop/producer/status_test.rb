@@ -6,7 +6,7 @@ class ProducerStatusTest < WaterDropTest::Base
   end
 
   def test_default_state_is_initial
-    assert @status.initial?
+    assert_predicate @status, :initial?
   end
 end
 
@@ -17,35 +17,35 @@ class ProducerStatusInitialTest < WaterDropTest::Base
   end
 
   def test_initial
-    assert @status.initial?
+    assert_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_not_active
-    refute @status.active?
+    refute_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -60,35 +60,35 @@ class ProducerStatusConfiguredTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_configured
-    assert @status.configured?
+    assert_predicate @status, :configured?
   end
 
   def test_active
-    assert @status.active?
+    assert_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -103,35 +103,35 @@ class ProducerStatusConnectedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_active
-    assert @status.active?
+    assert_predicate @status, :active?
   end
 
   def test_connected
-    assert @status.connected?
+    assert_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -146,35 +146,35 @@ class ProducerStatusDisconnectingTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_active
-    assert @status.active?
+    assert_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_disconnecting
-    assert @status.disconnecting?
+    assert_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -189,35 +189,35 @@ class ProducerStatusDisconnectedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_active
-    assert @status.active?
+    assert_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_disconnected
-    assert @status.disconnected?
+    assert_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -232,35 +232,35 @@ class ProducerStatusClosingTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_not_active
-    refute @status.active?
+    refute_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_closing
-    assert @status.closing?
+    assert_predicate @status, :closing?
   end
 
   def test_not_closed
-    refute @status.closed?
+    refute_predicate @status, :closed?
   end
 
   def test_to_s
@@ -275,35 +275,35 @@ class ProducerStatusClosedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    refute @status.initial?
+    refute_predicate @status, :initial?
   end
 
   def test_not_configured
-    refute @status.configured?
+    refute_predicate @status, :configured?
   end
 
   def test_not_active
-    refute @status.active?
+    refute_predicate @status, :active?
   end
 
   def test_not_connected
-    refute @status.connected?
+    refute_predicate @status, :connected?
   end
 
   def test_not_disconnecting
-    refute @status.disconnecting?
+    refute_predicate @status, :disconnecting?
   end
 
   def test_not_disconnected
-    refute @status.disconnected?
+    refute_predicate @status, :disconnected?
   end
 
   def test_not_closing
-    refute @status.closing?
+    refute_predicate @status, :closing?
   end
 
   def test_closed
-    assert @status.closed?
+    assert_predicate @status, :closed?
   end
 
   def test_to_s
