@@ -6,7 +6,7 @@ class ProducerStatusTest < WaterDropTest::Base
   end
 
   def test_default_state_is_initial
-    assert_same true, @status.initial?
+    assert @status.initial?
   end
 end
 
@@ -17,35 +17,35 @@ class ProducerStatusInitialTest < WaterDropTest::Base
   end
 
   def test_initial
-    assert_same true, @status.initial?
+    assert @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_not_active
-    assert_same false, @status.active?
+    refute @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -60,35 +60,35 @@ class ProducerStatusConfiguredTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_configured
-    assert_same true, @status.configured?
+    assert @status.configured?
   end
 
   def test_active
-    assert_same true, @status.active?
+    assert @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -103,35 +103,35 @@ class ProducerStatusConnectedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_active
-    assert_same true, @status.active?
+    assert @status.active?
   end
 
   def test_connected
-    assert_same true, @status.connected?
+    assert @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -146,35 +146,35 @@ class ProducerStatusDisconnectingTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_active
-    assert_same true, @status.active?
+    assert @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_disconnecting
-    assert_same true, @status.disconnecting?
+    assert @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -189,35 +189,35 @@ class ProducerStatusDisconnectedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_active
-    assert_same true, @status.active?
+    assert @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_disconnected
-    assert_same true, @status.disconnected?
+    assert @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -232,35 +232,35 @@ class ProducerStatusClosingTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_not_active
-    assert_same false, @status.active?
+    refute @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_closing
-    assert_same true, @status.closing?
+    assert @status.closing?
   end
 
   def test_not_closed
-    assert_same false, @status.closed?
+    refute @status.closed?
   end
 
   def test_to_s
@@ -275,35 +275,35 @@ class ProducerStatusClosedTest < WaterDropTest::Base
   end
 
   def test_not_initial
-    assert_same false, @status.initial?
+    refute @status.initial?
   end
 
   def test_not_configured
-    assert_same false, @status.configured?
+    refute @status.configured?
   end
 
   def test_not_active
-    assert_same false, @status.active?
+    refute @status.active?
   end
 
   def test_not_connected
-    assert_same false, @status.connected?
+    refute @status.connected?
   end
 
   def test_not_disconnecting
-    assert_same false, @status.disconnecting?
+    refute @status.disconnecting?
   end
 
   def test_not_disconnected
-    assert_same false, @status.disconnected?
+    refute @status.disconnected?
   end
 
   def test_not_closing
-    assert_same false, @status.closing?
+    refute @status.closing?
   end
 
   def test_closed
-    assert_same true, @status.closed?
+    assert @status.closed?
   end
 
   def test_to_s

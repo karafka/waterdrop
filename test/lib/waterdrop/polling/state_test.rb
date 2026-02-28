@@ -145,14 +145,11 @@ end
 
 class WaterDropPollingStateEnableQueueEventsErrorTest < WaterDropTest::Base
   def test_raises_error_when_enable_queue_io_events_fails
-    client = Minitest::Mock.new
-    client.expect(:enable_queue_io_events, nil) { raise StandardError, "test error" }
-    client.expect(:queue_size, 0)
-
-    monitor = Minitest::Mock.new
+    client = Object.new
+    client.define_singleton_method(:enable_queue_io_events) { |_fd| raise StandardError, "test error" }
 
     assert_raises(StandardError) do
-      WaterDrop::Polling::State.new("producer-id", client, monitor, 100, 1000)
+      WaterDrop::Polling::State.new("producer-id", client, OpenStruct.new, 100, 1000)
     end
   end
 end

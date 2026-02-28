@@ -47,5 +47,7 @@ class ProducerClassMonitorTest < WaterDropTest::Base
     producer = WaterDrop::Producer.new
 
     assert_kind_of WaterDrop::Instrumentation::ClassMonitor, producer.send(:class_monitor)
+  ensure
+    producer.close
   end
 end

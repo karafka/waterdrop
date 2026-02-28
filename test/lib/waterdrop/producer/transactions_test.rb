@@ -22,15 +22,23 @@ class ProducerTransactionsTest < WaterDropTest::Base
   end
 
   def test_invalid_transactional_settings_raises
+    producer = build(:transactional_producer, transaction_timeout_ms: 100)
+
     assert_raises(Rdkafka::Config::ConfigError) do
-      build(:transactional_producer, transaction_timeout_ms: 100).client
+      producer.client
     end
+  ensure
+    producer.close
   end
 
   def test_invalid_acks_raises
+    producer = build(:transactional_producer, request_required_acks: 1)
+
     assert_raises(Rdkafka::Config::ClientCreationError) do
-      build(:transactional_producer, request_required_acks: 1).client
+      producer.client
     end
+  ensure
+    producer.close
   end
 
   def test_transaction_without_transactional_id

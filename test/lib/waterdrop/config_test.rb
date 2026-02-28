@@ -26,6 +26,8 @@ class WaterDropConfigSetupTransactionalWithoutIdempotenceTest < WaterDropTest::B
     assert_raises(Rdkafka::Config::ClientCreationError) do
       producer.produce_sync(topic: topic_name, payload: "test")
     end
+  ensure
+    producer.close
   end
 end
 

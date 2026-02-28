@@ -163,6 +163,7 @@ class WaterDropInstrumentationClassMonitorIntegrationWithoutConfigTest < WaterDr
   end
 
   def teardown
+    @producer.close
     WaterDrop.instance_variable_set(:@instrumentation, nil)
     super
   end
@@ -205,6 +206,7 @@ class WaterDropInstrumentationClassMonitorIntegrationWithConfigTest < WaterDropT
   end
 
   def teardown
+    @producer.close
     WaterDrop.instance_variable_set(:@instrumentation, nil)
     super
   end
@@ -249,6 +251,8 @@ class WaterDropInstrumentationClassMonitorIntegrationMultipleProducersTest < Wat
   end
 
   def teardown
+    @producer1.close
+    @producer2.close
     WaterDrop.instance_variable_set(:@instrumentation, nil)
     super
   end
@@ -316,5 +320,7 @@ class WaterDropInstrumentationClassMonitorIntegrationExternalLibrariesTest < Wat
     processed_message = producer.middleware.run(test_message)
 
     assert_equal "test-trace-id", processed_message[:headers]["x-trace-id"]
+  ensure
+    producer.close
   end
 end
