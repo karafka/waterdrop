@@ -27,13 +27,14 @@ class WaterDropPollingLatchTest < WaterDropTest::Base
   def test_wait_until_release_from_another_thread
     released = false
 
-    Thread.new do
+    thread = Thread.new do
       sleep(0.05)
       @latch.release!
       released = true
     end
 
     @latch.wait
+    thread.join
 
     assert_same true, released
   end
