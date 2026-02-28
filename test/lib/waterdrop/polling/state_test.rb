@@ -204,6 +204,25 @@ class WaterDropPollingStatePollTest < WaterDropTest::Base
       assert_same true, @state.poll
     end
   end
+
+  def test_poll_returns_false_when_timeout_reached
+    long_poll = lambda { |&block|
+      loop do
+        result = block.call(1)
+        break if result == :stop
+      end
+    }
+
+    short_state = WaterDrop::Polling::State.new(
+      @producer_id, @client, @monitor, 0, @periodic_poll_interval
+    )
+
+    @client.stub(:events_poll_nb_each, long_poll) do
+      assert_same false, short_state.poll
+    end
+
+    short_state.close
+  end
 end
 
 class WaterDropPollingStateQueueEmptyTest < WaterDropTest::Base

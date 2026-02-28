@@ -379,6 +379,20 @@ class WaterDropConnectionPoolClassSetupTest < WaterDropTest::Base
     WaterDrop::ConnectionPool.setup { |config| config.deliver = false }
   end
 
+  def test_raises_load_error_when_connection_pool_gem_not_available
+    original_const = Object.send(:remove_const, :ConnectionPool)
+
+    WaterDrop::ConnectionPool.stub(:require, ->(_name) { raise LoadError }) do
+      error = assert_raises(LoadError) do
+        WaterDrop::ConnectionPool.setup { |config| config.deliver = false }
+      end
+
+      assert_match(/connection_pool/, error.message)
+    end
+  ensure
+    Object.const_set(:ConnectionPool, original_const) if original_const
+  end
+
   def test_supports_per_producer_configuration_with_index_in_global_setup
     WaterDrop::ConnectionPool.setup(size: 2) do |config, index|
       config.deliver = false
