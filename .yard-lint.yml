@@ -9,7 +9,6 @@ AllValidators:
   Exclude:
   - vendor/**/*
   - node_modules/**/*
-  - spec/**/*
   - test/**/*
   FailOnSeverity: convention
   MinCoverage: 100
