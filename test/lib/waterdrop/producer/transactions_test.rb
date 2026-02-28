@@ -27,8 +27,6 @@ class ProducerTransactionsTest < WaterDropTest::Base
     assert_raises(Rdkafka::Config::ConfigError) do
       producer.client
     end
-  ensure
-    producer.close
   end
 
   def test_invalid_acks_raises
@@ -37,8 +35,6 @@ class ProducerTransactionsTest < WaterDropTest::Base
     assert_raises(Rdkafka::Config::ClientCreationError) do
       producer.client
     end
-  ensure
-    producer.close
   end
 
   def test_transaction_without_transactional_id
