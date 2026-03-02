@@ -321,6 +321,7 @@ describe_current do
       it "detects fatal error state and recovers via reload on subsequent produce_sync" do
         # First verify producer works
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
         assert_nil(report.error)
 
@@ -329,11 +330,13 @@ describe_current do
 
         # Verify fatal error is present
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
 
         # Now try to produce after fatal error - should succeed after reload
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
         assert_nil(report.error)
       end
@@ -342,6 +345,7 @@ describe_current do
         # Produce multiple messages successfully
         5.times do
           report = @producer.produce_sync(@message)
+
           assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
           assert_nil(report.error)
         end
@@ -357,6 +361,7 @@ describe_current do
         # Multiple attempts should all succeed after reload
         3.times do
           report = @producer.produce_sync(@message)
+
           assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
           assert_nil(report.error)
         end
@@ -381,6 +386,7 @@ describe_current do
         # First verify producer works with batches
         # produce_many_sync returns DeliveryHandles (already waited)
         handles = @producer.produce_many_sync(@messages)
+
         assert_kind_of(Array, handles)
         assert_equal(3, handles.size)
         handles.each { |h| assert_kind_of(Rdkafka::Producer::DeliveryHandle, h) }
@@ -390,11 +396,13 @@ describe_current do
 
         # Verify fatal error is present
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
 
         # Now try to produce batch after fatal error - should succeed after reload
         handles = @producer.produce_many_sync(@messages)
+
         assert_kind_of(Array, handles)
         assert_equal(3, handles.size)
         handles.each { |h| assert_kind_of(Rdkafka::Producer::DeliveryHandle, h) }
@@ -404,6 +412,7 @@ describe_current do
         # Produce multiple batches successfully
         3.times do
           handles = @producer.produce_many_sync(@messages)
+
           assert_equal(3, handles.size)
           handles.each { |h| assert_kind_of(Rdkafka::Producer::DeliveryHandle, h) }
         end
@@ -418,16 +427,19 @@ describe_current do
         # Small batch
         small_batch = [build(:valid_message, topic: @topic_name)]
         reports = @producer.produce_many_sync(small_batch)
+
         assert_equal(1, reports.size)
 
         # Medium batch
         medium_batch = Array.new(5) { build(:valid_message, topic: @topic_name) }
         reports = @producer.produce_many_sync(medium_batch)
+
         assert_equal(5, reports.size)
 
         # Large batch
         large_batch = Array.new(10) { build(:valid_message, topic: @topic_name) }
         reports = @producer.produce_many_sync(large_batch)
+
         assert_equal(10, reports.size)
 
         # No fatal error yet
@@ -461,7 +473,7 @@ describe_current do
         3.times do
           error = assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           # Fatal error should persist after each attempt
           refute_nil(@producer.fatal_error)
@@ -483,7 +495,7 @@ describe_current do
         3.times do
           error = assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.produce_many_sync(@messages) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           # Fatal error should persist after each attempt
           refute_nil(@producer.fatal_error)

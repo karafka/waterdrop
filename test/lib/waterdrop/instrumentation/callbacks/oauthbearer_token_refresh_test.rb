@@ -64,6 +64,7 @@ describe_current do
 
       it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
         @callback.call(@rd_config, @bearer_name)
+
         assert_equal(1, @tracked_errors.size)
         assert_equal("callbacks.oauthbearer_token_refresh.error", @tracked_errors.first[:type])
       end

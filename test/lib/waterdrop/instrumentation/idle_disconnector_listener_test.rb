@@ -29,6 +29,7 @@ describe_current do
     describe "when messages are being transmitted" do
       it "expect not to disconnect producer" do
         @listener.on_statistics_emitted(@event)
+
         assert_empty(@disconnected_events)
       end
 
@@ -55,12 +56,14 @@ describe_current do
         it "expect to disconnect the producer" do
           @listener.on_statistics_emitted(@event)
           sleep(0.2) # a bit of time because disconnect happens async
+
           assert_equal(1, @disconnected_events.size)
         end
 
         it "expect to emit disconnect event with producer id" do
           @listener.on_statistics_emitted(@event)
           sleep(0.2) # a bit of time because disconnect happens async
+
           assert_equal(@producer.id, @disconnected_events.first[:producer_id])
         end
 
@@ -87,8 +90,9 @@ describe_current do
               @listener.on_statistics_emitted(@event)
             end
           end
+
           assert_empty(@disconnected_events)
-          assert_equal(false, disconnect_called)
+          refute(disconnect_called)
         end
 
         it "expect to still reset activity time" do
@@ -153,6 +157,7 @@ describe_current do
 
       it "expect not to disconnect producer" do
         @listener.on_statistics_emitted(@event)
+
         assert_empty(@disconnected_events)
       end
     end
@@ -170,6 +175,7 @@ describe_current do
       it "expect to treat as 0 messages" do
         # Should detect activity change from -1 to 0
         @listener.on_statistics_emitted(@event)
+
         assert_empty(@disconnected_events)
       end
     end
@@ -185,6 +191,7 @@ describe_current do
       @listener.stub(:call, ->(stats) { @call_args << stats }) do
         @listener.on_statistics_emitted(@event)
       end
+
       assert_equal([{ "txmsgs" => 150 }], @call_args)
     end
   end

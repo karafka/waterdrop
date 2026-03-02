@@ -20,7 +20,7 @@ describe_current do
   end
 
   describe "when all inputs are valid" do
-    it { assert @contract_result.success? }
+    it { assert_predicate @contract_result, :success? }
   end
 
   describe "when consumer is invalid" do
@@ -29,7 +29,7 @@ describe_current do
       @contract_result = described_class.new.call(@input)
     end
 
-    it { refute @contract_result.success? }
+    it { refute_predicate @contract_result, :success? }
   end
 
   describe "when message is invalid" do
@@ -39,7 +39,7 @@ describe_current do
         @contract_result = described_class.new.call(@input)
       end
 
-      it { refute @contract_result.success? }
+      it { refute_predicate @contract_result, :success? }
     end
   end
 
@@ -50,7 +50,7 @@ describe_current do
         @contract_result = described_class.new.call(@input)
       end
 
-      it { refute @contract_result.success? }
+      it { refute_predicate @contract_result, :success? }
     end
   end
 end

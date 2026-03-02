@@ -44,8 +44,8 @@ describe_current do
 
         pool.with do |producer|
           assert_kind_of(WaterDrop::Producer, producer)
-          assert_equal(true, producer.status.configured?)
-          assert_equal(false, producer.config.deliver)
+          assert_predicate(producer.status, :configured?)
+          refute(producer.config.deliver)
         end
       end
 
@@ -112,8 +112,8 @@ describe_current do
 
         pool.with do |producer|
           assert_kind_of(WaterDrop::Producer, producer)
-          assert_equal(true, producer.status.configured?)
-          assert_equal(false, producer.config.deliver)
+          assert_predicate(producer.status, :configured?)
+          refute(producer.config.deliver)
         end
       end
     end
@@ -131,12 +131,13 @@ describe_current do
     it "yields a configured producer" do
       @pool.with do |producer|
         assert_kind_of(WaterDrop::Producer, producer)
-        assert_equal(true, producer.status.configured?)
+        assert_predicate(producer.status, :configured?)
       end
     end
 
     it "returns the result of the block" do
       result = @pool.with { |producer| "producer-#{producer.id}" }
+
       assert_match(/producer-waterdrop-\w{12}/, result)
     end
 
@@ -170,6 +171,7 @@ describe_current do
 
     it "returns pool statistics" do
       stats = @pool.stats
+
       assert_kind_of(Hash, stats)
       assert_equal(3, stats[:size])
       assert_equal(3, stats[:available])
@@ -178,6 +180,7 @@ describe_current do
     it "reflects pool usage" do
       @pool.with do |_producer|
         stats = @pool.stats
+
         assert_equal(3, stats[:size])
         assert_equal(2, stats[:available])
       end
@@ -345,12 +348,13 @@ describe_current do
         it "yields a producer from the global pool" do
           described_class.with do |producer|
             assert_kind_of(WaterDrop::Producer, producer)
-            assert_equal(true, producer.status.configured?)
+            assert_predicate(producer.status, :configured?)
           end
         end
 
         it "returns the result of the block" do
           result = described_class.with { |producer| "global-#{producer.id}" }
+
           assert_match(/global-waterdrop-\w{12}/, result)
         end
       end
@@ -378,6 +382,7 @@ describe_current do
 
         it "returns global pool statistics" do
           stats = described_class.stats
+
           assert_kind_of(Hash, stats)
           assert_equal(7, stats[:size])
           assert_equal(7, stats[:available])
@@ -386,6 +391,7 @@ describe_current do
         it "reflects global pool usage" do
           described_class.with do |_producer|
             stats = described_class.stats
+
             assert_equal(7, stats[:size])
             assert_equal(6, stats[:available])
           end
@@ -423,6 +429,7 @@ describe_current do
 
         it "shuts down the global pool" do
           described_class.shutdown
+
           assert_nil(described_class.default_pool)
         end
 
@@ -450,6 +457,7 @@ describe_current do
 
         it "is an alias for shutdown and closes the global pool" do
           described_class.close
+
           assert_nil(described_class.default_pool)
         end
 
@@ -502,7 +510,7 @@ describe_current do
     describe ".active?" do
       context "when global pool is not configured" do
         it "returns false" do
-          assert_equal(false, described_class.active?)
+          refute_predicate(described_class, :active?)
         end
       end
 
@@ -517,7 +525,7 @@ describe_current do
         after { described_class.shutdown }
 
         it "returns true" do
-          assert_equal(true, described_class.active?)
+          assert_predicate(described_class, :active?)
         end
       end
 
@@ -530,7 +538,7 @@ describe_current do
         end
 
         it "returns false" do
-          assert_equal(false, described_class.active?)
+          refute_predicate(described_class, :active?)
         end
       end
     end
@@ -576,12 +584,13 @@ describe_current do
         it "delegates to ConnectionPool.with" do
           WaterDrop.with do |producer|
             assert_kind_of(WaterDrop::Producer, producer)
-            assert_equal(true, producer.status.configured?)
+            assert_predicate(producer.status, :configured?)
           end
         end
 
         it "returns the result of the block" do
           result = WaterDrop.with { |producer| "module-#{producer.id}" }
+
           assert_match(/module-waterdrop-\w{12}/, result)
         end
       end
@@ -880,12 +889,14 @@ describe_current do
 
       it "maintains global pool stats consistency with fiber operations" do
         initial_stats = described_class.stats
+
         assert_equal(2, initial_stats[:size])
         assert_equal(2, initial_stats[:available])
 
         fiber = Fiber.new do
           WaterDrop.with do |producer|
             stats = described_class.stats
+
             assert_equal(2, stats[:size])
             assert_equal(1, stats[:available])
 
@@ -893,6 +904,7 @@ describe_current do
 
             # Stats should still show one connection in use
             stats = described_class.stats
+
             assert_equal(2, stats[:size])
             assert_equal(1, stats[:available])
           end
@@ -903,6 +915,7 @@ describe_current do
 
         # After fiber completes, pool should be fully available
         final_stats = described_class.stats
+
         assert_equal(2, final_stats[:size])
         assert_equal(2, final_stats[:available])
       end
@@ -1148,10 +1161,12 @@ describe_current do
 
         # Reload event
         reload_index = event_ids.index("connection_pool.reloaded")
+
         assert_operator(reload_index, :>, 0)
 
         # Shutdown event comes last
         shutdown_index = event_ids.index("connection_pool.shutdown")
+
         assert_equal(event_ids.size - 1, shutdown_index)
       end
     end

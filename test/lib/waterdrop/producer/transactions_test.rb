@@ -17,7 +17,8 @@ describe_current do
   it do
     # First run will check if cached
     @producer.transactional?
-    assert_equal(true, @producer.transactional?)
+
+    assert_predicate(@producer, :transactional?)
   end
 
   context "when we try to create producer with invalid transactional settings" do
@@ -47,8 +48,8 @@ describe_current do
       assert_raises(WaterDrop::Errors::ProducerNotTransactionalError) { @producer.transaction { nil } }
     end
 
-    it { assert_equal(false, @producer.transactional?) }
-    it { assert_equal(false, @producer.transaction?) }
+    it { refute_predicate(@producer, :transactional?) }
+    it { refute_predicate(@producer, :transaction?) }
   end
 
   context "when we make a transaction without sending any messages" do
@@ -82,7 +83,7 @@ describe_current do
 
     it "expect not to allow to disconnect producer during transaction" do
       @producer.transaction do
-        assert_equal(false, @producer.disconnect)
+        refute(@producer.disconnect)
       end
     end
 
@@ -91,7 +92,7 @@ describe_current do
         @producer.produce_async(topic: @topic_name, payload: "2")
       end
 
-      assert_equal(true, @producer.disconnect)
+      assert(@producer.disconnect)
     end
   end
 
@@ -485,6 +486,7 @@ describe_current do
 
     it "expect to deliver message correctly" do
       result = @producer.produce_sync(topic: @topic_name, payload: rand.to_s)
+
       assert_equal(@topic_name, result.topic_name)
       assert_nil(result.error)
     end
@@ -492,6 +494,7 @@ describe_current do
     it "expect to use the async dispatch though with transaction wrapper" do
       handler = @producer.produce_async(topic: @topic_name, payload: rand.to_s)
       result = handler.wait
+
       assert_equal(@topic_name, result.topic_name)
       assert_nil(result.error)
     end
@@ -507,6 +510,7 @@ describe_current do
 
       it "expect to wrap it with a single transaction" do
         @producer.produce_many_sync(@messages)
+
         assert_equal(1, @counts.size)
       end
 
@@ -548,6 +552,7 @@ describe_current do
 
       it "expect to wrap it with a single transaction" do
         @producer.produce_many_async(@messages)
+
         assert_equal(1, @counts.size)
       end
     end
@@ -632,7 +637,7 @@ describe_current do
       end
 
       it "expect to delegate to client send_offsets_to_transaction with correct timeout" do
-        @producer.client.stub(:send_offsets_to_transaction, ->(*_) { nil }) do
+        @producer.client.stub(:send_offsets_to_transaction, ->(*_) {}) do
           @producer.transaction do
             assert_raises(WaterDrop::Errors::TransactionalOffsetInvalidError) do
               @producer.transaction_mark_as_consumed(@consumer, @message)
@@ -689,13 +694,13 @@ describe_current do
   end
 
   context "when we are not inside a running transaction" do
-    it { assert_equal(false, @producer.transaction?) }
+    it { refute_predicate(@producer, :transaction?) }
   end
 
   context "when we are inside a transaction" do
     it "expect to be recognize it and be true" do
       @producer.transaction do
-        assert_equal(true, @producer.transaction?)
+        assert_predicate(@producer, :transaction?)
       end
     end
   end
@@ -767,7 +772,7 @@ describe_current do
         errored = true
       end
 
-      assert_equal(true, errored)
+      assert(errored)
 
       @producer.produce_async(topic: @topic_name, payload: "1")
     end
@@ -781,7 +786,7 @@ describe_current do
         errored = true
       end
 
-      assert_equal(true, errored)
+      assert(errored)
 
       @producer.produce_sync(topic: @topic_name, payload: "1")
     end
@@ -853,7 +858,7 @@ describe_current do
       end
 
       it "expect reload_on_transaction_fatal_error to be enabled by default" do
-        assert_equal(true, @producer.config.reload_on_transaction_fatal_error)
+        assert(@producer.config.reload_on_transaction_fatal_error)
       end
 
       it "expect to have correct default backoff and max attempts config" do
@@ -863,7 +868,7 @@ describe_current do
 
       it "expect transactional_retryable? to check retry limit correctly" do
         # Initially should be retryable
-        assert_equal(true, @producer.transactional_retryable?)
+        assert_predicate(@producer, :transactional_retryable?)
 
         # Configure producer with low limit and test edge
         limited_producer = build(
@@ -872,7 +877,7 @@ describe_current do
           max_attempts_on_transaction_fatal_error: 2
         )
 
-        assert_equal(true, limited_producer.transactional_retryable?)
+        assert_predicate(limited_producer, :transactional_retryable?)
 
         limited_producer.close
       end

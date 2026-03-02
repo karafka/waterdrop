@@ -83,6 +83,7 @@ describe_current do
 
     it "expect to contain in, notify and continue as we do not want to crash rdkafka" do
       @callback.call(@client_name, @error)
+
       assert_equal(1, @tracked_errors.size)
       assert_equal("callbacks.error.error", @tracked_errors.first[:type])
     end

@@ -100,7 +100,7 @@ describe_current do
       it { assert_equal("connected", @status.to_s) }
       it { assert_equal(1, @events.size) }
       it { assert_equal("producer.connected", @events.last.id) }
-      it { assert_equal(true, @events.last.payload.key?(:producer_id)) }
+      it { assert(@events.last.payload.key?(:producer_id)) }
     end
 
     describe "when producer is closed" do
@@ -120,12 +120,12 @@ describe_current do
       it { assert_equal("closed", @status.to_s) }
       it { assert_equal(3, @events.size) }
       it { assert_equal("producer.connected", @events.first.id) }
-      it { assert_equal(true, @events.first.payload.key?(:producer_id)) }
+      it { assert(@events.first.payload.key?(:producer_id)) }
       it { assert_equal("producer.closing", @events[1].id) }
-      it { assert_equal(true, @events[1].payload.key?(:producer_id)) }
+      it { assert(@events[1].payload.key?(:producer_id)) }
       it { assert_equal("producer.closed", @events.last.id) }
-      it { assert_equal(true, @events.last.payload.key?(:producer_id)) }
-      it { assert_equal(true, @events.last.payload.key?(:time)) }
+      it { assert(@events.last.payload.key?(:producer_id)) }
+      it { assert(@events.last.payload.key?(:time)) }
     end
   end
 end

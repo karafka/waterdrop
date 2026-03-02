@@ -24,7 +24,7 @@ describe_current do
     end
 
     it "is a private method" do
-      assert_equal(true, @producer_class.private_method_defined?(:class_monitor))
+      assert(@producer_class.private_method_defined?(:class_monitor))
     end
 
     it "allows instrumentation through the returned monitor" do

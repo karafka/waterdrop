@@ -292,14 +292,15 @@ describe_current do
       end
 
       it "expect not to allow for disconnect" do
-        assert_equal(false, @producer.disconnect)
+        refute(@producer.disconnect)
       end
 
       it "expect to allow disconnect after they are dispatched" do
         message = build(:valid_message, label: "test")
         dispatched = Array.new(1_000) { @producer.produce_async(message) }
         dispatched.each(&:wait)
-        assert_equal(true, @producer.disconnect)
+
+        assert(@producer.disconnect)
       end
     end
   end
@@ -321,8 +322,10 @@ describe_current do
       it "detects fatal error state and recovers via reload on subsequent produce_async" do
         # First verify producer works
         handle = @producer.produce_async(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryHandle, handle)
         report = handle.wait
+
         assert_nil(report.error)
 
         # Trigger a fatal error
@@ -330,13 +333,16 @@ describe_current do
 
         # Verify fatal error is present
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
 
         # Now try to produce after fatal error - should succeed after reload
         handle = @producer.produce_async(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryHandle, handle)
         report = handle.wait
+
         assert_nil(report.error)
       end
 
@@ -346,6 +352,7 @@ describe_current do
         # Produce multiple messages asynchronously
         5.times do
           handle = @producer.produce_async(@message)
+
           assert_kind_of(Rdkafka::Producer::DeliveryHandle, handle)
           handles << handle
         end
@@ -353,6 +360,7 @@ describe_current do
         # Wait for all deliveries
         handles.each do |handle|
           report = handle.wait
+
           assert_nil(report.error)
         end
 
@@ -395,11 +403,13 @@ describe_current do
       it "detects fatal error state and recovers via reload on subsequent produce_many_async" do
         # First verify producer works with async batches
         handles = @producer.produce_many_async(@messages)
+
         assert_kind_of(Array, handles)
         assert_equal(3, handles.size)
 
         # Wait for all deliveries
         reports = handles.map(&:wait)
+
         reports.each do |report|
           assert_nil(report.error)
         end
@@ -409,16 +419,19 @@ describe_current do
 
         # Verify fatal error is present
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
 
         # Now try to produce batch after fatal error - should succeed after reload
         handles = @producer.produce_many_async(@messages)
+
         assert_kind_of(Array, handles)
         assert_equal(3, handles.size)
 
         # All deliveries should succeed
         reports = handles.map(&:wait)
+
         reports.each do |report|
           assert_nil(report.error)
         end
@@ -430,6 +443,7 @@ describe_current do
         # Produce multiple batches asynchronously
         3.times do
           handles = @producer.produce_many_async(@messages)
+
           assert_equal(3, handles.size)
           all_handles.concat(handles)
         end
@@ -437,6 +451,7 @@ describe_current do
         # Wait for all deliveries
         all_handles.each do |handle|
           report = handle.wait
+
           assert_nil(report.error)
         end
 
@@ -450,12 +465,14 @@ describe_current do
         # Small async batch
         small_batch = [build(:valid_message, topic: @topic_name)]
         handles = @producer.produce_many_async(small_batch)
+
         assert_equal(1, handles.size)
         handles.each { |h| assert_nil(h.wait.error) }
 
         # Medium async batch
         medium_batch = Array.new(5) { build(:valid_message, topic: @topic_name) }
         handles = @producer.produce_many_async(medium_batch)
+
         assert_equal(5, handles.size)
         handles.each { |h| assert_nil(h.wait.error) }
 
@@ -491,7 +508,7 @@ describe_current do
         3.times do
           error = assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_async(@message) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           # Fatal error should persist after each attempt
           refute_nil(@producer.fatal_error)
@@ -513,7 +530,7 @@ describe_current do
         3.times do
           error = assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_many_async(@messages) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           # Fatal error should persist after each attempt
           refute_nil(@producer.fatal_error)

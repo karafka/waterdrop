@@ -20,7 +20,8 @@ describe_current do
   describe "#initialize" do
     context "when we initialize without a setup" do
       it { @producer }
-      it { assert_equal(false, @producer.status.active?) }
+
+      it { refute_predicate(@producer.status, :active?) }
     end
 
     context "when initializing with setup" do
@@ -32,8 +33,9 @@ describe_current do
       end
 
       it { @producer }
-      it { assert_equal(true, @producer.status.configured?) }
-      it { assert_equal(true, @producer.status.active?) }
+
+      it { assert_predicate(@producer.status, :configured?) }
+      it { assert_predicate(@producer.status, :active?) }
     end
 
     context "when initializing with oauth listener" do
@@ -50,12 +52,13 @@ describe_current do
       end
 
       it { @producer }
-      it { assert_equal(true, @producer.status.configured?) }
-      it { assert_equal(true, @producer.status.active?) }
+
+      it { assert_predicate(@producer.status, :configured?) }
+      it { assert_predicate(@producer.status, :active?) }
     end
 
     it "expect not to allow to disconnect" do
-      assert_equal(false, @producer.disconnect)
+      refute(@producer.disconnect)
     end
   end
 
@@ -95,7 +98,7 @@ describe_current do
     end
 
     it "expect not to allow to disconnect" do
-      assert_equal(false, @producer.disconnect)
+      refute(@producer.disconnect)
     end
   end
 
@@ -244,6 +247,7 @@ describe_current do
         end
 
         results = threads.map(&:value)
+
         results.each { |e| assert_kind_of(Integer, e) }
         results.each { |r| assert_operator(r, :>=, 0) }
       end
@@ -256,7 +260,7 @@ describe_current do
         @producer = build(:transactional_producer)
       end
 
-      it { assert_equal(true, @producer.idempotent?) }
+      it { assert_predicate(@producer, :idempotent?) }
     end
 
     context "when it is a regular producer" do
@@ -264,7 +268,7 @@ describe_current do
         @producer = build(:producer)
       end
 
-      it { assert_equal(false, @producer.idempotent?) }
+      it { refute_predicate(@producer, :idempotent?) }
     end
 
     context "when it is an idempotent producer" do
@@ -272,7 +276,7 @@ describe_current do
         @producer = build(:idempotent_producer)
       end
 
-      it { assert_equal(true, @producer.idempotent?) }
+      it { assert_predicate(@producer, :idempotent?) }
     end
 
     context "when setting explicit enable.idempotence to false" do
@@ -282,7 +286,7 @@ describe_current do
         end
       end
 
-      it { assert_equal(false, @producer.idempotent?) }
+      it { refute_predicate(@producer, :idempotent?) }
     end
   end
 
@@ -294,7 +298,8 @@ describe_current do
       end
 
       it { @producer.close }
-      it { assert_equal(true, @producer.tap(&:close).status.closed?) }
+
+      it { assert_predicate(@producer.tap(&:close).status, :closed?) }
     end
 
     context "when producer was not yet closed" do
@@ -303,7 +308,8 @@ describe_current do
       end
 
       it { @producer.close }
-      it { assert_equal(true, @producer.tap(&:close).status.closed?) }
+
+      it { assert_predicate(@producer.tap(&:close).status, :closed?) }
     end
 
     context "when there were messages in the buffer" do
@@ -316,16 +322,21 @@ describe_current do
       it do
         assert_equal(1, @producer.messages.size)
         @producer.close
+
         assert_equal(0, @producer.messages.size)
       end
 
       it "expect to close client since was open" do
         closed = false
         original_close = @client.method(:close)
-        @client.stub(:close, -> { closed = true; original_close.call }) do
+        @client.stub(:close, -> {
+          closed = true
+          original_close.call
+        }) do
           @producer.close
         end
-        assert_equal(true, closed)
+
+        assert(closed)
       end
     end
 
@@ -334,9 +345,10 @@ describe_current do
         @producer = build(:producer)
       end
 
-      it { assert_equal(true, @producer.status.configured?) }
+      it { assert_predicate(@producer.status, :configured?) }
       it { @producer.close }
-      it { assert_equal(true, @producer.tap(&:close).status.closed?) }
+
+      it { assert_predicate(@producer.tap(&:close).status, :closed?) }
     end
 
     context "when producer was configured and connected" do
@@ -345,9 +357,10 @@ describe_current do
         @client = @producer.client
       end
 
-      it { assert_equal(true, @producer.status.connected?) }
+      it { assert_predicate(@producer.status, :connected?) }
       it { @producer.close }
-      it { assert_equal(true, @producer.tap(&:close).status.closed?) }
+
+      it { assert_predicate(@producer.tap(&:close).status, :closed?) }
     end
 
     context "when flush timeouts" do
@@ -367,7 +380,7 @@ describe_current do
       before { @producer.close }
 
       it "expect not to allow to disconnect" do
-        assert_equal(false, @producer.disconnect)
+        refute(@producer.disconnect)
       end
     end
   end
@@ -424,6 +437,7 @@ describe_current do
           @producer.purge
 
           handler.wait(raise_response_error: false)
+
           assert_equal(:purge_queue, @detected.first[:error].code)
           assert_equal("test", @detected.first[:label])
         end
@@ -607,7 +621,7 @@ describe_current do
       # Ensure inspect doesn't trigger client creation on a non-configured producer
       @producer.inspect
       # Producer should still be in initial state (no client created)
-      assert_equal(false, @producer.status.connected?)
+      refute_predicate(@producer.status, :connected?)
     end
   end
 
@@ -668,6 +682,7 @@ describe_current do
         sleep(2)
 
         types = events.map(&:last)
+
         assert_includes(types, :before)
         assert_includes(types, :reconnected)
         refute_includes(types, :disconnected)
@@ -805,6 +820,7 @@ describe_current do
           exit!(1)
         end
         Process.wait
+
         assert_equal(0, $CHILD_STATUS.to_i)
       end
     end
@@ -841,17 +857,17 @@ describe_current do
       # Give a bit of time for the instrumentation to kick in
       sleep(1)
 
-      assert_equal(false, @never_used.status.disconnected?)
-      assert_equal(false, @used.status.disconnected?)
-      assert_equal(false, @buffered.status.disconnected?)
-      assert_equal(true, @used_short.status.disconnected?)
+      refute_predicate(@never_used.status, :disconnected?)
+      refute_predicate(@used.status, :disconnected?)
+      refute_predicate(@buffered.status, :disconnected?)
+      assert_predicate(@used_short.status, :disconnected?)
     end
   end
 
   describe "#disconnectable?" do
     context "when producer is not configured" do
       it "expect not to be disconnectable" do
-        assert_equal(false, @producer.disconnectable?)
+        refute_predicate(@producer, :disconnectable?)
       end
     end
 
@@ -864,7 +880,7 @@ describe_current do
       end
 
       it "expect not to be disconnectable" do
-        assert_equal(false, @producer.disconnectable?)
+        refute_predicate(@producer, :disconnectable?)
       end
     end
 
@@ -876,7 +892,7 @@ describe_current do
       end
 
       it "expect to be disconnectable" do
-        assert_equal(true, @producer.disconnectable?)
+        assert_predicate(@producer, :disconnectable?)
       end
 
       context "when producer has buffered messages" do
@@ -885,7 +901,7 @@ describe_current do
         end
 
         it "expect not to be disconnectable" do
-          assert_equal(false, @producer.disconnectable?)
+          refute_predicate(@producer, :disconnectable?)
         end
       end
 
@@ -893,7 +909,7 @@ describe_current do
         before { @producer.close }
 
         it "expect not to be disconnectable" do
-          assert_equal(false, @producer.disconnectable?)
+          refute_predicate(@producer, :disconnectable?)
         end
       end
 
@@ -904,7 +920,7 @@ describe_current do
         end
 
         it "expect not to be disconnectable again" do
-          assert_equal(false, @producer.disconnectable?)
+          refute_predicate(@producer, :disconnectable?)
         end
       end
     end
@@ -916,7 +932,7 @@ describe_current do
 
       it "expect not to be disconnectable during transaction" do
         @producer.transaction do
-          assert_equal(false, @producer.disconnectable?)
+          refute_predicate(@producer, :disconnectable?)
         end
       end
     end

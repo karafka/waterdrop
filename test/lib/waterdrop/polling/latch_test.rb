@@ -9,14 +9,15 @@ describe_current do
 
   describe "#initialize" do
     it "is not released by default" do
-      assert_equal(false, @latch.released?)
+      refute_predicate(@latch, :released?)
     end
   end
 
   describe "#release!" do
     it "marks the latch as released" do
       @latch.release!
-      assert_equal(true, @latch.released?)
+
+      assert_predicate(@latch, :released?)
     end
 
     it "can be called multiple times safely" do
@@ -40,18 +41,20 @@ describe_current do
       end
 
       @latch.wait
-      assert_equal(true, released)
+
+      assert(released)
     end
   end
 
   describe "#released?" do
     it "returns false when not released" do
-      assert_equal(false, @latch.released?)
+      refute_predicate(@latch, :released?)
     end
 
     it "returns true when released" do
       @latch.release!
-      assert_equal(true, @latch.released?)
+
+      assert_predicate(@latch, :released?)
     end
   end
 end

@@ -12,6 +12,7 @@ describe_current do
     it do
       message_before = @message.dup
       @middleware.run(@message)
+
       assert_equal(message_before, @message)
     end
   end
@@ -29,6 +30,7 @@ describe_current do
     it do
       assert_nil(@message[:test])
       @middleware.run(@message)
+
       assert_equal(1, @message[:test])
     end
   end
@@ -52,12 +54,14 @@ describe_current do
     it do
       assert_nil(@message[:test])
       @middleware.run(@message)
+
       assert_equal(1, @message[:test])
     end
 
     it do
       assert_nil(@message[:test2])
       @middleware.run(@message)
+
       assert_equal(2, @message[:test2])
     end
   end
@@ -76,6 +80,7 @@ describe_current do
     it do
       message_before = @message.dup
       @middleware.run(@message)
+
       assert_equal(message_before, @message)
     end
 
@@ -105,6 +110,7 @@ describe_current do
     it do
       message_before = @message.dup
       @middleware.run(@message)
+
       assert_equal(message_before, @message)
     end
 
@@ -125,6 +131,7 @@ describe_current do
     it do
       assert_nil(@message[:test])
       @middleware.run_many([@message])
+
       assert_equal(1, @message[:test])
     end
   end
@@ -148,12 +155,14 @@ describe_current do
     it do
       assert_nil(@message[:test])
       @middleware.run_many([@message])
+
       assert_equal(1, @message[:test])
     end
 
     it do
       assert_nil(@message[:test2])
       @middleware.run_many([@message])
+
       assert_equal(2, @message[:test2])
     end
   end
@@ -172,6 +181,7 @@ describe_current do
     it do
       message_before = @message.dup
       @middleware.run_many([@message])
+
       assert_equal(message_before, @message)
     end
 

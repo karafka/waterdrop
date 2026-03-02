@@ -16,6 +16,7 @@ describe_current do
         changed = []
         @monitor.subscribe("statistics.emitted") { |event| changed << event[:statistics] }
         @callback.call({})
+
         assert_empty(changed)
       end
     end
@@ -28,6 +29,7 @@ describe_current do
         @monitor.subscribe("error.occurred") { |event| tracked_errors << event }
 
         @callback.call({ "name" => @client_name })
+
         assert_equal(1, tracked_errors.size)
         assert_equal("callbacks.statistics.error", tracked_errors.first[:type])
       end
@@ -105,6 +107,7 @@ describe_current do
     describe "when no one is listening initially" do
       it "expect not to emit statistics" do
         @callback.call(@statistics)
+
         assert_empty(@events)
       end
     end
@@ -113,6 +116,7 @@ describe_current do
       it "expect to emit statistics for subsequent calls" do
         # First call with no listeners
         @callback.call(@statistics)
+
         assert_empty(@events)
 
         # Subscribe late
@@ -122,6 +126,7 @@ describe_current do
 
         # Second call should now emit
         @callback.call(@statistics)
+
         refute_empty(@events)
         assert_equal(1, @events.size)
       end

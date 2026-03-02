@@ -172,12 +172,14 @@ describe_current do
         assert_equal(1, created_events.size)
 
         event_data = created_events.first.last
+
         assert_equal(@producer, event_data[:producer])
         assert_nil(event_data[:producer_id]) # Not configured yet
       end
 
       it "does not instrument producer.configured event yet" do
         configured_events = @events_received.select { |event| event.first == :producer_configured }
+
         assert_empty(configured_events)
       end
     end
@@ -201,6 +203,7 @@ describe_current do
 
         # Check producer.configured event data
         config_event_data = configured_events.first.last
+
         assert_equal(@producer, config_event_data[:producer])
         assert_equal(@producer.id, config_event_data[:producer_id])
         assert_equal(@producer.config, config_event_data[:config])

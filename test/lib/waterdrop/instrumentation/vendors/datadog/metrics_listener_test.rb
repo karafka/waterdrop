@@ -58,6 +58,7 @@ describe_current do
 
       it "expect to have proper metrics data in place" do
         published_tags = @dummy_client.buffer[:increment]["waterdrop.produced_sync"][0][0][:tags]
+
         assert_includes(published_tags, "test:me")
       end
     end
@@ -231,7 +232,7 @@ describe_current do
         sleep(0.25)
       end
 
-      assert_equal(true, error_received)
+      assert(error_received)
     end
   end
 

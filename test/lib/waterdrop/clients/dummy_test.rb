@@ -112,7 +112,7 @@ describe_current do
   end
 
   describe "#respond_to?" do
-    it { assert_equal(true, @client.respond_to?(:test)) }
+    it { assert_respond_to(@client, :test) }
   end
 
   describe "#queue_size" do

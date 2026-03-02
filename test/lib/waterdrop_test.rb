@@ -83,7 +83,7 @@ describe_current do
       monitor_instance = @waterdrop.monitor
 
       # Should be the exact same object
-      assert_equal(instrumentation_instance.object_id, monitor_instance.object_id)
+      assert_same(instrumentation_instance, monitor_instance)
     end
   end
 end

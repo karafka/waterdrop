@@ -21,6 +21,7 @@ describe_current do
 
       # Verify that a fatal error is now present
       fatal_error = @producer.fatal_error
+
       refute_nil(fatal_error)
       assert_equal(47, fatal_error[:error_code])
       assert_includes(fatal_error[:error_string], "test_fatal_error")
@@ -31,6 +32,7 @@ describe_current do
       @producer.trigger_test_fatal_error(64, "Test invalid producer ID")
 
       fatal_error = @producer.fatal_error
+
       refute_nil(fatal_error)
       assert_equal(64, fatal_error[:error_code])
     end
@@ -48,10 +50,8 @@ describe_current do
         # Remove Testing module if it was included
         if @producer.client.singleton_class.included_modules.include?(Rdkafka::Testing)
           # We can't easily remove it, so just verify the method works
-          @producer.trigger_test_fatal_error(47, "test")
-        else
-          @producer.trigger_test_fatal_error(47, "test")
         end
+        @producer.trigger_test_fatal_error(47, "test")
       end
     end
   end
@@ -70,6 +70,7 @@ describe_current do
 
       it "returns error details as a hash" do
         error = @producer.fatal_error
+
         assert_kind_of(Hash, error)
         assert(error.key?(:error_code))
         assert(error.key?(:error_string))
@@ -77,11 +78,13 @@ describe_current do
 
       it "returns the correct error code" do
         error = @producer.fatal_error
+
         assert_equal(47, error[:error_code])
       end
 
       it "returns a human-readable error string" do
         error = @producer.fatal_error
+
         assert_kind_of(String, error[:error_string])
         refute_empty(error[:error_string])
       end
@@ -142,9 +145,11 @@ describe_current do
 
     it "can trigger fatal errors on transactional producers" do
       result = @producer.trigger_test_fatal_error(47, "Test transactional error")
+
       assert_equal(0, result)
 
       fatal_error = @producer.fatal_error
+
       refute_nil(fatal_error)
       assert_equal(47, fatal_error[:error_code])
     end
@@ -159,6 +164,7 @@ describe_current do
 
       it "can still trigger and query fatal errors" do
         @producer.trigger_test_fatal_error(47, "Test on non-idempotent")
+
         refute_nil(@producer.fatal_error)
       end
     end
@@ -172,6 +178,7 @@ describe_current do
 
       it "makes testing methods available to all producer instances" do
         new_producer = build(:idempotent_producer)
+
         assert_respond_to(new_producer, :trigger_test_fatal_error)
         assert_respond_to(new_producer, :fatal_error)
         new_producer.close
@@ -188,6 +195,7 @@ describe_current do
       it "works with error code #{code} (#{description})" do
         @producer.trigger_test_fatal_error(code, "Testing #{description}")
         error = @producer.fatal_error
+
         refute_nil(error)
         assert_equal(code, error[:error_code])
       end

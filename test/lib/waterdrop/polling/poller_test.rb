@@ -45,12 +45,14 @@ describe_current do
   describe "#register" do
     it "adds the producer to the registry" do
       @poller.register(@producer, @client)
+
       assert_equal(1, @poller.count)
     end
 
     it "starts the polling thread" do
       @poller.register(@producer, @client)
-      assert_equal(true, @poller.alive?)
+
+      assert_predicate(@poller, :alive?)
     end
 
     it "instruments producer registration" do
@@ -62,6 +64,7 @@ describe_current do
       @poller.register(@producer, @client)
 
       registered_call = instrument_calls.find { |call| call[0].include?("poller.producer_registered") }
+
       refute_nil(registered_call)
       assert_equal(@producer_id, registered_call[1][:producer_id])
     end
@@ -81,6 +84,7 @@ describe_current do
       @poller.unregister(@producer)
 
       unregistered_call = instrument_calls.find { |call| call[0].include?("poller.producer_unregistered") }
+
       refute_nil(unregistered_call)
       assert_equal(@producer_id, unregistered_call[1][:producer_id])
     end
@@ -92,11 +96,11 @@ describe_current do
     end
 
     it "stops the polling thread when last producer unregisters" do
-      assert_equal(true, @poller.alive?)
+      assert_predicate(@poller, :alive?)
 
       @poller.unregister(@producer)
 
-      assert_equal(false, @poller.alive?)
+      refute_predicate(@poller, :alive?)
     end
 
     it "sets thread priority from Config" do
@@ -112,6 +116,7 @@ describe_current do
 
         # Access thread via instance variable (acceptable for testing internals)
         thread = @poller.instance_variable_get(:@thread)
+
         assert_equal(-1, thread.priority)
       ensure
         WaterDrop::Polling::Config.setup do |config|
@@ -124,7 +129,7 @@ describe_current do
   describe "#alive?" do
     describe "when no producers are registered" do
       it "returns false" do
-        assert_equal(false, @poller.alive?)
+        refute_predicate(@poller, :alive?)
       end
     end
 
@@ -132,7 +137,7 @@ describe_current do
       before { @poller.register(@producer, @client) }
 
       it "returns true" do
-        assert_equal(true, @poller.alive?)
+        assert_predicate(@poller, :alive?)
       end
     end
   end
@@ -166,14 +171,16 @@ describe_current do
     before { @poller.register(@producer, @client) }
 
     it "stops the polling thread" do
-      assert_equal(true, @poller.alive?)
+      assert_predicate(@poller, :alive?)
       @poller.shutdown!
-      assert_equal(false, @poller.alive?)
+
+      refute_predicate(@poller, :alive?)
     end
 
     it "clears all producers" do
       assert_equal(1, @poller.count)
       @poller.shutdown!
+
       assert_equal(0, @poller.count)
     end
 
@@ -185,7 +192,7 @@ describe_current do
   describe "#in_poller_thread?" do
     describe "when called from main thread" do
       it "returns false" do
-        assert_equal(false, @poller.in_poller_thread?)
+        refute_predicate(@poller, :in_poller_thread?)
       end
     end
   end
@@ -199,12 +206,14 @@ describe_current do
   describe ".new" do
     it "creates a new poller instance (not the singleton)" do
       custom_poller = described_class.new
+
       refute_equal(@poller, custom_poller)
     end
 
     it "assigns incremental IDs to new instances" do
       poller1 = described_class.new
       poller2 = described_class.new
+
       assert_operator(poller2.id, :>, poller1.id)
     end
 
@@ -213,6 +222,7 @@ describe_current do
       custom_poller.register(@producer, @client)
 
       thread = custom_poller.instance_variable_get(:@thread)
+
       assert_equal("waterdrop.poller##{custom_poller.id}", thread.name)
 
       custom_poller.shutdown!

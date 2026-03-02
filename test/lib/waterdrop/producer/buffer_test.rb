@@ -59,6 +59,7 @@ describe WaterDrop::Producer::Buffer do
       it "expect to run middleware only once during the flow" do
         @producer.buffer(@message)
         @producer.flush_async
+
         assert_equal(1, @message[:payload].scan("test").size)
       end
     end
@@ -125,6 +126,7 @@ describe WaterDrop::Producer::Buffer do
       it "expect to run middleware only once during the flow" do
         @producer.buffer_many([@message])
         @producer.flush_async
+
         assert_equal(1, @message[:payload].scan("test").size)
       end
     end
@@ -186,7 +188,7 @@ describe WaterDrop::Producer::Buffer do
     before { @producer.buffer(build(:valid_message)) }
 
     it "expect not to allow for a disconnect" do
-      assert_equal(false, @producer.disconnect)
+      refute(@producer.disconnect)
     end
   end
 end

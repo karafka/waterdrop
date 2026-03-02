@@ -35,11 +35,11 @@ describe_current do
     end
 
     it "is not closed by default" do
-      assert_equal(false, @state.closed?)
+      refute_predicate(@state, :closed?)
     end
 
     it "is not closing by default" do
-      assert_equal(false, @state.closing?)
+      refute_predicate(@state, :closing?)
     end
 
     describe "when enable_queue_io_events raises an error" do
@@ -68,12 +68,14 @@ describe_current do
       @client.define_singleton_method(:events_poll_nb_each) { |*| poll_called = true }
 
       @state.poll
-      assert_equal(true, poll_called)
+
+      assert(poll_called)
     end
 
     it "returns true when queue drains before timeout" do
       @client.define_singleton_method(:events_poll_nb_each) { |*| nil }
-      assert_equal(true, @state.poll)
+
+      assert(@state.poll)
     end
 
     it "returns false when timeout is reached" do
@@ -88,7 +90,8 @@ describe_current do
 
       # Use a very short max_poll_time to trigger timeout
       short_state = described_class.new(@producer_id, @client, @monitor, 0, @periodic_poll_interval)
-      assert_equal(false, short_state.poll)
+
+      refute(short_state.poll)
       short_state.close
     end
   end
@@ -96,12 +99,14 @@ describe_current do
   describe "#queue_empty?" do
     it "returns true when queue_size is zero" do
       @client.define_singleton_method(:queue_size) { 0 }
-      assert_equal(true, @state.queue_empty?)
+
+      assert_predicate(@state, :queue_empty?)
     end
 
     it "returns false when queue_size is non-zero" do
       @client.define_singleton_method(:queue_size) { 5 }
-      assert_equal(false, @state.queue_empty?)
+
+      refute_predicate(@state, :queue_empty?)
     end
   end
 
@@ -114,18 +119,20 @@ describe_current do
     end
 
     it "needs periodic poll when never polled" do
-      assert_equal(true, @state.needs_periodic_poll?)
+      assert_predicate(@state, :needs_periodic_poll?)
     end
 
     it "does not need periodic poll immediately after polling" do
       @state.mark_polled!
-      assert_equal(false, @state.needs_periodic_poll?)
+
+      refute_predicate(@state, :needs_periodic_poll?)
     end
 
     it "needs periodic poll after interval passes" do
       @state.mark_polled!
       sleep(0.15)
-      assert_equal(true, @state.needs_periodic_poll?)
+
+      assert_predicate(@state, :needs_periodic_poll?)
     end
 
     describe "with large interval to avoid timing issues" do
@@ -138,7 +145,8 @@ describe_current do
       it "does not need periodic poll if interval has not passed" do
         @state.mark_polled!
         sleep(0.01)
-        assert_equal(false, @state.needs_periodic_poll?)
+
+        refute_predicate(@state, :needs_periodic_poll?)
       end
     end
   end
@@ -146,12 +154,14 @@ describe_current do
   describe "#signal_close" do
     it "sets closing flag to true" do
       @state.signal_close
-      assert_equal(true, @state.closing?)
+
+      assert_predicate(@state, :closing?)
     end
 
     it "makes the IO readable" do
       @state.signal_close
       ready = IO.select([@state.io], nil, nil, 0)
+
       refute_nil(ready)
     end
 
@@ -164,6 +174,7 @@ describe_current do
     it "makes the IO readable" do
       @state.signal_continue
       ready = IO.select([@state.io], nil, nil, 0)
+
       refute_nil(ready)
     end
 
@@ -174,12 +185,13 @@ describe_current do
 
   describe "#closing?" do
     it "returns false initially" do
-      assert_equal(false, @state.closing?)
+      refute_predicate(@state, :closing?)
     end
 
     it "returns true after signal_close" do
       @state.signal_close
-      assert_equal(true, @state.closing?)
+
+      assert_predicate(@state, :closing?)
     end
   end
 
@@ -189,6 +201,7 @@ describe_current do
       @state.drain
       # Pipe should be empty now
       ready = IO.select([@state.io], nil, nil, 0)
+
       assert_nil(ready)
     end
 
@@ -200,13 +213,15 @@ describe_current do
   describe "#close" do
     it "marks the state as closed" do
       @state.close
-      assert_equal(true, @state.closed?)
+
+      assert_predicate(@state, :closed?)
     end
 
     it "closes the IO" do
       io = @state.io
       @state.close
-      assert_equal(true, io.closed?)
+
+      assert_predicate(io, :closed?)
     end
 
     it "does not raise when called multiple times" do
@@ -230,14 +245,15 @@ describe_current do
       end
 
       @state.wait_for_close
-      assert_equal(true, closed)
+
+      assert(closed)
     end
   end
 
   describe "#closed?" do
     describe "when not closed" do
       it "returns false" do
-        assert_equal(false, @state.closed?)
+        refute_predicate(@state, :closed?)
       end
     end
 
@@ -245,7 +261,7 @@ describe_current do
       before { @state.close }
 
       it "returns true" do
-        assert_equal(true, @state.closed?)
+        assert_predicate(@state, :closed?)
       end
     end
   end

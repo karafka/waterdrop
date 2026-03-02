@@ -27,6 +27,7 @@ describe_current do
       client.define_singleton_method(:enable_queue_io_events) { |fd| called_with = fd }
 
       pipe = described_class.new(client)
+
       refute_nil(called_with)
       assert_kind_of(Integer, called_with)
       pipe.close
@@ -47,6 +48,7 @@ describe_current do
     it "makes the pipe readable" do
       @pipe.signal
       ready = IO.select([@pipe.reader], nil, nil, 0)
+
       refute_nil(ready)
     end
 
@@ -69,6 +71,7 @@ describe_current do
       3.times { @pipe.signal }
       @pipe.drain
       ready = IO.select([@pipe.reader], nil, nil, 0)
+
       assert_nil(ready)
     end
 
@@ -82,7 +85,8 @@ describe_current do
     it "closes the reader IO" do
       reader = @pipe.reader
       @pipe.close
-      assert_equal(true, reader.closed?)
+
+      assert_predicate(reader, :closed?)
     end
 
     it "can be called multiple times safely" do

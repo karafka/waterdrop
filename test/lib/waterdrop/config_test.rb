@@ -74,7 +74,8 @@ describe_current do
 
       it "defaults to false" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
-        assert_equal(false, @config.config.reload_on_idempotent_fatal_error)
+
+        refute(@config.config.reload_on_idempotent_fatal_error)
       end
     end
 
@@ -88,6 +89,7 @@ describe_current do
 
       it "defaults to 5000" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(5_000, @config.config.wait_backoff_on_idempotent_fatal_error)
       end
     end
@@ -102,6 +104,7 @@ describe_current do
 
       it "defaults to 5" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(5, @config.config.max_attempts_on_idempotent_fatal_error)
       end
     end
@@ -116,6 +119,7 @@ describe_current do
 
       it "defaults to 1000" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(1_000, @config.config.wait_backoff_on_transaction_fatal_error)
       end
     end
@@ -130,6 +134,7 @@ describe_current do
 
       it "defaults to 10" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(10, @config.config.max_attempts_on_transaction_fatal_error)
       end
     end
@@ -151,6 +156,7 @@ describe_current do
 
       it "defaults to :thread" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(:thread, @config.config.polling.mode)
       end
     end
@@ -165,6 +171,7 @@ describe_current do
 
       it "defaults to 100" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
+
         assert_equal(100, @config.config.polling.fd.max_time)
       end
 
@@ -198,7 +205,8 @@ describe_current do
           kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS },
           middleware: WaterDrop::Middleware.new
         }
-        assert_equal(false, contract.call(invalid_config).success?)
+
+        refute_predicate(contract.call(invalid_config), :success?)
       end
     end
   end

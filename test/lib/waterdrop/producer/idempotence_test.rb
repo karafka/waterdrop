@@ -16,7 +16,7 @@ describe_current do
       end
 
       it "expect to return true as all transactional producers are idempotent" do
-        assert_equal(true, @producer.idempotent?)
+        assert_predicate(@producer, :idempotent?)
       end
     end
 
@@ -26,7 +26,7 @@ describe_current do
       end
 
       it "expect to return true" do
-        assert_equal(true, @producer.idempotent?)
+        assert_predicate(@producer, :idempotent?)
       end
     end
 
@@ -39,7 +39,7 @@ describe_current do
       end
 
       it "expect to return false" do
-        assert_equal(false, @producer.idempotent?)
+        refute_predicate(@producer, :idempotent?)
       end
     end
 
@@ -49,7 +49,7 @@ describe_current do
       end
 
       it "expect to return false by default" do
-        assert_equal(false, @producer.idempotent?)
+        refute_predicate(@producer, :idempotent?)
       end
     end
 
@@ -60,8 +60,9 @@ describe_current do
 
       it "expect to cache the result" do
         first_result = @producer.idempotent?
+
         assert_equal(first_result, @producer.idempotent?)
-        assert_equal(true, @producer.instance_variable_defined?(:@idempotent))
+        assert(@producer.instance_variable_defined?(:@idempotent))
       end
     end
   end
@@ -170,11 +171,9 @@ describe_current do
 
       it "expect not to emit producer.reloaded event" do
         @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fenced_error }) do
-          begin
-            @producer.produce_sync(@message)
-          rescue WaterDrop::Errors::ProduceError
-            nil
-          end
+          @producer.produce_sync(@message)
+        rescue WaterDrop::Errors::ProduceError
+          nil
         end
 
         assert_empty(@reloaded_events)
@@ -239,6 +238,7 @@ describe_current do
 
         # Verify the fatal error is now present and queryable
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
         assert_includes(fatal_error[:error_string], "test_fatal_error")
@@ -250,6 +250,7 @@ describe_current do
 
         # Verify fatal error is present and has correct error code
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
       end
@@ -264,9 +265,11 @@ describe_current do
       it "can inject fatal errors with various error codes" do
         # Error code 47 (INVALID_PRODUCER_EPOCH)
         result = @producer.trigger_test_fatal_error(47, "Simulated producer fencing")
+
         assert_equal(0, result)
 
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
         assert_kind_of(String, fatal_error[:error_string])
@@ -295,6 +298,7 @@ describe_current do
 
         # Error state should persist
         sleep 0.1
+
         refute_nil(@producer.fatal_error)
         assert_equal(47, @producer.fatal_error[:error_code])
       end
@@ -302,6 +306,7 @@ describe_current do
       it "detects real fatal errors correctly" do
         # First, produce a message successfully to ensure producer is working
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
         assert_nil(report.error)
 
@@ -310,6 +315,7 @@ describe_current do
 
         # Verify the fatal error is present
         fatal_error = @producer.fatal_error
+
         refute_nil(fatal_error)
         assert_equal(47, fatal_error[:error_code])
       end
@@ -317,6 +323,7 @@ describe_current do
       it "can create new producer after fatal error for recovery" do
         # Trigger fatal error on first producer
         @producer.trigger_test_fatal_error(47, "First producer fatal")
+
         refute_nil(@producer.fatal_error)
 
         # Close it
@@ -364,13 +371,14 @@ describe_current do
 
         # Produce should trigger reload and succeed
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
 
         # Verify producer.reload event was emitted
         assert_operator(@reload_events.size, :>=, 1)
         assert_equal(@producer.id, @reload_events.first[:producer_id])
         assert_kind_of(Rdkafka::RdkafkaError, @reload_events.first[:error])
-        assert_equal(true, @reload_events.first[:error].fatal?)
+        assert_predicate(@reload_events.first[:error], :fatal?)
         assert_equal(1, @reload_events.first[:attempt])
         assert_equal(@producer, @reload_events.first[:caller])
 
@@ -390,6 +398,7 @@ describe_current do
 
         # Produce should trigger reload and succeed
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
 
         # Verify reload events were emitted
@@ -409,6 +418,7 @@ describe_current do
 
         # Produce should trigger reload and succeed
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
 
         # Verify error.occurred event was emitted
@@ -441,12 +451,13 @@ describe_current do
 
         # Produce should trigger reload and succeed
         report = @producer.produce_sync(@message)
+
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
 
         # Verify config modification event was called
-        assert_equal(true, config_modified)
+        assert(config_modified)
         refute_nil(modified_config)
-        assert_equal(false, modified_config.kafka[:"enable.idempotence"])
+        refute(modified_config.kafka[:"enable.idempotence"])
         assert_operator(@reload_events.size, :>=, 1)
         assert_operator(@reloaded_events.size, :>=, 1)
       end
@@ -549,7 +560,7 @@ describe_current do
 
         refute_nil(error)
         assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-        assert_equal(true, error.cause.fatal?)
+        assert_predicate(error.cause, :fatal?)
 
         # Verify fatal error persists
         refute_nil(@producer.fatal_error)
@@ -566,7 +577,7 @@ describe_current do
 
         refute_nil(error)
         assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-        assert_equal(true, error.cause.fatal?)
+        assert_predicate(error.cause, :fatal?)
 
         # Verify fatal error persists
         refute_nil(@producer.fatal_error)
@@ -582,7 +593,7 @@ describe_current do
 
         refute_nil(error)
         assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-        assert_equal(true, error.cause.fatal?)
+        assert_predicate(error.cause, :fatal?)
 
         # Verify fatal error persists
         refute_nil(@producer.fatal_error)
@@ -598,7 +609,7 @@ describe_current do
 
         refute_nil(error)
         assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-        assert_equal(true, error.cause.fatal?)
+        assert_predicate(error.cause, :fatal?)
 
         # Verify fatal error persists
         refute_nil(@producer.fatal_error)
@@ -609,19 +620,19 @@ describe_current do
         3.times do
           error = assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           error = assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_async(@message) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           error = assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.produce_many_sync(@messages) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
 
           error = assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.produce_many_async(@messages) }
           assert_kind_of(Rdkafka::RdkafkaError, error.cause)
-          assert_equal(true, error.cause.fatal?)
+          assert_predicate(error.cause, :fatal?)
         end
 
         # Fatal error should still be present after all attempts

@@ -16,6 +16,7 @@ describe_current do
   describe "#increment" do
     it "increases the value by 1" do
       @counter.increment
+
       assert_equal(1, @counter.value)
     end
 
@@ -24,6 +25,7 @@ describe_current do
         Thread.new { @counter.increment }
       end
       threads.each(&:join)
+
       assert_equal(10, @counter.value)
     end
   end
@@ -31,6 +33,7 @@ describe_current do
   describe "#decrement" do
     it "decreases the value by 1" do
       @counter.decrement
+
       assert_equal(-1, @counter.value)
     end
 
@@ -39,6 +42,7 @@ describe_current do
         Thread.new { @counter.decrement }
       end
       threads.each(&:join)
+
       assert_equal(-10, @counter.value)
     end
   end
@@ -48,6 +52,7 @@ describe_current do
       increment_threads = Array.new(5) { Thread.new { @counter.increment } }
       decrement_threads = Array.new(5) { Thread.new { @counter.decrement } }
       (increment_threads + decrement_threads).each(&:join)
+
       assert_equal(0, @counter.value)
     end
   end
