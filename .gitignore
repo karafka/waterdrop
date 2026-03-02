@@ -30,7 +30,7 @@ db/*.sqlite3
 /doc/yard
 /doc/features.html
 /doc/specs.html
-/spec/tmp/*
+/test/tmp/*
 /cache
 /capybara*
 /capybara-*.html

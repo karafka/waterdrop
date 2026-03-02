@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   before do
     @producer = WaterDrop::Producer.new do |config|

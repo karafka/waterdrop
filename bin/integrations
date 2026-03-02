@@ -49,7 +49,7 @@ class Scenario
 
   # @return [String] integration spec name
   def name
-    @path.gsub("#{ROOT_PATH}/spec/integrations/", "")
+    @path.gsub("#{ROOT_PATH}/test/integrations/", "")
   end
 
   # @return [Boolean] did this scenario finished or is it still running
@@ -162,7 +162,7 @@ class Scenario
 end
 
 # Load all the specs
-specs = Dir[ROOT_PATH.join("spec/integrations/**/*_spec.rb")]
+specs = Dir[ROOT_PATH.join("test/integrations/**/*_spec.rb")]
 
 FILTER_TYPE = (ARGV[0] == "--exclude") ? "exclude" : "include"
 

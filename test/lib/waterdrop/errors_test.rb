@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   describe "BaseError" do
     before { @error = described_class::BaseError }
