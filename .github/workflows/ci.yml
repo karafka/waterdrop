@@ -82,11 +82,12 @@ jobs:
         run: ./bin/integrations --exclude oauth_token_refresh
 
       - name: Upload coverage artifact
-        if: matrix.coverage == 'true'
+        if: matrix.coverage == 'true' && always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: coverage-${{ matrix.polling_mode }}
           path: coverage/.resultset.json
+          if-no-files-found: warn
           retention-days: 1
 
       - name: Check Kafka logs for unexpected warnings
@@ -149,7 +150,7 @@ jobs:
           path: coverage-parts
 
       - name: List downloaded artifacts
-        run: find coverage-parts -type f
+        run: find coverage-parts -type f -ls 2>&1 || echo "No coverage-parts directory found"
 
       - name: Merge and check coverage
         run: |
