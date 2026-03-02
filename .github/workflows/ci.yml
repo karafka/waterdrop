@@ -87,7 +87,8 @@ jobs:
         with:
           name: coverage-${{ matrix.polling_mode }}
           path: coverage/.resultset.json
-          if-no-files-found: warn
+          include-hidden-files: true
+          if-no-files-found: error
           retention-days: 1
 
       - name: Check Kafka logs for unexpected warnings
