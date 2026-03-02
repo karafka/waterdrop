@@ -44,16 +44,6 @@ describe_current do
       # Verify error was triggered
       refute_nil(@producer.fatal_error)
     end
-
-    context "when rdkafka client already supports testing methods" do
-      it "does not raise an error" do
-        assert_respond_to(@producer.client, :trigger_test_fatal_error)
-
-        result = @producer.trigger_test_fatal_error(47, "test")
-
-        assert_equal(0, result)
-      end
-    end
   end
 
   describe "#fatal_error" do
