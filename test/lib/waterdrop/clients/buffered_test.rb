@@ -6,7 +6,7 @@ describe_current do
   before do
     @buffered_message_stub = Struct.new(:topic, :partition, :offset, keyword_init: true)
     @buffered_consumer_stub = Struct.new(:consumer_group_metadata_pointer, keyword_init: true)
-    @topic_name = "it-#{SecureRandom}"
+    @topic_name = "it-#{SecureRandom.uuid}"
     @producer = WaterDrop::Producer.new do |config|
       config.deliver = false
       config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }

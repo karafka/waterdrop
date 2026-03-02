@@ -75,7 +75,8 @@ describe_current do
 
         @producer.produce_sync(@message)
 
-        sleep(0.01) until @changed.size.positive?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+        sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
       end
 
@@ -100,7 +101,8 @@ describe_current do
           nil
         end
 
-        sleep(0.01) until @changed.size.positive?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+        sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.last
       end
 
@@ -125,7 +127,8 @@ describe_current do
           nil
         end
 
-        sleep(0.01) until @changed.size.positive?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+        sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
       end
 
@@ -152,7 +155,8 @@ describe_current do
           @errors << e
         end
 
-        sleep(0.01) until @changed.size.positive?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+        sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
       end
 
@@ -179,7 +183,8 @@ describe_current do
         @producer.produce_async(build(:valid_message))
         @producer.purge
 
-        sleep(0.01) until @errors.size.positive?
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
+        sleep(0.01) until @errors.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
       end
 
       it "expect to have it in the errors" do

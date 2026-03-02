@@ -45,13 +45,13 @@ describe_current do
       refute_nil(@producer.fatal_error)
     end
 
-    context "when rdkafka client does not have Testing support" do
-      it "automatically includes Rdkafka::Testing on the client" do
-        # Remove Testing module if it was included
-        if @producer.client.singleton_class.included_modules.include?(Rdkafka::Testing)
-          # We can't easily remove it, so just verify the method works
-        end
-        @producer.trigger_test_fatal_error(47, "test")
+    context "when rdkafka client already supports testing methods" do
+      it "does not raise an error" do
+        assert_respond_to(@producer.client, :trigger_test_fatal_error)
+
+        result = @producer.trigger_test_fatal_error(47, "test")
+
+        assert_equal(0, result)
       end
     end
   end
