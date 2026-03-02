@@ -14,7 +14,8 @@ end
 group :test do
   gem "connection_pool"
   gem "ostruct"
-  gem "rspec"
+  gem "minitest"
+  gem "minitest-mock"
   gem "simplecov"
   gem "warning"
 end

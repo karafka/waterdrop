@@ -1,2 +1,0 @@
---require spec_helper
---exclude-pattern "spec/integrations/**/*_spec.rb"
