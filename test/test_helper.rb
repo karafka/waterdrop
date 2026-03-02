@@ -38,7 +38,6 @@ if coverage
     command_name "Minitest-#{(ENV["FD_POLLING"] == "true") ? "fiber" : "thread"}"
 
     add_filter "/test/"
-    add_filter "/spec/"
     add_filter "/vendor/"
     add_filter "/gems/"
     add_filter "/.bundle/"

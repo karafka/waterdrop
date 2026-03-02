@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe WaterDrop::Producer::Buffer do
   before do
     @producer = build(:producer)

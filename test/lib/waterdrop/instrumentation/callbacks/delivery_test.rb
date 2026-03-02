@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   before do
     @delivery_report_stub = Struct.new(:offset, :partition, :topic_name, :error, :label, keyword_init: true)
@@ -78,6 +76,8 @@ describe_current do
         deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
         sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
+
+        refute_nil @event, "No message.acknowledged event received within deadline"
       end
 
       it { assert_equal(0, @event.payload[:partition]) }
@@ -104,6 +104,8 @@ describe_current do
         deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
         sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.last
+
+        refute_nil @event, "No error.occurred event received within deadline"
       end
 
       it { assert_kind_of(Rdkafka::RdkafkaError, @event.payload[:error]) }
@@ -130,6 +132,8 @@ describe_current do
         deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
         sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
+
+        refute_nil @event, "No error.occurred event received within deadline"
       end
 
       it { assert_kind_of(Rdkafka::RdkafkaError, @event.payload[:error]) }
@@ -158,6 +162,8 @@ describe_current do
         deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
         sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
         @event = @changed.first
+
+        refute_nil @event, "No error.occurred event received within deadline"
       end
 
       it { assert_kind_of(WaterDrop::Errors::ProduceError, @errors.first) }
@@ -185,6 +191,8 @@ describe_current do
 
         deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
         sleep(0.01) until @errors.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+        refute_empty @errors, "No error.occurred event received within deadline"
       end
 
       it "expect to have it in the errors" do

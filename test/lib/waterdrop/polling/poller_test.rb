@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   # Since Poller is a singleton, we need to be careful with testing
   # We'll test the instance methods through the singleton

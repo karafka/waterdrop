@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   before do
     @original_thread_priority = described_class.config.thread_priority

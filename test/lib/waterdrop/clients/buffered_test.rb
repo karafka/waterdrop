@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require "test_helper"
-
 describe_current do
   before do
     @buffered_message_stub = Struct.new(:topic, :partition, :offset, keyword_init: true)

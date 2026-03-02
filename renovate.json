@@ -8,7 +8,7 @@
     "Gemfile",
     "Gemfile.lint",
     "waterdrop.gemspec",
-    "spec/integrations/**/Gemfile",
+    "test/integrations/**/Gemfile",
     ".github/workflows/**",
     "docker-compose*.yml",
     "package.json"
@@ -28,7 +28,7 @@
     },
     {
       "matchFileNames": [
-        "spec/integrations/**/Gemfile"
+        "test/integrations/**/Gemfile"
       ],
       "groupName": "integration test dependencies",
       "commitMessageTopic": "integration test dependencies"
