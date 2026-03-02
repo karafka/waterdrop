@@ -14,6 +14,7 @@ Warning.process do |warning|
   next if warning.include?("$CHILD_STATUS")
   # Allow method redefinition in tests (e.g. define_singleton_method on OpenStruct mocks)
   next if warning.include?("method redefined") && warning.include?("_test")
+  next if warning.include?("previous definition") && warning.include?("_test")
 
   raise "Warning in your code: #{warning}"
 end
