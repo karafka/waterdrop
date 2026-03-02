@@ -35,6 +35,8 @@ if coverage
 
   # Don't include unnecessary stuff into rcov
   SimpleCov.start do
+    command_name "Minitest-#{ENV['FD_POLLING'] == 'true' ? 'fiber' : 'thread'}"
+
     add_filter "/test/"
     add_filter "/spec/"
     add_filter "/vendor/"
