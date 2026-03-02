@@ -150,16 +150,12 @@ jobs:
           pattern: coverage-*
           path: coverage-parts
 
-      - name: List downloaded artifacts
-        run: find coverage-parts -type f -ls 2>&1 || echo "No coverage-parts directory found"
-
       - name: Merge and check coverage
         run: |
           bundle exec ruby -e '
             require "simplecov"
 
             results = Dir.glob("coverage-parts/**/.resultset.json", File::FNM_DOTMATCH)
-            puts "Found #{results.size} result sets: #{results}"
             abort "No coverage results found" if results.empty?
 
             SimpleCov.collate(results) do
