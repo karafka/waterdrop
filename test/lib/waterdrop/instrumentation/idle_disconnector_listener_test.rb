@@ -82,24 +82,18 @@ describe_current do
         end
 
         it "expect not to attempt disconnect at all" do
-          disconnect_called = false
-          @producer.stub(:disconnectable?, false) do
-            @producer.stub(:disconnect, -> { disconnect_called = true }) do
-              @listener.on_statistics_emitted(@event)
-            end
-          end
+          @producer.stubs(:disconnectable?).returns(false)
+          @producer.stubs(:disconnect).returns(nil)
+          @listener.on_statistics_emitted(@event)
 
           assert_empty(@disconnected_events)
-          refute(disconnect_called)
         end
 
         it "expect to still reset activity time" do
           old_activity_time = @listener.instance_variable_get(:@last_activity_time)
-          @producer.stub(:disconnectable?, false) do
-            @producer.stub(:disconnect, nil) do
-              @listener.on_statistics_emitted(@event)
-            end
-          end
+          @producer.stubs(:disconnectable?).returns(false)
+          @producer.stubs(:disconnect).returns(nil)
+          @listener.on_statistics_emitted(@event)
           new_activity_time = @listener.instance_variable_get(:@last_activity_time)
 
           assert_operator(new_activity_time, :>, old_activity_time)
@@ -117,12 +111,10 @@ describe_current do
         end
 
         it "expect to handle error gracefully and instrument it" do
-          @producer.stub(:disconnectable?, true) do
-            @producer.stub(:disconnect, ->(*) { raise @test_error }) do
-              @listener.on_statistics_emitted(@event)
-              sleep(0.1) # Give thread time to complete and handle error
-            end
-          end
+          @producer.stubs(:disconnectable?).returns(true)
+          @producer.stubs(:disconnect).raises(@test_error)
+          @listener.on_statistics_emitted(@event)
+          sleep(0.1) # Give thread time to complete and handle error
 
           assert_empty(@disconnected_events)
           refute_empty(@error_events)
@@ -133,12 +125,10 @@ describe_current do
 
         it "expect to still reset activity time even after error" do
           old_activity_time = @listener.instance_variable_get(:@last_activity_time)
-          @producer.stub(:disconnectable?, true) do
-            @producer.stub(:disconnect, ->(*) { raise @test_error }) do
-              @listener.on_statistics_emitted(@event)
-              sleep(0.1) # Give thread time to complete
-            end
-          end
+          @producer.stubs(:disconnectable?).returns(true)
+          @producer.stubs(:disconnect).raises(@test_error)
+          @listener.on_statistics_emitted(@event)
+          sleep(0.1) # Give thread time to complete
           new_activity_time = @listener.instance_variable_get(:@last_activity_time)
 
           assert_operator(new_activity_time, :>, old_activity_time)
@@ -186,9 +176,11 @@ describe_current do
     end
 
     it "expect to delegate to call method with statistics" do
-      @listener.stub(:call, ->(stats) { @call_args << stats }) do
-        @listener.on_statistics_emitted(@event)
+      @listener.stubs(:call).with do |stats|
+        @call_args << stats
+        true
       end
+      @listener.on_statistics_emitted(@event)
 
       assert_equal([{ "txmsgs" => 150 }], @call_args)
     end

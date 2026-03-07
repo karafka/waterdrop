@@ -88,13 +88,10 @@ describe_current do
 
         # Stub the initial client's produce method
         original_client = @producer.client
-        produce_stub = lambda do |*_args, **_kwargs|
+        original_client.stubs(:produce).with do
           call_count += 1
-          raise @fatal_error if call_count == 1
-
-          # Return a successful delivery handle
-          OpenStruct.new(wait: nil)
-        end
+          true
+        end.raises(@fatal_error).then.raises(@fatal_error)
 
         # Create a mock builder instance
         mock_builder = OpenStruct.new
@@ -116,12 +113,9 @@ describe_current do
           mock_client
         end
 
-        original_client.stub(:produce, produce_stub) do
-          WaterDrop::Producer::Builder.stub(:new, ->(*) { mock_builder }) do
-            # This should trigger one reload and succeed on retry
-            @producer.produce_sync(@message)
-          end
-        end
+        WaterDrop::Producer::Builder.stubs(:new).returns(mock_builder)
+        # This should trigger one reload and succeed on retry
+        @producer.produce_sync(@message)
 
         # Verify producer.reload event was emitted
         assert_equal(1, reload_events.size)
@@ -144,9 +138,8 @@ describe_current do
       end
 
       it "expect to raise the fatal error without reload" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fatal_error }) do
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        @producer.client.stubs(:produce).raises(@fatal_error)
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
       end
     end
 
@@ -161,14 +154,14 @@ describe_current do
       end
 
       it "expect not to reload and raise the error" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fenced_error }) do
-          # This should raise because fenced errors are non-reloadable by default
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        @producer.client.stubs(:produce).raises(@fenced_error)
+        # This should raise because fenced errors are non-reloadable by default
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
       end
 
       it "expect not to emit producer.reloaded event" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fenced_error }) do
+        @producer.client.stubs(:produce).raises(@fenced_error)
+        begin
           @producer.produce_sync(@message)
         rescue WaterDrop::Errors::ProduceError
           nil
@@ -185,10 +178,9 @@ describe_current do
       end
 
       it "expect not to use idempotent reload path" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fatal_error }) do
-          # Transactional producers should not use the idempotent reload path
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        @producer.client.stubs(:produce).raises(@fatal_error)
+        # Transactional producers should not use the idempotent reload path
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
       end
     end
 
@@ -199,9 +191,8 @@ describe_current do
       end
 
       it "expect not to reload as producer is not idempotent" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @fatal_error }) do
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        @producer.client.stubs(:produce).raises(@fatal_error)
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
       end
     end
 
@@ -213,10 +204,9 @@ describe_current do
       end
 
       it "expect not to reload for non-fatal errors" do
-        @producer.client.stub(:produce, ->(*_a, **_kw) { raise @queue_full_error }) do
-          # Should follow normal error handling path, not reload
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        @producer.client.stubs(:produce).raises(@queue_full_error)
+        # Should follow normal error handling path, not reload
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
       end
     end
 
@@ -485,16 +475,16 @@ describe_current do
 
         # Stub to always raise fatal error
         fatal = Rdkafka::RdkafkaError.new(-150, fatal: true)
-        initial_client.stub(:produce, ->(*_a, **_kw) { raise fatal }) do
-          # First attempt should raise
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
+        initial_client.stubs(:produce).raises(fatal)
 
-          # Second attempt should also raise (no reload)
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
+        # First attempt should raise
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
 
-          # Third attempt should also raise (no reload)
-          assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
-        end
+        # Second attempt should also raise (no reload)
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
+
+        # Third attempt should also raise (no reload)
+        assert_raises(WaterDrop::Errors::ProduceError) { @producer.produce_sync(@message) }
 
         # Verify no reload events were emitted
         assert_empty(@reload_events)
@@ -510,18 +500,16 @@ describe_current do
 
         # Stub to count produce attempts
         fatal = Rdkafka::RdkafkaError.new(-150, fatal: true)
-        counter_stub = lambda do |*_a, **_kw|
+        initial_client.stubs(:produce).with do
           produce_attempts += 1
-          raise fatal
-        end
+          true
+        end.raises(fatal)
 
-        initial_client.stub(:produce, counter_stub) do
-          # Multiple produce attempts
-          5.times do
-            @producer.produce_sync(@message)
-          rescue WaterDrop::Errors::ProduceError
-            # Expected to fail
-          end
+        # Multiple produce attempts
+        5.times do
+          @producer.produce_sync(@message)
+        rescue WaterDrop::Errors::ProduceError
+          # Expected to fail
         end
 
         # All attempts should have hit the same client (no reload)

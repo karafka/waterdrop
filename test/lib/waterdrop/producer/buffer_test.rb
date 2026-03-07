@@ -148,10 +148,9 @@ describe WaterDrop::Producer::Buffer do
       end
 
       it do
-        @producer.client.stub(:produce, ->(*) { raise @error }) do
-          @producer.buffer(build(:valid_message))
-          assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_async }
-        end
+        @producer.client.stubs(:produce).raises(@error)
+        @producer.buffer(build(:valid_message))
+        assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_async }
       end
     end
   end
@@ -174,10 +173,9 @@ describe WaterDrop::Producer::Buffer do
       end
 
       it do
-        @producer.client.stub(:produce, ->(*) { raise @error }) do
-          @producer.buffer(build(:valid_message))
-          assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_sync }
-        end
+        @producer.client.stubs(:produce).raises(@error)
+        @producer.buffer(build(:valid_message))
+        assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_sync }
       end
     end
   end
