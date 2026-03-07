@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.8.17 (Unreleased)
+- [Change] Upscale default timeout values 3x closer to librdkafka defaults to prevent intermediate timeouts during node recovery (`message.timeout.ms`: 50s → 150s, `transaction.timeout.ms`: 55s → 165s, `max_wait_timeout`: 60s → 180s).
+
 ## 2.8.16 (2026-02-25)
 - [Feature] Add FD-based polling mode (`config.polling.mode = :fd`) as an alternative to the default thread-based polling. FD mode uses a single Ruby thread with IO.select for efficient multiplexing, providing 39-54% higher throughput, lower memory usage, and fewer threads compared to the default thread mode.
 - [Feature] Add `config.polling.fd.max_time` setting (default: 100ms) to control maximum polling time per producer per cycle. This enables per-producer priority differentiation.

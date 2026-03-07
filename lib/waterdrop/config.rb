@@ -15,9 +15,9 @@ module WaterDrop
       "statistics.interval.ms": 5_000,
       # We set it to a value that is lower than `max_wait_timeout` to have a final verdict upon
       # sync delivery
-      "message.timeout.ms": 50_000,
+      "message.timeout.ms": 150_000,
       # Must be more or equal to `message.timeout.ms` defaults
-      "transaction.timeout.ms": 55_000,
+      "transaction.timeout.ms": 165_000,
       # Lowers latency. Default in newer librdkafka but we want to make sure it is shipped to
       # users despite what librdkafka they run on
       "socket.nagle.disable": true
@@ -53,7 +53,7 @@ module WaterDrop
     setting :max_payload_size, default: 1_000_012
     # option [Integer] Wait that long for the delivery report or raise an error if this takes
     #   longer than the timeout ms.
-    setting :max_wait_timeout, default: 60_000
+    setting :max_wait_timeout, default: 180_000
     # option [Boolean] should we upon detecting full librdkafka queue backoff and retry or should
     #   we raise an exception.
     #   When this is set to `true`, upon full queue, we won't raise an error. There will be error
