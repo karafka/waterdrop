@@ -323,8 +323,16 @@ describe_current do
       end
 
       it "expect to close client since was open" do
-        @client.expects(:close).at_least_once
+        original_close = @client.method(:close)
+        closed = false
+        @client.stubs(:close).with do
+          closed = true
+          original_close.call
+          true
+        end
         @producer.close
+
+        assert(closed)
       end
     end
 
