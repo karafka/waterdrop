@@ -463,10 +463,16 @@ describe_current do
   context "when transaction crashes internally on one of the retryable operations" do
     it "expect to retry and continue" do
       ref = @producer.client.method(:begin_transaction)
+      counter = 0
 
-      @producer.client.stubs(:begin_transaction)
-        .raises(Rdkafka::RdkafkaError.new(-152, retryable: true))
-        .then.returns(ref.call)
+      @producer.client.define_singleton_method(:begin_transaction) do
+        if counter.zero?
+          counter += 1
+          raise(Rdkafka::RdkafkaError.new(-152, retryable: true))
+        end
+
+        ref.call
+      end
 
       @producer.transaction { nil }
     end

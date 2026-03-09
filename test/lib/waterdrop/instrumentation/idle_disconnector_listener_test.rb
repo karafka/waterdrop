@@ -83,7 +83,7 @@ describe_current do
 
         it "expect not to attempt disconnect at all" do
           @producer.stubs(:disconnectable?).returns(false)
-          @producer.stubs(:disconnect).returns(nil)
+          @producer.expects(:disconnect).never
           @listener.on_statistics_emitted(@event)
 
           assert_empty(@disconnected_events)
