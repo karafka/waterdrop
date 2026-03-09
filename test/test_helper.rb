@@ -54,7 +54,7 @@ end
 
 require "minitest/autorun"
 require "minitest/spec"
-require "minitest/mock"
+require "mocha/minitest"
 
 # Add `context` as an alias for `describe` in minitest/spec
 class Minitest::Spec

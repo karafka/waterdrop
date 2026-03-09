@@ -22,11 +22,10 @@ describe_current do
       { payload: "one", topic: "bar" }
     ]
     @client = described_class.new(@producer)
-    @producer.stub(:client, @client) do
-      @producer.produce_sync(payload: "one", topic: "foo")
-      @producer.produce_sync(payload: "one", topic: "bar")
-      @producer.produce_sync(payload: "two", topic: "foo")
-    end
+    @producer.stubs(:client).returns(@client)
+    @producer.produce_sync(payload: "one", topic: "foo")
+    @producer.produce_sync(payload: "one", topic: "bar")
+    @producer.produce_sync(payload: "two", topic: "foo")
   end
 
   after { @producer.close }
@@ -70,132 +69,123 @@ describe_current do
 
     context "when no error and no abort" do
       it "expect to return the block value" do
-        @producer.stub(:client, @client) do
-          assert_equal(1, @producer.transaction { 1 })
-        end
+        @producer.stubs(:client).returns(@client)
+
+        assert_equal(1, @producer.transaction { 1 })
       end
     end
 
     context "when running transaction with production of messages" do
       it "expect to add them to the buffers" do
-        @producer.stub(:client, @client) do
-          @producer.transaction do
-            @producer.produce_sync(topic: @topic_name, payload: "test")
-            @producer.produce_sync(topic: @topic_name, payload: "test")
-          end
-
-          assert_equal(2, @client.messages.size)
-          assert_equal(2, @client.messages_for(@topic_name).size)
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction do
+          @producer.produce_sync(topic: @topic_name, payload: "test")
+          @producer.produce_sync(topic: @topic_name, payload: "test")
         end
+
+        assert_equal(2, @client.messages.size)
+        assert_equal(2, @client.messages_for(@topic_name).size)
       end
     end
 
     context "when running nested transaction with production of messages" do
       it "expect to add them to the buffers" do
-        @producer.stub(:client, @client) do
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction do
+          @producer.produce_sync(topic: @topic_name, payload: "test")
+          @producer.produce_sync(topic: @topic_name, payload: "test")
+
           @producer.transaction do
             @producer.produce_sync(topic: @topic_name, payload: "test")
             @producer.produce_sync(topic: @topic_name, payload: "test")
-
-            @producer.transaction do
-              @producer.produce_sync(topic: @topic_name, payload: "test")
-              @producer.produce_sync(topic: @topic_name, payload: "test")
-            end
           end
-
-          assert_equal(4, @client.messages.size)
-          assert_equal(4, @client.messages_for(@topic_name).size)
         end
+
+        assert_equal(4, @client.messages.size)
+        assert_equal(4, @client.messages_for(@topic_name).size)
       end
     end
 
     context "when running nested transaction with production of messages on abort" do
       it "expect to add them to the buffers" do
-        @producer.stub(:client, @client) do
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction do
+          @producer.produce_sync(topic: @topic_name, payload: "test")
+          @producer.produce_sync(topic: @topic_name, payload: "test")
+
           @producer.transaction do
             @producer.produce_sync(topic: @topic_name, payload: "test")
             @producer.produce_sync(topic: @topic_name, payload: "test")
 
-            @producer.transaction do
-              @producer.produce_sync(topic: @topic_name, payload: "test")
-              @producer.produce_sync(topic: @topic_name, payload: "test")
-
-              raise WaterDrop::AbortTransaction
-            end
+            raise WaterDrop::AbortTransaction
           end
-
-          assert_equal(0, @client.messages.size)
-          assert_equal(0, @client.messages_for("test").size)
         end
+
+        assert_equal(0, @client.messages.size)
+        assert_equal(0, @client.messages_for("test").size)
       end
     end
 
     context "when abort occurs" do
       it "expect not to raise error" do
-        @producer.stub(:client, @client) do
-          @producer.transaction { raise WaterDrop::AbortTransaction }
-        end
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction { raise WaterDrop::AbortTransaction }
       end
 
       it "expect not to contain messages from the aborted transaction" do
-        @producer.stub(:client, @client) do
-          @producer.transaction do
-            @producer.produce_sync(topic: @topic_name, payload: "test")
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction do
+          @producer.produce_sync(topic: @topic_name, payload: "test")
 
-            raise WaterDrop::AbortTransaction
-          end
-
-          assert_equal(0, @client.messages.size)
-          assert_empty(@client.messages_for("test"))
+          raise WaterDrop::AbortTransaction
         end
+
+        assert_equal(0, @client.messages.size)
+        assert_empty(@client.messages_for("test"))
       end
     end
 
     context "when WaterDrop::AbortTransaction error occurs" do
       it "expect not to raise error" do
-        @producer.stub(:client, @client) do
-          @producer.transaction { raise(WaterDrop::AbortTransaction) }
-        end
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction { raise(WaterDrop::AbortTransaction) }
       end
     end
 
     context "when different error occurs" do
       it "expect to raise error" do
-        @producer.stub(:client, @client) do
-          assert_raises(StandardError) do
-            @producer.transaction { raise(StandardError) }
-          end
+        @producer.stubs(:client).returns(@client)
+        assert_raises(StandardError) do
+          @producer.transaction { raise(StandardError) }
         end
       end
 
       it "expect not to contain messages from the aborted transaction" do
-        @producer.stub(:client, @client) do
-          assert_raises(StandardError) do
-            @producer.transaction do
-              @producer.produce_sync(topic: @topic_name, payload: "test")
+        @producer.stubs(:client).returns(@client)
+        assert_raises(StandardError) do
+          @producer.transaction do
+            @producer.produce_sync(topic: @topic_name, payload: "test")
 
-              raise StandardError
-            end
+            raise StandardError
           end
-
-          assert_equal(0, @client.messages.size)
-          assert_empty(@client.messages_for("test"))
         end
+
+        assert_equal(0, @client.messages.size)
+        assert_empty(@client.messages_for("test"))
       end
     end
 
     context "when running a nested transaction" do
       it "expect to work ok" do
-        @producer.stub(:client, @client) do
-          result = @producer.transaction do
-            @producer.transaction do
-              @producer.produce_sync(topic: "1", payload: "2")
-              2
-            end
+        @producer.stubs(:client).returns(@client)
+        result = @producer.transaction do
+          @producer.transaction do
+            @producer.produce_sync(topic: "1", payload: "2")
+            2
           end
-
-          assert_equal(2, result)
         end
+
+        assert_equal(2, result)
       end
     end
 
@@ -206,10 +196,9 @@ describe_current do
       end
 
       it "expect to raise an error" do
-        @producer.stub(:client, @client) do
-          assert_raises(WaterDrop::Errors::TransactionRequiredError) do
-            @producer.transaction_mark_as_consumed(nil, @message)
-          end
+        @producer.stubs(:client).returns(@client)
+        assert_raises(WaterDrop::Errors::TransactionRequiredError) do
+          @producer.transaction_mark_as_consumed(nil, @message)
         end
       end
     end
@@ -222,10 +211,9 @@ describe_current do
       end
 
       it do
-        @producer.stub(:client, @client) do
-          @producer.transaction do
-            @producer.transaction_mark_as_consumed(@consumer, @message)
-          end
+        @producer.stubs(:client).returns(@client)
+        @producer.transaction do
+          @producer.transaction_mark_as_consumed(@consumer, @message)
         end
       end
     end

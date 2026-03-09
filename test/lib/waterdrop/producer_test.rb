@@ -127,9 +127,8 @@ describe_current do
 
         # Simulates fork by changing the pid
         it do
-          Process.stub(:pid, -1) do
-            assert_raises(@expected_error) { @producer.client }
-          end
+          Process.stubs(:pid).returns(-1)
+          assert_raises(@expected_error) { @producer.client }
         end
       end
 
@@ -145,9 +144,8 @@ describe_current do
 
       context "when called from a fork" do
         it do
-          Process.stub(:pid, -1) do
-            @producer.client
-          end
+          Process.stubs(:pid).returns(-1)
+          @producer.client
         end
       end
 
@@ -325,14 +323,14 @@ describe_current do
       end
 
       it "expect to close client since was open" do
-        closed = false
         original_close = @client.method(:close)
-        @client.stub(:close, -> {
+        closed = false
+        @client.stubs(:close).with do
           closed = true
           original_close.call
-        }) do
-          @producer.close
+          true
         end
+        @producer.close
 
         assert(closed)
       end
@@ -368,9 +366,8 @@ describe_current do
       end
 
       it "expect to close and not to raise any errors" do
-        @producer.client.stub(:flush, ->(*) { raise Rdkafka::RdkafkaError.new(1) }) do
-          @producer.close
-        end
+        @producer.client.stubs(:flush).raises(Rdkafka::RdkafkaError.new(1))
+        @producer.close
       end
     end
 
@@ -454,17 +451,12 @@ describe_current do
       end
 
       it do
-        @producer.status.stub(:configured?, false) do
-          @producer.status.stub(:connected?, false) do
-            @producer.status.stub(:initial?, false) do
-              @producer.status.stub(:closing?, false) do
-                @producer.status.stub(:closed?, false) do
-                  assert_raises(@expected_error) { @producer.send(:ensure_active!) }
-                end
-              end
-            end
-          end
-        end
+        @producer.status.stubs(:configured?).returns(false)
+        @producer.status.stubs(:connected?).returns(false)
+        @producer.status.stubs(:initial?).returns(false)
+        @producer.status.stubs(:closing?).returns(false)
+        @producer.status.stubs(:closed?).returns(false)
+        assert_raises(@expected_error) { @producer.send(:ensure_active!) }
       end
     end
   end
@@ -559,9 +551,9 @@ describe_current do
       end
 
       it do
-        @producer.status.stub(:to_s, "closing") do
-          assert_includes(@producer.inspect, "closing")
-        end
+        @producer.status.stubs(:to_s).returns("closing")
+
+        assert_includes(@producer.inspect, "closing")
       end
     end
 

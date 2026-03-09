@@ -71,12 +71,14 @@ GEM
     minitest (6.0.2)
       drb (~> 2.0)
       prism (~> 1.5)
-    minitest-mock (5.27.0)
+    mocha (3.0.2)
+      ruby2_keywords (>= 0.0.5)
     ostruct (0.6.3)
     prism (1.9.0)
     rake (13.3.1)
     reline (0.6.3)
       io-console (~> 0.5)
+    ruby2_keywords (0.0.5)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -103,7 +105,7 @@ DEPENDENCIES
   byebug
   connection_pool
   minitest
-  minitest-mock
+  mocha
   ostruct
   simplecov
   warning

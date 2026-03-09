@@ -15,7 +15,7 @@ group :test do
   gem "connection_pool"
   gem "ostruct"
   gem "minitest"
-  gem "minitest-mock"
+  gem "mocha"
   gem "simplecov"
   gem "warning"
 end

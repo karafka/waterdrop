@@ -462,18 +462,19 @@ describe_current do
 
   context "when transaction crashes internally on one of the retryable operations" do
     it "expect to retry and continue" do
-      counter = 0
       ref = @producer.client.method(:begin_transaction)
+      counter = 0
 
-      @producer.client.stub(:begin_transaction, lambda {
+      @producer.client.define_singleton_method(:begin_transaction) do
         if counter.zero?
           counter += 1
           raise(Rdkafka::RdkafkaError.new(-152, retryable: true))
         end
+
         ref.call
-      }) do
-        @producer.transaction { nil }
       end
+
+      @producer.transaction { nil }
     end
   end
 
@@ -635,11 +636,11 @@ describe_current do
       end
 
       it "expect to delegate to client send_offsets_to_transaction with correct timeout" do
-        @producer.client.stub(:send_offsets_to_transaction, ->(*_) {}) do
-          @producer.transaction do
-            assert_raises(WaterDrop::Errors::TransactionalOffsetInvalidError) do
-              @producer.transaction_mark_as_consumed(@consumer, @message)
-            end
+        @producer.client.stubs(:send_offsets_to_transaction)
+
+        @producer.transaction do
+          assert_raises(WaterDrop::Errors::TransactionalOffsetInvalidError) do
+            @producer.transaction_mark_as_consumed(@consumer, @message)
           end
         end
       end
@@ -652,20 +653,13 @@ describe_current do
       end
 
       it "expect to delegate to client send_offsets_to_transaction with correct timeout" do
-        called_with = nil
-        send_stub = lambda do |consumer, *args|
-          called_with = [consumer, *args]
-          nil
+        @producer.client.expects(:send_offsets_to_transaction).with do |consumer, *args|
+          consumer == @consumer && args.last == 30_000
         end
 
-        @producer.client.stub(:send_offsets_to_transaction, send_stub) do
-          @producer.transaction do
-            @producer.transaction_mark_as_consumed(@consumer, @message)
-          end
+        @producer.transaction do
+          @producer.transaction_mark_as_consumed(@consumer, @message)
         end
-
-        assert_equal(@consumer, called_with[0])
-        assert_equal(30_000, called_with.last)
       end
     end
   end

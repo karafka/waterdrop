@@ -24,9 +24,8 @@ describe_current do
 
       @config = producer_config.config
 
-      @producer_inst.stub(:config, @config) do
-        @client = described_class.new.call(@producer_inst, @config)
-      end
+      @producer_inst.stubs(:config).returns(@config)
+      @client = described_class.new.call(@producer_inst, @config)
     end
 
     it { assert_kind_of(Rdkafka::Producer, @client) }
@@ -46,9 +45,8 @@ describe_current do
 
         @config = producer_config.config
 
-        @producer_inst.stub(:config, @config) do
-          @client = described_class.new.call(@producer_inst, @config)
-        end
+        @producer_inst.stubs(:config).returns(@config)
+        @client = described_class.new.call(@producer_inst, @config)
       end
 
       after { @prev_client&.close }
@@ -66,9 +64,8 @@ describe_current do
           @callback_event = event
         end
 
-        @producer_inst.stub(:config, @config) do
-          @client = described_class.new.call(@producer_inst, @config)
-        end
+        @producer_inst.stubs(:config).returns(@config)
+        @client = described_class.new.call(@producer_inst, @config)
 
         @client.delivery_callback.call(@delivery_report)
       end

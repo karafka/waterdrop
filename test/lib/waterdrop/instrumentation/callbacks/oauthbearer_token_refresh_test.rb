@@ -12,18 +12,13 @@ describe_current do
   describe "#call" do
     describe "when the bearer name matches" do
       it "instruments an oauthbearer.token_refresh event" do
-        instrumented_calls = []
+        @monitor.expects(:instrument).with(
+          "oauthbearer.token_refresh",
+          bearer: @bearer,
+          caller: @callback
+        )
 
-        @monitor.stub(:instrument, lambda { |event_name, **kwargs|
-          instrumented_calls << [event_name, kwargs]
-        }) do
-          @callback.call(@rd_config, @bearer_name)
-        end
-
-        assert_equal(1, instrumented_calls.size)
-        assert_equal("oauthbearer.token_refresh", instrumented_calls.first[0])
-        assert_equal(@bearer, instrumented_calls.first[1][:bearer])
-        assert_equal(@callback, instrumented_calls.first[1][:caller])
+        @callback.call(@rd_config, @bearer_name)
       end
     end
 
@@ -33,15 +28,9 @@ describe_current do
       end
 
       it "does not instrument any event" do
-        instrumented_calls = []
+        @monitor.expects(:instrument).never
 
-        @monitor.stub(:instrument, lambda { |event_name, **kwargs|
-          instrumented_calls << [event_name, kwargs]
-        }) do
-          @callback.call(@rd_config, @bearer_name)
-        end
-
-        assert_empty(instrumented_calls)
+        @callback.call(@rd_config, @bearer_name)
       end
     end
 
