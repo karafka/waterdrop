@@ -44,7 +44,7 @@ jobs:
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -107,7 +107,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: '4.0.1'
           bundler-cache: true
@@ -124,7 +124,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: '4.0.1'
           bundler-cache: true
@@ -139,7 +139,7 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: '4.0.1'
           bundler-cache: true
@@ -196,7 +196,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: '4.0.1'
           bundler-cache: true
@@ -263,7 +263,7 @@ jobs:
           echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@6ca151fd1bfcfd6fe0c4eb6837eb0584d0134a0c # v1.290.0
+        uses: ruby/setup-ruby@4eb9f110bac952a8b68ecf92e3b5c7a987594ba6 # v1.292.0
         with:
           ruby-version: '4.0.1'
           bundler-cache: true
