@@ -36,7 +36,7 @@ begin
   variant_created = true
 
   # Try to produce with the variant to trigger validation if deferred
-  topic_name = "it-#{SPEC_HASH}-idem-variant-acks-#{SecureRandom.hex(4)}"
+  topic_name = generate_topic("idem-variant-acks")
   variant.produce_sync(topic: topic_name, payload: "test")
 rescue WaterDrop::Errors::VariantInvalidError => e
   # This is the expected error

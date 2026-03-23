@@ -3,7 +3,7 @@
 describe_current do
   before do
     @config = described_class.new
-    @topic_name = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}"
+    @topic_name = generate_topic
   end
 
   describe "#setup" do

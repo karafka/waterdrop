@@ -5,7 +5,7 @@ describe_current do
     @producer = build(:producer)
     @timeout_ms = 1000 # 1 second for fast tests
     @disconnected_events = []
-    @topic_name = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}"
+    @topic_name = generate_topic
     @listener = described_class.new(@producer, disconnect_timeout: @timeout_ms)
 
     @producer.monitor.subscribe("producer.disconnected") do |event|

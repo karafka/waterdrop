@@ -6,7 +6,7 @@ describe_current do
     @config_error = WaterDrop::Errors::VariantInvalidError
     @produce_error = WaterDrop::Errors::ProduceError
     @rd_config_error = Rdkafka::Config::ConfigError
-    @topic = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}"
+    @topic = generate_topic
   end
 
   after { @producer.close }

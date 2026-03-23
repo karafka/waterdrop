@@ -53,7 +53,7 @@ producer2 = WaterDrop::Producer.new(&configure_producer)
   producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 end
 
-topic_name = "it-#{SPEC_HASH}-fence-loop-#{SecureRandom.hex(4)}"
+topic_name = generate_topic("fence-loop")
 
 # First transaction with producer1
 producer1.transaction do

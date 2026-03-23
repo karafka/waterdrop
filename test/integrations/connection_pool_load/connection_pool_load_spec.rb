@@ -36,7 +36,7 @@ threads = Array.new(THREAD_COUNT) do |thread_index|
     MESSAGES_PER_THREAD.times do |msg_index|
       # Use a producer from the pool
       pool.with do |producer|
-        topic = "it-#{SPEC_HASH}-pool-#{SecureRandom.hex(4)}"
+        topic = generate_topic("pool")
 
         result = producer.produce_sync(
           topic: topic,

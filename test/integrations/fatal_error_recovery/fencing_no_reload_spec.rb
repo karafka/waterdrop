@@ -36,7 +36,7 @@ producer1.monitor.subscribe("producer.reloaded") { |event| reload_events << even
 producer1.monitor.subscribe("error.occurred") { |event| error_events << event }
 
 # Start a transaction with first producer
-topic_name = "it-#{SPEC_HASH}-fence-#{SecureRandom.hex(4)}"
+topic_name = generate_topic("fence")
 producer1.transaction do
   producer1.produce_sync(topic: topic_name, payload: "message1")
 end

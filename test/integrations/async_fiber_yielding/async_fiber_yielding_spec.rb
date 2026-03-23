@@ -37,7 +37,7 @@ Async do |task|
       before_call = Time.now
 
       # Each message gets its own topic, guaranteeing topic creation delay
-      unique_topic = "it-#{SPEC_HASH}-#{SecureRandom.hex(4)}-#{i}"
+      unique_topic = "#{generate_topic}-#{i}"
       message = message_template.merge(topic: unique_topic, key: "test_#{i}")
 
       producer.produce_sync(message)

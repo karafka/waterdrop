@@ -11,7 +11,7 @@ require "securerandom"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-topic_name = "it-#{SPEC_HASH}-closed-fork-#{SecureRandom.hex(4)}"
+topic_name = generate_topic("closed-fork")
 
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {

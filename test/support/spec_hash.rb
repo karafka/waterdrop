@@ -21,3 +21,15 @@ SPEC_HASH = begin
 
   Digest::MD5.hexdigest(relative_path)[0, 8]
 end
+
+# Generates a unique topic name that includes SPEC_HASH for traceability.
+#
+# @param label [String, nil] optional descriptive label (e.g., "fd-stats", "tx-concurrent")
+# @return [String] topic name like "it-a1b2c3d4-abcdef012345" or "it-a1b2c3d4-fd-stats-abcd0123"
+def generate_topic(label = nil)
+  if label
+    "it-#{SPEC_HASH}-#{label}-#{SecureRandom.hex(4)}"
+  else
+    "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}"
+  end
+end

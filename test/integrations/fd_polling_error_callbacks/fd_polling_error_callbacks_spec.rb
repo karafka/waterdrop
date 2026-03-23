@@ -34,7 +34,7 @@ producer.monitor.subscribe("message.acknowledged") do |event|
   delivery_reports << event[:offset]
 end
 
-topic = "it-#{SPEC_HASH}-fd-error-callbacks-#{SecureRandom.hex(4)}"
+topic = generate_topic("fd-error-callbacks")
 
 handles = []
 MESSAGE_COUNT.times do |i|

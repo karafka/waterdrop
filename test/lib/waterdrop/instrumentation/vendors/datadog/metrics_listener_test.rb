@@ -31,7 +31,7 @@ describe_current do
       config.client = @dummy_client
     end
 
-    @topic = "it-#{SPEC_HASH}-#{SecureRandom.hex(6)}"
+    @topic = generate_topic
 
     @producer = build(:producer)
     @producer.monitor.subscribe @listener
