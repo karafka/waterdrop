@@ -6,7 +6,6 @@
 allowed_patterns=(
    "Performing controller activation"
    "registered with feature metadata.version"
-   "TOPIC_ALREADY_EXISTS"
 )
 
 # Get all warnings
