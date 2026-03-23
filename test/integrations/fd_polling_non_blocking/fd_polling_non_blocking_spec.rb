@@ -23,7 +23,7 @@ producer = WaterDrop::Producer.new do |config|
   config.max_wait_timeout = 5_000
 end
 
-topic = "it-fd-non-blocking-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-non-blocking")
 
 begin
   producer.produce_sync(topic: topic, payload: "warmup")

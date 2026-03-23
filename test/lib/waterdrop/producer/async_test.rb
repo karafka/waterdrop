@@ -311,7 +311,7 @@ describe_current do
         max_attempts_on_idempotent_fatal_error: 3,
         wait_backoff_on_idempotent_fatal_error: 100
       )
-      @topic_name = "it-#{SecureRandom.uuid}"
+      @topic_name = generate_topic
       @message = build(:valid_message, topic: @topic_name)
       @producer.singleton_class.include(WaterDrop::Producer::Testing)
     end
@@ -392,7 +392,7 @@ describe_current do
         max_attempts_on_idempotent_fatal_error: 3,
         wait_backoff_on_idempotent_fatal_error: 100
       )
-      @topic_name = "it-#{SecureRandom.uuid}"
+      @topic_name = generate_topic
       @messages = Array.new(3) { build(:valid_message, topic: @topic_name) }
       @producer.singleton_class.include(WaterDrop::Producer::Testing)
     end
@@ -486,7 +486,7 @@ describe_current do
         :idempotent_producer,
         reload_on_idempotent_fatal_error: false
       )
-      @topic_name = "it-#{SecureRandom.uuid}"
+      @topic_name = generate_topic
       @message = build(:valid_message, topic: @topic_name)
       @messages = Array.new(3) { build(:valid_message, topic: @topic_name) }
       @reload_events = []

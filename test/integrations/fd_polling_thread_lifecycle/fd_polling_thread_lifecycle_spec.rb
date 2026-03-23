@@ -29,7 +29,7 @@ def create_fd_producer
   end
 end
 
-topic = "it-fd-lifecycle-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-lifecycle")
 failed = false
 
 # Test 1: Thread starts with first producer

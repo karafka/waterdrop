@@ -35,7 +35,7 @@ producer.monitor.subscribe("statistics.emitted") do |_event|
   end
 end
 
-topic = "it-fd-stats-wakeup-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-stats-wakeup")
 
 begin
   producer.produce_sync(topic: topic, payload: "initial message")

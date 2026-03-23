@@ -53,7 +53,7 @@ producer.client.define_singleton_method(:produce) do |**kwargs|
   end
 end
 
-topic_name = "it-idem-reload-#{SecureRandom.hex(6)}"
+topic_name = generate_topic("idem-reload")
 
 # Produce messages - first one will trigger fatal error and reload
 successful_messages = 0

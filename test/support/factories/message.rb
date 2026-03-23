@@ -7,7 +7,7 @@ module Factories
     # @return [Hash] valid message
     def valid_message_factory(overrides = {})
       defaults = {
-        topic: "it-#{SecureRandom.uuid}",
+        topic: generate_topic,
         payload: rand.to_s,
         partition_key: nil,
         label: nil,

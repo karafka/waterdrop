@@ -38,7 +38,7 @@ producer.monitor.subscribe("error.occurred") do |event|
   errors << event[:error].message
 end
 
-topic = "it-fd-idempotent-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-idempotent")
 
 handles = []
 MESSAGE_COUNT.times do |i|

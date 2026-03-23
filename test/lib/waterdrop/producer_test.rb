@@ -4,7 +4,7 @@ describe_current do
   before do
     @producer = described_class.new
     @_initial_producer = @producer
-    @topic_name = "it-#{SecureRandom.uuid}"
+    @topic_name = generate_topic
   end
 
   after do
@@ -164,7 +164,7 @@ describe_current do
 
     context "when topic does not exist" do
       before do
-        @topic = "it-#{SecureRandom.uuid}"
+        @topic = generate_topic
       end
 
       it do
@@ -180,7 +180,7 @@ describe_current do
 
     context "when topic exists" do
       before do
-        @topic = "it-#{SecureRandom.uuid}"
+        @topic = generate_topic
         @producer.produce_sync(topic: @topic, payload: "")
       end
 

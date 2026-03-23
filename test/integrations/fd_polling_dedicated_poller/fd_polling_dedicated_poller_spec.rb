@@ -12,7 +12,7 @@
 require "waterdrop"
 require "securerandom"
 
-topic = "it-fd-dedicated-poller-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-dedicated-poller")
 failed = false
 
 # Track callbacks per producer

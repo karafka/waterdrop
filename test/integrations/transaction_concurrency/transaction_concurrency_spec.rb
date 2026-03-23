@@ -18,7 +18,7 @@ MESSAGES_PER_THREAD = 10
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
     "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
-    "transactional.id": "it-tx-concurrent-#{SecureRandom.hex(6)}"
+    "transactional.id": generate_topic("tx-concurrent")
   }
 end
 
@@ -32,7 +32,7 @@ threads = Array.new(THREAD_COUNT) do |thread_index|
   Thread.new do
     # Each thread performs multiple transactions
     MESSAGES_PER_THREAD.times do |msg_index|
-      topic = "it-tx-concurrent-#{SecureRandom.hex(6)}"
+      topic = generate_topic("tx-concurrent")
 
       producer.transaction do
         # Send multiple messages per transaction

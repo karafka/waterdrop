@@ -33,7 +33,7 @@ end
 producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
 producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 
-topic_name = "it-reload-disabled-#{SecureRandom.hex(6)}"
+topic_name = generate_topic("reload-disabled")
 
 # Produce messages - should work normally
 successful_messages = 0

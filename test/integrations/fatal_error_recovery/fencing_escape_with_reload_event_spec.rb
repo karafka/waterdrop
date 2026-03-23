@@ -46,7 +46,7 @@ end
 producer1.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
 producer1.monitor.subscribe("error.occurred") { |event| error_events << event }
 
-topic_name = "it-fence-escape-#{SecureRandom.hex(6)}"
+topic_name = generate_topic("fence-escape")
 
 # First transaction with producer1
 producer1.transaction do

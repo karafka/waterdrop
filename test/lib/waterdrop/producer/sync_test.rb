@@ -3,7 +3,7 @@
 describe_current do
   before do
     @producer = build(:producer)
-    @topic_name = "it-#{SecureRandom.uuid}"
+    @topic_name = generate_topic
   end
 
   after { @producer.close }

@@ -38,7 +38,7 @@ end
 producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
 producer.monitor.subscribe("error.occurred") { |event| error_events << event }
 
-topic_name = "it-tx-reload-#{SecureRandom.hex(6)}"
+topic_name = generate_topic("tx-reload")
 
 # Verify configuration is set correctly
 config_valid = producer.config.reload_on_transaction_fatal_error == true &&

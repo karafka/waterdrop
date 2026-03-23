@@ -4,7 +4,7 @@ describe_current do
   before do
     @buffered_message_stub = Struct.new(:topic, :partition, :offset, keyword_init: true)
     @buffered_consumer_stub = Struct.new(:consumer_group_metadata_pointer, keyword_init: true)
-    @topic_name = "it-#{SecureRandom.uuid}"
+    @topic_name = generate_topic
     @producer = WaterDrop::Producer.new do |config|
       config.deliver = false
       config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
@@ -191,7 +191,7 @@ describe_current do
 
     context "when we try to store offset without a transaction" do
       before do
-        @topic = "it-#{SecureRandom.uuid}"
+        @topic = generate_topic
         @message = @buffered_message_stub.new(topic: @topic, partition: 0, offset: 10)
       end
 
@@ -205,7 +205,7 @@ describe_current do
 
     context "when trying to store offset with transaction" do
       before do
-        @topic = "it-#{SecureRandom.uuid}"
+        @topic = generate_topic
         @consumer = @buffered_consumer_stub.new(consumer_group_metadata_pointer: nil)
         @message = @buffered_message_stub.new(topic: @topic, partition: 0, offset: 10)
       end

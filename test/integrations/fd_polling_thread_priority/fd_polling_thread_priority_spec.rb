@@ -11,7 +11,7 @@ require "waterdrop"
 require "securerandom"
 
 EXPECTED_PRIORITY = -2
-topic = "it-fd-priority-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-priority")
 failed = false
 callback_thread_priority = nil
 callback_thread_name = nil

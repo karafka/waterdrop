@@ -7,7 +7,7 @@ describe_current do
     @transactional_consumer_stub = Struct.new(:consumer_group_metadata_pointer, :dummy, keyword_init: true)
     @transactional_id = SecureRandom.uuid
     @critical_error = Exception
-    @topic_name = "it-#{SecureRandom.uuid}"
+    @topic_name = generate_topic
   end
 
   after { @producer.close }

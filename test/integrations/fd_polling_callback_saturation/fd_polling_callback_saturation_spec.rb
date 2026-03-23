@@ -23,7 +23,7 @@ require "securerandom"
 SLOW_CALLBACK_DURATION = 3 # seconds
 STATS_INTERVAL_MS = 1_000 # 1 second
 
-topic = "it-fd-saturation-#{SecureRandom.hex(6)}"
+topic = generate_topic("fd-saturation")
 failed = false
 
 producer1_stats_count = 0

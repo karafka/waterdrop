@@ -3,7 +3,7 @@
 describe_current do
   before do
     @config = described_class.new
-    @topic_name = "it-#{SecureRandom.uuid}"
+    @topic_name = generate_topic
   end
 
   describe "#setup" do

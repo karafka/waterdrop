@@ -67,7 +67,7 @@ describe_current do
 
   describe "fatal error handling" do
     before do
-      @topic_name = "it-#{SecureRandom.uuid}"
+      @topic_name = generate_topic
       @message = build(:valid_message, topic: @topic_name)
     end
 
