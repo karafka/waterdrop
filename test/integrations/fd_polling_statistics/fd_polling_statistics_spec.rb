@@ -36,7 +36,7 @@ producer.monitor.subscribe("statistics.emitted") do |event|
   end
 end
 
-topic = "it-fd-stats-#{SecureRandom.hex(6)}"
+topic = "it-#{SPEC_HASH}-fd-stats-#{SecureRandom.hex(4)}"
 
 begin
   producer.produce_sync(topic: topic, payload: "initial message")

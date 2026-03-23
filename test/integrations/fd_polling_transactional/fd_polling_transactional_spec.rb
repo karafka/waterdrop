@@ -20,7 +20,7 @@ errors = []
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
     "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
-    "transactional.id": "it-fd-tx-#{SecureRandom.hex(6)}"
+    "transactional.id": "it-#{SPEC_HASH}-fd-tx-#{SecureRandom.hex(4)}"
   }
   config.polling.mode = :fd
   config.max_wait_timeout = 30_000
@@ -34,7 +34,7 @@ producer.monitor.subscribe("error.occurred") do |event|
   errors << event[:error].message
 end
 
-topic = "it-fd-transactional-#{SecureRandom.hex(6)}"
+topic = "it-#{SPEC_HASH}-fd-transactional-#{SecureRandom.hex(4)}"
 
 TRANSACTION_COUNT.times do |tx_index|
   producer.transaction do

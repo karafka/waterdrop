@@ -17,7 +17,7 @@ require "securerandom"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-topic_name = "it-testing-api-#{SecureRandom.hex(6)}"
+topic_name = "it-#{SPEC_HASH}-testing-api-#{SecureRandom.hex(4)}"
 
 # Test 1: Producer with reload disabled - should NOT recover
 producer_no_reload = WaterDrop::Producer.new do |config|

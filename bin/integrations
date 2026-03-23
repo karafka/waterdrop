@@ -142,6 +142,7 @@ class Scenario
     # We copy the spec into a temp dir, not to pollute the spec location with logs, etc
     temp_dir = Dir.mktmpdir
     file_name = File.basename(@path)
+    spec_file_path = @path.sub("#{ROOT_PATH}/", "")
 
     FileUtils.cp_r("#{scenario_dir}/.", temp_dir)
 
@@ -151,7 +152,8 @@ class Scenario
       bundle install &&
       BUNDLE_AUTO_INSTALL=true \
       WATERDROP_GEM_DIR=#{ROOT_PATH} \
-      bundle exec ruby #{file_name}
+      SPEC_FILE_PATH=#{spec_file_path} \
+      bundle exec ruby -r "#{ROOT_PATH}/test/support/spec_hash" #{file_name}
     CMD
   end
 

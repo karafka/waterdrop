@@ -77,6 +77,7 @@ class Minitest::Spec
   end
 end
 
+require_relative "support/spec_hash"
 require_relative "support/factories"
 require_relative "support/factories/message"
 require_relative "support/factories/producer"

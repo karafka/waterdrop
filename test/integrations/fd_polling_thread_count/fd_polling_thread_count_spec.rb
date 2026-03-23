@@ -29,7 +29,7 @@ def thread_count
   Thread.list.count
 end
 
-topic = "it-fd-thread-count-#{SecureRandom.hex(6)}"
+topic = "it-#{SPEC_HASH}-fd-thread-count-#{SecureRandom.hex(4)}"
 failed = false
 
 # Get baseline thread count

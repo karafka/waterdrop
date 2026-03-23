@@ -15,7 +15,7 @@ require "timeout"
 
 DEADLOCK_TIMEOUT = 10 # seconds
 
-topic = "it-fd-deadlock-#{SecureRandom.hex(6)}"
+topic = "it-#{SPEC_HASH}-fd-deadlock-#{SecureRandom.hex(4)}"
 failed = false
 
 # Test 1: Close producer from delivery callback
