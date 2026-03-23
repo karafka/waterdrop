@@ -109,7 +109,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@dffb23f65a78bba8db45d387d5ea1bbd6be3ef18 # v1.293.0
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '4.0.2'
           bundler-cache: true
       - name: Run rubocop
         run: bundle exec rubocop
@@ -126,7 +126,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@dffb23f65a78bba8db45d387d5ea1bbd6be3ef18 # v1.293.0
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '4.0.2'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
@@ -141,7 +141,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@dffb23f65a78bba8db45d387d5ea1bbd6be3ef18 # v1.293.0
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '4.0.2'
           bundler-cache: true
 
       - name: Download coverage artifacts
@@ -198,7 +198,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@dffb23f65a78bba8db45d387d5ea1bbd6be3ef18 # v1.293.0
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '4.0.2'
           bundler-cache: true
           bundler: 'latest'
 
@@ -265,7 +265,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@dffb23f65a78bba8db45d387d5ea1bbd6be3ef18 # v1.293.0
         with:
-          ruby-version: '4.0.1'
+          ruby-version: '4.0.2'
           bundler-cache: true
           bundler: 'latest'
 
