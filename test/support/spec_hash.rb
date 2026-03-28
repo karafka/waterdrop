@@ -39,3 +39,16 @@ def generate_topic(label = nil)
     "it-#{spec_hash}-#{SecureRandom.hex(6)}"
   end
 end
+
+# Pre-creates a Kafka topic via the admin API to avoid TOPIC_ALREADY_EXISTS race conditions
+# that occur when concurrent produce requests trigger auto-topic creation simultaneously.
+#
+# @param topic_name [String] the topic name to create
+# @param partitions [Integer] number of partitions (default: 1)
+# @param replication_factor [Integer] replication factor (default: 1)
+# @param topic_config [Hash] optional topic-level configuration (e.g., "max.message.bytes": 128)
+def create_topic(topic_name, partitions: 1, replication_factor: 1, **topic_config)
+  admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
+  admin.create_topic(topic_name, partitions, replication_factor, topic_config).wait
+  admin.close
+end
