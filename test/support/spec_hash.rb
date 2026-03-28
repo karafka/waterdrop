@@ -49,6 +49,10 @@ end
 # @param topic_config [Hash] optional topic-level configuration (e.g., "max.message.bytes": 128)
 def create_topic(topic_name, partitions: 1, replication_factor: 1, **topic_config)
   admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
-  admin.create_topic(topic_name, partitions, replication_factor, topic_config).wait
-  admin.close
+
+  begin
+    admin.create_topic(topic_name, partitions, replication_factor, topic_config).wait
+  ensure
+    admin&.close
+  end
 end
