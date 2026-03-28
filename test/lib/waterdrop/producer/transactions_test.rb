@@ -8,6 +8,7 @@ describe_current do
     @transactional_id = SecureRandom.uuid
     @critical_error = Exception
     @topic_name = generate_topic
+    create_topic(@topic_name)
   end
 
   after { @producer.close }
@@ -129,6 +130,7 @@ describe_current do
   context "when trying to use transaction on a non-existing topics and short time" do
     before do
       @producer = build(:transactional_producer, transaction_timeout_ms: 1_000)
+      @non_existing_topic = generate_topic
     end
 
     it "expect to crash with an inconsistent or a timeout state after abort" do
@@ -137,7 +139,7 @@ describe_current do
       begin
         @producer.transaction do
           20.times do |i|
-            @producer.produce_async(topic: @topic_name, payload: i.to_s)
+            @producer.produce_async(topic: @non_existing_topic, payload: i.to_s)
           end
         end
       rescue Rdkafka::RdkafkaError => e
@@ -157,12 +159,13 @@ describe_current do
   context "when trying to use transaction on a non-existing topics and enough time" do
     before do
       @producer = build(:transactional_producer)
+      @non_existing_topic = generate_topic
     end
 
     it "expect not to crash and publish all data" do
       @producer.transaction do
         10.times do |i|
-          @producer.produce_async(topic: @topic_name, payload: i.to_s)
+          @producer.produce_async(topic: @non_existing_topic, payload: i.to_s)
         end
       end
     end
@@ -748,9 +751,8 @@ describe_current do
         }
       end
 
-      admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
-      admin.create_topic(@topic_name, 1, 1, "max.message.bytes": 128).wait
-      admin.close
+      @small_topic = generate_topic
+      create_topic(@small_topic, "max.message.bytes": 128)
     end
 
     after { @prev_producer&.close }
@@ -759,28 +761,28 @@ describe_current do
       errored = false
 
       begin
-        @producer.produce_async(topic: @topic_name, payload: "1" * 512)
+        @producer.produce_async(topic: @small_topic, payload: "1" * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       assert(errored)
 
-      @producer.produce_async(topic: @topic_name, payload: "1")
+      @producer.produce_async(topic: @small_topic, payload: "1")
     end
 
     it "expect to be able to use same producer after the error when sync" do
       errored = false
 
       begin
-        @producer.produce_sync(topic: @topic_name, payload: "1" * 512)
+        @producer.produce_sync(topic: @small_topic, payload: "1" * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       assert(errored)
 
-      @producer.produce_sync(topic: @topic_name, payload: "1")
+      @producer.produce_sync(topic: @small_topic, payload: "1")
     end
   end
 
