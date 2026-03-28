@@ -751,7 +751,8 @@ describe_current do
         }
       end
 
-      create_topic(@topic_name, "max.message.bytes": 128)
+      @small_topic = generate_topic
+      create_topic(@small_topic, "max.message.bytes": 128)
     end
 
     after { @prev_producer&.close }
@@ -760,28 +761,28 @@ describe_current do
       errored = false
 
       begin
-        @producer.produce_async(topic: @topic_name, payload: "1" * 512)
+        @producer.produce_async(topic: @small_topic, payload: "1" * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       assert(errored)
 
-      @producer.produce_async(topic: @topic_name, payload: "1")
+      @producer.produce_async(topic: @small_topic, payload: "1")
     end
 
     it "expect to be able to use same producer after the error when sync" do
       errored = false
 
       begin
-        @producer.produce_sync(topic: @topic_name, payload: "1" * 512)
+        @producer.produce_sync(topic: @small_topic, payload: "1" * 512)
       rescue WaterDrop::Errors::ProduceError
         errored = true
       end
 
       assert(errored)
 
-      @producer.produce_sync(topic: @topic_name, payload: "1")
+      @producer.produce_sync(topic: @small_topic, payload: "1")
     end
   end
 
