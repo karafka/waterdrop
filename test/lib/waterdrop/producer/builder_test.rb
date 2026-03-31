@@ -25,6 +25,7 @@ describe_current do
       @config = producer_config.config
 
       @producer_inst.stubs(:config).returns(@config)
+      @producer_inst.stubs(:monitor).returns(@config.monitor)
       @client = described_class.new.call(@producer_inst, @config)
     end
 
@@ -46,6 +47,7 @@ describe_current do
         @config = producer_config.config
 
         @producer_inst.stubs(:config).returns(@config)
+        @producer_inst.stubs(:monitor).returns(@config.monitor)
         @client = described_class.new.call(@producer_inst, @config)
       end
 
@@ -65,6 +67,7 @@ describe_current do
         end
 
         @producer_inst.stubs(:config).returns(@config)
+        @producer_inst.stubs(:monitor).returns(@config.monitor)
         @client = described_class.new.call(@producer_inst, @config)
 
         @client.delivery_callback.call(@delivery_report)

@@ -35,7 +35,7 @@ if coverage
 
   # Don't include unnecessary stuff into rcov
   SimpleCov.start do
-    command_name "Minitest-#{(ENV["FD_POLLING"] == "true") ? "fiber" : "thread"}"
+    command_name "Minitest-#{(ENV["THREAD_POLLING"] == "true") ? "thread" : "fiber"}"
 
     add_filter "/test/"
     add_filter "/vendor/"
@@ -112,7 +112,7 @@ class Minitest::Spec
       producer.close unless producer.status.closed?
     end
 
-    if ENV["FD_POLLING"] == "true"
+    unless ENV["THREAD_POLLING"] == "true"
       WaterDrop::Polling::Poller.instance.shutdown!
     end
   end

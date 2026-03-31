@@ -152,10 +152,10 @@ describe_current do
         end
       end
 
-      it "defaults to :thread" do
+      it "defaults to :fd" do
         @config.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
 
-        assert_equal(:thread, @config.config.polling.mode)
+        assert_equal(:fd, @config.config.polling.mode)
       end
     end
 

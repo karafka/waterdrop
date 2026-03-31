@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
-## 2.8.17 (Unreleased)
+## 2.9.0 (Unreleased)
+- **[Breaking]** Switch default polling mode from `:thread` to `:fd`. If you experience any issues, you can revert to the previous behavior by setting `config.polling.mode = :thread`. The `:thread` mode will be deprecated in 2.10 and removed in 2.11.
 - [Change] Upscale default timeout values 3x closer to librdkafka defaults to prevent intermediate timeouts during node recovery (`message.timeout.ms`: 50s → 150s, `transaction.timeout.ms`: 55s → 165s, `max_wait_timeout`: 60s → 180s).
 
 ## 2.8.16 (2026-02-25)

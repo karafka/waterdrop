@@ -143,9 +143,9 @@ module WaterDrop
     # Namespace for polling configuration
     setting :polling do
       # option [Symbol] Polling mode for handling producer callbacks
-      # :thread - uses librdkafka's native background polling threads (default)
-      # :fd - uses a single global Ruby thread with IO.select-based multiplexing
-      setting :mode, default: :thread
+      # :fd - uses a single global Ruby thread with IO.select-based multiplexing (default)
+      # :thread - uses librdkafka's native background polling threads
+      setting :mode, default: :fd
 
       # option [WaterDrop::Polling::Poller, nil] Custom poller instance for isolation
       # When nil (default), uses the global singleton poller shared by all FD-mode producers
