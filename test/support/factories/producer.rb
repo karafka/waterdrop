@@ -6,8 +6,8 @@ module Factories
     # @param overrides [Hash] attributes we want to override
     # @return [WaterDrop::Producer] producer
     def producer_factory(overrides = {})
-      # Enable FD-based polling when FD_POLLING env var is set to 'true'
-      polling_mode = (ENV["FD_POLLING"] == "true") ? :fd : :thread
+      # Allow overriding polling mode via env var (default is :fd)
+      polling_mode = (ENV["THREAD_POLLING"] == "true") ? :thread : :fd
 
       defaults = {
         deliver: true,
