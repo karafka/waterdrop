@@ -96,6 +96,14 @@ module WaterDrop
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
       @default_variant = Variant.new(self, default: true)
 
+      if @config.polling.mode == :thread
+        Kernel.warn(
+          '[WaterDrop] The :thread polling mode is deprecated and will be removed in ' \
+          'version 2.10. Please switch to :fd mode (now the default) which provides better ' \
+          'throughput, lower memory usage, and fewer threads.'
+        )
+      end
+
       if @config.idle_disconnect_timeout.zero?
         @status.configured!
 
