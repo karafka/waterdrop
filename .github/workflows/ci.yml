@@ -72,12 +72,12 @@ jobs:
       - name: Run all tests
         env:
           GITHUB_COVERAGE: ${{matrix.coverage}}
-          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         run: bundle exec rake test
 
       - name: Run integration tests
         env:
-          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         # Exclude oauth_token_refresh - requires separate Keycloak + OAuth Kafka infrastructure
         run: ./bin/integrations --exclude oauth_token_refresh
 
@@ -230,7 +230,7 @@ jobs:
 
       - name: Run OAuth integration test
         env:
-          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         run: ./bin/integrations oauth_token_refresh
 
       - name: Show Keycloak logs on failure
@@ -339,12 +339,12 @@ jobs:
 
       - name: Run all tests
         env:
-          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         run: bundle exec rake test
 
       - name: Run integration tests
         env:
-          FD_POLLING: ${{ matrix.polling_mode == 'fiber' && 'true' || 'false' }}
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         run: ./bin/integrations --exclude oauth_token_refresh
 
   ci-success:
