@@ -131,7 +131,6 @@ describe_current do
         end
 
         message = build(:valid_message, label: "test")
-        # Pre-create the topic to avoid concurrent auto-create causing TOPIC_ALREADY_EXISTS warnings
         create_topic(message[:topic])
         threads = Array.new(20) do
           Thread.new do
