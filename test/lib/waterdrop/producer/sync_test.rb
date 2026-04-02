@@ -131,6 +131,7 @@ describe_current do
         end
 
         message = build(:valid_message, label: "test")
+        create_topic(message[:topic])
         threads = Array.new(20) do
           Thread.new do
             @producer.produce_sync(message)
