@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 jobs:
-  specs:
+  tests:
     timeout-minutes: 15
     runs-on: ubuntu-latest
     strategy:
@@ -134,7 +134,7 @@ jobs:
   coverage:
     timeout-minutes: 5
     runs-on: ubuntu-latest
-    needs: specs
+    needs: tests
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
@@ -241,7 +241,7 @@ jobs:
         if: failure()
         run: docker compose -f docker-compose.oauth.yml logs kafka-oauth
 
-  specs-macos:
+  tests-macos:
     timeout-minutes: 30
     runs-on: macos-15
     env:
@@ -353,8 +353,8 @@ jobs:
     if: always()
     needs:
       - rubocop
-      - specs
-      - specs-macos
+      - tests
+      - tests-macos
       - yard-lint
       - coverage
       - lostconf
