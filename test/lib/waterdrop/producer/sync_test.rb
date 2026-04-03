@@ -4,6 +4,7 @@ describe_current do
   before do
     @producer = build(:producer)
     @topic_name = generate_topic
+    create_topic(@topic_name)
   end
 
   after { @producer.close }
@@ -209,6 +210,7 @@ describe_current do
       before do
         @topic1 = @topic_name
         @topic2 = "#{@topic1}-2"
+        create_topic(@topic2)
 
         @messages = [
           { topic: @topic1, payload: "message1", partition: 0 },
