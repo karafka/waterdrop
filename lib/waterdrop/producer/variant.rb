@@ -90,7 +90,7 @@ module WaterDrop
 
               @producer.#{method_name}(*args, &block)
             ensure
-              ref[@producer.id] = nil
+              ref.delete(@producer.id)
             end
           RUBY
         end
