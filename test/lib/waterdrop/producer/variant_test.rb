@@ -129,6 +129,7 @@ describe_current do
         @variant.produce_sync(topic: @topic, payload: "")
 
         clients = Fiber.current.waterdrop_clients
+
         refute clients.key?(@producer.id), "Expected producer key to be deleted, got: #{clients.inspect}"
       end
 
@@ -140,6 +141,7 @@ describe_current do
         3.times { @variant.produce_sync(topic: @topic, payload: "") }
 
         clients = Fiber.current.waterdrop_clients
+
         assert_equal 0, clients.size, "Expected empty hash, got: #{clients.inspect}"
       end
 

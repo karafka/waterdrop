@@ -21,7 +21,7 @@ producer = WaterDrop::Producer.new do |config|
   config.logger = Logger.new($stdout, level: Logger::INFO)
 end
 
-variant = producer.with(topic_config: { "acks": 1 })
+variant = producer.with(topic_config: { acks: 1 })
 
 topic = generate_topic("variant-cleanup")
 
@@ -71,7 +71,7 @@ producer2 = WaterDrop::Producer.new do |config|
   config.logger = Logger.new($stdout, level: Logger::INFO)
 end
 
-variant2 = producer2.with(topic_config: { "acks": 1 })
+variant2 = producer2.with(topic_config: { acks: 1 })
 
 fiber3 = Fiber.new do
   variant.produce_async(topic: topic, payload: "hello")
