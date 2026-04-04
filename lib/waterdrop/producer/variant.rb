@@ -81,7 +81,7 @@ module WaterDrop
           #
           #     @producer.produce_async(*args, &block)
           #   ensure
-          #     ref[@producer.id] = nil
+          #     ref.delete(@producer.id)
           #   end
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def #{method_name}(*args, &block)
