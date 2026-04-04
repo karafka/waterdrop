@@ -295,7 +295,7 @@ describe_current do
 
   context "when producing and disconnected in a loop" do
     before do
-      @message = build(:valid_message)
+      @message = build(:valid_message, topic: @topic_name)
     end
 
     it "expect to always disconnect and reconnect and continue to produce" do

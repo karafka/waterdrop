@@ -119,6 +119,36 @@ describe_current do
     end
   end
 
+  context "when variant method completes" do
+    before do
+      @variant = @producer.with(topic_config: { acks: 1 })
+    end
+
+    it "expect to fully remove the producer key from fiber-local waterdrop_clients" do
+      fiber = Fiber.new do
+        @variant.produce_sync(topic: @topic, payload: "")
+
+        clients = Fiber.current.waterdrop_clients
+
+        refute clients.key?(@producer.id), "Expected producer key to be deleted, got: #{clients.inspect}"
+      end
+
+      fiber.resume
+    end
+
+    it "expect to not accumulate stale keys across multiple calls" do
+      fiber = Fiber.new do
+        3.times { @variant.produce_sync(topic: @topic, payload: "") }
+
+        clients = Fiber.current.waterdrop_clients
+
+        assert_equal 0, clients.size, "Expected empty hash, got: #{clients.inspect}"
+      end
+
+      fiber.resume
+    end
+  end
+
   context "when trying to lower the acks on an idempotent producer" do
     before do
       @producer = build(:idempotent_producer)

@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.9.0 (Unreleased)
+- [Fix] Use `delete` in the variant ensure block to avoid leaving stale nil entries in `Fiber.current.waterdrop_clients` and prevent memory leaks in long-running processes (#836).
 - [Fix] Exclude test files, `.github/`, and `log/` directories from gem releases to reduce package size.
 - **[Breaking]** Switch default polling mode from `:thread` to `:fd`. If you experience any issues, you can revert to the previous behavior by setting `config.polling.mode = :thread`. The `:thread` mode will be deprecated in 2.10 and removed in 2.11.
 - [Change] Upscale default timeout values 3x closer to librdkafka defaults to prevent intermediate timeouts during node recovery (`message.timeout.ms`: 50s → 150s, `transaction.timeout.ms`: 55s → 165s, `max_wait_timeout`: 60s → 180s).
