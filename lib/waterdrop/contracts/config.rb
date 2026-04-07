@@ -33,9 +33,12 @@ module WaterDrop
       required(:non_reloadable_errors) do |val|
         val.is_a?(Array) && val.all?(Symbol)
       end
+
       required(:idle_disconnect_timeout) do |val|
         val.is_a?(Integer) && (val.zero? || val >= 30_000)
       end
+
+      required(:statistics_decorator) { |val| val.respond_to?(:call) }
 
       nested(:oauth) do
         required(:token_provider_listener) do |val|

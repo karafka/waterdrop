@@ -25,7 +25,12 @@ module WaterDrop
           # Register statistics runner for this particular type of callbacks
           ::Karafka::Core::Instrumentation.statistics_callbacks.add(
             producer.id,
-            Instrumentation::Callbacks::Statistics.new(producer.id, client.name, monitor)
+            Instrumentation::Callbacks::Statistics.new(
+              producer.id,
+              client.name,
+              monitor,
+              producer.config.statistics_decorator
+            )
           )
 
           # Register error tracking callback

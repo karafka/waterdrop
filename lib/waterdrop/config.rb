@@ -116,6 +116,23 @@ module WaterDrop
     #   prevent overly aggressive disconnections.
     setting :idle_disconnect_timeout, default: 0
 
+    # option [Karafka::Core::Monitoring::StatisticsDecorator] decorator instance used to compute
+    #   deltas (_d) and freeze durations (_fd) on raw librdkafka statistics. The default is
+    #   pre-configured with `only_keys` covering keys used by the built-in Datadog metrics
+    #   listener and `excluded_keys` skipping subtrees not needed by producers (topics, broker
+    #   window stats). Users who need additional decorated keys or full decoration can provide
+    #   a custom decorator instance.
+    setting(
+      :statistics_decorator,
+      default: false,
+      constructor: lambda { |decorator|
+        decorator || ::Karafka::Core::Monitoring::StatisticsDecorator.new(
+          only_keys: %w[tx txretries txerrs rxerrs],
+          excluded_keys: %w[int_latency outbuf_latency rtt throttle req toppars topics]
+        )
+      }
+    )
+
     # option [Boolean] should we send messages. Setting this to false can be really useful when
     #   testing and or developing because when set to false, won't actually ping Kafka but will
     #   run all the validations, etc

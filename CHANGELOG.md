@@ -4,6 +4,8 @@
 - [Fix] Use `delete` in the variant ensure block to avoid leaving stale nil entries in `Fiber.current.waterdrop_clients` and prevent memory leaks in long-running processes (#836).
 - [Fix] Exclude test files, `.github/`, and `log/` directories from gem releases to reduce package size.
 - **[Breaking]** Switch default polling mode from `:thread` to `:fd`. If you experience any issues, you can revert to the previous behavior by setting `config.polling.mode = :thread`. The `:thread` mode will be deprecated in 2.10 and removed in 2.11.
+- **[Breaking]** Statistics decorator now only decorates keys used by the built-in Datadog metrics listener (`tx`, `txretries`, `txerrs`, `rxerrs`) and skips unused subtrees (`topics`, broker window stats). This reduces decoration cost by ~425x on large clusters (10 brokers, 20 topics, 2000 partitions). Users who rely on other `_d` or `_fd` keys in custom instrumentation should provide a custom decorator via `config.statistics_decorator`.
+- [Feature] Add `config.statistics_decorator` setting to allow full control over the `StatisticsDecorator` instance used for statistics decoration. Users can provide a custom decorator with different `only_keys` and `excluded_keys` to match their instrumentation needs.
 - [Change] Upscale default timeout values 3x closer to librdkafka defaults to prevent intermediate timeouts during node recovery (`message.timeout.ms`: 50s → 150s, `transaction.timeout.ms`: 55s → 165s, `max_wait_timeout`: 60s → 180s).
 
 ## 2.8.16 (2026-02-25)

@@ -5,7 +5,12 @@ describe_current do
     @producer_id = SecureRandom.uuid
     @client_name = SecureRandom.uuid
     @monitor = WaterDrop::Instrumentation::Monitor.new
-    @callback = described_class.new(@producer_id, @client_name, @monitor)
+    @callback = described_class.new(
+      @producer_id,
+      @client_name,
+      @monitor,
+      ::Karafka::Core::Monitoring::StatisticsDecorator.new
+    )
   end
 
   describe "#call" do
@@ -36,7 +41,12 @@ describe_current do
     describe "when emitted statistics refer to expected producer" do
       before do
         @monitor = WaterDrop::Instrumentation::Monitor.new
-        @callback = described_class.new(@producer_id, @client_name, @monitor)
+        @callback = described_class.new(
+          @producer_id,
+          @client_name,
+          @monitor,
+          ::Karafka::Core::Monitoring::StatisticsDecorator.new
+        )
         @changed = []
         @statistics = { "name" => @client_name }
 
@@ -55,7 +65,12 @@ describe_current do
     describe "when we emit more statistics" do
       before do
         @monitor = WaterDrop::Instrumentation::Monitor.new
-        @callback = described_class.new(@producer_id, @client_name, @monitor)
+        @callback = described_class.new(
+          @producer_id,
+          @client_name,
+          @monitor,
+          ::Karafka::Core::Monitoring::StatisticsDecorator.new
+        )
         @changed = []
 
         @monitor.subscribe("statistics.emitted") do |event|
