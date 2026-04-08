@@ -20,7 +20,7 @@ describe_current do
 
     context "when message is valid" do
       before do
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
@@ -28,7 +28,7 @@ describe_current do
 
     context "when message has array headers" do
       before do
-        @message = build(:valid_message, headers: { "a" => %w[b c] })
+        @message = build(:valid_message, topic: @topic_name, headers: { "a" => %w[b c] })
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
@@ -36,7 +36,7 @@ describe_current do
 
     context "when message has invalid headers" do
       before do
-        @message = build(:valid_message, headers: { "a" => %i[b c] })
+        @message = build(:valid_message, topic: @topic_name, headers: { "a" => %i[b c] })
       end
 
       it { assert_raises(WaterDrop::Errors::MessageInvalidError) { @producer.produce_sync(@message) } }
@@ -44,7 +44,7 @@ describe_current do
 
     context "when message is valid and with label" do
       before do
-        @message = build(:valid_message, label: "test")
+        @message = build(:valid_message, topic: @topic_name, label: "test")
       end
 
       it { assert_equal("test", @producer.produce_sync(@message).label) }
@@ -52,7 +52,7 @@ describe_current do
 
     context "when producing with topic as a symbol" do
       before do
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
         @message[:topic] = @message[:topic].to_sym
       end
 
@@ -71,12 +71,12 @@ describe_current do
       end
     end
 
-    context "when producing sync to a topic that does not exist with partition_key" do
+    context "when producing sync with partition_key" do
       before do
-        @message = build(:valid_message, partition_key: "test", key: "test")
+        @message = build(:valid_message, topic: @topic_name, partition_key: "test", key: "test")
       end
 
-      it "expect not to raise error and work correctly as the topic should be created" do
+      it "expect not to raise error and work correctly" do
         assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message))
       end
     end
@@ -176,7 +176,7 @@ describe_current do
 
     context "when the last message out of a batch is invalid" do
       before do
-        @messages = [build(:valid_message), build(:invalid_message)]
+        @messages = [build(:valid_message, topic: @topic_name), build(:invalid_message)]
       end
 
       it { assert_raises(WaterDrop::Errors::MessageInvalidError) { @producer.produce_many_sync(@messages) } }
@@ -184,7 +184,7 @@ describe_current do
 
     context "when we have several valid messages" do
       before do
-        @messages = Array.new(10) { build(:valid_message) }
+        @messages = Array.new(10) { build(:valid_message, topic: @topic_name) }
       end
 
       it "expect all the results to be delivery handles" do
@@ -196,7 +196,7 @@ describe_current do
 
     context "when we have several valid messages with array headers" do
       before do
-        @messages = Array.new(10) { build(:valid_message, headers: { "a" => %w[b c] }) }
+        @messages = Array.new(10) { build(:valid_message, topic: @topic_name, headers: { "a" => %w[b c] }) }
       end
 
       it "expect all the results to be delivery handles" do
@@ -241,7 +241,7 @@ describe_current do
             "compression.codec": "gzip"
           }
         )
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
@@ -256,7 +256,7 @@ describe_current do
             "compression.codec": "zstd"
           }
         )
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
@@ -271,7 +271,7 @@ describe_current do
             "compression.codec": "lz4"
           }
         )
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
@@ -286,7 +286,7 @@ describe_current do
             "compression.codec": "snappy"
           }
         )
-        @message = build(:valid_message)
+        @message = build(:valid_message, topic: @topic_name)
       end
 
       it { assert_kind_of(Rdkafka::Producer::DeliveryReport, @producer.produce_sync(@message)) }
