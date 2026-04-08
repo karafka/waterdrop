@@ -7,14 +7,18 @@
 # 2. Neither producer deadlocks or blocks the other
 # 3. All transactions from both producers commit successfully
 # 4. Delivery reports are received correctly for both producers
+# 5. Producers truly run in parallel (total time well under sequential sum)
 
 require "waterdrop"
 require "securerandom"
 require "timeout"
 
-TRANSACTIONS_PER_PRODUCER = 10
+TRANSACTIONS_PER_PRODUCER = 2
 MESSAGES_PER_TRANSACTION = 5
+SLEEP_PER_TRANSACTION = 5 # seconds - sleep between transactions to prove parallelism
 DEADLOCK_TIMEOUT = 30 # seconds
+# If producers ran sequentially, total would be 2 * 2 * 5 = 20s. In parallel it should be ~10s.
+MAX_PARALLEL_TIME = 15 # seconds - generous upper bound for parallel execution
 
 topic = generate_topic("fd-two-tx")
 
@@ -59,6 +63,7 @@ producer2.monitor.subscribe("error.occurred") do |event|
 end
 
 failed = false
+start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
 begin
   Timeout.timeout(DEADLOCK_TIMEOUT) do
@@ -74,6 +79,8 @@ begin
             )
           end
         end
+
+        sleep(SLEEP_PER_TRANSACTION)
       end
     rescue => e
       mutex.synchronize { errors << "producer1 thread: #{e.message}" }
@@ -90,6 +97,8 @@ begin
             )
           end
         end
+
+        sleep(SLEEP_PER_TRANSACTION)
       end
     rescue => e
       mutex.synchronize { errors << "producer2 thread: #{e.message}" }
@@ -102,6 +111,8 @@ rescue Timeout::Error
   puts "Deadlock detected: two transactional producers blocked each other in :fd mode"
   failed = true
 end
+
+elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
 producer1.close
 producer2.close
@@ -120,6 +131,11 @@ end
 
 if producer2_deliveries.size != expected_per_producer
   puts "Producer 2: expected #{expected_per_producer} deliveries, got #{producer2_deliveries.size}"
+  failed = true
+end
+
+if elapsed > MAX_PARALLEL_TIME
+  puts "Producers did not run in parallel: took #{elapsed.round(1)}s (max #{MAX_PARALLEL_TIME}s)"
   failed = true
 end
 
