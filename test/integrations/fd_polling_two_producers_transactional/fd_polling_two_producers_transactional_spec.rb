@@ -120,8 +120,17 @@ rescue Timeout::Error
 ensure
   elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
 
-  producer1.close rescue nil
-  producer2.close rescue nil
+  begin
+    producer1.close
+  rescue
+    nil
+  end
+
+  begin
+    producer2.close
+  rescue
+    nil
+  end
 end
 
 expected_per_producer = TRANSACTIONS_PER_PRODUCER * MESSAGES_PER_TRANSACTION
