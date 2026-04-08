@@ -13,6 +13,7 @@ require "waterdrop"
 require "securerandom"
 require "timeout"
 
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 TRANSACTIONS_PER_PRODUCER = 2
 MESSAGES_PER_TRANSACTION = 5
 SLEEP_PER_TRANSACTION = 5 # seconds - sleep between transactions to prove parallelism
@@ -31,7 +32,7 @@ producer2_deliveries = []
 
 producer1 = WaterDrop::Producer.new do |config|
   config.kafka = {
-    "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
     "transactional.id": generate_topic("fd-two-tx-p1")
   }
   config.polling.mode = :fd
@@ -40,7 +41,7 @@ end
 
 producer2 = WaterDrop::Producer.new do |config|
   config.kafka = {
-    "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092"),
+    "bootstrap.servers": BOOTSTRAP_SERVERS,
     "transactional.id": generate_topic("fd-two-tx-p2")
   }
   config.polling.mode = :fd
