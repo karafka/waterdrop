@@ -21,6 +21,7 @@ DEADLOCK_TIMEOUT = 30 # seconds
 MAX_PARALLEL_TIME = 15 # seconds - generous upper bound for parallel execution
 
 topic = generate_topic("fd-two-tx")
+create_topic(topic)
 
 errors = []
 mutex = Mutex.new
@@ -63,6 +64,8 @@ producer2.monitor.subscribe("error.occurred") do |event|
 end
 
 failed = false
+thread1 = nil
+thread2 = nil
 start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
 
 begin
@@ -110,12 +113,16 @@ begin
 rescue Timeout::Error
   puts "Deadlock detected: two transactional producers blocked each other in :fd mode"
   failed = true
+
+  # Kill threads to avoid hanging on close
+  thread1&.kill
+  thread2&.kill
+ensure
+  elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
+
+  producer1.close rescue nil
+  producer2.close rescue nil
 end
-
-elapsed = Process.clock_gettime(Process::CLOCK_MONOTONIC) - start_time
-
-producer1.close
-producer2.close
 
 expected_per_producer = TRANSACTIONS_PER_PRODUCER * MESSAGES_PER_TRANSACTION
 
