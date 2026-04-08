@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## 2.9.0 (Unreleased)
+## 2.9.0 (2026-04-08)
 - [Fix] Use `delete` in the variant ensure block to avoid leaving stale nil entries in `Fiber.current.waterdrop_clients` and prevent memory leaks in long-running processes (#836).
 - [Fix] Exclude test files, `.github/`, and `log/` directories from gem releases to reduce package size.
 - **[Breaking]** Switch default polling mode from `:thread` to `:fd`. If you experience any issues, you can revert to the previous behavior by setting `config.polling.mode = :thread`. The `:thread` mode will be deprecated in 2.10 and removed in 2.11.
