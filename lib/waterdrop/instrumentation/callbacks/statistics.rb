@@ -13,11 +13,13 @@ module WaterDrop
         # @param producer_id [String]
         # @param client_name [String] rdkafka client name
         # @param monitor [WaterDrop::Instrumentation::Monitor] monitor we are using
-        def initialize(producer_id, client_name, monitor)
+        # @param statistics_decorator [Karafka::Core::Monitoring::StatisticsDecorator] decorator
+        #   instance to use for computing deltas and freeze durations on raw librdkafka statistics
+        def initialize(producer_id, client_name, monitor, statistics_decorator)
           @producer_id = producer_id
           @client_name = client_name
           @monitor = monitor
-          @statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
+          @statistics_decorator = statistics_decorator
         end
 
         # Emits decorated statistics to the monitor

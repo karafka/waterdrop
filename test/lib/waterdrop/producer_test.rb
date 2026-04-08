@@ -637,6 +637,37 @@ describe_current do
       it { assert_equal("statistics.emitted", @events.last.id) }
       it { assert_equal(@producer.id, @events.last[:producer_id]) }
       it { assert_operator(@events.last[:statistics]["ts"], :>, 0) }
+      # With the default only_keys decorator, only configured keys get _d values
+      it { refute_nil(@events.last[:statistics]["tx_d"]) }
+    end
+
+    context "when stats are emitted with a custom full decorator" do
+      before do
+        @producer = WaterDrop::Producer.new do |config|
+          config.deliver = true
+          config.logger = Logger.new(File::NULL, level: Logger::DEBUG)
+          config.kafka = {
+            "bootstrap.servers": BOOTSTRAP_SERVERS,
+            "statistics.interval.ms": 100,
+            "request.required.acks": "all"
+          }
+          config.statistics_decorator = ::Karafka::Core::Monitoring::StatisticsDecorator.new
+        end
+
+        @events = []
+
+        @producer.monitor.subscribe("statistics.emitted") do |event|
+          @events << event
+        end
+
+        @producer.produce_sync(@message)
+
+        sleep(0.001) while @events.size < 3
+      end
+
+      it { assert_equal("statistics.emitted", @events.last.id) }
+      it { assert_equal(@producer.id, @events.last[:producer_id]) }
+      it { assert_operator(@events.last[:statistics]["ts"], :>, 0) }
       # This is in microseconds. We needed a stable value for comparison, and the distance in
       # between statistics events should always be within 1ms (relaxed for slower CI like macOS)
       it do
