@@ -36,6 +36,7 @@ describe_current do
           periodic_poll_interval: 1000
         }
       },
+      statistics_decorator: ::Karafka::Core::Monitoring::StatisticsDecorator.new,
       kafka: {
         "bootstrap.servers": "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
       }
