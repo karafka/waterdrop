@@ -3,20 +3,6 @@
 describe_current do
   it { assert_operator(described_class, :<, Karafka::Core::Monitoring::Monitor) }
 
-  describe "#freeze_statistics_listeners!" do
-    before { @monitor = described_class.new }
-
-    it "expect statistics_listeners_frozen? to start as false" do
-      refute_predicate(@monitor, :statistics_listeners_frozen?)
-    end
-
-    it "expect to flip statistics_listeners_frozen? to true" do
-      @monitor.freeze_statistics_listeners!
-
-      assert_predicate(@monitor, :statistics_listeners_frozen?)
-    end
-  end
-
   describe "#subscribe with statistics.emitted after freezing" do
     before { @monitor = described_class.new }
 

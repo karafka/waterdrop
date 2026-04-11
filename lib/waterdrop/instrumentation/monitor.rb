@@ -36,11 +36,6 @@ module WaterDrop
         @statistics_listeners_frozen = true
       end
 
-      # @return [Boolean] true if new subscriptions to `statistics.emitted` are rejected
-      def statistics_listeners_frozen?
-        @statistics_listeners_frozen
-      end
-
       # Subscribes to the notifications bus, raising if the user tries to subscribe to
       # `statistics.emitted` after statistics have been disabled at client build time. This
       # prevents the "silent nothing" pitfall where a user expects statistics but no events

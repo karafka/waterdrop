@@ -99,10 +99,6 @@ describe_current do
         assert_equal(5_000, @producer_on_demand.config.kafka[:"statistics.interval.ms"])
       end
 
-      it "expect to freeze the statistics listeners on the monitor" do
-        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
-      end
-
       it "expect a late subscription to statistics.emitted to raise" do
         assert_raises(WaterDrop::Errors::StatisticsNotEnabledError) do
           @producer_on_demand.monitor.subscribe("statistics.emitted") { |_event| }
@@ -126,10 +122,6 @@ describe_current do
 
       it "expect to register the statistics callback" do
         assert(@captured[:stats_callback_registered])
-      end
-
-      it "expect not to freeze the statistics listeners on the monitor" do
-        refute_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
       end
 
       it "expect a second late subscription to statistics.emitted to still work" do
@@ -156,8 +148,10 @@ describe_current do
         refute(@captured[:stats_callback_registered])
       end
 
-      it "expect to freeze the statistics listeners on the monitor" do
-        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
+      it "expect a late subscription to statistics.emitted to raise" do
+        assert_raises(WaterDrop::Errors::StatisticsNotEnabledError) do
+          @producer_on_demand.monitor.subscribe("statistics.emitted") { |_event| }
+        end
       end
     end
 
@@ -178,8 +172,10 @@ describe_current do
         refute(@captured[:stats_callback_registered])
       end
 
-      it "expect to freeze the statistics listeners on the monitor" do
-        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
+      it "expect a later subscription to statistics.emitted to raise" do
+        assert_raises(WaterDrop::Errors::StatisticsNotEnabledError) do
+          @producer_on_demand.monitor.subscribe("statistics.emitted") { |_event| }
+        end
       end
     end
   end
