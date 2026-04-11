@@ -7,13 +7,13 @@ describe_current do
     before { @monitor = described_class.new }
 
     it "expect statistics_listeners_frozen? to start as false" do
-      refute(@monitor.statistics_listeners_frozen?)
+      refute_predicate(@monitor, :statistics_listeners_frozen?)
     end
 
     it "expect to flip statistics_listeners_frozen? to true" do
       @monitor.freeze_statistics_listeners!
 
-      assert(@monitor.statistics_listeners_frozen?)
+      assert_predicate(@monitor, :statistics_listeners_frozen?)
     end
   end
 
@@ -47,16 +47,21 @@ describe_current do
     describe "listener-object subscription" do
       before do
         @stats_listener = Class.new do
-          def on_statistics_emitted(_event); end
+          def on_statistics_emitted(_event)
+          end
         end.new
 
         @non_stats_listener = Class.new do
-          def on_error_occurred(_event); end
+          def on_error_occurred(_event)
+          end
         end.new
 
         @mixed_listener = Class.new do
-          def on_statistics_emitted(_event); end
-          def on_error_occurred(_event); end
+          def on_statistics_emitted(_event)
+          end
+
+          def on_error_occurred(_event)
+          end
         end.new
       end
 

@@ -52,7 +52,10 @@ describe_current do
 
       ::Rdkafka::Config
         .stubs(:new)
-        .with { |hash| captured.replace(hash); true }
+        .with do |hash|
+          captured.replace(hash)
+          true
+        end
         .returns(fake_config)
 
       described_class.new(producer)
@@ -70,8 +73,8 @@ describe_current do
     # Reads whether a statistics callback is currently registered for the given producer id
     def statistics_callback_registered?(producer_id)
       callbacks = ::Karafka::Core::Instrumentation
-                    .statistics_callbacks
-                    .instance_variable_get(:@callbacks)
+        .statistics_callbacks
+        .instance_variable_get(:@callbacks)
 
       callbacks.key?(producer_id)
     end
@@ -97,7 +100,7 @@ describe_current do
       end
 
       it "expect to freeze the statistics listeners on the monitor" do
-        assert(@producer_on_demand.monitor.statistics_listeners_frozen?)
+        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
       end
 
       it "expect a late subscription to statistics.emitted to raise" do
@@ -126,7 +129,7 @@ describe_current do
       end
 
       it "expect not to freeze the statistics listeners on the monitor" do
-        refute(@producer_on_demand.monitor.statistics_listeners_frozen?)
+        refute_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
       end
 
       it "expect a second late subscription to statistics.emitted to still work" do
@@ -154,7 +157,7 @@ describe_current do
       end
 
       it "expect to freeze the statistics listeners on the monitor" do
-        assert(@producer_on_demand.monitor.statistics_listeners_frozen?)
+        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
       end
     end
 
@@ -176,7 +179,7 @@ describe_current do
       end
 
       it "expect to freeze the statistics listeners on the monitor" do
-        assert(@producer_on_demand.monitor.statistics_listeners_frozen?)
+        assert_predicate(@producer_on_demand.monitor, :statistics_listeners_frozen?)
       end
     end
   end

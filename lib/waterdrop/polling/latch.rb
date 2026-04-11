@@ -18,6 +18,7 @@ module WaterDrop
     # This ensures the producer is fully drained and removed from the poller
     # before returning control to the caller, preventing race conditions.
     class Latch
+      # Initializes a new latch in the unreleased state.
       def initialize
         @mutex = Mutex.new
         @cv = ConditionVariable.new

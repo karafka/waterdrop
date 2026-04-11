@@ -61,12 +61,11 @@ module WaterDrop
         #
         # @param kafka_config [Hash] kafka config hash taken from the producer config
         # @param monitor [WaterDrop::Instrumentation::Monitor] per-producer monitor
-        # @return [Array(Hash, Boolean)] [kafka_config, statistics_enabled]. The returned hash
-        #   is a duped copy when we need to mutate the interval, so the producer's own config
-        #   hash is never touched.
+        # @return [Array] two-element array `[kafka_config, statistics_enabled]`. The returned
+        #   hash is a duped copy when we need to mutate the interval, so the producer's own
+        #   config hash is never touched.
         def prepare_statistics(kafka_config, monitor)
-          stats_interval = kafka_config[:"statistics.interval.ms"]
-          statistics_enabled = stats_interval && stats_interval.to_i.positive?
+          statistics_enabled = kafka_config[:"statistics.interval.ms"].to_i.positive?
 
           if statistics_enabled && !statistics_listener?(monitor)
             kafka_config = kafka_config.dup

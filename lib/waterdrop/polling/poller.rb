@@ -47,6 +47,8 @@ module WaterDrop
       # @return [Integer] unique identifier for this poller instance
       attr_reader :id
 
+      # Initializes an empty poller with no registered producers. The background thread is
+      # not started until the first producer is registered.
       def initialize
         @id = self.class.next_id
         @mutex = Mutex.new

@@ -47,6 +47,7 @@ module WaterDrop
       # ever arrive because librdkafka statistics were turned off entirely.
       #
       # @param event_id_or_listener [String, Symbol, Object] event id (with block) or listener
+      # @param block [Proc, nil] handler block when subscribing to a named event
       # @raise [WaterDrop::Errors::StatisticsNotEnabledError] when the subscription targets
       #   `statistics.emitted` and this monitor has been frozen for statistics
       def subscribe(event_id_or_listener, &block)
