@@ -1,5 +1,9 @@
 # WaterDrop changelog
 
+## Unreleased
+- **[Breaking]** Skip emitting librdkafka statistics when nothing is subscribed to `statistics.emitted` at the time the underlying rdkafka client is constructed. When no listener is present at build time, `statistics.interval.ms` is forced to `0` regardless of user configuration and the statistics callback is not registered, saving substantial allocations in the hot path (no JSON parsing, no statistics hash materialization, no decoration work). To use statistics, subscribe a listener to `statistics.emitted` BEFORE the first producer use (before the underlying client is lazily initialized).
+- **[Breaking]** Raise `WaterDrop::Errors::StatisticsNotEnabledError` when attempting to subscribe to `statistics.emitted` (either via block or via a listener that responds to `on_statistics_emitted`) on a monitor where librdkafka statistics have been disabled at client build time. This replaces the "silent nothing" failure mode with an immediate, actionable error that pinpoints the timing mistake.
+
 ## 2.9.0 (2026-04-08)
 - [Fix] Use `delete` in the variant ensure block to avoid leaving stale nil entries in `Fiber.current.waterdrop_clients` and prevent memory leaks in long-running processes (#836).
 - [Fix] Exclude test files, `.github/`, and `log/` directories from gem releases to reduce package size.
