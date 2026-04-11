@@ -12,6 +12,11 @@ describe_current do
       @disconnected_events << event
     end
 
+    # Keep the monitor's statistics slot open so nested test blocks can subscribe statistics
+    # listeners after the client is built. Without this, the first produce_sync below would
+    # freeze statistics subscriptions.
+    @producer.monitor.subscribe("statistics.emitted") { |_event| }
+
     # Initialize producer connection
     2.times { @producer.produce_sync(topic: @topic_name, payload: "msg") }
   end

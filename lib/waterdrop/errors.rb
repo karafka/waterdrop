@@ -59,6 +59,13 @@ module WaterDrop
     # Raised when an error occurs in the polling loop
     PollerError = Class.new(BaseError)
 
+    # Raised when trying to subscribe to `statistics.emitted` after the underlying rdkafka client
+    # has been built without any listener present at build time. In that case, librdkafka
+    # statistics are disabled entirely for performance, and late subscriptions would silently
+    # receive nothing. To fix: subscribe the listener BEFORE first producer use (i.e. before the
+    # underlying client is lazily initialized).
+    StatisticsNotEnabledError = Class.new(BaseError)
+
     # Raised when during messages producing something bad happened inline
     class ProduceManyError < ProduceError
       attr_reader :dispatched
