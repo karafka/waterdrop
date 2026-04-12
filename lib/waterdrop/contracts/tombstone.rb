@@ -2,8 +2,11 @@
 
 module WaterDrop
   module Contracts
-    # Contract for validating tombstone message requirements beyond what the standard
-    # Message contract checks. Tombstones require a non-nil key and an explicit partition.
+    # Contract for validating tombstone-specific message requirements.
+    # Tombstones require a non-nil key and an explicit partition.
+    #
+    # @note Topic, headers, and other standard message attributes are validated separately
+    #   by the {Message} contract during the produce delegation flow.
     class Tombstone < ::Karafka::Core::Contractable::Contract
       configure do |config|
         config.error_messages = YAML.safe_load_file(
