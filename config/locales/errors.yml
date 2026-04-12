@@ -61,6 +61,11 @@ en:
       headers_invalid_key_type: all headers keys need to be of type String
       headers_invalid_value_type: all headers values need to be strings or arrays of strings
 
+    tombstone:
+      missing: must be present
+      key_format: must be a non-empty string
+      partition_format: must be an integer greater or equal to 0
+
     transactional_offset:
       consumer_format: 'must respond to #consumer_group_metadata_pointer method'
       message_format: 'must respond to #topic, #partition and #offset'

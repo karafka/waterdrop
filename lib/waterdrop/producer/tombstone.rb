@@ -69,13 +69,7 @@ module WaterDrop
         message.delete(:payload)
         message[:payload] = nil
 
-        unless message.key?(:key) && !message[:key].nil?
-          raise Errors::MessageInvalidError, 'key is required for tombstone messages'
-        end
-
-        unless message.key?(:partition)
-          raise Errors::MessageInvalidError, 'partition is required for tombstone messages'
-        end
+        Contracts::Tombstone.new.validate!(message, Errors::MessageInvalidError)
 
         message
       end
