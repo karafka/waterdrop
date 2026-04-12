@@ -7,6 +7,7 @@ module WaterDrop
     include Sync
     include Async
     include Buffer
+    include Tombstone
     include Transactions
     include Idempotence
     include ClassMonitor
