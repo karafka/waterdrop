@@ -17,7 +17,7 @@ module WaterDrop
       #
       # @raise [Errors::MessageInvalidError] When `:key` or `:partition` is missing
       def tombstone_sync(message)
-        produce_sync(tombstone_message(message))
+        produce_sync(prepare_tombstone(message))
       end
 
       # Produces a tombstone message to Kafka and does not wait for results
@@ -29,7 +29,7 @@ module WaterDrop
       #
       # @raise [Errors::MessageInvalidError] When `:key` or `:partition` is missing
       def tombstone_async(message)
-        produce_async(tombstone_message(message))
+        produce_async(prepare_tombstone(message))
       end
 
       # Produces many tombstone messages to Kafka and waits for them to be delivered
@@ -41,7 +41,7 @@ module WaterDrop
       #
       # @raise [Errors::MessageInvalidError] When any message is missing `:key` or `:partition`
       def tombstone_many_sync(messages)
-        produce_many_sync(messages.map { |message| tombstone_message(message) })
+        produce_many_sync(messages.map { |message| prepare_tombstone(message) })
       end
 
       # Produces many tombstone messages to Kafka and does not wait for them to be delivered
@@ -53,7 +53,7 @@ module WaterDrop
       #
       # @raise [Errors::MessageInvalidError] When any message is missing `:key` or `:partition`
       def tombstone_many_async(messages)
-        produce_many_async(messages.map { |message| tombstone_message(message) })
+        produce_many_async(messages.map { |message| prepare_tombstone(message) })
       end
 
       private
@@ -64,7 +64,7 @@ module WaterDrop
       # @param message [Hash] the original message hash
       # @return [Hash] a new message hash with payload set to nil
       # @raise [Errors::MessageInvalidError] when key or partition is missing
-      def tombstone_message(message)
+      def prepare_tombstone(message)
         message = message.dup
         message.delete(:payload)
         message[:payload] = nil
