@@ -40,9 +40,9 @@ sleep(WAIT_TIME_SECONDS)
 # Even the low-level statistics callback registry must not hold an entry for this producer,
 # since we never registered the statistics callback at all.
 registered = ::Karafka::Core::Instrumentation
-             .statistics_callbacks
-             .instance_variable_get(:@callbacks)
-             .key?(producer.id)
+  .statistics_callbacks
+  .instance_variable_get(:@callbacks)
+  .key?(producer.id)
 
 if registered
   puts "Expected no statistics callback to be registered for producer #{producer.id}"
