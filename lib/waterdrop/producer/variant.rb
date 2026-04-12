@@ -71,6 +71,7 @@ module WaterDrop
         Async,
         Buffer,
         Sync,
+        Tombstone,
         Transactions
       ].each do |scope|
         scope.instance_methods(false).each do |method_name|

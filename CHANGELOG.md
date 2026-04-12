@@ -3,6 +3,7 @@
 ## 2.10.0 (Unreleased)
 - **[Breaking]** Skip emitting librdkafka statistics when nothing is subscribed to `statistics.emitted` at the time the underlying rdkafka client is constructed. When no listener is present at build time, `statistics.interval.ms` is forced to `0` regardless of user configuration and the statistics callback is not registered, saving substantial allocations in the hot path (no JSON parsing, no statistics hash materialization, no decoration work). To use statistics, subscribe a listener to `statistics.emitted` BEFORE the first producer use (before the underlying client is lazily initialized).
 - **[Breaking]** Raise `WaterDrop::Errors::StatisticsNotEnabledError` when attempting to subscribe to `statistics.emitted` (either via block or via a listener that responds to `on_statistics_emitted`) on a monitor where librdkafka statistics have been disabled at client build time. This replaces the "silent nothing" failure mode with an immediate, actionable error that pinpoints the timing mistake.
+- [Feature] Add tombstone API (`#tombstone_sync`, `#tombstone_async`, `#tombstone_many_sync`, `#tombstone_many_async`) for producing tombstone records (nil-payload messages) with required key and partition validation. Works with variants.
 
 ## 2.9.0 (2026-04-08)
 - [Fix] Use `delete` in the variant ensure block to avoid leaving stale nil entries in `Fiber.current.waterdrop_clients` and prevent memory leaks in long-running processes (#836).
