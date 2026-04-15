@@ -144,6 +144,8 @@ module WaterDrop
       # This matches the threaded polling behavior which drains without timeout
       # @param producer [WaterDrop::Producer] the producer instance
       def unregister(producer)
+        ensure_same_process!
+
         state, thread = @mutex.synchronize { [@producers[producer.id], @thread] }
 
         return unless state
