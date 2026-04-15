@@ -91,7 +91,7 @@ rescue Timeout::Error
     nil
   end
 
-  $stderr.puts "FAIL: Child process hung for #{CHILD_TIMEOUT}s (deadlock in Poller#unregister)"
+  warn "FAIL: Child process hung for #{CHILD_TIMEOUT}s (deadlock in Poller#unregister)"
   exit(1)
 end
 
@@ -110,14 +110,14 @@ producer.close
 
 # Validate results
 if results["close"]&.fetch(:status) != "ok"
-  $stderr.puts "FAIL: producer.close in child failed: #{results['close']}"
+  warn "FAIL: producer.close in child failed: #{results["close"]}"
   exit(1)
 end
 
 if results["produce"]&.fetch(:status) != "ok"
-  $stderr.puts "FAIL: new producer in child failed: #{results['produce']}"
+  warn "FAIL: new producer in child failed: #{results["produce"]}"
   exit(1)
 end
 
-$stderr.puts "PASS: Pre-fork producer closed without deadlock, new producer works in child"
+warn "PASS: Pre-fork producer closed without deadlock, new producer works in child"
 exit(0)

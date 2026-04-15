@@ -54,19 +54,19 @@ CYCLES.times do |i|
 end
 
 if LINUX
-  $stderr.puts "Pipe FD counts per cycle:"
-  pipe_counts.each_with_index { |c, i| $stderr.puts "  #{i}: #{c}" }
+  warn "Pipe FD counts per cycle:"
+  pipe_counts.each_with_index { |c, i| warn "  #{i}: #{c}" }
 
   growth = pipe_counts.last - pipe_counts.first
 
   if growth > 4
-    $stderr.puts "FAIL: Pipe FDs grew by #{growth} over #{CYCLES} cycles (#{pipe_counts.first} -> #{pipe_counts.last})"
+    warn "FAIL: Pipe FDs grew by #{growth} over #{CYCLES} cycles (#{pipe_counts.first} -> #{pipe_counts.last})"
     exit(1)
   end
 
-  $stderr.puts "PASS: Pipe FD growth = #{growth} (within tolerance)"
+  warn "PASS: Pipe FD growth = #{growth} (within tolerance)"
 else
-  $stderr.puts "PASS: #{CYCLES} create/use/close cycles completed without error (pipe FD check skipped on non-Linux)"
+  warn "PASS: #{CYCLES} create/use/close cycles completed without error (pipe FD check skipped on non-Linux)"
 end
 
 exit(0)
