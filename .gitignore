@@ -67,3 +67,6 @@ pickle-email-*.html
 .yardoc
 
 .byebug_history
+
+# Integration test lock files (generated locally with paths, CI runs bundle install)
+test/integrations/**/Gemfile.lock
