@@ -165,7 +165,7 @@ module WaterDrop
 
           # Switch to transactional mode if user provided a transactional id
           client.init_transactions if kafka_config.key?(:"transactional.id")
-        rescue StandardError => e
+        rescue
           # Unwind everything we set up before re-raising:
           # 1. Unregister from poller (if we registered)
           producer.poller.unregister(producer) if producer.fd_polling?
@@ -178,7 +178,7 @@ module WaterDrop
           # 3. Close the native client to join its threads and release pipe FDs
           client.close
 
-          raise e
+          raise
         end
 
         # Checks whether there is at least one subscriber to the `statistics.emitted` event on

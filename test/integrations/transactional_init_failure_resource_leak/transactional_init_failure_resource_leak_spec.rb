@@ -70,14 +70,15 @@ ATTEMPTS.times do |i|
       "metadata.request.timeout.ms": 1_000,
       "socket.connection.setup.timeout.ms": 1_000
     }
+    config.deliver = true
     config.max_wait_timeout = 10_000
-    config.logger = Logger.new("/dev/null")
+    config.logger = Logger.new(File::NULL)
   end
 
   begin
     producer.client
     warn "  Attempt #{i + 1}: init_transactions succeeded (unexpected)"
-  rescue StandardError => e
+  rescue => e
     warn "  Attempt #{i + 1}: failed as expected (#{e.class})"
   end
 
