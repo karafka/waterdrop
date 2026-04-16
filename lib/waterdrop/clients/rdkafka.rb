@@ -146,6 +146,12 @@ module WaterDrop
         # transactions if the user configured a transactional id. Must run last so all
         # callbacks are already wired up before the client goes live.
         #
+        # If any step after `client.start` fails (most commonly `init_transactions` timing
+        # out when Kafka is unreachable), we must clean up everything that was already set up:
+        # unregister from the poller, remove the global instrumentation callbacks, and close
+        # the native client. Without this, each failed attempt leaks native threads, pipe
+        # file descriptors, and callback registry entries permanently.
+        #
         # @param producer [WaterDrop::Producer]
         # @param client [::Rdkafka::Producer]
         # @param kafka_config [Hash]
@@ -159,6 +165,20 @@ module WaterDrop
 
           # Switch to transactional mode if user provided a transactional id
           client.init_transactions if kafka_config.key?(:"transactional.id")
+        rescue
+          # Unwind everything we set up before re-raising:
+          # 1. Unregister from poller (if we registered)
+          producer.poller.unregister(producer) if producer.fd_polling?
+
+          # 2. Remove global instrumentation callbacks so they don't accumulate
+          ::Karafka::Core::Instrumentation.statistics_callbacks.delete(producer.id)
+          ::Karafka::Core::Instrumentation.error_callbacks.delete(producer.id)
+          ::Karafka::Core::Instrumentation.oauthbearer_token_refresh_callbacks.delete(producer.id)
+
+          # 3. Close the native client to join its threads and release pipe FDs
+          client.close
+
+          raise
         end
 
         # Checks whether there is at least one subscriber to the `statistics.emitted` event on

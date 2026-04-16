@@ -179,4 +179,92 @@ describe_current do
       end
     end
   end
+
+  describe "cleanup on init_transactions failure" do
+    def build_transactional_producer
+      WaterDrop::Producer.new do |config|
+        config.deliver = true
+        config.polling.mode = :thread
+        config.kafka = {
+          "bootstrap.servers": BOOTSTRAP_SERVERS,
+          "transactional.id": "test-tx-#{SecureRandom.hex(4)}"
+        }
+      end
+    end
+
+    def callback_count(producer_id)
+      %i[statistics_callbacks error_callbacks oauthbearer_token_refresh_callbacks].sum do |name|
+        cb = ::Karafka::Core::Instrumentation.public_send(name)
+        cb.instance_variable_get(:@callbacks).key?(producer_id) ? 1 : 0
+      end
+    end
+
+    it "expect to clean up callbacks when init_transactions raises" do
+      producer = build_transactional_producer
+
+      fake_client = Object.new
+      fake_client.define_singleton_method(:name) { "rdkafka-producer-fake" }
+      fake_client.define_singleton_method(:start) {}
+      fake_client.define_singleton_method(:close) {}
+      fake_client.define_singleton_method(:delivery_callback=) { |_| }
+      fake_client.define_singleton_method(:init_transactions) { raise Rdkafka::RdkafkaError.new(7) }
+
+      fake_config = Object.new
+      fake_config.define_singleton_method(:producer) { |**_opts| fake_client }
+
+      ::Rdkafka::Config.stubs(:new).returns(fake_config)
+
+      assert_raises(Rdkafka::RdkafkaError) { described_class.new(producer) }
+
+      assert_equal 0, callback_count(producer.id),
+        "Expected all callbacks to be cleaned up after init_transactions failure"
+    ensure
+      producer&.close
+    end
+
+    it "expect to close the native client when init_transactions raises" do
+      producer = build_transactional_producer
+
+      close_called = false
+
+      fake_client = Object.new
+      fake_client.define_singleton_method(:name) { "rdkafka-producer-fake" }
+      fake_client.define_singleton_method(:start) {}
+      fake_client.define_singleton_method(:close) { close_called = true }
+      fake_client.define_singleton_method(:delivery_callback=) { |_| }
+      fake_client.define_singleton_method(:init_transactions) { raise Rdkafka::RdkafkaError.new(7) }
+
+      fake_config = Object.new
+      fake_config.define_singleton_method(:producer) { |**_opts| fake_client }
+
+      ::Rdkafka::Config.stubs(:new).returns(fake_config)
+
+      assert_raises(Rdkafka::RdkafkaError) { described_class.new(producer) }
+
+      assert close_called, "Expected client.close to be called after init_transactions failure"
+    ensure
+      producer&.close
+    end
+
+    it "expect to re-raise the original error" do
+      producer = build_transactional_producer
+
+      fake_client = Object.new
+      fake_client.define_singleton_method(:name) { "rdkafka-producer-fake" }
+      fake_client.define_singleton_method(:start) {}
+      fake_client.define_singleton_method(:close) {}
+      fake_client.define_singleton_method(:delivery_callback=) { |_| }
+      fake_client.define_singleton_method(:init_transactions) { raise Rdkafka::RdkafkaError.new(7) }
+
+      fake_config = Object.new
+      fake_config.define_singleton_method(:producer) { |**_opts| fake_client }
+
+      ::Rdkafka::Config.stubs(:new).returns(fake_config)
+
+      error = assert_raises(Rdkafka::RdkafkaError) { described_class.new(producer) }
+      assert_kind_of Rdkafka::RdkafkaError, error
+    ensure
+      producer&.close
+    end
+  end
 end
