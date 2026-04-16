@@ -13,6 +13,7 @@
 require "waterdrop"
 require "securerandom"
 
+BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 # Pool size for this spec
 POOL_SIZE = 3
 # Thread count for this spec
@@ -20,9 +21,14 @@ THREAD_COUNT = 10
 # How many messages to produce in this spec
 MESSAGES_PER_THREAD = 5
 
+# Pre-create the topic via admin API to avoid TOPIC_ALREADY_EXISTS race
+# conditions from concurrent produce requests triggering auto-topic creation.
+topic = generate_topic("pool")
+create_topic(topic)
+
 # Create connection pool
 pool = WaterDrop::ConnectionPool.new(size: POOL_SIZE) do |config|
-  config.kafka = { "bootstrap.servers": ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092") }
+  config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
 end
 
 # Track results
@@ -36,8 +42,6 @@ threads = Array.new(THREAD_COUNT) do |thread_index|
     MESSAGES_PER_THREAD.times do |msg_index|
       # Use a producer from the pool
       pool.with do |producer|
-        topic = generate_topic("pool")
-
         result = producer.produce_sync(
           topic: topic,
           key: "thread-#{thread_index}",
