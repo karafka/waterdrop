@@ -84,7 +84,6 @@ describe_current do
     context "when allow.auto.create.topics is set to false" do
       before do
         @message = build(:valid_message)
-        create_topic(@message[:topic])
         @producer = build(
           :producer,
           kafka: {
@@ -104,7 +103,6 @@ describe_current do
     context "when allow.auto.create.topics is set to false and we use partition key" do
       before do
         @message = build(:valid_message, partition_key: "test", key: "test")
-        create_topic(@message[:topic])
         @producer = build(
           :producer,
           kafka: {
