@@ -58,12 +58,19 @@ describe_current do
   end
 
   context "when we dispatch in transaction to multiple topics" do
+    before do
+      @topic_name_multi1 = generate_topic
+      @topic_name_multi2 = generate_topic
+      create_topic(@topic_name_multi1)
+      create_topic(@topic_name_multi2)
+    end
+
     it "expect to work" do
       handlers = []
 
       @producer.transaction do
-        handlers << @producer.produce_async(topic: "#{@topic_name}1", payload: "1")
-        handlers << @producer.produce_async(topic: "#{@topic_name}2", payload: "2")
+        handlers << @producer.produce_async(topic: @topic_name_multi1, payload: "1")
+        handlers << @producer.produce_async(topic: @topic_name_multi2, payload: "2")
       end
 
       handlers.map!(&:wait)
@@ -96,17 +103,24 @@ describe_current do
   end
 
   context "when we dispatch in transaction to multiple topics with array headers" do
+    before do
+      @topic_name_multi1 = generate_topic
+      @topic_name_multi2 = generate_topic
+      create_topic(@topic_name_multi1)
+      create_topic(@topic_name_multi2)
+    end
+
     it "expect to work" do
       handlers = []
 
       @producer.transaction do
         handlers << @producer.produce_async(
-          topic: "#{@topic_name}1",
+          topic: @topic_name_multi1,
           payload: "1",
           headers: { "a" => "b", "c" => %w[d e] }
         )
         handlers << @producer.produce_async(
-          topic: "#{@topic_name}2",
+          topic: @topic_name_multi2,
           payload: "2",
           headers: { "a" => "b", "c" => %w[d e] }
         )
@@ -130,7 +144,6 @@ describe_current do
   context "when trying to use transaction on a non-existing topics and short time" do
     before do
       @producer = build(:transactional_producer, transaction_timeout_ms: 1_000)
-      @non_existing_topic = generate_topic
     end
 
     it "expect to crash with an inconsistent or a timeout state after abort" do
@@ -139,7 +152,7 @@ describe_current do
       begin
         @producer.transaction do
           20.times do |i|
-            @producer.produce_async(topic: @non_existing_topic, payload: i.to_s)
+            @producer.produce_async(topic: generate_topic, payload: i.to_s)
           end
         end
       rescue Rdkafka::RdkafkaError => e
@@ -159,13 +172,12 @@ describe_current do
   context "when trying to use transaction on a non-existing topics and enough time" do
     before do
       @producer = build(:transactional_producer)
-      @non_existing_topic = generate_topic
     end
 
     it "expect not to crash and publish all data" do
       @producer.transaction do
         10.times do |i|
-          @producer.produce_async(topic: @non_existing_topic, payload: i.to_s)
+          @producer.produce_async(topic: generate_topic, payload: i.to_s)
         end
       end
     end
@@ -788,16 +800,18 @@ describe_current do
 
   context "when wrapping an early return method with a transaction" do
     before do
-      t_name = @topic_name
+      @return_topic = generate_topic
+      create_topic(@return_topic)
+      return_topic = @return_topic
 
       @operation = Class.new do
         define_method :call do |producer, handlers|
-          handlers << producer.produce_async(topic: "#{t_name}1", payload: "1")
+          handlers << producer.produce_async(topic: return_topic, payload: "1")
 
           return unless handlers.empty?
 
           # Never to be reached, expected in this spec
-          handlers << producer.produce_async(topic: "#{t_name}1", payload: "1")
+          handlers << producer.produce_async(topic: return_topic, payload: "1")
         end
       end
     end
@@ -814,15 +828,20 @@ describe_current do
   end
 
   context "when wrapping an early break block with a transaction" do
+    before do
+      @break_topic = generate_topic
+      create_topic(@break_topic)
+    end
+
     it "expect to work correctly" do
-      topic_name = @topic_name
+      break_topic = @break_topic
       operation = lambda do |producer, handlers|
-        handlers << producer.produce_async(topic: "#{topic_name}1", payload: "1")
+        handlers << producer.produce_async(topic: break_topic, payload: "1")
 
         return unless handlers.empty?
 
         # Never to be reached, expected in this spec
-        handlers << producer.produce_async(topic: "#{topic_name}1", payload: "1")
+        handlers << producer.produce_async(topic: break_topic, payload: "1")
       end
 
       handlers = []
