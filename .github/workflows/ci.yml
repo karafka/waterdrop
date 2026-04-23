@@ -78,8 +78,8 @@ jobs:
       - name: Run integration tests
         env:
           THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
-        # Exclude oauth_token_refresh - requires separate Keycloak + OAuth Kafka infrastructure
-        run: ./bin/integrations --exclude oauth_token_refresh
+        # Exclude tests that require separate infrastructure (run in dedicated CI jobs)
+        run: ./bin/integrations --exclude oauth_token_refresh --exclude produce_many_sync_repeated_sasl
 
       - name: Upload coverage artifact
         if: matrix.coverage == 'true' && always()
@@ -241,6 +241,57 @@ jobs:
         if: failure()
         run: docker compose -f docker-compose.oauth.yml logs kafka-oauth
 
+  sasl-integration:
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        polling_mode:
+          - 'thread'
+          - 'fiber'
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        with:
+          ruby-version: '4.0.2'
+          bundler-cache: true
+          bundler: 'latest'
+
+      - name: Start Kafka with SASL/PLAIN
+        run: docker compose -f docker-compose.sasl.yml up -d
+
+      - name: Wait for Kafka SASL broker to be ready
+        run: |
+          echo "Waiting for Kafka SASL broker..."
+          for i in {1..30}; do
+            if docker exec kafka-sasl kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
+              echo "Kafka SASL broker is ready!"
+              break
+            fi
+            echo "Waiting... ($i/30)"
+            sleep 2
+          done
+
+      - name: Install dependencies
+        run: |
+          gem install bundler --no-document
+          bundle config set without 'tools benchmarks docs development'
+          bundle install --jobs 4 --retry 3
+
+      - name: Run SASL integration tests
+        env:
+          THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
+        run: ./bin/integrations produce_many_sync_repeated_sasl
+
+      - name: Show Kafka SASL logs on failure
+        if: failure()
+        run: docker compose -f docker-compose.sasl.yml logs kafka-sasl
+
   tests-macos:
     timeout-minutes: 30
     runs-on: macos-15
@@ -345,7 +396,7 @@ jobs:
       - name: Run integration tests
         env:
           THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
-        run: ./bin/integrations --exclude oauth_token_refresh
+        run: ./bin/integrations --exclude oauth_token_refresh --exclude produce_many_sync_repeated_sasl
 
   ci-success:
     name: CI Success
@@ -359,6 +410,7 @@ jobs:
       - coverage
       - lostconf
       - oauth-integration
+      - sasl-integration
     steps:
       - name: Check all jobs passed
         if: |
