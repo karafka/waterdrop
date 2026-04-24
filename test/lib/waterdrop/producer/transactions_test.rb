@@ -141,9 +141,11 @@ describe_current do
     end
   end
 
-  context "when trying to use transaction on a non-existing topics and short time" do
+  context "when trying to use transaction on many topics and short time" do
     before do
       @producer = build(:transactional_producer, transaction_timeout_ms: 1_000)
+      @topics = 20.times.map { generate_topic }
+      @topics.each { |t| create_topic(t) }
     end
 
     it "expect to crash with an inconsistent or a timeout state after abort" do
@@ -151,8 +153,8 @@ describe_current do
 
       begin
         @producer.transaction do
-          20.times do |i|
-            @producer.produce_async(topic: generate_topic, payload: i.to_s)
+          @topics.each_with_index do |topic, i|
+            @producer.produce_async(topic: topic, payload: i.to_s)
           end
         end
       rescue Rdkafka::RdkafkaError => e
@@ -169,15 +171,17 @@ describe_current do
     end
   end
 
-  context "when trying to use transaction on a non-existing topics and enough time" do
+  context "when trying to use transaction on many topics and enough time" do
     before do
       @producer = build(:transactional_producer)
+      @topics = 10.times.map { generate_topic }
+      @topics.each { |t| create_topic(t) }
     end
 
     it "expect not to crash and publish all data" do
       @producer.transaction do
-        10.times do |i|
-          @producer.produce_async(topic: generate_topic, payload: i.to_s)
+        @topics.each_with_index do |topic, i|
+          @producer.produce_async(topic: topic, payload: i.to_s)
         end
       end
     end
