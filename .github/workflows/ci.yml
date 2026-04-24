@@ -268,14 +268,20 @@ jobs:
       - name: Wait for Kafka SASL broker to be ready
         run: |
           echo "Waiting for Kafka SASL broker..."
+          ready=false
           for i in {1..30}; do
             if docker exec kafka-sasl kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; then
               echo "Kafka SASL broker is ready!"
+              ready=true
               break
             fi
             echo "Waiting... ($i/30)"
             sleep 2
           done
+          if [ "$ready" != "true" ]; then
+            echo "Kafka SASL broker did not become ready after 30 attempts."
+            exit 1
+          fi
 
       - name: Install dependencies
         run: |

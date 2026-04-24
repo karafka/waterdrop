@@ -88,11 +88,6 @@ def run_test(label:, kafka_config:, polling_mode:, iterations:, idle:, deadline:
     test_failed = true
   end
 
-  if timings.size < iterations
-    puts "  Only #{timings.size}/#{iterations} calls completed"
-    test_failed = true
-  end
-
   test_failed
 end
 

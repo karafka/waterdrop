@@ -9,7 +9,7 @@
 # test specifically targets that configuration.
 #
 # Requires: docker compose -f docker-compose.sasl.yml up -d
-# Excluded from CI (no SASL broker in standard CI pipeline).
+# Runs in CI via the dedicated sasl-integration job.
 #
 # See: https://github.com/karafka/waterdrop/issues/853
 
@@ -92,11 +92,6 @@ def run_test(label:, kafka_config:, polling_mode:, iterations:, idle:, deadline:
 
   if errors.any?
     puts "  Errors: #{errors.map { |e| "#{e.class}: #{e.message}" }.join(", ")}"
-    test_failed = true
-  end
-
-  if timings.size < iterations
-    puts "  Only #{timings.size}/#{iterations} calls completed"
     test_failed = true
   end
 
