@@ -44,7 +44,7 @@ jobs:
         run: "[ -e $APT_DEPS ] || sudo apt-get install -y --no-install-recommends $APT_DEPS"
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
           ruby-version: ${{matrix.ruby}}
           bundler-cache: true
@@ -107,9 +107,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
       - name: Run rubocop
         run: bundle exec rubocop
@@ -124,9 +124,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
       - name: Run yard-lint
         run: bundle exec yard-lint lib/
@@ -139,9 +139,9 @@ jobs:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
 
       - name: Download coverage artifacts
@@ -196,9 +196,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
           bundler: 'latest'
 
@@ -256,9 +256,9 @@ jobs:
           fetch-depth: 0
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
           bundler: 'latest'
 
@@ -320,9 +320,9 @@ jobs:
           echo "/opt/homebrew/bin" >> $GITHUB_PATH
 
       - name: Set up Ruby
-        uses: ruby/setup-ruby@4c56a21280b36d862b5fc31348f463d60bdc55d5 # v1.301.0
+        uses: ruby/setup-ruby@0cb964fd540e0a24c900370abf38a33466142735 # v1.305.0
         with:
-          ruby-version: '4.0.2'
+          ruby-version: '4.0.3'
           bundler-cache: true
           bundler: 'latest'
 
