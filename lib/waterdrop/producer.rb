@@ -423,6 +423,20 @@ module WaterDrop
           end
         end
       end
+    rescue ThreadError => e
+      # Ruby raises ThreadError with this specific message when Mutex#synchronize (or #lock) is
+      # called from a signal trap context. There is no public Ruby API to detect trap context
+      # proactively - Thread.current is the same object as the main thread, its status is "run",
+      # and caller_locations contains no "trap" frame. The only observable difference is that
+      # blocking mutex operations raise this error. We re-raise anything else (e.g.
+      # "deadlock; recursive locking") so those are not silently swallowed.
+      #
+      # Puma's `after_stopped` DSL hook in single mode is one example that fires in trap context.
+      # We escape by delegating to a background thread and joining so the caller blocks until the
+      # producer is fully closed.
+      raise unless e.message == "can't be called from trap context"
+
+      Thread.new { close(force: force) }.value
     end
 
     # Closes the producer with forced close after timeout, purging any outgoing data

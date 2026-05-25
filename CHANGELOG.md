@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.10.1 (2026-05-25)
+- [Fix] Prevent `Producer#close` from raising `ThreadError: can't be called from trap context` when invoked from a Ruby signal trap context (e.g. Puma's `after_stopped` DSL hook in single mode). `close` now detects this case and delegates to a background thread, joining it so the caller blocks until the producer is fully closed (#866).
+
 ## 2.10.0 (2026-05-07)
 - [Fix] Clean up native rdkafka client, global instrumentation callbacks, and poller registration when `init_transactions` fails during producer client construction. Previously, each failed attempt permanently leaked native threads, pipe file descriptors, and callback registry entries because the started `rd_kafka_t` handle was abandoned without being destroyed.
 - **[Breaking]** Skip emitting librdkafka statistics when nothing is subscribed to `statistics.emitted` at the time the underlying rdkafka client is constructed. When no listener is present at build time, `statistics.interval.ms` is forced to `0` regardless of user configuration and the statistics callback is not registered, saving substantial allocations in the hot path (no JSON parsing, no statistics hash materialization, no decoration work). To use statistics, subscribe a listener to `statistics.emitted` BEFORE the first producer use (before the underlying client is lazily initialized).

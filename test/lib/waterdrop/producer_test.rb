@@ -378,6 +378,28 @@ describe_current do
         refute(@producer.disconnect)
       end
     end
+
+    context "when called from a signal trap context" do
+      before do
+        @producer = build(:producer)
+      end
+
+      it "expect to close without raising ThreadError" do
+        error = nil
+
+        trap("USR1") do
+          @producer.close
+        rescue => e
+          error = e
+        end
+
+        Process.kill("USR1", Process.pid)
+        sleep(0.1)
+
+        assert_nil(error, "Expected no error but got: #{error}")
+        assert_predicate(@producer.status, :closed?)
+      end
+    end
   end
 
   describe "#close!" do
