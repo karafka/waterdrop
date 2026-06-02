@@ -1,7 +1,12 @@
 # frozen_string_literal: true
 
-Warning[:performance] = true if RUBY_VERSION >= "3.3"
 Warning[:deprecated] = true
+# Enable all opt-in warning categories. Warning.categories is available since Ruby 3.4;
+# on older Rubies this is a no-op. We skip :deprecated (handled above) and :experimental
+# (too unstable) so only stable opt-in categories like :performance are auto-enabled.
+if Warning.respond_to?(:categories)
+  (Warning.categories - %i[deprecated experimental]).each { |cat| Warning[cat] = true }
+end
 $VERBOSE = true
 
 require "warning"

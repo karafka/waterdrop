@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## 2.10.2 (Unreleased)
+- [Enhancement] Replace explicit `Warning[:performance]` opt-in with a dynamic approach using `Warning.categories` (available since Ruby 3.4) to automatically enable all stable opt-in warning categories in the test suite, including `:strict_unused_block` introduced in Ruby 4.0.
+
 ## 2.10.1 (2026-05-25)
 - [Fix] Prevent `Producer#close` from raising `ThreadError: can't be called from trap context` when invoked from a Ruby signal trap context (e.g. Puma's `after_stopped` DSL hook in single mode). `close` now detects this case and delegates to a background thread, joining it so the caller blocks until the producer is fully closed (#866).
 
