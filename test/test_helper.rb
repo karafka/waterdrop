@@ -5,8 +5,7 @@ $VERBOSE = true
 require "warning"
 
 # Enable all opt-in warning categories. Warning.categories is available since Ruby 3.4;
-# on older Rubies this is a no-op. We skip :deprecated (handled above) and :experimental
-# (too unstable) so only stable opt-in categories like :performance are auto-enabled.
+# on older Rubies this is a no-op.
 if Warning.respond_to?(:categories)
   (Warning.categories - %i[experimental]).each do |cat|
     Warning[cat] = true
