@@ -88,6 +88,12 @@ describe_current do
     describe "when there is a message that was not successfully delivered async" do
       before do
         @changed = []
+        # A 250-char name exceeds Kafka's hard 249-char limit so the broker always rejects
+        # it via the delivery callback. Plain lowercase letters pass rdkafka's local topic
+        # validation, so the produce is always queued (never raises inline). Using special
+        # characters like "$%^&*" is unreliable because newer rdkafka versions reject them
+        # locally, swallowing the error silently and never generating a delivery callback.
+        @invalid_topic = "a" * 250
 
         @producer.monitor.subscribe("error.occurred") do |event|
           @changed << event
@@ -96,7 +102,7 @@ describe_current do
         100.times do
           # We force it to bypass the validations, so we trigger an error on delivery
           # otherwise we would be stopped by WaterDrop itself
-          @producer.send(:client).produce(topic: "$%^&*", payload: "1")
+          @producer.send(:client).produce(topic: @invalid_topic, payload: "1")
         rescue Rdkafka::RdkafkaError
           nil
         end
@@ -111,7 +117,7 @@ describe_current do
       it { assert_kind_of(Rdkafka::RdkafkaError, @event.payload[:error]) }
       it { assert_equal(-1, @event.payload[:partition]) }
       it { assert_equal(-1001, @event.payload[:offset]) }
-      it { assert_equal("$%^&*", @event.payload[:topic]) }
+      it { assert_equal(@invalid_topic, @event.payload[:topic]) }
     end
 
     describe "when there is a message that was not successfully delivered sync" do

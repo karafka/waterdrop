@@ -108,6 +108,13 @@ class Minitest::Spec
     instance
   end
 
+  # Polls until the given events array has at least +count+ entries or the timeout expires.
+  # Use this instead of bare sleep() when waiting for async events (e.g. disconnect threads).
+  def wait_for_events(events, count: 1, timeout: 5)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+    sleep(0.01) until events.size >= count || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+  end
+
   # Clean up the Poller singleton after each test to prevent mock leakage
   # Reset the Poller singleton between tests to prevent state leakage
   def teardown
