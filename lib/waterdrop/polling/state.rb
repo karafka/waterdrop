@@ -53,8 +53,7 @@ module WaterDrop
         @io = @queue_pipe.reader
       end
 
-      # Drains the queue pipe
-      # Called before polling to clear any pending signals
+      # Drains the queue pipe. Called before polling to clear any pending signals
       def drain
         @queue_pipe.drain
       end
@@ -88,8 +87,7 @@ module WaterDrop
 
       private_constant :STALE_CHECK_THROTTLE_MS
 
-      # Marks this producer as having been polled
-      # Called after polling to track staleness
+      # Marks this producer as having been polled. Called after polling to track staleness
       def mark_polled!
         @last_poll_time = monotonic_now
       end

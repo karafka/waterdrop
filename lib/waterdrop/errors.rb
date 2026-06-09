@@ -80,7 +80,6 @@ module WaterDrop
     end
   end
 
-  # Alias so we can have a nicer API to abort transactions
-  # This makes referencing easier
+  # Alias so we can have a nicer API to abort transactions. This makes referencing easier
   AbortTransaction = Errors::AbortTransaction
 end

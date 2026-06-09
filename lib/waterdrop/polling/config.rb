@@ -16,8 +16,7 @@ module WaterDrop
       extend ::Karafka::Core::Configurable
 
       # Ruby thread priority for the poller thread
-      # Valid range: -3 to 3 (Ruby's thread priority range)
-      # Higher values = higher priority
+      # Valid range: -3 to 3 (Ruby's thread priority range). Higher values = higher priority
       setting :thread_priority, default: 0
 
       # IO.select timeout in milliseconds

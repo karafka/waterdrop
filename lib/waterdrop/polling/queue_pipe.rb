@@ -25,8 +25,7 @@ module WaterDrop
         client.enable_queue_io_events(@writer.fileno)
       end
 
-      # Signals by writing a byte to the pipe
-      # Used to wake IO.select for continue/close signals
+      # Signals by writing a byte to the pipe. Used to wake IO.select for continue/close signals
       # Thread-safe and non-blocking; silently ignores errors
       def signal
         @writer.write_nonblock("W", exception: false)
