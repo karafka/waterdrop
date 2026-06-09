@@ -58,14 +58,14 @@ describe_current do
       describe "when producer can be disconnected" do
         it "expect to disconnect the producer" do
           @listener.on_statistics_emitted(@event)
-          sleep(0.2) # a bit of time because disconnect happens async
+          wait_for_events(@disconnected_events, count: 1)
 
           assert_equal(1, @disconnected_events.size)
         end
 
         it "expect to emit disconnect event with producer id" do
           @listener.on_statistics_emitted(@event)
-          sleep(0.2) # a bit of time because disconnect happens async
+          wait_for_events(@disconnected_events, count: 1)
 
           assert_equal(@producer.id, @disconnected_events.first[:producer_id])
         end
@@ -73,8 +73,7 @@ describe_current do
         it "expect not to disconnect again on subsequent calls with same txmsgs" do
           @listener.on_statistics_emitted(@event)
           @listener.on_statistics_emitted(@event)
-
-          sleep(0.2) # a bit of time because disconnect happens async
+          wait_for_events(@disconnected_events, count: 1)
 
           assert_equal(1, @disconnected_events.size)
         end
@@ -119,7 +118,7 @@ describe_current do
           @producer.stubs(:disconnectable?).returns(true)
           @producer.stubs(:disconnect).raises(@test_error)
           @listener.on_statistics_emitted(@event)
-          sleep(0.1) # Give thread time to complete and handle error
+          wait_for_events(@error_events, count: 1)
 
           assert_empty(@disconnected_events)
           refute_empty(@error_events)
@@ -133,7 +132,7 @@ describe_current do
           @producer.stubs(:disconnectable?).returns(true)
           @producer.stubs(:disconnect).raises(@test_error)
           @listener.on_statistics_emitted(@event)
-          sleep(0.1) # Give thread time to complete
+          wait_for_events(@error_events, count: 1)
           new_activity_time = @listener.instance_variable_get(:@last_activity_time)
 
           assert_operator(new_activity_time, :>, old_activity_time)
