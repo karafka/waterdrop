@@ -33,8 +33,7 @@ module WaterDrop
         end
       end
 
-      # Waits until the latch is released
-      # Returns immediately if already released
+      # Waits until the latch is released. Returns immediately if already released
       def wait
         @mutex.synchronize do
           @cv.wait(@mutex) until @released

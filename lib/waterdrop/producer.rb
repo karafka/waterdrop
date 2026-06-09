@@ -152,8 +152,7 @@ module WaterDrop
 
         # We should raise an error when trying to use a producer with client from a fork. Always.
         if @client
-          # We need to reset the client, otherwise there might be attempt to close the parent
-          # client
+          # We need to reset the client, otherwise there might be attempt to close the parent client
           @client = nil
           raise Errors::ProducerUsedInParentProcess, Process.pid
         end

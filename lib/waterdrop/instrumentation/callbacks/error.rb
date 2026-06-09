@@ -21,8 +21,7 @@ module WaterDrop
         # @note When there is a particular message produce error (not internal error), the error
         #   is shipped via the delivery callback, not via error callback.
         def call(client_name, error)
-          # Emit only errors related to our client
-          # Same as with statistics (mor explanation there)
+          # Emit only errors related to our client, same as with statistics (mor explanation there)
           return unless @client_name == client_name
 
           @monitor.instrument(

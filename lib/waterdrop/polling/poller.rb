@@ -186,8 +186,7 @@ module WaterDrop
         @ios_dirty = true
       end
 
-      # Ensures the polling thread is running
-      # Must be called within @mutex.synchronize
+      # Ensures the polling thread is running. Must be called within @mutex.synchronize
       def ensure_thread_running!
         return if @thread&.alive?
 

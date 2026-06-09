@@ -254,8 +254,7 @@ module WaterDrop
     # for API consistency across both individual producers and connection pools
     alias_method :close, :shutdown
 
-    # Reload all connections in the pool
-    # Useful for configuration changes or error recovery
+    # Reload all connections in the pool. Useful for configuration changes or error recovery
     def reload
       @pool.reload do |producer|
         producer.close! if producer&.status&.active?
