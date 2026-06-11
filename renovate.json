@@ -17,7 +17,7 @@
     {
       "minimumReleaseAge": "7 days",
       "matchDepNames": [
-        "/*/"
+        "*"
       ]
     },
     {
