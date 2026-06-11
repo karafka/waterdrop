@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.2 (Unreleased)
+- [Enhancement] Stop allocating one interpolated string per message in `LoggerListener` batch produce handlers. The quoted topic strings were only ever counted (quoting is a 1:1 mapping), never displayed, so counting the raw topic values yields the identical number with zero string allocations — relevant for large `produce_many_*` batches with the default logger listener attached.
 - [Enhancement] Use `Array#concat` in `Producer#buffer_many` instead of appending messages one by one.
 - [Enhancement] Skip building the `message.acknowledged` instrumentation payload in the delivery callback when nothing is subscribed to that event. The notifications bus already short-circuits on empty listeners, but only after the payload hash was allocated — once per delivered message on the polling thread. Mirrors the listener guard already used by the statistics callback. Late subscribers keep working as the check happens on each emission.
 - [Enhancement] Resolve the fiber-local variant once per `#produce` call and once per `#produce_many_sync` wait phase instead of re-resolving it for every usage and for every waited delivery handle. For a 1,000-message sync batch this removes ~2,000 redundant fiber-local lookups.
