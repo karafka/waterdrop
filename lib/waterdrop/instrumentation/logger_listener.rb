@@ -47,7 +47,7 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_produced_async(event)
         messages = event[:messages]
-        topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
+        topics_count = messages.map { |message| message[:topic] }.uniq.count
 
         info(
           event,
@@ -62,7 +62,7 @@ module WaterDrop
       # @param event [Dry::Events::Event] event that happened with the details
       def on_messages_produced_sync(event)
         messages = event[:messages]
-        topics_count = messages.map { |message| "'#{message[:topic]}'" }.uniq.count
+        topics_count = messages.map { |message| message[:topic] }.uniq.count
 
         info(event, "Sync producing of #{messages.size} messages to #{topics_count} topics")
 

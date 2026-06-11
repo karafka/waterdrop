@@ -35,7 +35,7 @@ module WaterDrop
           messages: messages,
           buffer: @messages
         ) do
-          messages.each { |message| @messages << message }
+          @messages.concat(messages)
           messages
         end
       end
