@@ -530,9 +530,11 @@ module WaterDrop
 
     # @return [Producer::Variant] the variant config. Either custom if built using `#with` or
     #   a default one.
+    # @note Read-only path. The fiber-local hash is created by the variant wrapper methods when
+    #   needed, so we must not allocate it here just to look up a variant that may not exist.
     def current_variant
-      Fiber.current.waterdrop_clients ||= {}
-      Fiber.current.waterdrop_clients[id] || @default_variant
+      clients = Fiber.current.waterdrop_clients
+      (clients && clients[id]) || @default_variant
     end
 
     # Runs the client produce method with a given message

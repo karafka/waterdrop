@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.2 (Unreleased)
+- [Enhancement] Do not allocate the fiber-local variants hash on the `Producer#current_variant` read path. Previously every fiber that produced messages got a Hash pinned to it for the fiber's lifetime (per producer use), even when variants were never used — wasteful under fiber-per-request servers (Falcon, async). The hash is now only created by variant wrapper methods that actually need to write to it.
 - [Enhancement] Cache the variant validation contract in a constant instead of instantiating a new `Contracts::Variant` on every `Producer#with` / `Producer#variant` call (mirrors the existing `Transactions::CONTRACT` pattern).
 - [Enhancement] Cache the tombstone validation contract in a constant instead of instantiating a new `Contracts::Tombstone` per tombstone message, removing per-message allocations in the `tombstone_*` APIs (mirrors the existing `Transactions::CONTRACT` pattern).
 - [Enhancement] Replace explicit `Warning[:performance]` opt-in with a dynamic approach using `Warning.categories` (available since Ruby 3.4) to automatically enable all stable opt-in warning categories in the test suite, including `:strict_unused_block` introduced in Ruby 4.0.
