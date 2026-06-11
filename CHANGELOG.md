@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.2 (Unreleased)
+- [Enhancement] Skip building the `message.acknowledged` instrumentation payload in the delivery callback when nothing is subscribed to that event. The notifications bus already short-circuits on empty listeners, but only after the payload hash was allocated — once per delivered message on the polling thread. Mirrors the listener guard already used by the statistics callback. Late subscribers keep working as the check happens on each emission.
 - [Enhancement] Resolve the fiber-local variant once per `#produce` call and once per `#produce_many_sync` wait phase instead of re-resolving it for every usage and for every waited delivery handle. For a 1,000-message sync batch this removes ~2,000 redundant fiber-local lookups.
 - [Enhancement] Do not allocate the fiber-local variants hash on the `Producer#current_variant` read path. Previously every fiber that produced messages got a Hash pinned to it for the fiber's lifetime (per producer use), even when variants were never used — wasteful under fiber-per-request servers (Falcon, async). The hash is now only created by variant wrapper methods that actually need to write to it.
 - [Enhancement] Cache the variant validation contract in a constant instead of instantiating a new `Contracts::Variant` on every `Producer#with` / `Producer#variant` call (mirrors the existing `Transactions::CONTRACT` pattern).
