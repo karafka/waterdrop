@@ -91,14 +91,20 @@ module WaterDrop
             inline_error = e
           end
 
+          # Resolve the variant timeout once instead of re-resolving the fiber-local variant for
+          # every single handler we wait on
+          max_wait_timeout = current_variant.max_wait_timeout
+
           # This will ensure, that we have all verdicts before raising the failure, so we pass
           # all delivery handles having a final verdict
-          dispatched.each { |handler| wait(handler, raise_response_error: false) }
+          dispatched.each do |handler|
+            wait(handler, max_wait_timeout: max_wait_timeout, raise_response_error: false)
+          end
 
           raise(inline_error) if inline_error
 
           # This will raise an error on the first error that have happened
-          dispatched.each { |handler| wait(handler) }
+          dispatched.each { |handler| wait(handler, max_wait_timeout: max_wait_timeout) }
 
           dispatched
         end

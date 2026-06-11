@@ -519,20 +519,25 @@ module WaterDrop
     # Waits on a given handler
     #
     # @param handler [Rdkafka::Producer::DeliveryHandle]
+    # @param max_wait_timeout [Integer] max wait timeout in ms. Resolved from the current variant
+    #   by default but can be passed in by batch operations that wait on many handlers, so the
+    #   variant is not re-resolved for each of them.
     # @param raise_response_error [Boolean] should we raise the response error after we receive the
     #   final result and it is an error.
-    def wait(handler, raise_response_error: true)
+    def wait(handler, max_wait_timeout: current_variant.max_wait_timeout, raise_response_error: true)
       handler.wait(
-        max_wait_timeout_ms: current_variant.max_wait_timeout,
+        max_wait_timeout_ms: max_wait_timeout,
         raise_response_error: raise_response_error
       )
     end
 
     # @return [Producer::Variant] the variant config. Either custom if built using `#with` or
     #   a default one.
+    # @note Read-only path. The fiber-local hash is created by the variant wrapper methods when
+    #   needed, so we must not allocate it here just to look up a variant that may not exist.
     def current_variant
-      Fiber.current.waterdrop_clients ||= {}
-      Fiber.current.waterdrop_clients[id] || @default_variant
+      clients = Fiber.current.waterdrop_clients
+      (clients && clients[id]) || @default_variant
     end
 
     # Runs the client produce method with a given message
@@ -550,16 +555,20 @@ module WaterDrop
         ensure_active!
       end
 
+      # The variant is fiber-local and cannot change mid-call, so we resolve it once instead of
+      # paying the fiber-local lookup for each usage
+      variant = current_variant
+
       # We basically only duplicate the message hash only if it is needed.
       # It is needed when user is using a custom settings variant or when symbol is provided as
       # the topic name. We should never mutate user input message as it may be a hash that the
       # user is using for some other operations
-      if message[:topic].is_a?(Symbol) || !current_variant.default?
+      if message[:topic].is_a?(Symbol) || !variant.default?
         message = message.dup
         # In case someone defines topic as a symbol, we need to convert it into a string as
         # librdkafka does not accept symbols
         message[:topic] = message[:topic].to_s
-        message[:topic_config] = current_variant.topic_config
+        message[:topic_config] = variant.topic_config
       end
 
       result = if transactional?
