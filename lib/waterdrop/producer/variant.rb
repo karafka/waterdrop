@@ -34,7 +34,10 @@ module WaterDrop
       # When rdkafka-ruby detects empty hash, it will use the librdkafka defaults
       EMPTY_HASH = {}.freeze
 
-      private_constant :EMPTY_HASH
+      # Contract to validate that variant alteration data is correct
+      CONTRACT = Contracts::Variant.new
+
+      private_constant :EMPTY_HASH, :CONTRACT
 
       attr_reader :max_wait_timeout, :topic_config, :producer
 
@@ -56,7 +59,7 @@ module WaterDrop
         @default = default
         super(producer)
 
-        Contracts::Variant.new.validate!(to_h, Errors::VariantInvalidError)
+        CONTRACT.validate!(to_h, Errors::VariantInvalidError)
       end
 
       # @return [Boolean] is this a default variant for this producer
