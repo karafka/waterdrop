@@ -8,6 +8,11 @@ module WaterDrop
     # in compacted topics. This module provides a dedicated API so users don't have to manually
     # construct `produce_*(topic:, key:, payload: nil, ...)` calls.
     module Tombstone
+      # Contract to validate that tombstone message input is correct
+      CONTRACT = Contracts::Tombstone.new
+
+      private_constant :CONTRACT
+
       # Produces a tombstone message to Kafka and waits for it to be delivered
       #
       # @param message [Hash] hash with at least `:topic`, `:key`, and `:partition` keys.
@@ -66,10 +71,9 @@ module WaterDrop
       # @raise [Errors::MessageInvalidError] when key or partition is missing
       def prepare_tombstone(message)
         message = message.dup
-        message.delete(:payload)
         message[:payload] = nil
 
-        Contracts::Tombstone.new.validate!(message, Errors::MessageInvalidError)
+        CONTRACT.validate!(message, Errors::MessageInvalidError)
 
         message
       end
