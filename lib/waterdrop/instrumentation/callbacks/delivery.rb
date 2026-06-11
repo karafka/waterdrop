@@ -60,7 +60,14 @@ module WaterDrop
         private
 
         # @param delivery_report [Rdkafka::Producer::DeliveryReport] delivery report
+        # @note This is the most frequently fired event in the system (once per delivered
+        #   message) and most users do not subscribe to it. While the notifications bus
+        #   short-circuits on empty listeners, that happens only after the payload hash is
+        #   built, so we guard here to keep the no-listeners path allocation-free. We check on
+        #   each emission to support late subscribers.
         def instrument_acknowledged(delivery_report)
+          return unless listening?
+
           @monitor.instrument(
             "message.acknowledged",
             caller: self,
@@ -110,6 +117,13 @@ module WaterDrop
         # @return [::Rdkafka::RdkafkaError]
         def build_error(delivery_report)
           ::Rdkafka::RdkafkaError.new(delivery_report.error)
+        end
+
+        # Check if anyone is listening to the acknowledgement events
+        # @return [Boolean] true if there are any listeners
+        def listening?
+          listeners = @monitor.listeners["message.acknowledged"]
+          listeners && !listeners.empty?
         end
       end
     end
