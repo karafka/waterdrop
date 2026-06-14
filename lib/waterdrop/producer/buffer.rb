@@ -83,6 +83,32 @@ module WaterDrop
         return data_for_dispatch if data_for_dispatch.empty?
 
         sync ? produce_many_sync(data_for_dispatch) : produce_many_async(data_for_dispatch)
+      rescue Errors::ProduceManyError => e
+        # A dispatch failed partway through the batch. Re-buffer the messages that never reached
+        # librdkafka so a partial failure does not silently drop valid buffered messages. For a
+        # transactional producer the whole batch is rolled back (nothing is visible to consumers),
+        # so all of it is restored; for a regular producer `e.dispatched` holds the handles already
+        # created, so only the remainder is restored.
+        requeue_unflushed(transactional? ? data_for_dispatch : data_for_dispatch.drop(e.dispatched.size))
+
+        raise
+      rescue Errors::MessageInvalidError
+        # Validation runs before anything is dispatched, so nothing reached librdkafka. Restore the
+        # whole batch instead of dropping valid messages alongside the invalid one.
+        requeue_unflushed(data_for_dispatch)
+
+        raise
+      end
+
+      # Puts not-yet-dispatched messages back at the front of the buffer (preserving their original
+      # order relative to each other and to anything buffered concurrently), so a failed flush does
+      # not lose them.
+      #
+      # @param messages [Array<Hash>] messages to restore to the buffer
+      def requeue_unflushed(messages)
+        return if messages.empty?
+
+        @buffer_mutex.synchronize { @messages.unshift(*messages) }
       end
     end
   end
