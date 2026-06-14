@@ -199,9 +199,29 @@ module WaterDrop
       # Main polling loop that runs in a dedicated thread
       def polling_loop
         backoff_ms = 0
+        clean_exit = false
 
         loop do
-          break if @shutdown
+          # Decide whether to stop AND clear @thread in a single critical section. This is what
+          # closes the register/shutdown race: a concurrent `register` is serialized by @mutex, so
+          # it either runs before this block (we observe its producer plus `@shutdown = false` and
+          # keep polling) or after it (it finds `@thread` already nil and starts a fresh thread).
+          # Previously the exit decision and the `@thread = nil` teardown were separate and
+          # unsynchronized, so a producer registered in that gap was treated as already served by
+          # this exiting thread and then closed by its cleanup - left registered but never polled.
+          stop = @mutex.synchronize do
+            if @shutdown || @producers.empty?
+              @thread = nil
+              true
+            else
+              false
+            end
+          end
+
+          if stop
+            clean_exit = true
+            break
+          end
 
           # Apply backoff from previous error
           if backoff_ms > 0
@@ -212,9 +232,9 @@ module WaterDrop
           # Collect readable IOs (queue FDs)
           readable_ios, io_to_state = collect_readable_ios
 
-          # Exit when no producers registered
-          # New registrations will start a fresh thread via ensure_thread_running!
-          break if readable_ios.empty?
+          # A producer may have registered right after the stop check above; if the cached snapshot
+          # is momentarily empty, loop to rebuild it instead of selecting on an empty set.
+          next if readable_ios.empty?
 
           poll_with_select(readable_ios, io_to_state)
         rescue => e
@@ -228,13 +248,12 @@ module WaterDrop
             end
         end
       ensure
-        # Clear thread reference first so new registrations will start a fresh thread
-        # This prevents race where register sees old thread as alive during cleanup
-        @mutex.synchronize { @thread = nil }
-
-        # When the poller thread exits (error or clean shutdown), close all remaining states
-        # This releases any latches that might be waiting in unregister calls
-        close_all_states
+        # A normal exit already cleared @thread above with an empty registry, so there is nothing to
+        # release - and skipping cleanup here is what keeps a producer registered in the exit gap
+        # from being closed: its fresh thread owns it now. Only an abnormal exit (an exception
+        # escaped the loop) can leave producers registered with callers blocked in `unregister`;
+        # release those so they don't hang.
+        close_all_states unless clean_exit
       end
 
       # Broadcasts an error to all registered producers' monitors
@@ -378,13 +397,15 @@ module WaterDrop
         state.close
       end
 
-      # Closes all remaining producer states
-      # Called when the poller thread exits to release any pending latches
-      # This prevents deadlocks if producers are waiting in unregister
+      # Releases any producer states still registered when the poller thread exits ABNORMALLY (an
+      # exception escaped the loop), so callers blocked in `unregister` waiting on their latch are
+      # not left hanging. A normal exit clears the registry through the loop and never calls this,
+      # which is why no thread-ownership check is needed here.
       def close_all_states
         states = @mutex.synchronize do
-          to_close = @producers.values.dup
-          @producers.clear
+          @thread = nil
+          to_close = @producers.values
+          @producers = {}
           @ios_dirty = true
           to_close
         end
