@@ -21,7 +21,7 @@ module WaterDrop
           "message.produced_async",
           producer_id: id,
           message: message
-        ) { produce(message) }
+        ) { produce(message, "produce_async") }
       rescue *SUPPORTED_FLOW_ERRORS => e
         # We use this syntax here because we want to preserve the original `#cause` when we
         # instrument the error and there is no way to manually assign `#cause` value
@@ -62,7 +62,7 @@ module WaterDrop
         ) do
           with_transaction_if_transactional do
             messages.each do |message|
-              dispatched << produce(message)
+              dispatched << produce(message, "produce_many_async")
             end
           end
 

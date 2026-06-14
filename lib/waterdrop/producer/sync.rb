@@ -24,7 +24,7 @@ module WaterDrop
           producer_id: id,
           message: message
         ) do
-          wait(produce(message))
+          wait(produce(message, "produce_sync"))
         end
       rescue *SUPPORTED_FLOW_ERRORS => e
         # We use this syntax here because we want to preserve the original `#cause` when we
@@ -84,7 +84,7 @@ module WaterDrop
           begin
             with_transaction_if_transactional do
               messages.each do |message|
-                dispatched << produce(message)
+                dispatched << produce(message, "produce_many_sync")
               end
             end
           rescue *SUPPORTED_FLOW_ERRORS => e

@@ -570,10 +570,36 @@ module WaterDrop
       (clients && clients[id]) || @default_variant
     end
 
+    # Dispatches a message, ensuring transactional producers take the transaction lock before the
+    # operation is counted.
+    #
+    # For a transactional producer we wrap the whole dispatch (including the operations-counter
+    # bookkeeping) in `transaction`, so `@transaction_mutex` is acquired BEFORE
+    # `@operations_in_progress` is incremented. This makes `#produce` acquire locks in the same order
+    # as `#close` (`@transaction_mutex` -> `@operating_mutex` -> operations counter) and removes a
+    # lock-order inversion: without it, a dispatch that had already counted itself could block forever
+    # on `@transaction_mutex` held by a concurrent `#close` that was itself waiting for the operations
+    # counter to drain. When we already own the transaction lock (inside an explicit transaction block
+    # or the closing flush) the order is already correct, so we dispatch directly.
+    #
+    # @param message [Hash] message we want to send
+    # @param label [String] short name of the public dispatch method (e.g. `"produce_sync"`) that
+    #   we surface in the `message.*` queue-full error type. Passed explicitly by each public entry
+    #   point so we never have to walk the call stack to recover it (the number of internal frames
+    #   varies because the transactional path wraps the dispatch in a `transaction`).
+    def produce(message, label)
+      if transactional? && !@transaction_mutex.owned?
+        transaction { produce_to_client(message, label) }
+      else
+        produce_to_client(message, label)
+      end
+    end
+
     # Runs the client produce method with a given message
     #
     # @param message [Hash] message we want to send
-    def produce(message)
+    # @param label [String] public dispatch method name used in the queue-full error type
+    def produce_to_client(message, label)
       produce_time ||= monotonic_now
 
       # This can happen only during flushing on closing, in case like this we don't have to
@@ -654,8 +680,6 @@ module WaterDrop
       # This will prevent from situation where cluster is down forever and we just retry and retry
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
-
-      label = caller_locations(2, 1)[0].label.split.last.split("#").last
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
