@@ -29,19 +29,8 @@ module WaterDrop
     # Empty array to save on memory allocations
     EMPTY_ARRAY = [].freeze
 
-    # Public dispatch methods whose short name we surface in the `message.*` queue-full error type.
-    # We search the call stack for the nearest one instead of using a fixed frame offset, because the
-    # number of internal frames between the public method and the retry handler varies (transactional
-    # dispatches wrap the call in a transaction, adding frames).
-    PRODUCE_METHODS = %w[
-      produce_sync
-      produce_async
-      produce_many_sync
-      produce_many_async
-    ].freeze
-
     private_constant(
-      :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY, :PRODUCE_METHODS
+      :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
     )
 
     def_delegators :config
@@ -570,18 +559,23 @@ module WaterDrop
     # or the closing flush) the order is already correct, so we dispatch directly.
     #
     # @param message [Hash] message we want to send
-    def produce(message)
+    # @param label [String] short name of the public dispatch method (e.g. `"produce_sync"`) that
+    #   we surface in the `message.*` queue-full error type. Passed explicitly by each public entry
+    #   point so we never have to walk the call stack to recover it (the number of internal frames
+    #   varies because the transactional path wraps the dispatch in a `transaction`).
+    def produce(message, label)
       if transactional? && !@transaction_mutex.owned?
-        transaction { produce_to_client(message) }
+        transaction { produce_to_client(message, label) }
       else
-        produce_to_client(message)
+        produce_to_client(message, label)
       end
     end
 
     # Runs the client produce method with a given message
     #
     # @param message [Hash] message we want to send
-    def produce_to_client(message)
+    # @param label [String] public dispatch method name used in the queue-full error type
+    def produce_to_client(message, label)
       produce_time ||= monotonic_now
 
       # This can happen only during flushing on closing, in case like this we don't have to
@@ -656,11 +650,6 @@ module WaterDrop
       # This will prevent from situation where cluster is down forever and we just retry and retry
       # in an infinite loop, effectively hanging the processing
       raise unless monotonic_now - produce_time < @config.wait_timeout_on_queue_full
-
-      label = caller_locations
-        .lazy
-        .map { |location| location.label.split.last.to_s.split("#").last }
-        .find { |name| PRODUCE_METHODS.include?(name) } || "produce"
 
       # We use this syntax here because we want to preserve the original `#cause` when we
       # instrument the error and there is no way to manually assign `#cause` value. We want to keep
