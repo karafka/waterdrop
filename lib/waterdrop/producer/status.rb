@@ -17,6 +17,16 @@ module WaterDrop
 
       private_constant :LIFECYCLE
 
+      # States in which the producer is considered active and able to accept work. Kept as a single
+      # set so the current state can be classified in one atomic read (see `#active?` / `#to_sym`)
+      # rather than via a chain of predicate calls that could straddle a concurrent transition.
+      ACTIVE_STATES = %i[
+        connected
+        configured
+        disconnecting
+        disconnected
+      ].freeze
+
       # Creates a new instance of status with the initial state
       # @return [Status]
       def initialize
@@ -29,12 +39,22 @@ module WaterDrop
       #   established or disconnected, meaning it was working but user disconnected for his own
       #   reasons though sending could reconnect and continue.
       def active?
-        connected? || configured? || disconnecting? || disconnected?
+        # Single read of @current so a concurrent transition cannot make this return false for a
+        # status that is in fact active (for example flipping configured -> connected mid-check
+        # while another thread reloads the client after a fatal error).
+        ACTIVE_STATES.include?(@current)
       end
 
       # @return [String] current status as a string
       def to_s
         @current.to_s
+      end
+
+      # @return [Symbol] current lifecycle state captured as a single atomic read. Lets callers
+      #   branch on one consistent value instead of issuing several predicate calls that could
+      #   observe different states if the producer is transitioning on another thread.
+      def to_sym
+        @current
       end
 
       LIFECYCLE.each do |state|
