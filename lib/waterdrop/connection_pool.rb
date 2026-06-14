@@ -113,11 +113,14 @@ module WaterDrop
       end
 
       # Shutdown the global connection pool
-      def shutdown
+      #
+      # @param force [Boolean] when true, force-close each producer, purging unflushed messages.
+      #   Defaults to false (graceful close) so in-flight messages are not silently dropped.
+      def shutdown(force: false)
         return unless @default_pool
 
         pool = @default_pool
-        @default_pool.shutdown
+        @default_pool.shutdown(force: force)
         @default_pool = nil
 
         # Emit global event for pool shutdown
@@ -237,9 +240,16 @@ module WaterDrop
     end
 
     # Shutdown the connection pool
-    def shutdown
+    #
+    # @param force [Boolean] when true, force-close each producer, purging any messages that do not
+    #   flush within the producer's max wait timeout. Defaults to false: producers are closed
+    #   gracefully so in-flight messages are flushed instead of being silently dropped when the
+    #   broker is slow or unreachable.
+    def shutdown(force: false)
       @pool.shutdown do |producer|
-        producer.close! if producer&.status&.active?
+        next unless producer&.status&.active?
+
+        force ? producer.close! : producer.close
       end
 
       # Emit event after pool is shut down
@@ -255,9 +265,12 @@ module WaterDrop
     alias_method :close, :shutdown
 
     # Reload all connections in the pool. Useful for configuration changes or error recovery
+    #
+    # @note Producers are always closed gracefully (never force-closed): a reload must not drop
+    #   in-flight messages, so it waits for them to flush rather than purging the queue.
     def reload
       @pool.reload do |producer|
-        producer.close! if producer&.status&.active?
+        producer.close if producer&.status&.active?
       end
 
       # Emit event after pool is reloaded

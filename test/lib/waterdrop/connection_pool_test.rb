@@ -201,15 +201,23 @@ describe_current do
       @pool.shutdown
     end
 
-    it "calls close! on active producers during shutdown" do
-      producers = []
+    it "closes active producers gracefully, without force, during shutdown" do
+      producer = nil
+      @pool.with { |captured| producer = captured }
 
-      # Capture producers by using them
-      2.times do
-        @pool.with { |producer| producers << producer }
-      end
+      producer.expects(:close).at_least_once
+      producer.expects(:close!).never
 
       @pool.shutdown
+    end
+
+    it "force-closes active producers when shutdown is called with force: true" do
+      producer = nil
+      @pool.with { |captured| producer = captured }
+
+      producer.expects(:close!).at_least_once
+
+      @pool.shutdown(force: true)
     end
 
     it "handles inactive producers during shutdown" do
@@ -233,13 +241,12 @@ describe_current do
       @pool.close
     end
 
-    it "calls close! on active producers during close (same as shutdown)" do
-      producers = []
+    it "closes active producers gracefully via the close alias (same as shutdown)" do
+      producer = nil
+      @pool.with { |captured| producer = captured }
 
-      # Capture producers by using them
-      2.times do
-        @pool.with { |producer| producers << producer }
-      end
+      producer.expects(:close).at_least_once
+      producer.expects(:close!).never
 
       @pool.close
     end
@@ -259,6 +266,16 @@ describe_current do
     end
 
     it "reloads all connections in the pool" do
+      @pool.reload
+    end
+
+    it "closes active producers gracefully, never force-closing, on reload" do
+      producer = nil
+      @pool.with { |captured| producer = captured }
+
+      producer.expects(:close).at_least_once
+      producer.expects(:close!).never
+
       @pool.reload
     end
   end
