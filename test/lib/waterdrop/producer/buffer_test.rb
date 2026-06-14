@@ -130,6 +130,58 @@ describe WaterDrop::Producer::Buffer do
     end
   end
 
+  # Regression for the lost-update race: #buffer / #buffer_many must mutate the shared @messages
+  # buffer under @buffer_mutex. flush/purge/close swap @messages for a fresh array under that lock,
+  # so an unguarded append could land in the orphaned old array and be silently dropped. We prove
+  # the guard deterministically by holding @buffer_mutex and asserting the mutation cannot proceed
+  # until it is released (without the guard it completes immediately despite the held lock).
+  describe "buffer mutation locking" do
+    it "performs the #buffer append while holding @buffer_mutex" do
+      buffer_mutex = @producer.instance_variable_get(:@buffer_mutex)
+      done = false
+
+      buffer_mutex.lock
+
+      worker = Thread.new do
+        @producer.buffer(build(:valid_message))
+        done = true
+      end
+
+      # Give the worker ample time to reach (and, with the guard, block on) the append.
+      sleep(0.2)
+      blocked = !done
+
+      buffer_mutex.unlock
+      worker.join(5)
+
+      assert(blocked, "#buffer must block on @buffer_mutex while it is held")
+      assert(done)
+      refute_empty(@producer.messages)
+    end
+
+    it "performs the #buffer_many concat while holding @buffer_mutex" do
+      buffer_mutex = @producer.instance_variable_get(:@buffer_mutex)
+      done = false
+
+      buffer_mutex.lock
+
+      worker = Thread.new do
+        @producer.buffer_many([build(:valid_message), build(:valid_message)])
+        done = true
+      end
+
+      sleep(0.2)
+      blocked = !done
+
+      buffer_mutex.unlock
+      worker.join(5)
+
+      assert(blocked, "#buffer_many must block on @buffer_mutex while it is held")
+      assert(done)
+      assert_equal(2, @producer.messages.size)
+    end
+  end
+
   describe "#flush_async" do
     context "when there are no messages in the buffer" do
       it { assert_equal([], @producer.flush_async) }

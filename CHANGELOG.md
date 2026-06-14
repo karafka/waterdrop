@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.2 (Unreleased)
+- [Fix] Guard the internal buffer appends in `Producer#buffer` and `Producer#buffer_many` with `@buffer_mutex`. The appends mutated the shared `@messages` buffer without the lock that `flush`/`purge`/`close` hold while swapping it for a fresh array, so a concurrent swap landing between reading `@messages` and appending could drop the message into an orphaned array that is never dispatched — silently losing buffered messages in the documented "buffer in one thread, flush in another" pattern.
 - [Enhancement] Stop allocating one interpolated string per message in `LoggerListener` batch produce handlers. The quoted topic strings were only ever counted (quoting is a 1:1 mapping), never displayed, so counting the raw topic values yields the identical number with zero string allocations — relevant for large `produce_many_*` batches with the default logger listener attached.
 - [Enhancement] Use `Array#concat` in `Producer#buffer_many` instead of appending messages one by one.
 - [Enhancement] Skip building the `message.acknowledged` instrumentation payload in the delivery callback when nothing is subscribed to that event. The notifications bus already short-circuits on empty listeners, but only after the payload hash was allocated — once per delivered message on the polling thread. Mirrors the listener guard already used by the statistics callback. Late subscribers keep working as the check happens on each emission.

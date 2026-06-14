@@ -12,12 +12,15 @@ module WaterDrop
       def buffer(message)
         ensure_active!
 
+        # The append runs under @buffer_mutex because flush/purge/close swap @messages for a fresh
+        # array under the same lock. Without it, a concurrent swap between reading @messages and
+        # appending would land the message in the orphaned old array and silently lose it.
         @monitor.instrument(
           "message.buffered",
           producer_id: id,
           message: message,
           buffer: @messages
-        ) { @messages << message }
+        ) { @buffer_mutex.synchronize { @messages << message } }
       end
 
       # Adds given messages into the internal producer buffer without flushing them to Kafka
@@ -29,13 +32,16 @@ module WaterDrop
       def buffer_many(messages)
         ensure_active!
 
+        # The concat runs under @buffer_mutex for the same reason as #buffer: flush/purge/close swap
+        # @messages under the lock, so an unguarded concat could append into an array that has just
+        # been captured for dispatch (or discarded), silently losing the messages.
         @monitor.instrument(
           "messages.buffered",
           producer_id: id,
           messages: messages,
           buffer: @messages
         ) do
-          @messages.concat(messages)
+          @buffer_mutex.synchronize { @messages.concat(messages) }
           messages
         end
       end
