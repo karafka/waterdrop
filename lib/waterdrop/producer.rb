@@ -338,6 +338,19 @@ module WaterDrop
     # @param force [Boolean] should we force closing even with outstanding messages after the
     #   max wait timeout
     def close(force: false)
+      # If the client was built in a different process, we have been forked. The client and its
+      # native resources belong to the parent, so we must never flush or close them here: with the
+      # real rdkafka client that is rd_kafka_destroy on a fork-inherited handle (undefined behavior),
+      # and it would also tear down a client the parent still uses. We just drop our references and
+      # the inherited finalizer and return. This matters most for the GC finalizer, which is
+      # inherited across fork and would otherwise run #close in the child at exit.
+      if @client && @pid != Process.pid
+        @client = nil
+        ObjectSpace.undefine_finalizer(id)
+
+        return
+      end
+
       # When closing from within the FD poller thread (e.g., from a callback like
       # message.acknowledged or error.occurred), we must delegate to a background thread.
       # Close performs flush which waits for delivery reports, but delivery reports require
