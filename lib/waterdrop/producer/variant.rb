@@ -78,23 +78,34 @@ module WaterDrop
         Transactions
       ].each do |scope|
         scope.instance_methods(false).each do |method_name|
+          # We save and restore any variant already active for this producer in this fiber rather
+          # than unconditionally deleting it. A variant-wrapped method that yields user code (e.g.
+          # `transaction`) may wrap a nested same-producer variant call; without save/restore the
+          # inner call's `ensure` would clear the slot the outer scope still needs, so the rest of
+          # the outer scope would silently fall back to the default variant. When there was no outer
+          # entry we still `delete` (not nil-assign) to avoid leaving stale entries behind.
+          #
           # @example
           #   def produce_async(*args, &block)
           #     ref = Fiber.current.waterdrop_clients ||= {}
+          #     had = ref.key?(@producer.id)
+          #     prev = ref[@producer.id]
           #     ref[@producer.id] = self
           #
           #     @producer.produce_async(*args, &block)
           #   ensure
-          #     ref.delete(@producer.id)
+          #     had ? (ref[@producer.id] = prev) : ref.delete(@producer.id)
           #   end
           class_eval <<-RUBY, __FILE__, __LINE__ + 1
             def #{method_name}(*args, &block)
               ref = Fiber.current.waterdrop_clients ||= {}
+              had = ref.key?(@producer.id)
+              prev = ref[@producer.id]
               ref[@producer.id] = self
 
               @producer.#{method_name}(*args, &block)
             ensure
-              ref.delete(@producer.id)
+              had ? (ref[@producer.id] = prev) : ref.delete(@producer.id)
             end
           RUBY
         end
