@@ -381,7 +381,18 @@ module WaterDrop
 
             # Flush has its own buffer mutex but even if it is blocked, flushing can still happen
             # as we close the client after the flushing (even if blocked by the mutex)
-            flush(true)
+            #
+            # This is best-effort: if a buffered message surfaces a terminal error here (for example
+            # a fatal error on an idempotent producer), we must still proceed to close the underlying
+            # client. Otherwise the native client and its resources would leak and the producer would
+            # stay stuck in the `:closing` state. The failure is already surfaced via the
+            # `error.occurred` instrumentation emitted by the dispatch itself, so swallowing the
+            # re-raised wrapper here does not hide it.
+            begin
+              flush(true)
+            rescue Errors::ProduceError
+              nil
+            end
 
             # We should not close the client in several threads the same time
             # It is safe to run it several times but not exactly the same moment
@@ -582,8 +593,14 @@ module WaterDrop
 
       result
     rescue SUPPORTED_FLOW_ERRORS.first => e
-      # Check if this is a fatal error on an idempotent producer and we should reload
-      if idempotent_reloadable?(e)
+      # Check if this is a fatal error on an idempotent producer and we should reload.
+      #
+      # We must never reload while closing. During `#close` the final `flush` runs while this
+      # thread already owns `@operating_mutex`; the idempotent reload re-acquires that same mutex,
+      # which Ruby rejects with `ThreadError: deadlock; recursive locking`, and it would also try to
+      # rebuild the very client we are tearing down. In that case we let the error propagate so
+      # `#close` can finish and release the underlying client.
+      if idempotent_reloadable?(e) && !@operating_mutex.owned?
         # Check if we've exceeded max reload attempts
         raise unless idempotent_retryable?
 
