@@ -57,6 +57,15 @@ module WaterDrop
       # @note After reload, the producer will automatically retry the failed operation
       def idempotent_reload_client_on_fatal_error(attempt, error)
         @operating_mutex.synchronize do
+          # When several threads share an idempotent producer, one fatal librdkafka condition fails
+          # all their in-flight produces at once and each enters this method. The mutex serializes
+          # them, but a thread that waited here may arrive after another has already reloaded -
+          # resetting @client to nil and moving the producer to the configured state. Running
+          # reload! again would call methods on a nil @client and raise NoMethodError, so we bail
+          # out and let #produce retry against the freshly reloaded client. This mirrors the
+          # `return if @status.configured?` guard on the transactional reload path.
+          next if @client.nil? || @status.configured?
+
           # Emit producer.reload event before reload
           # Users can subscribe to this event and modify event[:caller].config.kafka to change
           # producer config

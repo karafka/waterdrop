@@ -497,15 +497,21 @@ module WaterDrop
     # Ensures that we don't run any operations when the producer is not configured or when it
     # was already closed
     def ensure_active!
-      return if @status.active?
-      return if @status.closing? && @operating_mutex.owned?
+      # Capture the lifecycle state once. Another thread may be transitioning the producer between
+      # states (for example configured -> connected while reloading the client after a fatal error),
+      # and issuing several @status predicate calls here could otherwise observe an inconsistent mix
+      # of states and raise StatusInvalidError for what is in fact a valid, active producer.
+      state = @status.to_sym
 
-      raise Errors::ProducerNotConfiguredError, id if @status.initial?
-      raise Errors::ProducerClosedError, id if @status.closing?
-      raise Errors::ProducerClosedError, id if @status.closed?
+      return if Status::ACTIVE_STATES.include?(state)
+      return if state == :closing && @operating_mutex.owned?
+
+      raise Errors::ProducerNotConfiguredError, id if state == :initial
+      raise Errors::ProducerClosedError, id if state == :closing
+      raise Errors::ProducerClosedError, id if state == :closed
 
       # This should never happen
-      raise Errors::StatusInvalidError, [id, @status.to_s]
+      raise Errors::StatusInvalidError, [id, state.to_s]
     end
 
     # Ensures that the message we want to send out to Kafka is actually valid and that it can be

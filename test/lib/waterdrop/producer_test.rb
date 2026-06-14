@@ -473,11 +473,10 @@ describe_current do
       end
 
       it do
-        @producer.status.stubs(:configured?).returns(false)
-        @producer.status.stubs(:connected?).returns(false)
-        @producer.status.stubs(:initial?).returns(false)
-        @producer.status.stubs(:closing?).returns(false)
-        @producer.status.stubs(:closed?).returns(false)
+        # `ensure_active!` classifies the lifecycle from a single `#to_sym` snapshot, so simulate an
+        # unknown/impossible state by returning a symbol that is in neither the active set nor any of
+        # the terminal states.
+        @producer.status.stubs(:to_sym).returns(:invalid_state)
         assert_raises(@expected_error) { @producer.send(:ensure_active!) }
       end
     end
