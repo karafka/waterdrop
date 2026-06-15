@@ -149,6 +149,34 @@ describe_current do
     end
   end
 
+  # Regression for the nested-variant clobber: the only variant-wrapped method that yields user
+  # code is `transaction`, so a nested same-producer variant call inside it (and a raw dispatch
+  # within the scope) must keep resolving to the outer variant. Without save/restore in the
+  # wrapper's ensure, the inner call deletes the shared fiber-local slot and the rest of the block
+  # silently falls back to the default variant.
+  context "when a nested same-producer call runs inside a variant transaction" do
+    before do
+      @producer = build(:transactional_producer)
+      @variant = @producer.with(topic_config: { "message.timeout.ms": 10_000 })
+    end
+
+    it "keeps the outer variant active for the rest of the block" do
+      after_inner_variant_call = nil
+      after_raw_dispatch = nil
+
+      @variant.transaction do
+        @variant.produce_async(topic: @topic, payload: "1")
+        after_inner_variant_call = @producer.send(:current_variant)
+
+        @producer.produce_async(topic: @topic, payload: "2")
+        after_raw_dispatch = @producer.send(:current_variant)
+      end
+
+      assert_same(@variant, after_inner_variant_call)
+      assert_same(@variant, after_raw_dispatch)
+    end
+  end
+
   context "when trying to lower the acks on an idempotent producer" do
     before do
       @producer = build(:idempotent_producer)
