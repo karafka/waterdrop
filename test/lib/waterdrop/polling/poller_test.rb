@@ -101,6 +101,20 @@ describe_current do
       refute_predicate(@poller, :alive?)
     end
 
+    it "starts a fresh polling thread when a producer registers after the thread had stopped" do
+      assert_predicate(@poller, :alive?)
+
+      @poller.unregister(@producer)
+
+      refute_predicate(@poller, :alive?)
+
+      # Registering again, once the thread has stopped, must spin a new polling thread up rather
+      # than leaving the producer unpolled.
+      @poller.register(@producer, @client)
+
+      assert_predicate(@poller, :alive?)
+    end
+
     it "sets thread priority from Config" do
       original_priority = WaterDrop::Polling::Config.config.thread_priority
 
