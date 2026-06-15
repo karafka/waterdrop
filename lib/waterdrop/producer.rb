@@ -263,6 +263,29 @@ module WaterDrop
       @middleware ||= config.middleware
     end
 
+    # Returns the variant currently in effect for dispatches on the current fiber.
+    #
+    # While executing inside a variant-wrapped call (any method invoked on the object returned by
+    # {#with} / {#variant}), this returns that variant; otherwise it returns the producer's default
+    # variant. It is primarily useful to middleware and instrumentation listeners that run
+    # synchronously within a dispatch and want to read the effective per-dispatch settings, such as
+    # `#topic_config`, `#max_wait_timeout` or `#default?`.
+    #
+    # @return [WaterDrop::Producer::Variant] the variant active for the current dispatch on this
+    #   fiber, or the producer's default variant when not inside a variant-wrapped call
+    #
+    # @note The lookup is fiber-local and scoped to a single dispatch; it does not represent a
+    #   producer-wide setting. Called from arbitrary code outside a variant-wrapped call it always
+    #   returns the default variant. It is likewise not meaningful from asynchronous delivery
+    #   callbacks (which run on the poller thread, a different fiber) - there it also returns the
+    #   default variant, not the variant the acknowledged message was dispatched with.
+    def current_variant
+      # Read-only: the fiber-local hash is created by the variant wrapper methods only when needed,
+      # so we must not allocate it here just to look up a variant that may not exist.
+      clients = Fiber.current.waterdrop_clients
+      (clients && clients[id]) || @default_variant
+    end
+
     # Disconnects the producer from Kafka while keeping it configured for potential reconnection
     #
     # This method safely disconnects the underlying Kafka client while preserving the producer's
@@ -559,15 +582,6 @@ module WaterDrop
         max_wait_timeout_ms: max_wait_timeout,
         raise_response_error: raise_response_error
       )
-    end
-
-    # @return [Producer::Variant] the variant config. Either custom if built using `#with` or
-    #   a default one.
-    # @note Read-only path. The fiber-local hash is created by the variant wrapper methods when
-    #   needed, so we must not allocate it here just to look up a variant that may not exist.
-    def current_variant
-      clients = Fiber.current.waterdrop_clients
-      (clients && clients[id]) || @default_variant
     end
 
     # Dispatches a message, ensuring transactional producers take the transaction lock before the

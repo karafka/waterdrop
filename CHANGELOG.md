@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.2 (Unreleased)
+- [Feature] Expose `Producer#current_variant` as a public method. It returns the variant active for the current dispatch on the current fiber - the custom variant while inside a `#with`/`#variant`-wrapped call, otherwise the producer's default variant - so middleware and instrumentation listeners running synchronously within a dispatch can read the effective per-dispatch settings (`topic_config`, `max_wait_timeout`, `default?`). The lookup is fiber-local and dispatch-scoped: outside a variant-wrapped call (or from an asynchronous delivery callback) it returns the default variant.
 - [Enhancement] Stop allocating one interpolated string per message in `LoggerListener` batch produce handlers. The quoted topic strings were only ever counted (quoting is a 1:1 mapping), never displayed, so counting the raw topic values yields the identical number with zero string allocations - relevant for large `produce_many_*` batches with the default logger listener attached.
 - [Enhancement] Use `Array#concat` in `Producer#buffer_many` instead of appending messages one by one.
 - [Enhancement] Skip building the `message.acknowledged` instrumentation payload in the delivery callback when nothing is subscribed to that event. The notifications bus already short-circuits on empty listeners, but only after the payload hash was allocated - once per delivered message on the polling thread. Mirrors the listener guard already used by the statistics callback. Late subscribers keep working as the check happens on each emission.
