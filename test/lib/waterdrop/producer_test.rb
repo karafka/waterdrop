@@ -286,6 +286,46 @@ describe_current do
     end
   end
 
+  describe "#current_variant" do
+    before do
+      @producer = build(:producer, deliver: false)
+    end
+
+    it "is a public method" do
+      assert_respond_to(@producer, :current_variant)
+    end
+
+    it "returns the default variant outside a variant-wrapped call" do
+      assert_predicate(@producer.current_variant, :default?)
+    end
+
+    it "returns the default variant during a plain (non-variant) dispatch" do
+      seen = nil
+      @producer.middleware.append(lambda do |message|
+        seen = @producer.current_variant
+        message
+      end)
+
+      @producer.produce_async(topic: @topic_name, payload: "data")
+
+      assert_predicate(seen, :default?)
+    end
+
+    it "returns the active variant while inside a variant-wrapped dispatch" do
+      variant = @producer.with(max_wait_timeout: 1_234)
+      seen = nil
+      @producer.middleware.append(lambda do |message|
+        seen = @producer.current_variant
+        message
+      end)
+
+      variant.produce_async(topic: @topic_name, payload: "data")
+
+      assert_same(variant, seen)
+      refute_predicate(seen, :default?)
+    end
+  end
+
   describe "#close" do
     context "when producer is already closed" do
       before do
