@@ -1,6 +1,6 @@
 services:
   kafka-sasl:
-    image: confluentinc/cp-kafka:8.2.1
+    image: confluentinc/cp-kafka:8.3.0
     container_name: kafka-sasl
     ports:
       - "9095:9095"
