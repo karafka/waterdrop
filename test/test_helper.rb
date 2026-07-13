@@ -43,13 +43,13 @@ if coverage
   SimpleCov.start do
     command_name "Minitest-#{(ENV["THREAD_POLLING"] == "true") ? "thread" : "fiber"}"
 
-    add_filter "/test/"
-    add_filter "/vendor/"
-    add_filter "/gems/"
-    add_filter "/.bundle/"
-    add_filter "/doc/"
-    add_filter "/config/"
-    add_filter "/lib/waterdrop/patches/"
+    skip "/test/"
+    skip "/vendor/"
+    skip "/gems/"
+    skip "/.bundle/"
+    skip "/doc/"
+    skip "/config/"
+    skip "/lib/waterdrop/patches/"
 
     merge_timeout 600
     # Per-run minimum is 0; merged coverage is checked in the CI coverage job
