@@ -14,7 +14,11 @@ allowed_patterns=(
    # and rejects the ABORT marker, logging this warning. It is the broker-side signature of the very
    # defect those specs exist to reproduce, so it is expected there - and scoped to their
    # transactional ids so we still catch the same warning anywhere else.
-   "tx-abort-\(race\|canary\)-id.*received transaction marker result to send: ABORT"
+   #
+   # One entry per spec rather than an alternation: `\|` is a GNU extension to POSIX BRE, so on BSD
+   # grep (macOS) it would match nothing and the allowance would silently do nothing at all.
+   "tx-abort-race-id.*received transaction marker result to send: ABORT"
+   "tx-abort-canary-id.*received transaction marker result to send: ABORT"
 )
 
 # Get all warnings

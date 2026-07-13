@@ -128,17 +128,26 @@ end
 
 # Definitive usability check: every producer must still be able to commit a fresh transaction after
 # all the aborts (and any reloads). This is what proves the librdkafka#4849 blip was fully absorbed.
-recovered = producers.each_with_index.map do |producer, idx|
-  producer.transaction do
-    producer.produce_sync(topic: topic, payload: "final-#{idx}")
+#
+# We skip it (and the close) entirely once something already failed. On the deadlock this spec exists
+# to catch, the wedged threads still hold the producer's transaction mutex, so `#transaction` here
+# would block on it forever - we would hang instead of reporting the failure we already detected.
+recovered = if failed_cycle
+  []
+else
+  producers.each_with_index.map do |producer, idx|
+    producer.transaction do
+      producer.produce_sync(topic: topic, payload: "final-#{idx}")
+    end
+    true
+  rescue => e
+    mutex.synchronize { failed_cycle ||= "final commit for producer #{idx}: #{e.class}: #{e.message}" }
+    false
   end
-  true
-rescue => e
-  mutex.synchronize { failed_cycle ||= "final commit for producer #{idx}: #{e.class}: #{e.message}" }
-  false
 end
 
-producers.each(&:close)
+# Same reason: closing a producer whose transaction mutex is held by a wedged thread blocks forever.
+producers.each(&:close) if failed_cycle.nil?
 
 race_count = race_errors.size
 reload_count = reload_events.size
