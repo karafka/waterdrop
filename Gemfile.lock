@@ -12,7 +12,6 @@ GEM
     byebug (13.0.0)
       reline (>= 0.6.0)
     connection_pool (3.0.2)
-    docile (1.4.1)
     drb (2.2.3)
     ffi (1.17.4)
     io-console (0.8.2)
@@ -39,12 +38,7 @@ GEM
     reline (0.6.3)
       io-console (~> 0.5)
     ruby2_keywords (0.0.5)
-    simplecov (0.22.0)
-      docile (~> 1.1)
-      simplecov-html (~> 0.11)
-      simplecov_json_formatter (~> 0.1)
-    simplecov-html (0.13.2)
-    simplecov_json_formatter (0.1.4)
+    simplecov (1.0.0)
     warning (1.6.0)
     zeitwerk (2.8.2)
 
@@ -65,7 +59,6 @@ DEPENDENCIES
 CHECKSUMS
   byebug (13.0.0) sha256=d2263efe751941ca520fa29744b71972d39cbc41839496706f5d9b22e92ae05d
   connection_pool (3.0.2) sha256=33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a
-  docile (1.4.1) sha256=96159be799bfa73cdb721b840e9802126e4e03dfc26863db73647204c727f21e
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   ffi (1.17.4) sha256=bcd1642e06f0d16fc9e09ac6d49c3a7298b9789bcb58127302f934e437d60acf
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
@@ -81,9 +74,7 @@ CHECKSUMS
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
   reline (0.6.3) sha256=1198b04973565b36ec0f11542ab3f5cfeeec34823f4e54cebde90968092b1835
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
-  simplecov (0.22.0) sha256=fe2622c7834ff23b98066bb0a854284b2729a569ac659f82621fc22ef36213a5
-  simplecov-html (0.13.2) sha256=bd0b8e54e7c2d7685927e8d6286466359b6f16b18cb0df47b508e8d73c777246
-  simplecov_json_formatter (0.1.4) sha256=529418fbe8de1713ac2b2d612aa3daa56d316975d307244399fa4838c601b428
+  simplecov (1.0.0) sha256=bdc50b41fa4a8b3c860da4bf5d61ba4704479c51d08a8f53cbd56ae50778dca8
   warning (1.6.0) sha256=a49cdfae19fb77d19afff2efbe45f8ab759e9cd25b4e4ce2c79dbaf46bdb6c9e
   waterdrop (2.10.2)
   zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
