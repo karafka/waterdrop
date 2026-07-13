@@ -7,14 +7,14 @@ allowed_patterns=(
    "Performing controller activation"
    "registered with feature metadata.version"
    "TOPIC_ALREADY_EXISTS"
-   # The transactional_abort_after_commit_race integration spec deliberately reproduces
-   # librdkafka#4849: it aborts with the first produce still in flight, so the abort's EndTxn can
-   # reach the coordinator before AddPartitionsToTxn registers the new transaction. The coordinator
-   # then still holds the *previous* transaction's COMPLETE_COMMIT state and rejects the ABORT
-   # marker, logging this warning. It is the broker-side signature of the very defect that spec
-   # exists to reproduce, so it is expected there - and scoped to that spec's transactional ids so
-   # we still catch it anywhere else.
-   "tx-abort-race-id.*received transaction marker result to send: ABORT"
+   # The transactional_abort_after_commit_race and transactional_abort_race_canary integration specs
+   # deliberately reproduce librdkafka#4849: they abort with the first produce still in flight, so
+   # the abort's EndTxn can reach the coordinator before AddPartitionsToTxn registers the new
+   # transaction. The coordinator then still holds the *previous* transaction's COMPLETE_COMMIT state
+   # and rejects the ABORT marker, logging this warning. It is the broker-side signature of the very
+   # defect those specs exist to reproduce, so it is expected there - and scoped to their
+   # transactional ids so we still catch the same warning anywhere else.
+   "tx-abort-\(race\|canary\)-id.*received transaction marker result to send: ABORT"
 )
 
 # Get all warnings
