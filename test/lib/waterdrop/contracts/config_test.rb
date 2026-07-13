@@ -24,6 +24,7 @@ describe_current do
       reload_on_transaction_fatal_error: true,
       wait_backoff_on_transaction_fatal_error: 1_000,
       max_attempts_on_transaction_fatal_error: 10,
+      wait_timeout_on_transaction_abort: 0,
       non_reloadable_errors: %i[fenced],
       oauth: {
         token_provider_listener: false

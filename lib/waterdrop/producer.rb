@@ -67,6 +67,7 @@ module WaterDrop
       @poller = nil
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
+      @transaction_first_handle = nil
 
       @status = Status.new
       @messages = []
@@ -646,6 +647,12 @@ module WaterDrop
       else
         client.produce(**message)
       end
+
+      # Remember the first delivery handle of the current transaction. Aborting while the very first
+      # produce is still in flight is what triggers librdkafka#4849, so the abort path waits on this
+      # handle to confirm the transaction is registered at the coordinator. See
+      # `#transactional_await_first_delivery`.
+      @transaction_first_handle ||= result if transactional? && @transaction_mutex.owned?
 
       # Reset attempts counter on successful produce
       @idempotent_fatal_error_attempts = 0

@@ -23,6 +23,7 @@ module Factories
         reload_on_transaction_fatal_error: true,
         wait_backoff_on_transaction_fatal_error: 1_000,
         max_attempts_on_transaction_fatal_error: 10,
+        wait_timeout_on_transaction_abort: 0,
         polling_mode: polling_mode,
         polling_fd_max_time: 100,
         kafka: {
@@ -55,6 +56,8 @@ module Factories
           attributes[:wait_backoff_on_transaction_fatal_error]
         config.max_attempts_on_transaction_fatal_error =
           attributes[:max_attempts_on_transaction_fatal_error]
+        config.wait_timeout_on_transaction_abort =
+          attributes[:wait_timeout_on_transaction_abort]
         config.polling.mode = attributes[:polling_mode]
         config.polling.fd.max_time = attributes[:polling_fd_max_time]
       end

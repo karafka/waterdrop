@@ -107,6 +107,7 @@ module WaterDrop
             begin
               with_transactional_error_handling(:abort) do
                 transactional_instrument(:aborted) do
+                  transactional_await_first_delivery
                   client.abort_transaction
                 end
               end
@@ -121,6 +122,13 @@ module WaterDrop
             transactional_reload_client_if_needed(e)
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
+          ensure
+            # The first delivery handle is scoped to the transaction that produced it and is only
+            # ever read by the abort path (which runs in the rescue above, before this). Clearing it
+            # here - on commit, on abort and on a re-raise alike - keeps it from outliving its
+            # transaction: otherwise a committed transaction would leave its handle (and everything
+            # the delivery report references) pinned to the producer until the next one begins.
+            @transaction_first_handle = nil
           end
         end
       end
@@ -256,11 +264,47 @@ module WaterDrop
           # Always attempt to abort but if aborting fails with an abortable error, do not attempt
           # to abort from abort as this could create an infinite loop
           with_transactional_error_handling(:abort, allow_abortable: false) do
-            transactional_instrument(:aborted) { client.abort_transaction }
+            transactional_instrument(:aborted) do
+              transactional_await_first_delivery
+              client.abort_transaction
+            end
           end
         end
 
         raise
+      end
+
+      # Waits (bounded) for the first delivery of the current transaction before we abort it.
+      #
+      # librdkafka only marks a transaction as ongoing at the coordinator once the
+      # `AddPartitionsToTxn` **response** comes back, but it fires `EndTxn` as soon as that request
+      # has merely been **sent** (it gates on `txn_req_cnt`, bumped on send). Aborting with the first
+      # produce still in flight can therefore reach a coordinator that does not yet consider the
+      # transaction started, which fails the abort with a fatal `INVALID_TXN_STATE`.
+      # See https://github.com/confluentinc/librdkafka/issues/4849
+      #
+      # A delivered message proves its partition completed registration, and that alone puts the
+      # transaction in an `ongoing` state at the coordinator - so a single acknowledged delivery is
+      # enough to make `EndTxn` valid, regardless of how many partitions the transaction spans.
+      #
+      # This is best-effort and never fatal: if the delivery does not materialize within the timeout
+      # (broker down, message timeout, purge) we abort exactly as before rather than hanging. The
+      # fatal, should it still happen, remains recoverable through the client reload.
+      def transactional_await_first_delivery
+        handle = @transaction_first_handle
+        timeout = config.wait_timeout_on_transaction_abort
+
+        return if handle.nil?
+        return if timeout.zero?
+
+        # An already delivered handle (the common case - any sync dispatch, or a transaction that did
+        # some work before aborting) short-circuits inside `#wait` itself, so there is nothing to
+        # guard against here: it returns immediately without blocking.
+        wait(handle, max_wait_timeout: timeout, raise_response_error: false)
+      rescue
+        # A timeout or a delivery/purge error only means we could not confirm the registration.
+        # Aborting is still the right move, we just lose the mitigation for this one transaction.
+        nil
       end
 
       # Reloads the underlying client instance if needed and allowed
