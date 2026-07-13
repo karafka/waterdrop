@@ -108,10 +108,15 @@ begin
               raise WaterDrop::AbortTransaction
             end
           rescue Rdkafka::RdkafkaError => e
-            # librdkafka#4849: the abort's EndTxn failed fatally (INVALID_TXN_STATE). WaterDrop has
-            # already reloaded the client under the hood, so this is a recoverable blip, not a
-            # rollback-correctness failure. Record it and keep going - the definitive check is that
-            # the producer still commits a fresh transaction after the loop.
+            # Only INVALID_TXN_STATE is the defect we are documenting: the abort's EndTxn failed
+            # fatally, WaterDrop reloaded the client under the hood, and the run continues. That is a
+            # recoverable blip, not a rollback-correctness failure.
+            #
+            # Anything else (auth, config, a broken cluster...) is NOT expected here, and tolerating
+            # it would let this spec pass green while the system is failing for a completely
+            # different reason. So we fail on it instead.
+            raise unless e.code == :invalid_txn_state
+
             mutex.synchronize { race_errors << e }
           end
         end

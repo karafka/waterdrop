@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require "securerandom"
+
 # Helpers for reading back what we produced, so tests can assert on what a real Kafka consumer sees
 # rather than only on delivery reports.
 module Consumption

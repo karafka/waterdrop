@@ -313,9 +313,14 @@ module WaterDrop
         # some work before aborting) short-circuits inside `#wait` itself, so there is nothing to
         # guard against here: it returns immediately without blocking.
         wait(handle, max_wait_timeout: timeout, raise_response_error: false)
-      rescue
-        # A timeout or a delivery/purge error only means we could not confirm the registration.
-        # Aborting is still the right move, we just lose the mitigation for this one transaction.
+      rescue ::Rdkafka::AbstractHandle::WaitTimeoutError, ::Rdkafka::RdkafkaError
+        # These two mean the same thing for us: we could not confirm the registration, either because
+        # the delivery did not arrive in time or because it failed outright. Aborting is still the
+        # right move, we just lose the mitigation for this one transaction.
+        #
+        # Deliberately narrow. A broader rescue would also swallow bugs of our own making (a
+        # `NoMethodError` on a handle we mis-tracked, say) and turn them into a silently skipped
+        # mitigation that nobody would ever notice.
         nil
       end
 
