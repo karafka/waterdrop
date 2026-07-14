@@ -427,6 +427,75 @@ describe_current do
     end
   end
 
+  # Counter-part of the "when we start transaction and abort" purge expectations above.
+  #
+  # `wait_timeout_on_transaction_abort` is the opt-in mitigation for librdkafka#4849: we wait for the
+  # first delivery of a transaction to be acknowledged before aborting, because that ack is the only
+  # signal available to us that the coordinator registered the transaction (without it, `EndTxn` can
+  # race ahead of `AddPartitionsToTxn` and fail fatally with `INVALID_TXN_STATE`).
+  #
+  # The trade-off is exactly what these tests pin down: that first message is no longer purged, it is
+  # really written to the log. That is safe because the transaction is still rolled back - the message
+  # is invisible to `read_committed` consumers, which is what actually matters.
+  context "when we start transaction and abort with the abort delivery wait enabled" do
+    before do
+      @producer.close
+      @producer = build(:transactional_producer, wait_timeout_on_transaction_abort: 5_000)
+
+      @purges = []
+      @errors = []
+
+      @producer.monitor.subscribe("message.purged") { |event| @purges << event[:error] }
+      @producer.monitor.subscribe("error.occurred") { |event| @errors << event[:error] }
+    end
+
+    it "expect not to purge the first message and to have a real delivery report" do
+      handler = nil
+
+      @producer.transaction do
+        handler = @producer.produce_async(topic: @topic_name, payload: "na")
+
+        raise(WaterDrop::AbortTransaction)
+      end
+
+      result = handler.create_result
+
+      # Delivered for real (not `-1001` with a purge error) because we waited for its ack
+      assert_equal(0, result.partition)
+      assert_operator(result.offset, :>=, 0)
+      assert_nil(result.error)
+    end
+
+    it "expect not to emit message.purged nor any error for it" do
+      @producer.transaction do
+        @producer.produce_async(topic: @topic_name, payload: "na")
+
+        raise(WaterDrop::AbortTransaction)
+      end
+
+      assert_empty(@purges)
+      assert_empty(@errors)
+    end
+
+    it "expect the message to be written but rolled back, so invisible to read_committed" do
+      @producer.transaction do
+        @producer.produce_async(topic: @topic_name, payload: "aborted")
+
+        raise(WaterDrop::AbortTransaction)
+      end
+
+      # It is in the log (an aborted transaction still writes, it just marks the batch aborted)
+      assert_equal(
+        %w[aborted],
+        consume_payloads(@topic_name, isolation_level: "read_uncommitted")
+      )
+
+      # ...but the rollback means no transactional consumer will ever see it. This is the whole
+      # reason the delivery above is an acceptable price for dodging the fatal.
+      assert_empty(consume_payloads(@topic_name, isolation_level: "read_committed"))
+    end
+  end
+
   context "when we try to create a producer with already used transactional_id" do
     before do
       @producer1 = build(:transactional_producer, transactional_id: @transactional_id)

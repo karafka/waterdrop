@@ -95,6 +95,31 @@ module WaterDrop
     # option [Integer] How many times to attempt reloading on transactional fatal error before
     #   giving up. This prevents infinite reload loops if the producer never recovers.
     setting :max_attempts_on_transaction_fatal_error, default: 10
+    # option [Numeric] How long to wait (in ms) for the first delivery of a transaction to be
+    #   acknowledged before we abort that transaction. `0` (the default) disables the wait.
+    #
+    #   This is an opt-in mitigation for a librdkafka defect. librdkafka only flags a transaction as
+    #   ongoing at the coordinator once the `AddPartitionsToTxn` **response** arrives, but it sends
+    #   `EndTxn` as soon as that request has merely been **sent**. Aborting with the first produce
+    #   still in flight can therefore hit a coordinator that does not consider the transaction
+    #   started yet, failing the abort with a fatal `INVALID_TXN_STATE`.
+    #   See https://github.com/confluentinc/librdkafka/issues/4849
+    #
+    #   A single acknowledged delivery proves its partition completed registration, and that alone
+    #   makes the coordinator accept `EndTxn` - no matter how many partitions the transaction spans.
+    #   So waiting for one delivery before aborting closes the race.
+    #
+    #   It is off by default because it changes abort semantics: waiting for that ack means the
+    #   first message is actually **delivered** (aborted, so invisible to `read_committed`
+    #   consumers) instead of being **purged**. Its delivery handle then reports a real offset
+    #   rather than a `Purged in queue` error, and no `message.purged` event is emitted for it,
+    #   while the remaining messages of the same transaction are still purged. Enable this only if
+    #   you hit the defect and prefer that trade over the fatal (which stays recoverable through
+    #   `reload_on_transaction_fatal_error` either way).
+    #
+    #   The wait is bounded and best-effort: if it expires (broker down, message timeout) we abort
+    #   exactly as if it were disabled.
+    setting :wait_timeout_on_transaction_abort, default: 0
     # option [Array<Symbol>] List of fatal error codes that should NOT trigger producer reload.
     #   These errors represent states that cannot be recovered by simply recreating the client.
     #

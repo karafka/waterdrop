@@ -106,9 +106,11 @@ module WaterDrop
             # This is why we catch this here
             begin
               with_transactional_error_handling(:abort) do
-                transactional_instrument(:aborted) do
-                  client.abort_transaction
-                end
+                # Outside of the `aborted` instrumentation on purpose: that event is supposed to
+                # measure `client.abort_transaction`, not our wait
+                transactional_await_first_delivery(e)
+
+                transactional_instrument(:aborted) { client.abort_transaction }
               end
             rescue => e
               # If something from rdkafka leaks here, it means there was a non-retryable error that
@@ -121,6 +123,13 @@ module WaterDrop
             transactional_reload_client_if_needed(e)
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
+          ensure
+            # The first delivery handle is scoped to the transaction that produced it and is only
+            # ever read by the abort path (which runs in the rescue above, before this). Clearing it
+            # here - on commit, on abort and on a re-raise alike - keeps it from outliving its
+            # transaction: otherwise a committed transaction would leave its handle (and everything
+            # the delivery report references) pinned to the producer until the next one begins.
+            @transaction_first_handle = nil
           end
         end
       end
@@ -255,12 +264,73 @@ module WaterDrop
         if e.abortable? && allow_abortable
           # Always attempt to abort but if aborting fails with an abortable error, do not attempt
           # to abort from abort as this could create an infinite loop
+          #
+          # We deliberately do NOT wait for the first delivery here (unlike the abort in
+          # `#transaction`): we only get here because librdkafka reported an abortable error, so the
+          # transaction is already in an error state where it no longer delivers. The queued messages
+          # are purged by the abort itself, so the handle would never resolve and we would just stall
+          # for the whole `wait_timeout_on_transaction_abort` on a path that is already recovering.
           with_transactional_error_handling(:abort, allow_abortable: false) do
             transactional_instrument(:aborted) { client.abort_transaction }
           end
         end
 
         raise
+      end
+
+      # Waits (bounded) for the first delivery of the current transaction before we abort it.
+      #
+      # librdkafka only marks a transaction as ongoing at the coordinator once the
+      # `AddPartitionsToTxn` **response** comes back, but it fires `EndTxn` as soon as that request
+      # has merely been **sent** (it gates on `txn_req_cnt`, bumped on send). Aborting with the first
+      # produce still in flight can therefore reach a coordinator that does not yet consider the
+      # transaction started, which fails the abort with a fatal `INVALID_TXN_STATE`.
+      # See https://github.com/confluentinc/librdkafka/issues/4849
+      #
+      # A delivered message proves its partition completed registration, and that alone puts the
+      # transaction in an `ongoing` state at the coordinator - so a single acknowledged delivery is
+      # enough to make `EndTxn` valid, regardless of how many partitions the transaction spans.
+      #
+      # This is best-effort and never fatal: if the delivery does not materialize within the timeout
+      # (broker down, message timeout, purge) we abort exactly as before rather than hanging. The
+      # fatal, should it still happen, remains recoverable through the client reload.
+      #
+      # @param error [Exception] the error that is causing us to abort this transaction
+      def transactional_await_first_delivery(error)
+        handle = @transaction_first_handle
+        timeout = config.wait_timeout_on_transaction_abort
+
+        return if handle.nil?
+        return if timeout.zero?
+        # Only worth waiting when the transaction is still healthy, that is when we abort because the
+        # user asked us to (`AbortTransaction`) or because their own code raised. Once librdkafka
+        # itself reported an error, the transaction no longer delivers: the queued messages are
+        # purged by the abort, so this handle would never resolve and we would stall for the full
+        # timeout on a path that is already recovering from an error.
+        return if transactional_error?(error)
+
+        # An already delivered handle (the common case - any sync dispatch, or a transaction that did
+        # some work before aborting) short-circuits inside `#wait` itself, so there is nothing to
+        # guard against here: it returns immediately without blocking.
+        wait(handle, max_wait_timeout: timeout, raise_response_error: false)
+      rescue ::Rdkafka::AbstractHandle::WaitTimeoutError, ::Rdkafka::RdkafkaError
+        # These two mean the same thing for us: we could not confirm the registration, either because
+        # the delivery did not arrive in time or because it failed outright. Aborting is still the
+        # right move, we just lose the mitigation for this one transaction.
+        #
+        # Deliberately narrow. A broader rescue would also swallow bugs of our own making (a
+        # `NoMethodError` on a handle we mis-tracked, say) and turn them into a silently skipped
+        # mitigation that nobody would ever notice.
+        nil
+      end
+
+      # @param error [Exception] error that caused the abort
+      # @return [Boolean] did this error come from librdkafka, meaning the transaction is already in
+      #   an error state and will not deliver anything anymore
+      def transactional_error?(error)
+        return true if error.is_a?(::Rdkafka::RdkafkaError)
+
+        error.cause.is_a?(::Rdkafka::RdkafkaError)
       end
 
       # Reloads the underlying client instance if needed and allowed

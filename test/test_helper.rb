@@ -84,11 +84,13 @@ class Minitest::Spec
 end
 
 require_relative "support/spec_hash"
+require_relative "support/consumption"
 require_relative "support/factories"
 require_relative "support/factories/message"
 require_relative "support/factories/producer"
 
 class Minitest::Spec
+  include Consumption
   include Factories
   include Factories::Message
   include Factories::Producer
