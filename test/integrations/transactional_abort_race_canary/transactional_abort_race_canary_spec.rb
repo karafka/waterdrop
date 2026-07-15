@@ -33,20 +33,24 @@ BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 PRODUCER_COUNT = 8
 # Produce->abort delays (seconds) to sweep. 0 is deliberately excluded: it reliably misses the bug.
-# The spread covers a moving window - on a slower coordinator the band sits further right.
-DELAYS = [0.001, 0.002, 0.003, 0.005, 0.008, 0.013, 0.02, 0.03, 0.05].freeze
+# The spread covers a moving window - on a slower coordinator the band sits further right. The tail
+# (0.08, 0.13) exists because CI runners occasionally add enough scheduling jitter on top of the
+# nominal sleep to push the window past 0.05 - without it, a slow/loaded machine can spend the whole
+# phase 1 budget sweeping delays that all land before the window and report a false "fixed upstream".
+DELAYS = [0.001, 0.002, 0.003, 0.005, 0.008, 0.013, 0.02, 0.03, 0.05, 0.08, 0.13].freeze
 # Budget for phase 1. We stop the moment the defect shows up, so a healthy (still-broken) librdkafka
 # exits in a second or two. The budget only gets spent in full when the defect is GONE - and it is
 # sized so that a false "it is fixed" is implausible: at the ~5% peak rate seeing zero across this
-# many aborts is essentially impossible, and even at a tenth of that it stays negligible.
-MAX_ABORTS = 2_400
-MAX_SECONDS = 120
+# many aborts is essentially impossible, and even at a tenth of that it stays negligible. Scaled with
+# DELAYS so every delay value keeps getting roughly the same number of attempts as before.
+MAX_ABORTS = 3_000
+MAX_SECONDS = 180
 # Phase 2 does not need to be as large: we only need enough aborts that, had the mitigation not
 # worked, we would very likely have seen a fatal.
-MITIGATED_ABORTS = 480
+MITIGATED_ABORTS = 600
 # ...and at least this many must actually run, otherwise "0 fatals" proves nothing and we would be
 # passing on a sample too small to have caught a broken mitigation.
-MIN_MITIGATED_ABORTS = 240
+MIN_MITIGATED_ABORTS = 300
 
 topic = generate_topic("tx-abort-canary")
 create_topic(topic)
