@@ -95,8 +95,12 @@ module WaterDrop
     # option [Integer] How many times to attempt reloading on transactional fatal error before
     #   giving up. This prevents infinite reload loops if the producer never recovers.
     setting :max_attempts_on_transaction_fatal_error, default: 10
-    # option [Numeric] How long to wait (in ms) for the first delivery of a transaction to be
-    #   acknowledged before we abort that transaction. `0` (the default) disables the wait.
+    # option [Numeric] How long to wait **at most** (in ms) for the first delivery of a transaction
+    #   to be acknowledged before we abort that transaction. `0` (the default) disables the wait.
+    #
+    #   This is a ceiling, not a fixed delay: the wait ends as soon as the delivery is acknowledged,
+    #   which under normal conditions is immediate. The full timeout is only ever spent when the
+    #   delivery never arrives at all.
     #
     #   This is an opt-in mitigation for a librdkafka defect. librdkafka only flags a transaction as
     #   ongoing at the coordinator once the `AddPartitionsToTxn` **response** arrives, but it sends
