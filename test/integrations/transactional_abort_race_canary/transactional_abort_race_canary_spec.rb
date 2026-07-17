@@ -28,6 +28,18 @@
 require "waterdrop"
 require "logger"
 require "securerandom"
+require "rbconfig"
+
+# librdkafka#4849 only reproduces reliably on Linux. On other platforms (notably macOS) the abort's
+# EndTxn does not race the coordinator registration the same way, so phase 1 can NEVER observe the
+# defect - and a canary whose whole job is "the bug must still reproduce" would then raise a false
+# "fixed upstream" retirement alarm, telling us to delete a mitigation that is still needed
+# everywhere. The window's absence here is a property of the platform, not evidence about the bug,
+# so we run this retirement alarm only where the defect actually lives.
+unless RbConfig::CONFIG["host_os"].match?(/linux/i)
+  puts "SKIP: librdkafka#4849 canary only runs on Linux (host_os=#{RbConfig::CONFIG["host_os"]})"
+  exit(0)
+end
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 

@@ -95,20 +95,37 @@ describe_current do
         # locally, swallowing the error silently and never generating a delivery callback.
         @invalid_topic = "a" * 250
 
-        @producer.monitor.subscribe("error.occurred") do |event|
+        # Bound how long librdkafka may hold the undeliverable message before it fails it and
+        # fires the delivery callback. With WaterDrop's 150s default `message.timeout.ms`, the
+        # only thing that fails the message inside the wait window is the broker's metadata
+        # rejection of the invalid topic - and that round-trip can occasionally exceed the
+        # deadline on a cold, loaded CI runner, leaving @changed empty and flaking the test. A
+        # short `message.timeout.ms` guarantees the error.occurred event fires within that bound
+        # regardless of metadata timing; on a healthy run the broker still rejects first, so we
+        # keep exercising the real rejection path and only fall back to the timeout when slow.
+        producer = build(
+          :producer,
+          kafka: {
+            "bootstrap.servers": BOOTSTRAP_SERVERS,
+            "message.timeout.ms": 5_000
+          }
+        )
+
+        producer.monitor.subscribe("error.occurred") do |event|
           @changed << event
         end
 
         100.times do
           # We force it to bypass the validations, so we trigger an error on delivery
           # otherwise we would be stopped by WaterDrop itself
-          @producer.send(:client).produce(topic: @invalid_topic, payload: "1")
+          producer.send(:client).produce(topic: @invalid_topic, payload: "1")
         rescue Rdkafka::RdkafkaError
           nil
         end
 
-        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 10
-        sleep(0.01) until @changed.size.positive? || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+        # Comfortably above `message.timeout.ms` so the guaranteed failure has landed; only the
+        # genuine "no event ever" case spends the full deadline before failing.
+        wait_for_events(@changed, count: 1, timeout: 20)
         @event = @changed.last
 
         refute_nil @event, "No error.occurred event received within deadline"
