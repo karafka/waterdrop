@@ -658,6 +658,29 @@ module WaterDrop
       @idempotent_fatal_error_attempts = 0
 
       result
+    rescue Rdkafka::ClosedProducerError, Rdkafka::ClosedInnerError
+      # A concurrent idempotent fatal-error reload closed the underlying client while this produce
+      # was already in flight. Unlike `#close`/`#disconnect`, which drain `@operations_in_progress`
+      # before closing the client, the idempotent reload swaps `@client` out from under sibling
+      # threads that have already passed the `@operating_mutex` gate and are inside `client.produce`.
+      # Racing with `@client.close`, such a thread sees either a producer already flagged closed
+      # (`ClosedProducerError`) or a nil inner librdkafka handle (`ClosedInnerError`) - which one
+      # depends purely on how far `close` has progressed.
+      #
+      # This is a benign, recoverable transient rather than a produce failure: the client has just
+      # been (or is being) rebuilt, so we retry the dispatch against the fresh client instead of
+      # surfacing a raw "closed producer" error to the caller - which would defeat the whole point
+      # of the transparent reload. Only the idempotent reload path closes the client with produces
+      # in flight, so we scope the retry to that configuration; anywhere else a closed client is a
+      # genuine error and must propagate. The retried pass re-runs `ensure_active!`, which raises
+      # `ProducerClosedError` once the producer is genuinely closing/closed, so this cannot spin
+      # forever.
+      raise unless config.reload_on_idempotent_fatal_error
+      raise if transactional?
+
+      @operations_in_progress.decrement
+
+      retry
     rescue SUPPORTED_FLOW_ERRORS.first => e
       # Check if this is a fatal error on an idempotent producer and we should reload.
       #
