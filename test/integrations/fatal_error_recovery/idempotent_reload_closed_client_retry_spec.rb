@@ -82,7 +82,7 @@ victim_report = nil
 
 victim = Thread.new do
   victim_report = producer.produce_sync(topic: topic, payload: "victim")
-rescue StandardError => e
+rescue => e
   # Any error here (in particular a leaked ClosedProducerError/ClosedInnerError) is a failure - the
   # produce should have transparently recovered.
   victim_error = e
