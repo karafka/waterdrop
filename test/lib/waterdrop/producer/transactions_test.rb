@@ -241,6 +241,11 @@ describe_current do
         rescue
           nil
         end
+
+        # The purge is emitted from the delivery callback on the rdkafka background thread, so it
+        # lands asynchronously after the abort returns. Without waiting for it, the assertions below
+        # race that thread and `@purges` is intermittently still empty (flaky on loaded CI).
+        wait_for_events(@purges, count: 1, timeout: 10)
       end
 
       it "expect not to emit the cancellation error via the error pipeline" do
@@ -374,6 +379,13 @@ describe_current do
 
           raise(WaterDrop::AbortTransaction)
         end
+
+        # The purge is emitted from the delivery callback on the rdkafka background thread, so it
+        # lands asynchronously after `abort_transaction` returns. Without waiting for it, the
+        # assertions below race that thread and `@purges` is intermittently still empty (flaky on
+        # loaded CI). Waiting also lets any erroneous `error.occurred` settle, so the negative
+        # assertion stays reliable.
+        wait_for_events(@purges, count: 1, timeout: 10)
       end
 
       it "expect not to emit the cancellation error via the error pipeline" do
