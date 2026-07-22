@@ -124,8 +124,11 @@ describe_current do
         end
 
         # Comfortably above `message.timeout.ms` so the guaranteed failure has landed; only the
-        # genuine "no event ever" case spends the full deadline before failing.
-        wait_for_events(@changed, count: 1, timeout: 20)
+        # genuine "no event ever" case spends the full deadline before failing. The delivery
+        # callback fires from the fd poller in fiber mode, and on a loaded CI runner that poll can
+        # lag well past a tight bound - the async path has no way to drive delivery itself without
+        # racing the poller, so we give the observation a generous budget to keep it from flaking.
+        wait_for_events(@changed, count: 1, timeout: 60)
         @event = @changed.last
 
         refute_nil @event, "No error.occurred event received within deadline"
