@@ -28,8 +28,8 @@ module WaterDrop
       # Marks this monitor as no longer accepting new subscriptions to `statistics.emitted`.
       # Called by the rdkafka client builder when it decides to leave librdkafka statistics
       # disabled (because no listener was present at build time). Any subsequent attempt to
-      # subscribe to `statistics.emitted` — either via a block or via a listener object that
-      # responds to `on_statistics_emitted` — will raise
+      # subscribe to `statistics.emitted` - either via a block or via a listener object that
+      # responds to `on_statistics_emitted` - will raise
       # `WaterDrop::Errors::StatisticsNotEnabledError` instead of silently doing nothing.
       def freeze_statistics_listeners!
         @statistics_listeners_frozen = true
