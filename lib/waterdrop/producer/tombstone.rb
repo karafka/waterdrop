@@ -16,7 +16,7 @@ module WaterDrop
       # Produces a tombstone message to Kafka and waits for it to be delivered
       #
       # @param message [Hash] hash with at least `:topic`, `:key`, and `:partition` keys.
-      #   `:payload` is not accepted — it will be silently removed if present.
+      #   `:payload` is not accepted - it will be silently removed if present.
       #
       # @return [Rdkafka::Producer::DeliveryReport] delivery report
       #
@@ -28,7 +28,7 @@ module WaterDrop
       # Produces a tombstone message to Kafka and does not wait for results
       #
       # @param message [Hash] hash with at least `:topic`, `:key`, and `:partition` keys.
-      #   `:payload` is not accepted — it will be silently removed if present.
+      #   `:payload` is not accepted - it will be silently removed if present.
       #
       # @return [Rdkafka::Producer::DeliveryHandle] delivery handle
       #

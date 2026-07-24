@@ -51,7 +51,7 @@ module WaterDrop
         # saves a significant number of allocations on the Ruby side (no JSON parsing, no
         # statistics hash materialization, no decorator work). Any listener subscribed after
         # the client has been built will not receive `statistics.emitted` events because
-        # librdkafka never emits them in the first place — to use statistics, subscribe a
+        # librdkafka never emits them in the first place - to use statistics, subscribe a
         # listener BEFORE the first producer use.
         #
         # When statistics end up disabled (either because the user explicitly set the interval
@@ -94,7 +94,7 @@ module WaterDrop
 
         # Registers the global callbacks (statistics, error, oauth refresh) for this producer
         # on the shared `Karafka::Core::Instrumentation` managers. The statistics callback is
-        # only registered when librdkafka is actually going to emit statistics — otherwise it
+        # only registered when librdkafka is actually going to emit statistics - otherwise it
         # would never fire and would only waste memory and a manager slot.
         #
         # @param producer [WaterDrop::Producer]
