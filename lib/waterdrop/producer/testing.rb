@@ -8,10 +8,6 @@ module WaterDrop
     # which is useful for testing error handling and recovery logic (such as automatic
     # producer reloading on fatal errors).
     #
-    # @note This module should only be used in test environments.
-    # @note Requires karafka-rdkafka >= 0.23.1 which includes Rdkafka::Testing support.
-    # @note This module is not auto-loaded by Zeitwerk and must be manually required.
-    #
     # @example Including for a single producer instance
     #   require 'waterdrop/producer/testing'
     #
@@ -40,6 +36,9 @@ module WaterDrop
     #
     #   # Fatal error should be cleared after reload
     #   expect(producer.fatal_error).to be_nil
+    # @note This module should only be used in test environments.
+    # @note Requires karafka-rdkafka >= 0.23.1 which includes Rdkafka::Testing support.
+    # @note This module is not auto-loaded by Zeitwerk and must be manually required.
     module Testing
       # Triggers a test fatal error on the underlying rdkafka producer.
       #

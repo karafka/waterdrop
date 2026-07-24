@@ -21,14 +21,13 @@ module WaterDrop
     #   class-level event subscriptions. This allows external libraries to subscribe to WaterDrop
     #   lifecycle events without needing producer instance references.
     #
-    # @note Only supports class-level events (producer.created, producer.configured), not
-    #   instance events
-    #
     # @example Subscribe to producer creation events
     #   WaterDrop.monitor.subscribe('producer.created') do |event|
     #     producer = event[:producer]
     #     # Configure producer or add middleware
     #   end
+    # @note Only supports class-level events (producer.created, producer.configured), not
+    #   instance events
     def monitor
       @instrumentation ||= Instrumentation::ClassMonitor.new
     end

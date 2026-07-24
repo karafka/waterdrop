@@ -9,13 +9,6 @@ module WaterDrop
     # messages) count. If the producer doesn't send any messages for a configurable timeout
     # period, it will automatically disconnect the producer.
     #
-    # @note We do not have to worry about the running transactions or buffer being used because
-    #   the disconnect is graceful and will not disconnect unless it is allowed to. This is why
-    #   we can simplify things and take interest only in txmsgs.
-    #
-    # @note For convenience, WaterDrop provides a config shortcut. Instead of manually subscribing
-    #   this listener, you can simply set `config.idle_disconnect_timeout` in your producer config.
-    #
     # @example Using config shortcut (recommended)
     #   WaterDrop::Producer.new do |config|
     #     config.idle_disconnect_timeout = 5 * 60 * 1000 # 5 minutes
@@ -34,6 +27,12 @@ module WaterDrop
     #     disconnect_timeout: 10 * 60 * 1000
     #   )
     #   producer.monitor.subscribe(idle_disconnector)
+    # @note We do not have to worry about the running transactions or buffer being used because
+    #   the disconnect is graceful and will not disconnect unless it is allowed to. This is why
+    #   we can simplify things and take interest only in txmsgs.
+    #
+    # @note For convenience, WaterDrop provides a config shortcut. Instead of manually subscribing
+    #   this listener, you can simply set `config.idle_disconnect_timeout` in your producer config.
     class IdleDisconnectorListener
       include ::Karafka::Core::Helpers::Time
 
