@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# WaterDrop main module
 module WaterDrop
   # Namespace for FD-based polling components
   # Contains the global Poller singleton and State class for managing producer polling

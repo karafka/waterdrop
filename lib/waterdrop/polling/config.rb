@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
-# WaterDrop main module
 module WaterDrop
-  # Namespace for FD-based polling components
   module Polling
     # Configuration for the global FD poller singleton
     # These settings apply to all producers using FD polling mode

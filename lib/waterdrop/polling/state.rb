@@ -26,7 +26,8 @@ module WaterDrop
       # @param client [Rdkafka::Producer] the rdkafka producer client
       # @param monitor [Object] the producer's monitor for error reporting
       # @param max_poll_time [Integer] max time in ms to poll per cycle
-      # @param periodic_poll_interval [Integer] max time in ms before this producer needs periodic poll
+      # @param periodic_poll_interval [Integer] max time in ms before this producer needs periodic
+      #   poll
       # @raise [StandardError] if queue pipe setup fails (FD mode requires this to work)
       def initialize(producer_id, client, monitor, max_poll_time, periodic_poll_interval)
         @producer_id = producer_id
@@ -106,9 +107,8 @@ module WaterDrop
         @last_stale_result = (now - @last_poll_time) >= @periodic_poll_interval
       end
 
-      # Signals the poller to remove this producer
-      # Called from any thread when the producer is being closed
-      # Sets closing flag BEFORE signaling to ensure poller sees it
+      # Signals the poller to remove this producer. Called from any thread when the producer is
+      # being closed. Sets closing flag BEFORE signaling to ensure poller sees it
       def signal_close
         @closing = true
         @queue_pipe.signal
@@ -133,9 +133,8 @@ module WaterDrop
         @close_latch.release!
       end
 
-      # Waits for this state to be closed
-      # Used by unregister to ensure synchronous cleanup before returning
-      # This matches the threaded polling behavior which drains without timeout
+      # Waits for this state to be closed. Used by unregister to ensure synchronous cleanup before
+      # returning. This matches the threaded polling behavior which drains without timeout
       def wait_for_close
         @close_latch.wait
       end

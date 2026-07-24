@@ -36,7 +36,7 @@ module WaterDrop
       constructor: ->(id) { id || "waterdrop-#{SecureRandom.hex(6)}" }
     )
     # option [Instance] logger that we want to use
-    # @note Due to how rdkafka works, this setting is global for all the producers
+    # Due to how rdkafka works, this setting is global for all the producers
     setting(
       :logger,
       default: false,
@@ -169,7 +169,7 @@ module WaterDrop
     # option [Class] class for usage when creating the underlying client used to dispatch messages
     setting :client_class, default: Clients::Rdkafka
     # rdkafka options
-    # @see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+    # See https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
     setting :kafka, default: {}
     # Middleware chain that can be expanded with useful middleware steps
     setting(

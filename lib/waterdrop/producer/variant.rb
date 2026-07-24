@@ -122,7 +122,7 @@ module WaterDrop
           topic_config: topic_config,
           # We pass this to validation, to make sure no-one alters the `acks` value when operating
           # in the transactional mode as it causes librdkafka to crash ruby
-          # @see https://github.com/confluentinc/librdkafka/issues/4710
+          # See https://github.com/confluentinc/librdkafka/issues/4710
           transactional: @producer.transactional?,
           # We pass this for a similar reason as above
           idempotent: @producer.idempotent?

@@ -2,9 +2,8 @@
 
 module WaterDrop
   module Instrumentation
-    # WaterDrop instrumentation monitor that we use to publish events
-    # By default uses our internal notifications bus but can be used with
-    # `ActiveSupport::Notifications` as well
+    # WaterDrop instrumentation monitor that we use to publish events. By default uses our internal
+    # notifications bus but can be used with `ActiveSupport::Notifications` as well
     class Monitor < ::Karafka::Core::Monitoring::Monitor
       # Event name for librdkafka statistics emissions
       STATISTICS_EVENT = "statistics.emitted"
