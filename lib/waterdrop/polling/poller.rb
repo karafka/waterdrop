@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 module WaterDrop
-  # Namespace for FD-based polling components
-  # Contains the global Poller singleton and State class for managing producer polling
   module Polling
     # Global poller singleton that manages a single polling thread for all FD-mode producers
     # This replaces librdkafka's native background polling threads with a single Ruby thread
@@ -272,7 +270,8 @@ module WaterDrop
 
       # Collects all IOs to monitor and builds a mapping from IO to State
       # Uses cached arrays when possible to avoid allocations in the hot path
-      # @return [Array<Array<IO>, Hash{IO => State}, Array<State>>] tuple of ios, io-to-state map, states
+      # @return [Array<Array<IO>, Hash{IO => State}, Array<State>>] tuple of ios, io-to-state map,
+      #   states
       def collect_readable_ios
         # Fast path: return cached result if not dirty (no mutex needed)
         # Safe because @cached_result is frozen and assigned atomically
@@ -345,9 +344,8 @@ module WaterDrop
         end
       end
 
-      # Polls all registered producers
-      # Called when IO.select times out to ensure periodic polling happens
-      # This ensures OAuth token refresh and statistics callbacks fire for all producers
+      # Polls all registered producers. Called when IO.select times out to ensure periodic polling
+      # happens. This ensures OAuth token refresh and statistics callbacks fire for all producers
       def poll_all_producers
         @cached_states.each { |state| poll_producer(state) }
       end

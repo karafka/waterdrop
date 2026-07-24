@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# WaterDrop library
 module WaterDrop
   # Connection pool wrapper for WaterDrop producers using the proven connection_pool gem.
   #

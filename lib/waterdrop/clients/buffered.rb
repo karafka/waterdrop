@@ -80,8 +80,7 @@ module WaterDrop
         @topics[topic]
       end
 
-      # Clears internal buffer
-      # Used in between specs so messages do not leak out
+      # Clears internal buffer. Used in between specs so messages do not leak out
       def reset
         @transaction_level = 0
         @transaction_active = false

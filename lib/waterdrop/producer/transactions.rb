@@ -282,10 +282,10 @@ module WaterDrop
       #
       # librdkafka only marks a transaction as ongoing at the coordinator once the
       # `AddPartitionsToTxn` **response** comes back, but it fires `EndTxn` as soon as that request
-      # has merely been **sent** (it gates on `txn_req_cnt`, bumped on send). Aborting with the first
-      # produce still in flight can therefore reach a coordinator that does not yet consider the
-      # transaction started, which fails the abort with a fatal `INVALID_TXN_STATE`.
-      # See https://github.com/confluentinc/librdkafka/issues/4849
+      # has merely been **sent** (it gates on `txn_req_cnt`, bumped on send). Aborting with the
+      # first produce still in flight can therefore reach a coordinator that does not yet consider
+      # the transaction started, which fails the abort with a fatal `INVALID_TXN_STATE`. See
+      # https://github.com/confluentinc/librdkafka/issues/4849
       #
       # A delivered message proves its partition completed registration, and that alone puts the
       # transaction in an `ongoing` state at the coordinator - so a single acknowledged delivery is

@@ -10,7 +10,6 @@ require "singleton"
 require "karafka-core"
 require "pathname"
 
-# WaterDrop library
 module WaterDrop
   class << self
     # @return [String] root path of this gem
