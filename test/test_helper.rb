@@ -117,6 +117,26 @@ class Minitest::Spec
     sleep(0.01) until events.size >= count || Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
   end
 
+  # Polls the given block until it returns a truthy value or the timeout expires, then returns
+  # the last value yielded by the block. Use this instead of a bare sleep() when waiting for an
+  # async condition to settle (e.g. Kafka metadata to propagate) so tests wake up as soon as the
+  # condition holds rather than always paying a fixed delay.
+  # @param timeout [Numeric] maximum number of seconds to wait
+  # @param interval [Numeric] delay in seconds between successive checks
+  # @yield block evaluated on each poll; its return value is inspected for truthiness
+  # @return [Object] the last value returned by the block
+  def wait_until(timeout: 5, interval: 0.1)
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+
+    loop do
+      value = yield
+      return value if value
+      return value if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+      sleep(interval)
+    end
+  end
+
   # Clean up the Poller singleton after each test to prevent mock leakage
   # Reset the Poller singleton between tests to prevent state leakage
   def teardown
