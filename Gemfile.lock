@@ -15,11 +15,11 @@ GEM
     drb (2.2.3)
     ffi (1.17.4)
     io-console (0.8.2)
-    json (2.20.0)
+    json (2.21.2)
     karafka-core (2.6.2)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
-    karafka-rdkafka (0.27.2)
+    karafka-rdkafka (0.28.0)
       ffi (~> 1.17.1)
       json (> 2.0)
       logger
@@ -40,7 +40,7 @@ GEM
     ruby2_keywords (0.0.5)
     simplecov (1.0.3)
     warning (1.6.0)
-    zeitwerk (2.8.2)
+    zeitwerk (2.8.3)
 
 PLATFORMS
   ruby
@@ -62,9 +62,9 @@ CHECKSUMS
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   ffi (1.17.4) sha256=bcd1642e06f0d16fc9e09ac6d49c3a7298b9789bcb58127302f934e437d60acf
   io-console (0.8.2) sha256=d6e3ae7a7cc7574f4b8893b4fca2162e57a825b223a177b7afa236c5ef9814cc
-  json (2.20.0) sha256=9362bc6e55a952b056abf9167cf053358181c904cb70cd6eee0808ea830fc32b
+  json (2.21.2) sha256=1f1d3b7cf2b3ba1a69beca0bb6db13d5438b80bff3cd54cdaaa620b9b07c1c6a
   karafka-core (2.6.2) sha256=c2fd7f277201b8ca97b824b364ad76bf776b8f5527bc422dafb71f7ae48d3a13
-  karafka-rdkafka (0.27.2) sha256=3ccce96306642be70bff8168e4e737fc10f2ffae20bc0ff0a43d88dbb7452d31
+  karafka-rdkafka (0.28.0) sha256=fd845140c42341c5892215cac1e8adacda53b0461688f2e16379d82cb33eb006
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
   minitest (6.0.6) sha256=153ea36d1d987a62942382b61075745042a2b3123b1cd48f4c3675af9cc7d6f1
@@ -77,7 +77,7 @@ CHECKSUMS
   simplecov (1.0.3) sha256=38ef0514f16ae7562f0d0f4df02610071115103d301b6de7dacbcc000082e39b
   warning (1.6.0) sha256=a49cdfae19fb77d19afff2efbe45f8ab759e9cd25b4e4ce2c79dbaf46bdb6c9e
   waterdrop (2.10.3)
-  zeitwerk (2.8.2) sha256=7212a61311083c604184b1ea2574b9aa05cd14f855a0841c06985cabe9181d12
+  zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
   4.0.6
