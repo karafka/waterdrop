@@ -168,10 +168,12 @@ describe_current do
       end
 
       it do
-        @producer.partition_count(@topic)
-        sleep(1)
+        # The first call kicks off an async metadata fetch and (with auto topic creation) the
+        # broker creating the topic. Poll until the partition count settles instead of betting on
+        # a fixed sleep, which races on slower/loaded runners and returns -1 (metadata not ready).
+        count = wait_until { (partitions = @producer.partition_count(@topic)).positive? && partitions }
 
-        assert_equal(1, @producer.partition_count(@topic))
+        assert_equal(1, count)
       rescue Rdkafka::RdkafkaError => e
         assert_kind_of(Rdkafka::RdkafkaError, e)
         assert_equal(:unknown_topic_or_part, e.code)
