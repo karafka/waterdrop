@@ -436,7 +436,9 @@ describe_current do
         end
 
         Process.kill("USR1", Process.pid)
-        sleep(0.1)
+        # The USR1 handler closes the producer on the signal-handling thread, so it lands
+        # asynchronously. Wait for it to settle instead of betting on a fixed sleep.
+        wait_until { @producer.status.closed? || error }
 
         assert_nil(error, "Expected no error but got: #{error}")
         assert_predicate(@producer.status, :closed?)
@@ -938,8 +940,9 @@ describe_current do
         sleep(1)
       end
 
-      # Give a bit of time for the instrumentation to kick in
-      sleep(1)
+      # Wait for the idle-disconnect instrumentation to disconnect the short-idle producer instead
+      # of betting on a fixed sleep.
+      wait_until { @used_short.status.disconnected? }
 
       refute_predicate(@never_used.status, :disconnected?)
       refute_predicate(@used.status, :disconnected?)
