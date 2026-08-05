@@ -168,7 +168,7 @@ describe_current do
       end
 
       it do
-        count = wait_until { (partitions = @producer.partition_count(@topic)).positive? && partitions }
+        count = wait_until(timeout: 30) { (partitions = @producer.partition_count(@topic)).positive? && partitions }
 
         assert_equal(1, count)
       rescue Rdkafka::RdkafkaError => e
