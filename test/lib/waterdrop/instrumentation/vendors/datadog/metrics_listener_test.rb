@@ -81,8 +81,8 @@ describe_current do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
 
-      # Give it some time to emit the stats
-      sleep(1)
+      # The assertions below check that values vary across emissions, so wait for several snapshots
+      wait_until(timeout: 10) { @dummy_client.buffer[:count]["waterdrop.calls"].size >= 5 }
 
       @counts = @dummy_client.buffer[:count]
       @histograms = @dummy_client.buffer[:histogram]
@@ -195,8 +195,7 @@ describe_current do
   describe "when message is acknowledged" do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
-      # We need to give the async callback a bit of time to kick in
-      sleep(0.1)
+      wait_until { @dummy_client.buffer[:increment]["waterdrop.acknowledged"].any? }
     end
 
     it "expect to have a proper metric in place" do
@@ -220,15 +219,7 @@ describe_current do
     end
 
     it "expect error count to increase" do
-      # Wait for error callback with retries since it depends on librdkafka timing
-      error_received = false
-      20.times do
-        if @dummy_client.buffer[:count]["waterdrop.error_occurred"].any?
-          error_received = true
-          break
-        end
-        sleep(0.25)
-      end
+      error_received = wait_until { @dummy_client.buffer[:count]["waterdrop.error_occurred"].any? }
 
       assert(error_received)
     end
@@ -263,7 +254,7 @@ describe_current do
   describe "when trying to publish a topic level metric" do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
-      sleep(1)
+      wait_until { @dummy_client.buffer[:gauge].any? }
 
       @guages = @dummy_client.buffer[:gauge]
       @metric = described_class::RdKafkaMetric.new(:gauge, :topics, "topics.batchcnt.avg", %w[batchcnt avg])

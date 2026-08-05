@@ -168,10 +168,9 @@ describe_current do
       end
 
       it do
-        @producer.partition_count(@topic)
-        sleep(1)
+        count = wait_until { (partitions = @producer.partition_count(@topic)).positive? && partitions }
 
-        assert_equal(1, @producer.partition_count(@topic))
+        assert_equal(1, count)
       rescue Rdkafka::RdkafkaError => e
         assert_kind_of(Rdkafka::RdkafkaError, e)
         assert_equal(:unknown_topic_or_part, e.code)
@@ -434,7 +433,7 @@ describe_current do
         end
 
         Process.kill("USR1", Process.pid)
-        sleep(0.1)
+        wait_until { @producer.status.closed? || error }
 
         assert_nil(error, "Expected no error but got: #{error}")
         assert_predicate(@producer.status, :closed?)
@@ -936,8 +935,7 @@ describe_current do
         sleep(1)
       end
 
-      # Give a bit of time for the instrumentation to kick in
-      sleep(1)
+      wait_until { @used_short.status.disconnected? }
 
       refute_predicate(@never_used.status, :disconnected?)
       refute_predicate(@used.status, :disconnected?)
