@@ -168,9 +168,6 @@ describe_current do
       end
 
       it do
-        # The first call kicks off an async metadata fetch and (with auto topic creation) the
-        # broker creating the topic. Poll until the partition count settles instead of betting on
-        # a fixed sleep, which races on slower/loaded runners and returns -1 (metadata not ready).
         count = wait_until { (partitions = @producer.partition_count(@topic)).positive? && partitions }
 
         assert_equal(1, count)
@@ -436,8 +433,6 @@ describe_current do
         end
 
         Process.kill("USR1", Process.pid)
-        # The USR1 handler closes the producer on the signal-handling thread, so it lands
-        # asynchronously. Wait for it to settle instead of betting on a fixed sleep.
         wait_until { @producer.status.closed? || error }
 
         assert_nil(error, "Expected no error but got: #{error}")
@@ -940,8 +935,6 @@ describe_current do
         sleep(1)
       end
 
-      # Wait for the idle-disconnect instrumentation to disconnect the short-idle producer instead
-      # of betting on a fixed sleep.
       wait_until { @used_short.status.disconnected? }
 
       refute_predicate(@never_used.status, :disconnected?)

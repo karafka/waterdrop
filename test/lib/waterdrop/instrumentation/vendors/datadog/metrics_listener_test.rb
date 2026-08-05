@@ -81,9 +81,7 @@ describe_current do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
 
-      # The assertions below check that values vary across emissions (uniq.size > 1), so we need
-      # several statistics snapshots, not just one. Wait until enough have accumulated instead of
-      # betting on a fixed sleep, which under-samples on a loaded runner. Interval is 100ms.
+      # The assertions below check that values vary across emissions, so wait for several snapshots
       wait_until(timeout: 10) { @dummy_client.buffer[:count]["waterdrop.calls"].size >= 5 }
 
       @counts = @dummy_client.buffer[:count]
@@ -197,8 +195,6 @@ describe_current do
   describe "when message is acknowledged" do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
-      # Wait for the async acknowledgement callback to record the metric instead of betting on a
-      # fixed sleep.
       wait_until { @dummy_client.buffer[:increment]["waterdrop.acknowledged"].any? }
     end
 
@@ -223,7 +219,6 @@ describe_current do
     end
 
     it "expect error count to increase" do
-      # Wait for the error callback, which depends on librdkafka timing.
       error_received = wait_until { @dummy_client.buffer[:count]["waterdrop.error_occurred"].any? }
 
       assert(error_received)
@@ -259,8 +254,6 @@ describe_current do
   describe "when trying to publish a topic level metric" do
     before do
       @producer.produce_sync(topic: @topic, payload: rand.to_s)
-      # Wait for the statistics callback to populate the gauge buffer instead of betting on a fixed
-      # sleep.
       wait_until { @dummy_client.buffer[:gauge].any? }
 
       @guages = @dummy_client.buffer[:gauge]
