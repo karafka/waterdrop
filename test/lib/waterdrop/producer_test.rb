@@ -168,12 +168,13 @@ describe_current do
       end
 
       it do
-        count = wait_until(timeout: 30) { (partitions = @producer.partition_count(@topic)).positive? && partitions }
+        # Reading the partition count of a missing topic triggers broker-side auto-creation
+        # (allow.auto.create.topics). Wait for the broker to actually report the topic before
+        # asserting, instead of racing its async metadata propagation - that race made this spec
+        # flake on slow CI runners (notably macOS) regardless of how high the poll timeout was.
+        wait_for_topic(@topic)
 
-        assert_equal(1, count)
-      rescue Rdkafka::RdkafkaError => e
-        assert_kind_of(Rdkafka::RdkafkaError, e)
-        assert_equal(:unknown_topic_or_part, e.code)
+        assert_equal(1, @producer.partition_count(@topic))
       end
     end
 
