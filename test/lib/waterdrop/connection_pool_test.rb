@@ -1091,13 +1091,18 @@ describe_current do
           end
         end
 
-        it "emits connection_pool.shutdown event" do
+        it "emits connection_pool.shutdown exactly once" do
+          pool = described_class.default_pool
+
           described_class.shutdown
 
-          shutdown_event = @events.find { |e| e.id == "connection_pool.shutdown" }
+          shutdown_events = @events.select { |e| e.id == "connection_pool.shutdown" }
 
-          refute_nil(shutdown_event)
-          refute_nil(shutdown_event[:pool])
+          # Regression guard: the class-level .shutdown used to emit connection_pool.shutdown on
+          # top of the instance #shutdown it delegates to, firing the event twice for a single
+          # global shutdown. It must fire exactly once, carrying the pool being shut down.
+          assert_equal(1, shutdown_events.size)
+          assert_equal(pool, shutdown_events.first[:pool])
         end
       end
 
@@ -1124,7 +1129,7 @@ describe_current do
       end
 
       context "when shutting down instance pool" do
-        it "emits shutdown event" do
+        it "emits shutdown event exactly once" do
           pool = described_class.new(size: 2) do |config|
             config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
             config.deliver = false
@@ -1132,10 +1137,12 @@ describe_current do
 
           pool.shutdown
 
-          shutdown_event = @events.find { |e| e.id == "connection_pool.shutdown" }
+          shutdown_events = @events.select { |e| e.id == "connection_pool.shutdown" }
 
-          refute_nil(shutdown_event)
-          assert_equal(pool, shutdown_event[:pool])
+          # The instance #shutdown is the single source of truth for this event, so a direct
+          # instance shutdown emits it once (the global .shutdown rides through this same emit).
+          assert_equal(1, shutdown_events.size)
+          assert_equal(pool, shutdown_events.first[:pool])
         end
       end
 

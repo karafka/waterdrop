@@ -118,15 +118,11 @@ module WaterDrop
       def shutdown(force: false)
         return unless @default_pool
 
-        pool = @default_pool
+        # The instrumentation event is emitted by the instance-level #shutdown we delegate to
+        # (with `pool: self`, i.e. this same global pool). We deliberately do not emit it again
+        # here - doing so fired `connection_pool.shutdown` twice for a single global shutdown.
         @default_pool.shutdown(force: force)
         @default_pool = nil
-
-        # Emit global event for pool shutdown
-        WaterDrop.instrumentation.instrument(
-          "connection_pool.shutdown",
-          pool: pool
-        )
       end
 
       # Alias for shutdown to align with producer API
