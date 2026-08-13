@@ -137,6 +137,47 @@ class Minitest::Spec
     end
   end
 
+  # Waits until a topic is reported by the cluster metadata and returns its partition count.
+  #
+  # Requesting metadata for a missing topic also nudges broker-side auto-creation
+  # (`allow.auto.create.topics`) along, so this doubles as a reliable way to wait out lazy topic
+  # creation without racing its async propagation. It reads authoritative broker metadata through a
+  # fresh admin client, so - unlike `Producer#partition_count` - it is unaffected by any per-producer
+  # partition-count caching (which briefly caches a "not found" result for a topic being created).
+  # @param topic_name [String] the topic to wait for
+  # @param timeout [Numeric] maximum number of seconds to wait
+  # @param interval [Numeric] delay in seconds between successive polls
+  # @return [Integer] the topic's partition count once it becomes available
+  # @raise [RuntimeError] if the topic does not become available before the timeout expires
+  def wait_for_topic(topic_name, timeout: 30, interval: 0.2)
+    admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
+    deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + timeout
+
+    loop do
+      partition_count =
+        begin
+          metadata = admin.metadata(topic_name).topics.find { |topic| topic[:topic_name] == topic_name }
+          metadata && metadata[:partition_count]
+        rescue Rdkafka::RdkafkaError => e
+          # A lookup for a topic the broker has not finished creating yet can surface as
+          # unknown_topic_or_part; treat it as "not ready yet" and keep polling.
+          raise unless e.code == :unknown_topic_or_part
+
+          nil
+        end
+
+      return partition_count if partition_count&.positive?
+
+      if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+        raise "Topic #{topic_name} did not become available within #{timeout}s"
+      end
+
+      sleep(interval)
+    end
+  ensure
+    admin&.close
+  end
+
   # Clean up the Poller singleton after each test to prevent mock leakage
   # Reset the Poller singleton between tests to prevent state leakage
   def teardown

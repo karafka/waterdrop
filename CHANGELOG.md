@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Maintenance] Stop the `#partition_count when topic does not exist` spec from flaking on slow CI runners (notably macOS). It relied on broker-side lazy auto-creation and polled `Producer#partition_count` until it turned positive, but that read caches a "not found" result for a few seconds, so the poll raced the async metadata propagation and could return `false` even past a 30s timeout. Add a reusable `wait_for_topic` test helper that reads authoritative broker metadata through the admin API (bypassing the per-producer cache, and nudging auto-creation along on each poll), and use it to wait for the topic before asserting the count.
 - [Fix] Retry a produce that races a concurrent idempotent fatal-error reload instead of leaking a raw `Rdkafka::ClosedProducerError`/`Rdkafka::ClosedInnerError`. When several threads share an idempotent producer with `reload_on_idempotent_fatal_error` enabled, one fatal condition fails all their in-flight produces at once; the first thread reloads the client (closing it) while sibling threads are still inside `client.produce`, so they call into a client that is being torn down. This is a benign, recoverable transient of the transparent reload, so we now retry it against the freshly reloaded client (scoped to the idempotent, non-transactional reload path; `ensure_active!` still raises on a genuinely closed producer so it cannot spin forever).
 
 ## 2.10.3 (2026-07-15)
