@@ -93,7 +93,9 @@ module WaterDrop
         .setup(...)
         .config
 
-      @id = @config.id
+      # dup so a frozen id (e.g. a frozen string literal) isn't used as the finalizer target, since
+      # ObjectSpace.(un)define_finalizer mutates the object and would raise FrozenError on #close
+      @id = @config.id.to_s.dup
       @monitor = @config.monitor
       @contract = Contracts::Message.new(max_payload_size: @config.max_payload_size)
       @default_variant = Variant.new(self, default: true)

@@ -2,5 +2,5 @@
 
 module WaterDrop
   # Current WaterDrop version
-  VERSION = "2.10.3"
+  VERSION = "2.10.4"
 end

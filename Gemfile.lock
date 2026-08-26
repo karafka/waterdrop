@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    waterdrop (2.10.3)
+    waterdrop (2.10.4)
       karafka-core (>= 2.5.12, < 3.0.0)
       karafka-rdkafka (>= 0.24.0)
       zeitwerk (~> 2.3)
@@ -76,7 +76,7 @@ CHECKSUMS
   ruby2_keywords (0.0.5) sha256=ffd13740c573b7301cf7a2e61fc857b2a8e3d3aff32545d6f8300d8bae10e3ef
   simplecov (1.1.1) sha256=25825ef13f0b2e74694d769817dad6ab8e90131dabdaa666e522fea105521e78
   warning (1.6.0) sha256=a49cdfae19fb77d19afff2efbe45f8ab759e9cd25b4e4ce2c79dbaf46bdb6c9e
-  waterdrop (2.10.3)
+  waterdrop (2.10.4)
   zeitwerk (2.8.3) sha256=2c85125a8467ce069e20123d1e709a08955c9d29c118c25b46b7b7fafdbb92e5
 
 BUNDLED WITH
