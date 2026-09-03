@@ -1,29 +1,16 @@
 # frozen_string_literal: true
 
-# Integration test locking in the first-produce offset edge case of `produce_sync`.
+# Integration test locking in the first-produce offset behaviour of `produce_sync`.
 #
-# On a brand-new topic - one auto-created by the produce itself - librdkafka may not get the
-# offset back in that very first delivery report, so `DeliveryReport#offset` comes back as the
-# invalid sentinel (-1001) even though the message is written to the log. Every subsequent
-# produce to the now-established topic reports a real, increasing offset.
-#
-# `produce_sync` is correct here and is what we use; the invalid offset is a reporting artifact
-# of the first produce, not a lost message. Consumers of the delivery report (e.g. a UI linking
-# to the produced message) must therefore treat an invalid offset as "unknown", not as a failure.
-#
-# What is asserted is only what is actually guaranteed: the first message lands, later offsets
-# are real and increasing, and every report names the topic we published to. Whether the first
-# offset comes back invalid is broker/librdkafka timing, so it is reported informationally
-# rather than required - requiring it would make this spec flaky.
+# On a brand-new topic the delivery report of the very first produce may carry an invalid offset
+# (-1001) because librdkafka does not get the offset back from that first report, even though the
+# message is written. Every produce after that reports a real, increasing offset. An invalid offset
+# therefore means "offset unknown", never a lost message.
 
 require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
-
-# librdkafka's RD_KAFKA_OFFSET_INVALID - what a delivery report carries when the broker did not
-# hand the offset back for that message.
 INVALID_OFFSET = -1001
-
 MESSAGES = 5
 
 failed = false
@@ -39,8 +26,6 @@ def check(failed, condition, message)
   end
 end
 
-# Reads the topic from the beginning and returns the payloads it managed to fetch. Used to prove
-# the first message lands even when its delivery report carries an invalid offset.
 def consume_payloads(topic, expected)
   consumer = Rdkafka::Config.new(
     "bootstrap.servers": BOOTSTRAP_SERVERS,
@@ -69,10 +54,8 @@ producer = WaterDrop::Producer.new do |config|
   config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
 end
 
-# Deliberately NOT pre-created with the `create_topic` helper: the whole point of this spec is the
-# first produce to a topic that does not exist yet and is auto-created by that produce. Creating it
-# up front would make the topic established before the first produce and the edge case would never
-# be exercised.
+# Deliberately not pre-created with `create_topic`: the edge case only exists for the first produce
+# to a topic auto-created by that produce, so pre-creating it would stop exercising it.
 topic = generate_topic("produce-sync-new-topic")
 
 reports = Array.new(MESSAGES) do |i|
@@ -83,53 +66,26 @@ producer.close
 
 first = reports.first
 rest = reports[1..]
+payloads = consume_payloads(topic, MESSAGES)
 
-failed = check(failed, reports.size == MESSAGES, "produce_sync returned a report for every message")
-failed = check(failed, reports.none?(&:error), "no delivery report carries an error")
-
-# The delivery report must name the topic we actually published to - anything reading the report
-# to locate the message (a UI deep link, for instance) depends on this.
+failed = check(failed, reports.size == MESSAGES, "a report per message")
+failed = check(failed, reports.none?(&:error), "no report carries an error")
 failed = check(
-  failed,
-  reports.all? { |report| report.topic_name == topic },
-  "every delivery report names the topic we published to"
+  failed, reports.all? { |report| report.topic_name == topic }, "reports name the produced topic"
 )
-
-# The documented edge case: the first offset may be the invalid sentinel. Both outcomes are
-# acceptable, so this is reported rather than asserted - the message landing is what matters and
-# is checked below.
-if first.offset == INVALID_OFFSET
-  puts "  note: first produce reported the invalid offset (#{INVALID_OFFSET}) - the documented edge case"
-else
-  puts "  note: first produce reported a real offset (#{first.offset}) - broker returned it in time"
-end
-
 failed = check(
   failed,
   first.offset == INVALID_OFFSET || first.offset >= 0,
-  "first offset is either a real offset or the invalid sentinel, never arbitrary"
+  "first offset is real or the invalid sentinel"
 )
-
-# Once the topic is established every subsequent produce must report a real, increasing offset.
+failed = check(failed, rest.all? { |report| report.offset >= 0 }, "later offsets are valid")
 failed = check(
-  failed,
-  rest.all? { |report| report.offset >= 0 },
-  "every produce after the first reports a valid offset (#{rest.map(&:offset).join(", ")})"
+  failed, rest.each_cons(2).all? { |a, b| b.offset > a.offset }, "later offsets increase"
 )
 failed = check(
   failed,
-  rest.each_cons(2).all? { |a, b| b.offset > a.offset },
-  "offsets after the first are strictly increasing"
-)
-
-# The point of the whole edge case: an invalid offset does not mean a lost message.
-payloads = consume_payloads(topic, MESSAGES)
-expected_payloads = Array.new(MESSAGES) { |i| "payload-#{i}" }
-
-failed = check(
-  failed,
-  expected_payloads.all? { |payload| payloads.include?(payload) },
-  "all #{MESSAGES} messages landed in the topic, including the first"
+  Array.new(MESSAGES) { |i| "payload-#{i}" }.all? { |payload| payloads.include?(payload) },
+  "every message landed, including the first"
 )
 
 if failed
