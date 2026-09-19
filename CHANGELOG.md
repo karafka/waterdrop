@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Fix] Re-check the producer liveness under `@buffer_mutex` in `#buffer`/`#buffer_many`, so a producer closed between the liveness check and the append raises `ProducerClosedError` instead of accepting the message into a closed producer's buffer and losing it silently.
+
 ## 2.10.4 (2026-08-26)
 - [Fix] Avoid a `FrozenError` on `Producer#close` when the producer is configured with a frozen string id (for example a frozen string literal, `config.id = "rspec"`).
 - [Fix] Emit `connection_pool.shutdown` only once when shutting down the global connection pool.
