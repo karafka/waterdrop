@@ -15,12 +15,22 @@ module WaterDrop
         # The append runs under @buffer_mutex because flush/purge/close swap @messages for a fresh
         # array under the same lock. Without it, a concurrent swap between reading @messages and
         # appending would land the message in the orphaned old array and silently lose it.
+        #
+        # The liveness check is repeated under the same lock because `close` marks the producer
+        # `:closing` before its final flush acquires @buffer_mutex. Checking only above the lock
+        # would let a close complete in between, stranding the message in a closed producer's
+        # buffer while this call returned success.
         @monitor.instrument(
           "message.buffered",
           producer_id: id,
           message: message,
           buffer: @messages
-        ) { @buffer_mutex.synchronize { @messages << message } }
+        ) do
+          @buffer_mutex.synchronize do
+            ensure_active!
+            @messages << message
+          end
+        end
       end
 
       # Adds given messages into the internal producer buffer without flushing them to Kafka
@@ -34,14 +44,20 @@ module WaterDrop
 
         # The concat runs under @buffer_mutex for the same reason as #buffer: flush/purge/close swap
         # @messages under the lock, so an unguarded concat could append into an array that has just
-        # been captured for dispatch (or discarded), silently losing the messages.
+        # been captured for dispatch (or discarded), silently losing the messages. The liveness
+        # check is repeated under the lock for the same reason as in #buffer: a close that
+        # completes between the check above and the lock would otherwise strand the batch.
         @monitor.instrument(
           "messages.buffered",
           producer_id: id,
           messages: messages,
           buffer: @messages
         ) do
-          @buffer_mutex.synchronize { @messages.concat(messages) }
+          @buffer_mutex.synchronize do
+            ensure_active!
+            @messages.concat(messages)
+          end
+
           messages
         end
       end

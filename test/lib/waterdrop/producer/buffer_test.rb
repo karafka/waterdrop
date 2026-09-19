@@ -11,6 +11,36 @@ describe WaterDrop::Producer::Buffer do
     @producer.close
   end
 
+  # Drives the race this guards against: a producer that is closed after #buffer/#buffer_many pass
+  # their liveness check but before the append acquires @buffer_mutex. Holding the mutex parks the
+  # buffering thread exactly in that window, so the close it would otherwise race with is observed
+  # deterministically rather than by timing luck.
+  def buffer_racing_close(producer)
+    buffer_mutex = producer.instance_variable_get(:@buffer_mutex)
+    status = producer.instance_variable_get(:@status)
+    error = nil
+
+    buffer_mutex.lock
+
+    thread = Thread.new do
+      yield
+    rescue WaterDrop::Errors::ProducerClosedError => e
+      error = e
+    end
+
+    # Parked on @buffer_mutex means the liveness check above it has already passed
+    wait_until { thread.status == "sleep" }
+
+    # What `close` reaches before its final flush takes the same mutex
+    status.closing!
+    status.closed!
+
+    buffer_mutex.unlock
+    thread.join
+
+    error
+  end
+
   describe "#buffer" do
     context "when producer is closed" do
       before { @producer.close }
@@ -18,6 +48,17 @@ describe WaterDrop::Producer::Buffer do
       it do
         @message = build(:valid_message)
         assert_raises(WaterDrop::Errors::ProducerClosedError) { @producer.buffer(@message) }
+      end
+    end
+
+    context "when the producer is closed between the liveness check and the append" do
+      it "expect to raise instead of stranding the message in a closed producer" do
+        @message = build(:valid_message)
+
+        error = buffer_racing_close(@producer) { @producer.buffer(@message) }
+
+        assert_instance_of(WaterDrop::Errors::ProducerClosedError, error)
+        assert_empty(@producer.instance_variable_get(:@messages))
       end
     end
 
@@ -64,6 +105,17 @@ describe WaterDrop::Producer::Buffer do
   end
 
   describe "#buffer_many" do
+    context "when the producer is closed between the liveness check and the append" do
+      it "expect to raise instead of stranding the messages in a closed producer" do
+        @messages = [build(:valid_message)]
+
+        error = buffer_racing_close(@producer) { @producer.buffer_many(@messages) }
+
+        assert_instance_of(WaterDrop::Errors::ProducerClosedError, error)
+        assert_empty(@producer.instance_variable_get(:@messages))
+      end
+    end
+
     context "when producer is closed" do
       before { @producer.close }
 
