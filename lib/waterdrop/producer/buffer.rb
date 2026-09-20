@@ -94,17 +94,36 @@ module WaterDrop
       # @note We use this method underneath to provide a different instrumentation for sync and
       #   async flushing within the public API
       def flush(sync)
-        data_for_dispatch = nil
+        fresh = nil
+        requeued = nil
 
         @buffer_mutex.synchronize do
-          data_for_dispatch = @messages
+          # Messages re-buffered by a previously failed flush have already been through middleware
+          # (they are dispatched from @requeued, not @messages), while freshly buffered messages
+          # have not. Taking both under the same swap keeps their relative order and lets us apply
+          # middleware only where it still needs to run.
+          requeued = @requeued
+          @requeued = []
+          fresh = @messages
           @messages = []
         end
+
+        # Middleware runs exactly once per message: on the fresh messages here, never again on the
+        # already-transformed messages coming back from a failed flush. Re-running it on those
+        # would apply every step a second time (double-encrypting/compressing/serializing payloads,
+        # duplicating headers/tracing metadata) and corrupt what is written to Kafka - a regression
+        # of #474 that the failure/requeue path reintroduced.
+        data_for_dispatch = requeued.concat(middleware.run_many(fresh))
 
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
 
-        sync ? produce_many_sync(data_for_dispatch) : produce_many_async(data_for_dispatch)
+        # Middleware has already been applied above, so the dispatch must not run it again.
+        if sync
+          produce_many_sync(data_for_dispatch, run_middleware: false)
+        else
+          produce_many_async(data_for_dispatch, run_middleware: false)
+        end
       rescue Errors::ProduceManyError => e
         # A dispatch failed partway through the batch. Re-buffer the messages that never reached
         # librdkafka so a partial failure does not silently drop valid buffered messages. For a
@@ -122,15 +141,16 @@ module WaterDrop
         raise
       end
 
-      # Puts not-yet-dispatched messages back at the front of the buffer (preserving their original
-      # order relative to each other and to anything buffered concurrently), so a failed flush does
-      # not lose them.
+      # Puts not-yet-dispatched messages back at the front of the retry buffer (preserving their
+      # original order relative to each other), so a failed flush does not lose them. They are kept
+      # separate from @messages because they have already passed through middleware and must not be
+      # transformed again on the next flush.
       #
-      # @param messages [Array<Hash>] messages to restore to the buffer
+      # @param messages [Array<Hash>] already middleware-processed messages to restore
       def requeue_unflushed(messages)
         return if messages.empty?
 
-        @buffer_mutex.synchronize { @messages.unshift(*messages) }
+        @buffer_mutex.synchronize { @requeued.unshift(*messages) }
       end
     end
   end

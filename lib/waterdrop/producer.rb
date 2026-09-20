@@ -39,8 +39,6 @@ module WaterDrop
     attr_reader :id
     # @return [Status] producer status object
     attr_reader :status
-    # @return [Array] internal messages buffer
-    attr_reader :messages
     # @return [Object] monitor we want to use
     attr_reader :monitor
     # @return [Object] dry-configurable config object
@@ -71,6 +69,9 @@ module WaterDrop
 
       @status = Status.new
       @messages = []
+      # Messages re-buffered after a failed flush. Kept apart from @messages because they have
+      # already passed through middleware and must not be transformed again on the next flush.
+      @requeued = []
 
       # Instrument producer creation for global listeners
       class_monitor.instrument(
@@ -177,6 +178,12 @@ module WaterDrop
       @client
     end
 
+    # @return [Array] internal messages buffer awaiting a flush. Includes both freshly buffered
+    #   messages and any messages re-buffered after a failed flush that are waiting to be retried.
+    def messages
+      @requeued + @messages
+    end
+
     # Returns the number of messages in the librdkafka producer queue.
     #
     # This count includes:
@@ -232,6 +239,7 @@ module WaterDrop
       @monitor.instrument("buffer.purged", producer_id: id) do
         @buffer_mutex.synchronize do
           @messages = []
+          @requeued = []
         end
 
         # We should not purge if there is no client initialized
@@ -321,6 +329,7 @@ module WaterDrop
             return false unless @client
             return false unless @status.connected?
             return false unless @messages.empty?
+            return false unless @requeued.empty?
             return false unless @operations_in_progress.value.zero?
 
             @status.disconnecting!
@@ -354,6 +363,7 @@ module WaterDrop
       return false unless @client
       return false unless @status.connected?
       return false unless @messages.empty?
+      return false unless @requeued.empty?
       return false if @transaction_mutex.locked?
       return false if @operating_mutex.locked?
 
@@ -503,7 +513,7 @@ module WaterDrop
       # Try to get buffer info safely
       if @buffer_mutex.try_lock
         begin
-          parts << "buffer_size=#{@messages.size}"
+          parts << "buffer_size=#{@messages.size + @requeued.size}"
         ensure
           @buffer_mutex.unlock
         end
