@@ -69,7 +69,7 @@ module WaterDrop
         @monitor.instrument(
           "buffer.flushed_async",
           producer_id: id,
-          messages: @messages
+          messages: messages
         ) { flush(false) }
       end
 
@@ -80,7 +80,7 @@ module WaterDrop
         @monitor.instrument(
           "buffer.flushed_sync",
           producer_id: id,
-          messages: @messages
+          messages: messages
         ) { flush(true) }
       end
 
@@ -98,10 +98,6 @@ module WaterDrop
         requeued = nil
 
         @buffer_mutex.synchronize do
-          # Messages re-buffered by a previously failed flush have already been through middleware
-          # (they are dispatched from @requeued, not @messages), while freshly buffered messages
-          # have not. Taking both under the same swap keeps their relative order and lets us apply
-          # middleware only where it still needs to run.
           requeued = @requeued
           @requeued = []
           fresh = @messages
@@ -109,16 +105,13 @@ module WaterDrop
         end
 
         # Middleware runs exactly once per message: on the fresh messages here, never again on the
-        # already-transformed messages coming back from a failed flush. Re-running it on those
-        # would apply every step a second time (double-encrypting/compressing/serializing payloads,
-        # duplicating headers/tracing metadata) and corrupt what is written to Kafka - a regression
-        # of #474 that the failure/requeue path reintroduced.
+        # already-transformed ones coming back from a failed flush, which a second pass would
+        # corrupt.
         data_for_dispatch = requeued.concat(middleware.run_many(fresh))
 
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
 
-        # Middleware has already been applied above, so the dispatch must not run it again.
         if sync
           produce_many_sync(data_for_dispatch, run_middleware: false)
         else
@@ -142,9 +135,7 @@ module WaterDrop
       end
 
       # Puts not-yet-dispatched messages back at the front of the retry buffer (preserving their
-      # original order relative to each other), so a failed flush does not lose them. They are kept
-      # separate from @messages because they have already passed through middleware and must not be
-      # transformed again on the next flush.
+      # original order relative to each other), so a failed flush does not lose them.
       #
       # @param messages [Array<Hash>] already middleware-processed messages to restore
       def requeue_unflushed(messages)

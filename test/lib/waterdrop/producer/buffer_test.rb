@@ -292,10 +292,7 @@ describe WaterDrop::Producer::Buffer do
     end
   end
 
-  # Regression for #474 resurfacing through the failure/requeue path added in #892: a message that
-  # is re-buffered after a failed flush has already been through middleware, so running middleware
-  # again on the retry would apply every step twice (double-encrypting/compressing/serializing
-  # payloads, duplicating headers). Middleware must run exactly once per message.
+  # Regression guard for #474 resurfacing through the #892 requeue path.
   describe "middleware on the failed-flush retry path" do
     before do
       @middleware = lambda do |message|
