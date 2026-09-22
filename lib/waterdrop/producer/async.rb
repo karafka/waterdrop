@@ -44,15 +44,18 @@ module WaterDrop
       #
       # @param messages [Array<Hash>] array with messages that comply with the
       #   {Contracts::Message} contract
+      # @param run_middleware [Boolean] should the middleware chain be run on the messages. Set to
+      #   false only when the messages have already been through middleware (for example when
+      #   re-dispatching a re-buffered flush batch) so it is not applied twice.
       #
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] deliveries handles
       #
       # @raise [Rdkafka::RdkafkaError] When adding the messages to rdkafka's queue failed
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
-      def produce_many_async(messages)
+      def produce_many_async(messages, run_middleware: true)
         dispatched = []
-        messages = middleware.run_many(messages)
+        messages = middleware.run_many(messages) if run_middleware
         messages.each { |message| validate_message!(message) }
 
         @monitor.instrument(

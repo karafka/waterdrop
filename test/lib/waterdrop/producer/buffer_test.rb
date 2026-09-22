@@ -291,4 +291,47 @@ describe WaterDrop::Producer::Buffer do
       refute(@producer.disconnect)
     end
   end
+
+  # Regression guard for #474 resurfacing through the #892 requeue path.
+  describe "middleware on the failed-flush retry path" do
+    before do
+      @middleware = lambda do |message|
+        message[:payload] += "-mw"
+        message
+      end
+
+      @producer.middleware.append(@middleware)
+    end
+
+    it "does not re-apply middleware to a message re-buffered after a ProduceManyError" do
+      message = build(:valid_message, payload: "value")
+
+      # The first flush fails during dispatch, so the message is re-buffered for a retry
+      @producer.client.stubs(:produce).raises(Rdkafka::RdkafkaError.new(0))
+      @producer.buffer(message)
+      assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_sync }
+
+      # The retry succeeds; middleware must not run a second time on the re-buffered message
+      @producer.client.unstub(:produce)
+      @producer.flush_sync
+
+      assert_equal("value-mw", message[:payload])
+      assert_equal(1, message[:payload].scan("-mw").size)
+    end
+
+    it "does not re-apply middleware to messages re-buffered after a MessageInvalidError" do
+      valid = build(:valid_message, payload: "value")
+      # Valid payload but invalid topic, so validation aborts the batch before anything dispatches
+      invalid = build(:valid_message, topic: "bad topic!", payload: "bad")
+      @producer.buffer_many([valid, invalid])
+
+      assert_raises(@invalid_error) { @producer.flush_sync }
+      assert_equal("value-mw", valid[:payload])
+
+      # The invalid message keeps the retry failing, but middleware must not run again on either
+      assert_raises(@invalid_error) { @producer.flush_sync }
+      assert_equal("value-mw", valid[:payload])
+      assert_equal(1, valid[:payload].scan("-mw").size)
+    end
+  end
 end

@@ -48,6 +48,9 @@ module WaterDrop
       #
       # @param messages [Array<Hash>] array with messages that comply with the
       #   {Contracts::Message} contract
+      # @param run_middleware [Boolean] should the middleware chain be run on the messages. Set to
+      #   false only when the messages have already been through middleware (for example when
+      #   re-dispatching a re-buffered flush batch) so it is not applied twice.
       #
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
       #   sent (can be used to verify offset, partition, etc via `#create_result`)
@@ -63,8 +66,8 @@ module WaterDrop
       #   errors), returning handles guarantees the same type in the `dispatched` collection,
       #   allowing uniform error handling. Each handle is in its final state after this method
       #   returns, so you can call `handle.create_result` to obtain the delivery report if needed.
-      def produce_many_sync(messages)
-        messages = middleware.run_many(messages)
+      def produce_many_sync(messages, run_middleware: true)
+        messages = middleware.run_many(messages) if run_middleware
         messages.each { |message| validate_message!(message) }
 
         dispatched = []

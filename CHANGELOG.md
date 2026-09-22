@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush (regression of #474 reintroduced by the failure/requeue path), which double-encrypted/compressed/serialized payloads and duplicated headers on retry.
 - [Fix] Re-check the producer liveness under `@buffer_mutex` in `#buffer`/`#buffer_many`, so a producer closed between the liveness check and the append raises `ProducerClosedError` instead of accepting the message into a closed producer's buffer and losing it silently.
 
 ## 2.10.4 (2026-08-26)
