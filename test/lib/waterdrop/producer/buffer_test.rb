@@ -334,4 +334,50 @@ describe WaterDrop::Producer::Buffer do
       assert_equal(1, valid[:payload].scan("-mw").size)
     end
   end
+
+  # #892 restored the buffer for the two error types it enumerated. Anything else raised before a
+  # message reaches librdkafka still emptied both buffers and lost the batch outright.
+  describe "a pre-dispatch failure" do
+    before do
+      @boom = ->(_message) { raise "boom from middleware" }
+    end
+
+    it "keeps the whole batch buffered when a middleware step raises" do
+      @producer.buffer_many(Array.new(5) { build(:valid_message) })
+      @producer.middleware.append(@boom)
+
+      assert_raises(RuntimeError) { @producer.flush_async }
+
+      assert_equal(5, @producer.messages.size)
+    end
+
+    it "restores the fresh and the already-processed messages to their own buffers" do
+      transform = lambda do |message|
+        message[:payload] += "-mw"
+        message
+      end
+
+      @producer.middleware.append(transform)
+
+      # A failed dispatch puts this one in the retry buffer, already middleware-processed
+      retried = build(:valid_message, payload: "retried")
+      @producer.client.stubs(:produce).raises(Rdkafka::RdkafkaError.new(0))
+      @producer.buffer(retried)
+      assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_sync }
+
+      # Raise ahead of the transforming step, so the fresh message is untouched when it unwinds
+      fresh = build(:valid_message, payload: "fresh")
+      @producer.buffer(fresh)
+      @producer.middleware.prepend(@boom)
+
+      assert_raises(RuntimeError) { @producer.flush_sync }
+
+      # Fresh messages go back un-transformed so middleware still runs on them exactly once later,
+      # while the retried one keeps the single pass it already had
+      assert_equal([fresh], @producer.instance_variable_get(:@messages))
+      assert_equal("fresh", fresh[:payload])
+      assert_equal([retried], @producer.instance_variable_get(:@requeued))
+      assert_equal(1, retried[:payload].scan("-mw").size)
+    end
+  end
 end

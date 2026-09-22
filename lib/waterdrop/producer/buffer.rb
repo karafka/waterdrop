@@ -96,6 +96,7 @@ module WaterDrop
       def flush(sync)
         fresh = nil
         requeued = nil
+        data_for_dispatch = []
 
         @buffer_mutex.synchronize do
           requeued = @requeued
@@ -107,7 +108,17 @@ module WaterDrop
         # Middleware runs exactly once per message: on the fresh messages here, never again on the
         # already-transformed ones coming back from a failed flush, which a second pass would
         # corrupt.
-        data_for_dispatch = requeued.concat(middleware.run_many(fresh))
+        #
+        # A middleware step raising here (a serializer, encryptor or schema lookup failing) would
+        # otherwise destroy both buffers, since they were emptied above and nothing has been
+        # dispatched yet to recover them from.
+        begin
+          data_for_dispatch = requeued.concat(middleware.run_many(fresh))
+        rescue
+          restore_undispatched(fresh, requeued)
+
+          raise
+        end
 
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
@@ -132,6 +143,19 @@ module WaterDrop
         requeue_unflushed(data_for_dispatch)
 
         raise
+      end
+
+      # Puts both sets back after a failure that happened before anything reached librdkafka. They
+      # go to different buffers because middleware has run on one of them and not the other, which
+      # is what keeps it applied exactly once per message.
+      #
+      # @param fresh [Array<Hash>] messages that have not been through middleware
+      # @param requeued [Array<Hash>] already middleware-processed messages
+      def restore_undispatched(fresh, requeued)
+        @buffer_mutex.synchronize do
+          @messages.unshift(*fresh)
+          @requeued.unshift(*requeued)
+        end
       end
 
       # Puts not-yet-dispatched messages back at the front of the retry buffer (preserving their
