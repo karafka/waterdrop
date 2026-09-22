@@ -1,7 +1,7 @@
 # WaterDrop
 
-[![Build Status](https://github.com/karafka/waterdrop/workflows/ci/badge.svg)](https://github.com/karafka/waterdrop/actions?query=workflow%3Aci)
-[![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](http://badge.fury.io/rb/waterdrop)
+[![Build Status](https://github.com/karafka/waterdrop/actions/workflows/ci.yml/badge.svg)](https://github.com/karafka/waterdrop/actions/workflows/ci.yml)
+[![Gem Version](https://badge.fury.io/rb/waterdrop.svg)](https://badge.fury.io/rb/waterdrop)
 [![Join the chat at https://slack.karafka.io](https://raw.githubusercontent.com/karafka/misc/master/slack.svg)](https://slack.karafka.io)
 
 WaterDrop is a standalone gem that sends messages to Kafka easily with an extra validation layer. It is a part of the [Karafka](https://github.com/karafka/karafka) ecosystem.
