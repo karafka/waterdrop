@@ -111,14 +111,21 @@ module WaterDrop
         #
         # A middleware step raising here (a serializer, encryptor or schema lookup failing) would
         # otherwise destroy both buffers, since they were emptied above and nothing has been
-        # dispatched yet to recover them from.
+        # dispatched yet to recover them from. Messages are run one by one so that on failure the
+        # ones whose chain completed are kept as returned and are not transformed again, while the
+        # failing one and those after it stay on the middleware path. The failing one is not
+        # requeued because that would dispatch it without the rest of its chain.
+        processed = []
+
         begin
-          data_for_dispatch = requeued.concat(middleware.run_many(fresh))
+          fresh.each { |message| processed << middleware.run(message) }
         rescue
-          restore_undispatched(fresh, requeued)
+          restore_undispatched(fresh.drop(processed.size), requeued.concat(processed))
 
           raise
         end
+
+        data_for_dispatch = requeued.concat(processed)
 
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
@@ -149,7 +156,7 @@ module WaterDrop
       # go to different buffers because middleware has run on one of them and not the other, which
       # is what keeps it applied exactly once per message.
       #
-      # @param fresh [Array<Hash>] messages that have not been through middleware
+      # @param fresh [Array<Hash>] messages whose middleware chain has not completed
       # @param requeued [Array<Hash>] already middleware-processed messages
       def restore_undispatched(fresh, requeued)
         @buffer_mutex.synchronize do
