@@ -3,6 +3,7 @@
 ## Unreleased
 - [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush (regression of #474 reintroduced by the failure/requeue path), which double-encrypted/compressed/serialized payloads and duplicated headers on retry.
 - [Fix] Re-check the producer liveness under `@buffer_mutex` in `#buffer`/`#buffer_many`, so a producer closed between the liveness check and the append raises `ProducerClosedError` instead of accepting the message into a closed producer's buffer and losing it silently.
+- [Fix] Restore both buffers when `#flush` fails before anything is dispatched (a middleware step raising, for example) instead of discarding the whole batch. Only `ProduceManyError` and `MessageInvalidError` were covered before.
 
 ## 2.10.4 (2026-08-26)
 - [Fix] Avoid a `FrozenError` on `Producer#close` when the producer is configured with a frozen string id (for example a frozen string literal, `config.id = "rspec"`).

@@ -334,4 +334,116 @@ describe WaterDrop::Producer::Buffer do
       assert_equal(1, valid[:payload].scan("-mw").size)
     end
   end
+
+  # #892 restored the buffer for the two error types it enumerated. Anything else raised before a
+  # message reaches librdkafka still emptied both buffers and lost the batch outright.
+  describe "a pre-dispatch failure" do
+    before do
+      @boom = ->(_message) { raise "boom from middleware" }
+    end
+
+    it "keeps the whole batch buffered when a middleware step raises" do
+      @producer.buffer_many(Array.new(5) { build(:valid_message) })
+      @producer.middleware.append(@boom)
+
+      assert_raises(RuntimeError) { @producer.flush_async }
+
+      assert_equal(5, @producer.messages.size)
+    end
+
+    it "restores the fresh and the already-processed messages to their own buffers" do
+      transform = lambda do |message|
+        message[:payload] += "-mw"
+        message
+      end
+
+      @producer.middleware.append(transform)
+
+      # A failed dispatch puts this one in the retry buffer, already middleware-processed
+      retried = build(:valid_message, payload: "retried")
+      @producer.client.stubs(:produce).raises(Rdkafka::RdkafkaError.new(0))
+      @producer.buffer(retried)
+      assert_raises(WaterDrop::Errors::ProduceManyError) { @producer.flush_sync }
+
+      # Raise ahead of the transforming step, so the fresh message is untouched when it unwinds
+      fresh = build(:valid_message, payload: "fresh")
+      @producer.buffer(fresh)
+      @producer.middleware.prepend(@boom)
+
+      assert_raises(RuntimeError) { @producer.flush_sync }
+
+      # Fresh messages go back un-transformed so middleware still runs on them exactly once later,
+      # while the retried one keeps the single pass it already had
+      assert_equal([fresh], @producer.instance_variable_get(:@messages))
+      assert_equal("fresh", fresh[:payload])
+      assert_equal([retried], @producer.instance_variable_get(:@requeued))
+      assert_equal(1, retried[:payload].scan("-mw").size)
+    end
+
+    context "when the step raises part-way through the batch" do
+      before do
+        @armed = true
+        @boom_on_m2 = lambda do |message|
+          raise "boom from middleware" if @armed && message[:payload].start_with?("m2")
+
+          message
+        end
+
+        @messages = Array.new(5) { |i| build(:valid_message, payload: "m#{i}") }
+      end
+
+      it "does not transform the already-processed messages again on retry" do
+        transform = lambda do |message|
+          message[:payload] += "-mw"
+          message
+        end
+
+        @producer.middleware.append(@boom_on_m2)
+        @producer.middleware.append(transform)
+        @producer.buffer_many(@messages)
+
+        assert_raises(RuntimeError) { @producer.flush_sync }
+
+        assert_equal(@messages[0..1], @producer.instance_variable_get(:@requeued))
+        assert_equal(@messages[2..], @producer.instance_variable_get(:@messages))
+
+        @armed = false
+        @producer.flush_sync
+
+        assert_empty(@producer.messages)
+        assert_equal(%w[m0-mw m1-mw m2-mw m3-mw m4-mw], @messages.map { |message| message[:payload] })
+      end
+
+      it "keeps the transformed copies returned by copy-style middleware" do
+        @producer.middleware.append(@boom_on_m2)
+        @producer.middleware.append(->(message) { message.merge(payload: "#{message[:payload]}-mw") })
+        @producer.buffer_many(@messages)
+
+        assert_raises(RuntimeError) { @producer.flush_sync }
+
+        requeued = @producer.instance_variable_get(:@requeued)
+
+        assert_equal(%w[m0-mw m1-mw], requeued.map { |message| message[:payload] })
+        assert_equal(%w[m2 m3 m4], @producer.instance_variable_get(:@messages).map { |m| m[:payload] })
+      end
+
+      # Requeueing the failing message would dispatch it without the rest of its chain, so it stays
+      # on the middleware path even though the steps before the raise already ran on it
+      it "keeps the message whose step raised on the middleware path" do
+        transform = lambda do |message|
+          message[:payload] += "-mw"
+          message
+        end
+
+        @producer.middleware.append(transform)
+        @producer.middleware.append(->(message) { message[:payload].start_with?("m2") ? raise("boom") : message })
+        @producer.buffer_many(@messages)
+
+        assert_raises(RuntimeError) { @producer.flush_sync }
+
+        assert_equal(@messages[0..1], @producer.instance_variable_get(:@requeued))
+        assert_same(@messages[2], @producer.instance_variable_get(:@messages).first)
+      end
+    end
+  end
 end
