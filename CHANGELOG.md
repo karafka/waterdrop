@@ -1,9 +1,9 @@
 # WaterDrop changelog
 
 ## 2.10.5 (2026-09-23)
-- [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush (regression of #474 reintroduced by the failure/requeue path), which double-encrypted/compressed/serialized payloads and duplicated headers on retry.
-- [Fix] Re-check the producer liveness under `@buffer_mutex` in `#buffer`/`#buffer_many`, so a producer closed between the liveness check and the append raises `ProducerClosedError` instead of accepting the message into a closed producer's buffer and losing it silently.
-- [Fix] Restore both buffers when `#flush` fails before anything is dispatched (a middleware step raising, for example) instead of discarding the whole batch. Only `ProduceManyError` and `MessageInvalidError` were covered before.
+- [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush, which double-processed payloads and duplicated headers on retry (regression of #474).
+- [Fix] Raise `ProducerClosedError` instead of silently losing a message buffered while the producer is closing.
+- [Fix] Restore both buffers when `#flush` fails before anything is dispatched, instead of discarding the whole batch.
 
 ## 2.10.4 (2026-08-26)
 - [Fix] Avoid a `FrozenError` on `Producer#close` when the producer is configured with a frozen string id (for example a frozen string literal, `config.id = "rspec"`).
@@ -12,10 +12,10 @@
 - [Maintenance] Stop the `#partition_count when topic does not exist` spec from flaking on slow CI runners by waiting for authoritative broker metadata before asserting the count.
 
 ## 2.10.3 (2026-07-15)
-- [Feature] Add `wait_timeout_on_transaction_abort` (default `0`, disabled) - an opt-in mitigation for [librdkafka#4849](https://github.com/confluentinc/librdkafka/issues/4849) that waits (up to the given ms) for the first delivery to be acknowledged before aborting, avoiding a fatal `INVALID_TXN_STATE`. Off by default because it changes abort semantics: the awaited message is written to the log (aborted) instead of being purged.
+- [Feature] Add `wait_timeout_on_transaction_abort` (disabled by default), an opt-in mitigation for [librdkafka#4849](https://github.com/confluentinc/librdkafka/issues/4849) that avoids a fatal `INVALID_TXN_STATE` on abort. When enabled, the awaited message is written to the log as aborted instead of being purged.
 
 ## 2.10.2 (2026-06-15)
-- [Feature] Expose `Producer#current_variant` as a public method returning the variant active for the current dispatch on the current fiber, so middleware and instrumentation listeners can read the effective per-dispatch settings (`topic_config`, `max_wait_timeout`, `default?`).
+- [Feature] Expose `Producer#current_variant`, returning the variant active for the current dispatch, for use in middleware and instrumentation listeners.
 - [Enhancement] Stop allocating one interpolated string per message in `LoggerListener` batch produce handlers.
 - [Enhancement] Use `Array#concat` in `Producer#buffer_many` instead of appending messages one by one.
 - [Enhancement] Skip building the `message.acknowledged` instrumentation payload in the delivery callback when nothing is subscribed to that event.
@@ -24,15 +24,15 @@
 - [Enhancement] Cache the variant validation contract in a constant instead of instantiating a new `Contracts::Variant` on every `Producer#with` / `Producer#variant` call.
 - [Enhancement] Cache the tombstone validation contract in a constant instead of instantiating a new `Contracts::Tombstone` per tombstone message.
 - [Enhancement] Replace explicit `Warning[:performance]` opt-in with a dynamic approach using `Warning.categories` to enable all stable opt-in warning categories in the test suite.
-- [Fix] Prevent a deadlock between a transactional single-message dispatch and `#close` caused by an inverted lock order; transactional dispatches now take `@transaction_mutex` before the operation is counted.
-- [Fix] Prevent a deadlock (`ThreadError: deadlock; recursive locking`) when closing an idempotent producer (with `reload_on_idempotent_fatal_error` enabled) whose final buffer flush surfaces a fatal librdkafka error; the idempotent reload is now skipped on the closing path.
+- [Fix] Prevent a deadlock between a transactional single-message dispatch and `#close`.
+- [Fix] Prevent a deadlock when closing an idempotent producer with `reload_on_idempotent_fatal_error` enabled whose final flush hits a fatal error.
 - [Fix] Make concurrent idempotent fatal-error reload thread-safe so a second thread's reload can no longer raise `NoMethodError` after the first reset `@client`.
 - [Fix] Stop `#flush_async` / `#flush_sync` from silently dropping valid buffered messages when the dispatch fails; unsent messages are now re-buffered so they can be retried instead of being lost.
 - [Fix] Make `Producer#close` fork-safe so the GC finalizer inherited by a forked child can no longer flush and close the parent's client.
-- [Fix] Guard the internal buffer appends in `Producer#buffer` and `Producer#buffer_many` with `@buffer_mutex` so a concurrent flush/purge/close swap can no longer drop a message into an orphaned array.
-- [Fix] Stop a nested same-producer variant call from clobbering the outer variant inside a variant `transaction` block; the wrapper now saves and restores the previous fiber-local entry instead of deleting it.
-- [Fix] Stop `ConnectionPool#shutdown` and `#reload` from silently dropping in-flight messages. They now close producers gracefully by default (`#reload` always; `#shutdown` unless called with the new `force: true`); pass `pool.shutdown(force: true)` to keep the old force-and-purge behavior.
-- [Fix] Close a race in the FD poller where a producer registered while the last one was being torn down could be left permanently unpolled; the poller now decides to stop and clears its thread reference in a single mutex section.
+- [Fix] Prevent a concurrent flush, purge or close from dropping a message buffered with `#buffer` or `#buffer_many`.
+- [Fix] Stop a nested variant call on the same producer from overriding the outer variant inside a variant `transaction` block.
+- [Fix] Stop `ConnectionPool#shutdown` and `#reload` from dropping in-flight messages by closing producers gracefully. Use `pool.shutdown(force: true)` for the previous force-and-purge behavior.
+- [Fix] Fix a race that could leave a newly registered producer permanently unpolled by the FD poller.
 
 ## 2.10.1 (2026-05-25)
 - [Fix] Prevent `Producer#close` from raising `ThreadError: can't be called from trap context` when invoked from a Ruby signal trap context (e.g. Puma's `after_stopped` DSL hook in single mode). `close` now detects this case and delegates to a background thread, joining it so the caller blocks until the producer is fully closed (#866).
