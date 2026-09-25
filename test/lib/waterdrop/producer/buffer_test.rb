@@ -444,6 +444,32 @@ describe WaterDrop::Producer::Buffer do
         assert_equal(@messages[0..1], @producer.instance_variable_get(:@requeued))
         assert_same(@messages[2], @producer.instance_variable_get(:@messages).first)
       end
+
+      # An in-place step that ran before the raising step must be rolled back, otherwise the
+      # re-buffered message carries a partial transform and the next flush runs the whole chain
+      # over it again (double `-mw`).
+      it "does not double-apply an in-place step to the message whose later step raised" do
+        transform = lambda do |message|
+          message[:payload] += "-mw"
+          message
+        end
+
+        @producer.middleware.append(transform)
+        @producer.middleware.append(@boom_on_m2)
+        @producer.buffer_many(@messages)
+
+        assert_raises(RuntimeError) { @producer.flush_sync }
+
+        # m2 is re-buffered pristine: the in-place `-mw` from before the raise has been undone
+        assert_equal(%w[m2 m3 m4], @producer.instance_variable_get(:@messages).map { |m| m[:payload] })
+
+        @armed = false
+        @producer.flush_sync
+
+        assert_empty(@producer.messages)
+        assert_equal(%w[m0-mw m1-mw m2-mw m3-mw m4-mw], @messages.map { |message| message[:payload] })
+        assert_equal(1, @messages[2][:payload].scan("-mw").size)
+      end
     end
   end
 end

@@ -116,6 +116,37 @@ describe_current do
     it { assert_equal(2, @middleware.run(@message)[:test2]) }
   end
 
+  context "when a later step raises after an in-place step already ran" do
+    before do
+      inplace = lambda do |msg|
+        msg[:payload] = "#{msg[:payload]}-mw"
+        msg
+      end
+
+      @middleware.append(inplace)
+      @middleware.append(->(_msg) { raise("boom") })
+      @message[:payload] = "value"
+    end
+
+    it "restores the message so the in-place step is not left applied" do
+      assert_raises(RuntimeError) { @middleware.run(@message) }
+
+      assert_equal("value", @message[:payload])
+    end
+
+    it "keeps re-running the full chain correct after the failing step is removed" do
+      assert_raises(RuntimeError) { @middleware.run(@message) }
+
+      recovered = described_class.new
+      recovered.append(lambda do |msg|
+        msg[:payload] = "#{msg[:payload]}-mw"
+        msg
+      end)
+
+      assert_equal("value-mw", recovered.run(@message)[:payload])
+    end
+  end
+
   context "when morphing middleware on many" do
     before do
       mid1 = lambda do |msg|
