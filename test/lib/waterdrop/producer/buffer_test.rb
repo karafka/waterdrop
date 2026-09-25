@@ -444,6 +444,29 @@ describe WaterDrop::Producer::Buffer do
         assert_equal(@messages[0..1], @producer.instance_variable_get(:@requeued))
         assert_same(@messages[2], @producer.instance_variable_get(:@messages).first)
       end
+
+      # Pins the documented non-atomic chain run (see Middleware#run): an in-place step that ran
+      # before the raising one is not rolled back, so the failing message gets it twice
+      it "re-applies an in-place step to the message whose later step raised" do
+        transform = lambda do |message|
+          message[:payload] += "-mw"
+          message
+        end
+
+        @producer.middleware.append(transform)
+        @producer.middleware.append(@boom_on_m2)
+        @producer.buffer_many(@messages)
+
+        assert_raises(RuntimeError) { @producer.flush_sync }
+
+        assert_equal(%w[m2-mw m3 m4], @producer.instance_variable_get(:@messages).map { |m| m[:payload] })
+
+        @armed = false
+        @producer.flush_sync
+
+        assert_empty(@producer.messages)
+        assert_equal(%w[m0-mw m1-mw m2-mw-mw m3-mw m4-mw], @messages.map { |message| message[:payload] })
+      end
     end
   end
 end

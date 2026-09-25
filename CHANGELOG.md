@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
+
 ## 2.10.5 (2026-09-23)
 - [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush, which double-processed payloads and duplicated headers on retry (regression of #474).
 - [Fix] Raise `ProducerClosedError` instead of silently losing a message buffered while the producer is closing.

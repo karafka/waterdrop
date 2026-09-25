@@ -17,6 +17,14 @@ module WaterDrop
     #   into a new object.
     # @note You need to decide yourself whether you don't use the message hash data anywhere else
     #   and you want to save on memory by modifying it in place or do you want to do a deep copy
+    # @note Steps run sequentially and a chain run is not atomic. If an in-place step mutates the
+    #   message and a later step raises, the message is left partially transformed. During a
+    #   buffer flush that message is re-buffered as not yet processed, so the next flush runs the
+    #   whole chain over it again and the earlier in-place steps are applied twice (for example
+    #   double encryption or duplicated headers). Making the run atomic would mean copying every
+    #   message before its chain runs, which defeats the memory saving in-place mode is for, so
+    #   this is a deliberate trade-off. If an in-place step can be followed by a step that may
+    #   raise, make the in-place step idempotent or have it return a copy instead.
     def run(message)
       return message if @count.zero?
 
