@@ -17,39 +17,37 @@ module WaterDrop
     #   into a new object.
     # @note You need to decide yourself whether you don't use the message hash data anywhere else
     #   and you want to save on memory by modifying it in place or do you want to do a deep copy
-    # @note Applying the chain is atomic: a step raising part-way through restores the message to
-    #   its pre-run state before re-raising. This keeps middleware applied exactly once even for
-    #   in-place steps, since a message re-buffered after a failed flush is not left half
-    #   transformed for the next flush to run the whole chain over again.
+    # @note Steps run sequentially and a chain run is not atomic. If an in-place step mutates the
+    #   message and a later step raises, the message is left partially transformed. During a
+    #   buffer flush that message is re-buffered as not yet processed, so the next flush runs the
+    #   whole chain over it again and the earlier in-place steps are applied twice (for example
+    #   double encryption or duplicated headers). Making the run atomic would mean copying every
+    #   message before its chain runs, which defeats the memory saving in-place mode is for, so
+    #   this is a deliberate trade-off. If an in-place step can be followed by a step that may
+    #   raise, make the in-place step idempotent or have it return a copy instead.
     def run(message)
       return message if @count.zero?
-
-      # Snapshot before running so an in-place step that already ran can be rolled back if a later
-      # step raises. `message` may be reassigned by copy-style steps, so roll back the original.
-      original = message
-      snapshot = message.dup
 
       @steps.each do |step|
         message = step.call(message)
       end
 
       message
-    rescue
-      original.replace(snapshot)
-      raise
     end
 
     # @param messages [Array<Hash>] messages on which we want to run middlewares
     # @return [Array<Hash>] transformed messages or same messages if no transformation
-    # @note Each message is run atomically (see {#run}): a step raising restores the failing
-    #   message before re-raising, so it is never left partially transformed.
     def run_many(messages)
       # Skip middleware processing entirely if no middleware steps are configured
       return messages if @count.zero?
 
       # Use each_with_object to avoid creating intermediate arrays for large batches
       messages.each_with_object([]) do |message, result|
-        result << run(message)
+        @steps.each do |step|
+          message = step.call(message)
+        end
+
+        result << message
       end
     end
 

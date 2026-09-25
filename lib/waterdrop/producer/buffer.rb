@@ -115,6 +115,12 @@ module WaterDrop
         # ones whose chain completed are kept as returned and are not transformed again, while the
         # failing one and those after it stay on the middleware path. The failing one is not
         # requeued because that would dispatch it without the rest of its chain.
+        #
+        # Known edge case (#46840): the failing message is re-buffered in whatever state its chain
+        # left it. Copy-style steps leave it untouched, but in-place steps that ran before the
+        # raising one leave it partially transformed, and the next flush runs its full chain again.
+        # We accept this rather than snapshotting every message before its run, which would cost a
+        # copy per message on the success path as well. See Middleware#run.
         processed = []
 
         begin
