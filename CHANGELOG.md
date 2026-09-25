@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
-- [Maintenance] Document that a middleware chain run is not atomic: an in-place step followed by a step that raises during `#flush` leaves the message partially transformed, and the next flush applies the in-place step again.
+- [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
 
 ## 2.10.5 (2026-09-23)
 - [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush (regression of #474 reintroduced by the failure/requeue path), which double-encrypted/compressed/serialized payloads and duplicated headers on retry.
