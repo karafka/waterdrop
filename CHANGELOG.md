@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.10.6 (Unreleased)
 - [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
 
 ## 2.10.5 (2026-09-23)
