@@ -148,9 +148,25 @@ describe_current do
           @changed << event
         end
 
+        client = @producer.send(:client)
+        handle = nil
+
+        # If the broker rejection of the topic metadata lands between the topic handle creation
+        # and the produce call, librdkafka rejects the produce inline (`unknown_topic`) and no
+        # delivery report is ever emitted. That topic stays rejected for this producer, so we
+        # retry with a new invalid topic until the message goes through the delivery path.
+        10.times do
+          handle = client.produce(topic: "$%^&*#{SecureRandom.hex(6)}", payload: "1")
+          break
+        rescue Rdkafka::RdkafkaError
+          nil
+        end
+
+        refute_nil handle, "Every produce attempt was rejected inline"
+
         # Intercept the error so it won't bubble up as we want to check the notifications pipeline
         begin
-          @producer.send(:client).produce(topic: "$%^&*", payload: "1").wait
+          handle.wait
         rescue Rdkafka::RdkafkaError
           nil
         end
