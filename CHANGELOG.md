@@ -2,6 +2,7 @@
 
 ## 2.10.6 (Unreleased)
 - [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
+- [Maintenance] Stop the sync delivery error spec from flaking when librdkafka rejects the produce to the invalid topic inline instead of through the delivery report.
 
 ## 2.10.5 (2026-09-23)
 - [Fix] Stop `#flush` from running middleware twice on messages re-buffered after a failed flush, which double-processed payloads and duplicated headers on retry (regression of #474).
