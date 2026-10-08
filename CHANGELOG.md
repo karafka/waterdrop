@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## 2.10.6 (Unreleased)
+- **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
 - [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
 - [Maintenance] Stop the sync delivery error spec from flaking when librdkafka rejects the produce to the invalid topic inline instead of through the delivery report.
 
