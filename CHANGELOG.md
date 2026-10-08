@@ -16,7 +16,7 @@
 - [Maintenance] Stop the `#partition_count when topic does not exist` spec from flaking on slow CI runners by waiting for authoritative broker metadata before asserting the count.
 
 ## 2.10.3 (2026-07-15)
-- [Feature] Add `wait_timeout_on_transaction_abort` (disabled by default) to avoid a fatal `INVALID_TXN_STATE` on abort ([librdkafka#4849](https://github.com/confluentinc/librdkafka/issues/4849)). When enabled, the awaited message is logged as aborted instead of purged.
+- [Feature] Add `wait_timeout_on_transaction_abort` (disabled by default) to avoid a fatal `INVALID_TXN_STATE` on abort ([librdkafka#4849](https://github.com/confluentinc/librdkafka/issues/4849)). When enabled, the awaited message is delivered as aborted instead of purged.
 
 ## 2.10.2 (2026-06-15)
 - [Feature] Expose `Producer#current_variant`, returning the variant active for the current dispatch, for use in middleware and instrumentation listeners.
@@ -283,7 +283,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - [Improvement] Make `#produce` method private to avoid confusion and make sure it is not used directly (it is not part of the official API).
 - [Change] Change `wait_on_queue_full` from `false` to `true` as a default.
 - [Change] Rename `wait_on_queue_full_timeout` to `wait_backoff_on_queue_full` to match what it actually does.
-- [Enhancement] Make `wait_timeout_on_queue_full` the time after which the error is raised despite backoff, so never-deliverable messages no longer cause an infinite loop.
+- [Enhancement] Introduce `wait_timeout_on_queue_full`: the time after which the error is raised despite backoff, so never-deliverable messages no longer cause an infinite loop.
 - [Fix] Provide `type` for queue full errors that references the appropriate public API method correctly.
 
 ## 2.5.3 (2023-05-26)
