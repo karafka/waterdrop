@@ -43,7 +43,7 @@
 - [Fix] Prevent `Producer#close` from raising `ThreadError: can't be called from trap context` when called from a signal trap (e.g. Puma's `after_stopped` hook in single mode). It now closes from a background thread and waits for it (#866).
 
 ## 2.10.0 (2026-05-07)
-- [Fix] Clean up native rdkafka client, global instrumentation callbacks, and poller registration when `init_transactions` fails during producer client construction, so failed attempts no longer leak native threads, file descriptors, and callback registry entries.
+- [Fix] Clean up the native client, instrumentation callbacks and poller registration when `init_transactions` fails during producer construction, so failed attempts no longer leak threads and file descriptors.
 - **[Breaking]** Skip librdkafka statistics when nothing subscribes to `statistics.emitted` before the rdkafka client is built, to save allocations. To use statistics, subscribe a listener BEFORE the first producer use.
 - **[Breaking]** Raise `WaterDrop::Errors::StatisticsNotEnabledError` when attempting to subscribe to `statistics.emitted` on a monitor where librdkafka statistics have been disabled at client build time, replacing the previous "silent nothing" failure mode.
 - [Feature] Add tombstone API (`#tombstone_sync`, `#tombstone_async`, `#tombstone_many_sync`, `#tombstone_many_async`) for producing tombstone records (nil-payload messages) with required key and partition validation. Works with variants.
@@ -87,11 +87,7 @@
 
 ## 2.8.12 (2025-10-10)
 - [Enhancement] Introduce `reload_on_idempotent_fatal_error` to automatically reload librdkafka producer after fatal errors on idempotent (non-transactional) producers.
-- [Enhancement] Add configurable backoff and retry limits for fatal error recovery to prevent infinite reload loops:
-  - `wait_backoff_on_idempotent_fatal_error` (default: 5000ms) - backoff before retrying after idempotent fatal error reload
-  - `max_attempts_on_idempotent_fatal_error` (default: 5) - max reload attempts for idempotent fatal errors
-  - `wait_backoff_on_transaction_fatal_error` (default: 1000ms) - backoff after transactional fatal error reload
-  - `max_attempts_on_transaction_fatal_error` (default: 10) - max reload attempts for transactional fatal errors
+- [Enhancement] Add backoff and retry limits for fatal error reloads to prevent infinite reload loops (defaults in brackets): `wait_backoff_on_idempotent_fatal_error` (5000ms), `max_attempts_on_idempotent_fatal_error` (5), `wait_backoff_on_transaction_fatal_error` (1000ms) and `max_attempts_on_transaction_fatal_error` (10).
 - [Enhancement] Ensure `error.occurred` is instrumented before idempotent fatal error reload for visibility.
 - [Enhancement] Automatically reset fatal error reload attempts counter on successful produce/transaction to allow recovery.
 - [Refactor] Extract idempotence-related logic into separate `WaterDrop::Producer::Idempotence` module.
@@ -206,7 +202,7 @@ This release contains **BREAKING** changes. Make sure to read and apply upgrade 
 - **[Breaking]** Remove no longer needed `wait_timeout` configuration option.
 - **[Breaking]** Do **not** validate or morph (via middleware) messages added to the buffer prior to `flush_sync` or `flush_async`.
 - [Enhancement] Provide `WaterDrop::Producer#transaction?` that returns only when producer has an active transaction running.
-- [Enhancement] Introduce `instrument_on_wait_queue_full` flag (defaults to `true`) to be able to configure whether non critical (retryable) queue full errors should be instrumented in the error pipeline. Useful when building high-performance pipes with WaterDrop queue retry backoff as a throttler.
+- [Enhancement] Introduce `instrument_on_wait_queue_full` (defaults to `true`) to control whether retryable queue full errors are instrumented in the error pipeline.
 - [Enhancement] Protect critical `rdkafka` thread executable code sections.
 - [Enhancement] Treat the queue size as a gauge rather than a cumulative stat (isturdy).
 - [Fix] Fix a case where purge on non-initialized client would crash.
