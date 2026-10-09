@@ -87,7 +87,7 @@
 
 ## 2.8.12 (2025-10-10)
 - [Enhancement] Introduce `reload_on_idempotent_fatal_error` to automatically reload librdkafka producer after fatal errors on idempotent (non-transactional) producers.
-- [Enhancement] Add backoff and retry limits for fatal error reloads to prevent infinite reload loops: `wait_backoff_on_idempotent_fatal_error` (5000ms), `max_attempts_on_idempotent_fatal_error` (5), `wait_backoff_on_transaction_fatal_error` (1000ms) and `max_attempts_on_transaction_fatal_error` (10).
+- [Enhancement] Add backoff and retry limits for fatal error reloads to prevent infinite reload loops (defaults in brackets): `wait_backoff_on_idempotent_fatal_error` (5000ms), `max_attempts_on_idempotent_fatal_error` (5), `wait_backoff_on_transaction_fatal_error` (1000ms) and `max_attempts_on_transaction_fatal_error` (10).
 - [Enhancement] Ensure `error.occurred` is instrumented before idempotent fatal error reload for visibility.
 - [Enhancement] Automatically reset fatal error reload attempts counter on successful produce/transaction to allow recovery.
 - [Refactor] Extract idempotence-related logic into separate `WaterDrop::Producer::Idempotence` module.
