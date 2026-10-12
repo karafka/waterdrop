@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
+
 ## 2.10.6 (2026-10-12)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
 - [Maintenance] Document that a middleware chain run is not atomic, so an in-place step followed by a raising step is applied again on the next `#flush`.
