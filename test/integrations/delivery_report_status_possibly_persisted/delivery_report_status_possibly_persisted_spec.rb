@@ -7,15 +7,26 @@
 # may write a duplicate, so it is not the same decision as for `NOT_PERSISTED`.
 #
 # A real broker answers too fast to time out a request in flight, so this spec uses the librdkafka
-# mock cluster with a simulated round-trip time (RTT). The producer first connects with the default
-# timeouts. A variant then produces to a new topic with a `message.timeout.ms` between one RTT
-# (metadata of the new topic, then the produce request is sent) and two RTTs (the acknowledgement),
-# so the message times out while in flight. librdkafka scans for timeouts once per second, so the
-# RTT is large enough to keep a second of margin on both sides.
+# mock cluster. The first message goes through with no delay, so the connection and the topic
+# metadata are ready. Then the mock broker round-trip time (RTT) is raised far above
+# `message.timeout.ms`: the next produce request is sent at once, and its acknowledgement cannot
+# arrive before the message times out, however slow the machine is.
 
 require "waterdrop"
 
-RTT_MS = 4_000
+# The mock cluster API is not part of the Ruby bindings, so we attach the two functions we need
+# from the bundled librdkafka.
+module MockCluster
+  extend FFI::Library
+
+  ffi_lib Rdkafka::Bindings.ffi_libraries.map(&:name)
+
+  attach_function :rd_kafka_handle_mock_cluster, [:pointer], :pointer
+  attach_function :rd_kafka_mock_broker_set_rtt, [:pointer, :int32, :int], :int
+end
+
+MESSAGE_TIMEOUT_MS = 5_000
+SLOW_RTT_MS = MESSAGE_TIMEOUT_MS * 10
 
 failed = false
 
@@ -43,11 +54,10 @@ end
 
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
-  config.max_wait_timeout = 60_000
   config.kafka = {
     "bootstrap.servers": "127.0.0.1:9999",
     "test.mock.num.brokers": 1,
-    "test.mock.broker.rtt": RTT_MS
+    "message.timeout.ms": MESSAGE_TIMEOUT_MS
   }
 end
 
@@ -57,12 +67,16 @@ producer.monitor.subscribe("error.occurred") do |event|
   failures << event if event[:type] == "librdkafka.dispatch_error"
 end
 
-# Establishes the connection, so the slow produce below needs only the metadata and produce RTTs
-warmup_report = producer.produce_sync(topic: "warmup", payload: "warmup")
+topic = "in-flight"
 
-# Topic-level config is fixed when librdkafka first sees a topic, so the variant needs a new topic
-slow = producer.variant(topic_config: { "message.timeout.ms": RTT_MS + 1_500 })
-slow.produce_async(topic: "in-flight", payload: "maybe")
+warmup_report = producer.produce_sync(topic: topic, payload: "warmup")
+
+producer.client.instance_variable_get(:@native_kafka).with_inner do |inner|
+  mock_cluster = MockCluster.rd_kafka_handle_mock_cluster(inner)
+  MockCluster.rd_kafka_mock_broker_set_rtt(mock_cluster, warmup_report.broker_id, SLOW_RTT_MS)
+end
+
+producer.produce_async(topic: topic, payload: "maybe")
 
 event = failures.pop
 report = event[:delivery_report]
