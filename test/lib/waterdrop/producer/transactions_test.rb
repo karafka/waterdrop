@@ -221,6 +221,11 @@ describe_current do
 
     context "when we have error instrumentation" do
       before do
+        # With the factory's 5 ms linger, a stalled runner can deliver the message before the
+        # abort, so it is never purged. A long linger keeps it queued until the abort purges it.
+        @producer.close
+        @producer = build(:transactional_producer, queue_buffering_max_ms: 10_000)
+
         @errors = []
         @purges = []
 
@@ -362,6 +367,11 @@ describe_current do
 
     context "when we have error instrumentation" do
       before do
+        # With the factory's 5 ms linger, a stalled runner can deliver the message before the
+        # abort, so it is never purged. A long linger keeps it queued until the abort purges it.
+        @producer.close
+        @producer = build(:transactional_producer, queue_buffering_max_ms: 10_000)
+
         @errors = []
         @purges = []
 
