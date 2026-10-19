@@ -2,6 +2,7 @@
 
 ## 2.10.7 (2026-10-19)
 - [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
+- [Maintenance] Stop the transaction purge instrumentation spec from flaking when a slow runner lets librdkafka deliver the message before the abort, which leaves nothing to purge.
 
 ## 2.10.6 (2026-10-12)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
