@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.10.7 (2026-10-19)
 - [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
 
 ## 2.10.6 (2026-10-12)
