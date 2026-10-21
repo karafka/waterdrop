@@ -58,6 +58,35 @@ describe_current do
       @pipe.close
       @pipe.signal
     end
+
+    it "does not raise when only the reader is closed" do
+      @pipe.reader.close
+      @pipe.signal
+    end
+
+    it "does not raise when it races close" do
+      client = OpenStruct.new
+      client.define_singleton_method(:enable_queue_io_events) { |*| nil }
+      errors = []
+
+      200.times do
+        pipe = described_class.new(client)
+        go = false
+
+        signaler = Thread.new do
+          Thread.pass until go
+          pipe.signal
+        rescue => e
+          errors << e
+        end
+
+        go = true
+        pipe.close
+        signaler.join
+      end
+
+      assert_empty(errors)
+    end
   end
 
   describe "#drain" do
