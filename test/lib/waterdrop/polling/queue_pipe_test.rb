@@ -69,7 +69,7 @@ describe_current do
       client.define_singleton_method(:enable_queue_io_events) { |*| nil }
       errors = []
 
-      200.times do
+      2_000.times do
         pipe = described_class.new(client)
         go = false
 
