@@ -588,6 +588,77 @@ describe_current do
     end
   end
 
+  context "when commit fails with an abortable error" do
+    before do
+      @events = []
+      @aborts = []
+      events = @events
+      aborts = @aborts
+      @producer.monitor.subscribe("error.occurred") { |event| events << [:error, event[:type]] }
+      @producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
+      @producer.monitor.subscribe("producer.reload") { events << [:reload] }
+
+      @commit_error = Rdkafka::RdkafkaError.new(-149, abortable: true)
+      commit_error = @commit_error
+      commit_ref = @producer.client.method(:commit_transaction)
+      failures = [commit_error]
+      @producer.client.define_singleton_method(:commit_transaction) do |*args|
+        error = failures.shift
+        raise(error) if error
+
+        commit_ref.call(*args)
+      end
+
+      abort_ref = @producer.client.method(:abort_transaction)
+      @producer.client.define_singleton_method(:abort_transaction) do |*args|
+        aborts << true
+        abort_ref.call(*args)
+      end
+    end
+
+    it "expect to abort once and raise the commit error as is" do
+      error = assert_raises(Rdkafka::RdkafkaError) do
+        @producer.transaction { @producer.produce_sync(topic: @topic_name, payload: "1") }
+      end
+
+      assert_same(@commit_error, error)
+      assert_equal(1, @aborts.size)
+      assert_equal([[:error, "transaction.commit"], [:aborted]], @events)
+    end
+
+    it "expect the producer to commit the next transaction" do
+      assert_raises(Rdkafka::RdkafkaError) { @producer.transaction { nil } }
+
+      report = @producer.transaction { @producer.produce_sync(topic: @topic_name, payload: "2") }
+
+      assert_nil(report.error)
+    end
+  end
+
+  context "when begin_transaction fails" do
+    before do
+      @events = []
+      @aborts = []
+      events = @events
+      aborts = @aborts
+      @producer.monitor.subscribe("error.occurred") { |event| events << [:error, event[:type]] }
+      @producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
+
+      @begin_error = Rdkafka::RdkafkaError.new(-172)
+      begin_error = @begin_error
+      @producer.client.define_singleton_method(:begin_transaction) { raise(begin_error) }
+      @producer.client.define_singleton_method(:abort_transaction) { |*| aborts << true }
+    end
+
+    it "expect not to abort a transaction that never began" do
+      error = assert_raises(Rdkafka::RdkafkaError) { @producer.transaction { nil } }
+
+      assert_same(@begin_error, error)
+      assert_empty(@aborts)
+      assert_equal([[:error, "transaction.begin"]], @events)
+    end
+  end
+
   context "when we use transactional producer without transaction" do
     it "expect to allow as it will wrap with a transaction" do
       @producer.produce_sync(topic: @topic_name, payload: rand.to_s)
