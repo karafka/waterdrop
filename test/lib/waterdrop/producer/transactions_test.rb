@@ -598,7 +598,9 @@ describe_current do
       @producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
       @producer.monitor.subscribe("producer.reload") { |event| events << [:reload, event[:error].code] }
 
-      @commit_error = Rdkafka::RdkafkaError.new(-149, abortable: true)
+      @commit_error = Rdkafka::RdkafkaError.new(
+        Rdkafka::Bindings::RD_KAFKA_RESP_ERR__TIMED_OUT, abortable: true
+      )
       commit_error = @commit_error
       commit_ref = @producer.client.method(:commit_transaction)
       failures = [commit_error]
@@ -623,8 +625,7 @@ describe_current do
 
       assert_same(@commit_error, error)
       assert_equal(1, @aborts.size)
-      # The client is reloaded for the commit error itself, not for a failed second abort
-      assert_equal([[:error, "transaction.commit"], [:aborted], [:reload, :inconsistent]], @events)
+      assert_equal([[:error, "transaction.commit"], [:aborted], [:reload, :timed_out]], @events)
     end
 
     it "expect the producer to commit the next transaction" do
@@ -645,7 +646,7 @@ describe_current do
       @producer.monitor.subscribe("error.occurred") { |event| events << [:error, event[:type]] }
       @producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
 
-      @begin_error = Rdkafka::RdkafkaError.new(-172)
+      @begin_error = Rdkafka::RdkafkaError.new(Rdkafka::Bindings::RD_KAFKA_RESP_ERR__STATE)
       begin_error = @begin_error
       @producer.client.define_singleton_method(:begin_transaction) { raise(begin_error) }
       @producer.client.define_singleton_method(:abort_transaction) { |*| aborts << true }

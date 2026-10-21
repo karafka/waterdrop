@@ -5,9 +5,9 @@
 #
 # A DENY Write ACL on one topic makes an async produce inside the transaction fail with
 # `topic_authorization_failed`, so `commit_transaction` fails with an abortable error. The commit
-# error handling aborts the transaction. `#transaction` used to abort it a second time, which
-# failed with `Operation not valid in state Ready` (`:state`): that error replaced the commit error
-# and was reported as an abort error. The client reload stays, now for the commit error itself.
+# error handling aborts the transaction; no second abort may follow, so no `Operation not valid in
+# state Ready` (`:state`) error replaces the commit error or is reported as an abort error. The
+# client is reloaded once, for the commit error.
 
 require "waterdrop"
 
