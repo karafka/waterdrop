@@ -234,6 +234,69 @@ describe WaterDrop::Producer::Buffer do
     end
   end
 
+  describe "buffer snapshots for readers" do
+    context "when threads buffer while others read #messages" do
+      it "expect readers not to fail and no message to be lost" do
+        producer = @producer
+        errors = Queue.new
+
+        message = build(:valid_message)
+
+        writers = Array.new(4) do
+          Thread.new { 2_000.times { producer.buffer(message) } }
+        end
+
+        readers = Array.new(2) do
+          Thread.new do
+            while writers.any?(&:alive?)
+              begin
+                errors << "nil entry" if producer.messages.any?(&:nil?)
+              rescue => e
+                errors << e
+              end
+            end
+          end
+        end
+
+        writers.each(&:join)
+        readers.each(&:join)
+
+        assert_empty(Array.new(errors.size) { errors.pop })
+        assert_equal(8_000, producer.messages.size)
+      end
+    end
+
+    context "when a message.buffered listener keeps the buffer" do
+      it "expect it to get a frozen copy that later changes do not touch" do
+        buffers = []
+        @producer.monitor.subscribe("message.buffered") { |event| buffers << event[:buffer] }
+        first = build(:valid_message)
+
+        @producer.buffer(first)
+        @producer.buffer(build(:valid_message))
+
+        assert_predicate(buffers.first, :frozen?)
+        assert_equal([first], buffers.first)
+        assert_equal(2, buffers.last.size)
+      end
+    end
+
+    context "when a messages.buffered listener keeps the buffer" do
+      it "expect it to get a frozen copy that later changes do not touch" do
+        buffers = []
+        @producer.monitor.subscribe("messages.buffered") { |event| buffers << event[:buffer] }
+        batch = [build(:valid_message), build(:valid_message)]
+
+        @producer.buffer_many(batch)
+        @producer.buffer_many([build(:valid_message)])
+
+        assert_predicate(buffers.first, :frozen?)
+        assert_equal(batch, buffers.first)
+        assert_equal(3, buffers.last.size)
+      end
+    end
+  end
+
   describe "#flush_async" do
     context "when there are no messages in the buffer" do
       it { assert_equal([], @producer.flush_async) }

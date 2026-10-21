@@ -20,15 +20,17 @@ module WaterDrop
         # `:closing` before its final flush acquires @buffer_mutex. Checking only above the lock
         # would let a close complete in between, stranding the message in a closed producer's
         # buffer while this call returned success.
-        @monitor.instrument(
-          "message.buffered",
-          producer_id: id,
-          message: message,
-          buffer: @messages
-        ) do
+        #
+        # Listeners run after the block and get a frozen copy of the buffer taken under the lock,
+        # because copying the live array while another thread appends to it is not safe without
+        # a GVL (JRuby).
+        payload = { producer_id: id, message: message }
+
+        @monitor.instrument("message.buffered", payload) do
           @buffer_mutex.synchronize do
             ensure_active!
             @messages << message
+            payload[:buffer] = @messages.dup.freeze
           end
         end
       end
@@ -46,16 +48,15 @@ module WaterDrop
         # @messages under the lock, so an unguarded concat could append into an array that has just
         # been captured for dispatch (or discarded), silently losing the messages. The liveness
         # check is repeated under the lock for the same reason as in #buffer: a close that
-        # completes between the check above and the lock would otherwise strand the batch.
-        @monitor.instrument(
-          "messages.buffered",
-          producer_id: id,
-          messages: messages,
-          buffer: @messages
-        ) do
+        # completes between the check above and the lock would otherwise strand the batch. The
+        # listeners' buffer copy is taken under the lock for the same reason as in #buffer.
+        payload = { producer_id: id, messages: messages }
+
+        @monitor.instrument("messages.buffered", payload) do
           @buffer_mutex.synchronize do
             ensure_active!
             @messages.concat(messages)
+            payload[:buffer] = @messages.dup.freeze
           end
 
           messages

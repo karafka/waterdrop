@@ -181,7 +181,7 @@ module WaterDrop
     # @return [Array] internal messages buffer awaiting a flush. Includes both freshly buffered
     #   messages and any messages re-buffered after a failed flush that are waiting to be retried.
     def messages
-      @requeued + @messages
+      @buffer_mutex.synchronize { @requeued + @messages }
     end
 
     # Returns the number of messages in the librdkafka producer queue.
