@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
+
 ## 2.10.7 (2026-10-19)
 - [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
 - [Maintenance] Stop the transaction purge instrumentation spec from flaking when a slow runner lets librdkafka deliver the message before the abort, which leaves nothing to purge.
