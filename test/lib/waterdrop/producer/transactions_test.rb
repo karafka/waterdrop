@@ -660,6 +660,30 @@ describe_current do
     end
   end
 
+  context "when a transaction.started listener raises" do
+    before do
+      @aborted = []
+      aborted = @aborted
+      failures = [StandardError.new("listener failed")]
+      @producer.monitor.subscribe("transaction.started") do
+        error = failures.shift
+        raise(error) if error
+      end
+      @producer.monitor.subscribe("transaction.aborted") { aborted << true }
+    end
+
+    it "expect to abort the begun transaction so the next one commits" do
+      error = assert_raises(StandardError) { @producer.transaction { nil } }
+
+      assert_equal("listener failed", error.message)
+      assert_equal(1, @aborted.size)
+
+      report = @producer.transaction { @producer.produce_sync(topic: @topic_name, payload: "1") }
+
+      assert_nil(report.error)
+    end
+  end
+
   context "when we use transactional producer without transaction" do
     it "expect to allow as it will wrap with a transaction" do
       @producer.produce_sync(topic: @topic_name, payload: rand.to_s)

@@ -65,10 +65,14 @@ module WaterDrop
 
           transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
-              transactional_instrument(:started) { client.begin_transaction }
+              transactional_instrument(:started) do
+                client.begin_transaction
+                # Set before the `started` listeners run, so an error raised by one of them still
+                # aborts the transaction that has begun
+                @transaction_open = true
+              end
             end
 
-            @transaction_open = true
             result = nil
             finished = false
 
