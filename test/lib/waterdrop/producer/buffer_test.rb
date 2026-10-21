@@ -265,6 +265,55 @@ describe WaterDrop::Producer::Buffer do
         assert_equal(8_000, producer.messages.size)
       end
     end
+
+    context "when disconnect holds the buffer lock" do
+      before { @producer.produce_sync(build(:valid_message)) }
+
+      it "expect a listener on its thread to read #messages" do
+        read = nil
+        @producer.monitor.subscribe("producer.disconnecting") { read = @producer.messages }
+
+        assert(@producer.disconnect)
+        assert_equal([], read)
+      end
+
+      it "expect another thread to read #messages without waiting for it" do
+        producer = @producer
+        reader = nil
+        joined = nil
+        producer.monitor.subscribe("producer.disconnecting") do
+          reader = Thread.new { producer.messages }
+          joined = reader.join(5)
+        end
+
+        assert(producer.disconnect)
+        assert(joined, "the reader must not wait for the lock held by disconnect")
+        assert_equal([], reader.value)
+      end
+    end
+
+    context "when #messages is called from a signal trap" do
+      before { @previous_trap = Signal.trap("USR1", "DEFAULT") }
+
+      after { Signal.trap("USR1", @previous_trap) }
+
+      it "expect it to return the buffer" do
+        producer = @producer
+        message = build(:valid_message)
+        producer.buffer(message)
+        result = nil
+        Signal.trap("USR1") do
+          result = producer.messages
+        rescue => e
+          result = e
+        end
+
+        Process.kill("USR1", Process.pid)
+        wait_until(timeout: 5, interval: 0.01) { result }
+
+        assert_equal([message], result)
+      end
+    end
   end
 
   describe "#flush_async" do
