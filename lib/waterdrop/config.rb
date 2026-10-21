@@ -140,8 +140,8 @@ module WaterDrop
     #
     #   Only remove :fenced from this list if each transactional.id is used by one producer at a
     #   time (e.g., coordinated transactional.id assignment). Otherwise a reload fences the newer
-    #   producer and the two can fence each other until `max_attempts_on_transaction_fatal_error`
-    #   is reached. In most cases, you should keep the default value.
+    #   producer and the two can keep fencing each other for as long as both run. In most cases,
+    #   you should keep the default value.
     setting :non_reloadable_errors, default: %i[fenced]
     # option [Integer] Idle disconnect timeout in milliseconds. When set to 0, idle disconnection
     #   is disabled. When set to a positive value, WaterDrop will automatically disconnect
