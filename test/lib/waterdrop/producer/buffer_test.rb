@@ -265,36 +265,6 @@ describe WaterDrop::Producer::Buffer do
         assert_equal(8_000, producer.messages.size)
       end
     end
-
-    context "when a message.buffered listener keeps the buffer" do
-      it "expect it to get a frozen copy that later changes do not touch" do
-        buffers = []
-        @producer.monitor.subscribe("message.buffered") { |event| buffers << event[:buffer] }
-        first = build(:valid_message)
-
-        @producer.buffer(first)
-        @producer.buffer(build(:valid_message))
-
-        assert_predicate(buffers.first, :frozen?)
-        assert_equal([first], buffers.first)
-        assert_equal(2, buffers.last.size)
-      end
-    end
-
-    context "when a messages.buffered listener keeps the buffer" do
-      it "expect it to get a frozen copy that later changes do not touch" do
-        buffers = []
-        @producer.monitor.subscribe("messages.buffered") { |event| buffers << event[:buffer] }
-        batch = [build(:valid_message), build(:valid_message)]
-
-        @producer.buffer_many(batch)
-        @producer.buffer_many([build(:valid_message)])
-
-        assert_predicate(buffers.first, :frozen?)
-        assert_equal(batch, buffers.first)
-        assert_equal(3, buffers.last.size)
-      end
-    end
   end
 
   describe "#flush_async" do

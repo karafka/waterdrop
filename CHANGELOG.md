@@ -1,7 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
-- [Fix] Build `Producer#messages` and the `buffer` payload of `message.buffered`/`messages.buffered` under the buffer lock, so reading them while other threads buffer no longer raises `ConcurrencyError` on JRuby. Listeners now get a frozen copy of the buffer instead of the live array.
+- [Fix] Build `Producer#messages` and the `buffer.flushed_async`/`buffer.flushed_sync` payloads under the buffer lock, so reading them while other threads buffer no longer raises `ConcurrencyError` on JRuby.
 
 ## 2.10.7 (2026-10-19)
 - [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
