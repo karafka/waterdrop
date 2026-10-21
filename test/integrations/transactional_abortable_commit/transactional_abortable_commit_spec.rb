@@ -7,7 +7,7 @@
 # `topic_authorization_failed`, so `commit_transaction` fails with an abortable error. The commit
 # error handling aborts the transaction. `#transaction` used to abort it a second time, which
 # failed with `Operation not valid in state Ready` (`:state`): that error replaced the commit error
-# and reloaded the client.
+# and was reported as an abort error. The client reload stays, now for the commit error itself.
 
 require "waterdrop"
 
@@ -55,7 +55,7 @@ end
 events = []
 producer.monitor.subscribe("error.occurred") { |event| events << [:error, event[:type]] }
 producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
-producer.monitor.subscribe("producer.reload") { events << [:reload] }
+producer.monitor.subscribe("producer.reload") { |event| events << [:reload, event[:error].code] }
 
 producer.transaction { producer.produce_sync(topic: ok_topic, payload: "warmup") }
 
@@ -83,7 +83,11 @@ failed = check(failed, error&.code != :state, "no invalid state error from a sec
 failed = check(failed, events.count([:aborted]) == 1, "the transaction is aborted once")
 failed = check(failed, events.include?([:error, "transaction.commit"]), "the commit error is reported")
 failed = check(failed, !events.include?([:error, "transaction.abort"]), "no abort error is reported")
-failed = check(failed, !events.include?([:reload]), "the client is not reloaded")
+failed = check(
+  failed,
+  events.select { |event| event.first == :reload } == [[:reload, error&.code]],
+  "the client is reloaded once, for the commit error"
+)
 
 recovered = begin
   producer.transaction { producer.produce_sync(topic: ok_topic, payload: "recovery") }

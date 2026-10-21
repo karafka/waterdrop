@@ -596,7 +596,7 @@ describe_current do
       aborts = @aborts
       @producer.monitor.subscribe("error.occurred") { |event| events << [:error, event[:type]] }
       @producer.monitor.subscribe("transaction.aborted") { events << [:aborted] }
-      @producer.monitor.subscribe("producer.reload") { events << [:reload] }
+      @producer.monitor.subscribe("producer.reload") { |event| events << [:reload, event[:error].code] }
 
       @commit_error = Rdkafka::RdkafkaError.new(-149, abortable: true)
       commit_error = @commit_error
@@ -623,7 +623,8 @@ describe_current do
 
       assert_same(@commit_error, error)
       assert_equal(1, @aborts.size)
-      assert_equal([[:error, "transaction.commit"], [:aborted]], @events)
+      # The client is reloaded for the commit error itself, not for a failed second abort
+      assert_equal([[:error, "transaction.commit"], [:aborted], [:reload, :inconsistent]], @events)
     end
 
     it "expect the producer to commit the next transaction" do

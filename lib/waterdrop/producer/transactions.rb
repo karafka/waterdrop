@@ -63,14 +63,11 @@ module WaterDrop
         @transaction_mutex.synchronize do
           ensure_active!
 
-          began = false
-
           transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
               transactional_instrument(:started) { client.begin_transaction }
             end
 
-            began = true
             @transaction_open = true
             result = nil
             finished = false
@@ -105,11 +102,10 @@ module WaterDrop
           # running. This will also handle things like `IRB::Abort`
           rescue Exception => e
             # Neither a transaction that never began nor one the error handling already aborted
-            # (abortable error) has anything left to abort: aborting again fails with an invalid
-            # state error that hides the original one and reloads the client for no reason
+            # (abortable error) has anything left to abort: aborting again would fail with an
+            # invalid state error that replaces the original one
             unless @transaction_open
-              # The aborted one is healthy again; only a failed begin may need a reload
-              transactional_reload_client_if_needed(e) unless began
+              transactional_reload_client_if_needed(e)
 
               raise
             end
