@@ -130,13 +130,18 @@ module WaterDrop
     #   WARNING: Modifying this setting can cause infinite reload loops if not properly understood.
     #   The default includes :fenced errors because:
     #   - Fencing occurs when another producer with the same transactional.id takes over
-    #   - This is an unrecoverable state - reloading won't help as the other producer is active
+    #   - Fencing also occurs when the broker aborts a transaction that exceeded
+    #     `transaction.timeout.ms`. Both cases raise the same :fenced error, so WaterDrop cannot
+    #     tell them apart
+    #   - After a takeover this is an unrecoverable state - reloading won't help as the other
+    #     producer is active
     #   - Attempting to reload on fenced errors creates: produce -> fenced -> reload -> produce ->
     #     fenced -> reload (infinite loop)
     #
-    #   Only remove :fenced from this list if you have explicit logic to handle producer fencing
-    #   in your application (e.g., coordinated transactional.id assignment, manual intervention).
-    #   In most cases, you should keep the default value.
+    #   Only remove :fenced from this list if each transactional.id is used by one producer at a
+    #   time (e.g., coordinated transactional.id assignment). Otherwise a reload fences the newer
+    #   producer and the two can keep fencing each other for as long as both run. In most cases,
+    #   you should keep the default value.
     setting :non_reloadable_errors, default: %i[fenced]
     # option [Integer] Idle disconnect timeout in milliseconds. When set to 0, idle disconnection
     #   is disabled. When set to a positive value, WaterDrop will automatically disconnect
