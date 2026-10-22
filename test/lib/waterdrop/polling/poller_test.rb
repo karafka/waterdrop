@@ -97,6 +97,7 @@ describe_current do
       assert_predicate(@poller, :alive?)
 
       @poller.unregister(@producer)
+      wait_until { !@poller.alive? }
 
       refute_predicate(@poller, :alive?)
     end
@@ -105,6 +106,7 @@ describe_current do
       assert_predicate(@poller, :alive?)
 
       @poller.unregister(@producer)
+      wait_until { !@poller.alive? }
 
       refute_predicate(@poller, :alive?)
 

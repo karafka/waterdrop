@@ -34,8 +34,8 @@ describe_current do
 
       Thread.new do
         sleep(0.05)
-        @latch.release!
         released = true
+        @latch.release!
       end
 
       @latch.wait
