@@ -49,7 +49,7 @@
 ## 2.10.0 (2026-05-07)
 - [Fix] Clean up the native client, instrumentation callbacks and poller registration when `init_transactions` fails during producer construction, so failed attempts no longer leak threads and file descriptors.
 - **[Breaking]** Skip librdkafka statistics when nothing subscribes to `statistics.emitted` before the rdkafka client is built, to save allocations. To use statistics, subscribe a listener BEFORE the first producer use.
-- **[Breaking]** Raise `WaterDrop::Errors::StatisticsNotEnabledError` when attempting to subscribe to `statistics.emitted` on a monitor where librdkafka statistics have been disabled at client build time, replacing the previous "silent nothing" failure mode.
+- **[Breaking]** Raise `WaterDrop::Errors::StatisticsNotEnabledError` when subscribing to `statistics.emitted` on a monitor whose librdkafka statistics were disabled at client build time, instead of silently doing nothing.
 - [Feature] Add tombstone API (`#tombstone_sync`, `#tombstone_async`, `#tombstone_many_sync`, `#tombstone_many_async`) for producing tombstone records (nil-payload messages) with required key and partition validation. Works with variants.
 - [Fix] Add `ensure_same_process!` to `Poller#unregister` for fork safety, so a child that inherited a pre-fork producer no longer deadlocks on `producer.close`.
 
@@ -58,7 +58,7 @@
 - [Fix] Exclude test files, `.github/`, and `log/` directories from gem releases to reduce package size.
 - **[Breaking]** Switch default polling mode from `:thread` to `:fd`. If you experience any issues, you can revert to the previous behavior by setting `config.polling.mode = :thread`. The `:thread` mode will be deprecated in 2.10 and removed in 2.11.
 - **[Breaking]** Decorate only the statistics keys used by the built-in Datadog listener (`tx`, `txretries`, `txerrs`, `rxerrs`). If you use other `_d` or `_fd` keys, set a custom `config.statistics_decorator`.
-- [Feature] Add `config.statistics_decorator` setting to allow full control over the `StatisticsDecorator` instance used for statistics decoration. Users can provide a custom decorator with different `only_keys` and `excluded_keys` to match their instrumentation needs.
+- [Feature] Add a `config.statistics_decorator` setting to use a custom `StatisticsDecorator` (e.g. with different `only_keys` and `excluded_keys`).
 - [Change] Upscale default timeout values 3x closer to librdkafka defaults to prevent intermediate timeouts during node recovery (`message.timeout.ms`: 50s → 150s, `transaction.timeout.ms`: 55s → 165s, `max_wait_timeout`: 60s → 180s).
 
 **Upgrade Notes**: https://karafka.io/docs/Upgrades-WaterDrop-2.9/
@@ -66,7 +66,7 @@
 ## 2.8.16 (2026-02-25)
 - [Feature] Add FD-based polling (`config.polling.mode = :fd`): a single Ruby thread with `IO.select` instead of the default thread mode, with 39-54% higher throughput, lower memory usage and fewer threads.
 - [Feature] Add `config.polling.fd.max_time` setting (default: 100ms) to control maximum polling time per producer per cycle. This enables per-producer priority differentiation.
-- [Feature] Add `Producer#queue_size` (alias: `#queue_length`) to return the count of messages pending in the librdkafka queue. This counts messages that have been dispatched to librdkafka but not yet transmitted to the Kafka broker.
+- [Feature] Add `Producer#queue_size` (alias: `#queue_length`) to return the count of messages dispatched to librdkafka but not yet sent to the Kafka broker.
 - [Enhancement] Add `poll_nb` and `poll_drain` methods to rdkafka Producer for efficient non-blocking polling without GVL release overhead.
 - [Enhancement] Add `poller.producer_registered` and `poller.producer_unregistered` instrumentation events for FD mode.
 - [Change] Update to use `max_wait_timeout_ms` parameter in rdkafka `AbstractHandle#wait` for consistency with librdkafka conventions.
@@ -109,10 +109,10 @@
 
 ## 2.8.10 (2025-09-25)
 - [Enhancement] Add `#close` alias for `WaterDrop::ConnectionPool#shutdown` to align with producer API for consistent interface across both individual producers and connection pools.
-- [Enhancement] Add `WaterDrop.monitor` method as the preferred alias for `WaterDrop.instrumentation` to align with per-producer API naming convention. The `instrumentation` method remains available as a deprecated alias for backward compatibility.
+- [Enhancement] Add `WaterDrop.monitor` as the preferred alias for `WaterDrop.instrumentation`, matching the per-producer API. `instrumentation` remains as a deprecated alias.
 
 ## 2.8.9 (2025-09-23)
-- [Enhancement] Add connection pool lifecycle events to global instrumentation for improved observability. Events include `connection_pool.created`, `connection_pool.setup`, `connection_pool.shutdown`, `connection_pool.reload`, and `connection_pool.reloaded`.
+- [Enhancement] Add connection pool lifecycle events to global instrumentation: `connection_pool.created`, `connection_pool.setup`, `connection_pool.shutdown`, `connection_pool.reload` and `connection_pool.reloaded`.
 - [Enhancement] Add default connection pool transactional direct API.
 
 ## 2.8.8 (2025-09-23)
