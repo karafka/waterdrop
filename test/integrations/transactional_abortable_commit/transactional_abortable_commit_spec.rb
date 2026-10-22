@@ -3,8 +3,9 @@
 # A transaction whose commit fails with an abortable error must be aborted exactly once, and the
 # caller must get the commit error itself.
 #
-# A DENY Write ACL on one topic makes an async produce inside the transaction fail with
-# `topic_authorization_failed`, so `commit_transaction` fails with an abortable error. The commit
+# A message larger than its topic's `max.message.bytes` makes an async produce inside the
+# transaction fail with `msg_size_too_large`, so `commit_transaction` fails with an abortable
+# error. It needs no broker ACLs, so it also holds on brokers whose client is a super user. The commit
 # error handling aborts the transaction; no second abort may follow, so no `Operation not valid in
 # state Ready` (`:state`) error replaces the commit error or is reported as an abort error. The
 # client is reloaded once, for the commit error.
@@ -27,22 +28,9 @@ def check(failed, condition, message)
 end
 
 ok_topic = generate_topic("tx-abortable-ok")
-denied_topic = generate_topic("tx-abortable-denied")
+small_topic = generate_topic("tx-abortable-small")
 create_topic(ok_topic)
-create_topic(denied_topic)
-
-acl = {
-  resource_type: Rdkafka::Bindings::RD_KAFKA_RESOURCE_TOPIC,
-  resource_name: denied_topic,
-  resource_pattern_type: Rdkafka::Bindings::RD_KAFKA_RESOURCE_PATTERN_LITERAL,
-  principal: "User:ANONYMOUS",
-  host: "*",
-  operation: Rdkafka::Bindings::RD_KAFKA_ACL_OPERATION_WRITE,
-  permission_type: Rdkafka::Bindings::RD_KAFKA_ACL_PERMISSION_TYPE_DENY
-}
-
-admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
-admin.create_acl(**acl).wait
+create_topic(small_topic, "max.message.bytes": 128)
 
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
@@ -59,25 +47,19 @@ producer.monitor.subscribe("producer.reload") { |event| events << [:reload, even
 
 producer.transaction { producer.produce_sync(topic: ok_topic, payload: "warmup") }
 
-# The ACL reaches the broker's authorizer asynchronously: retry until a transaction hits it
+events.clear
 error = nil
-10.times do
-  events.clear
 
-  begin
-    producer.transaction do
-      producer.produce_sync(topic: ok_topic, payload: "ok")
-      producer.produce_async(topic: denied_topic, payload: "denied")
-    end
-  rescue Rdkafka::RdkafkaError => e
-    error = e
-    break
+begin
+  producer.transaction do
+    producer.produce_sync(topic: ok_topic, payload: "ok")
+    producer.produce_async(topic: small_topic, payload: "x" * 512)
   end
-
-  sleep(0.5)
+rescue Rdkafka::RdkafkaError => e
+  error = e
 end
 
-failed = check(failed, !error.nil?, "the transaction with a denied write fails")
+failed = check(failed, !error.nil?, "the transaction with a too large message fails")
 failed = check(failed, error&.abortable?, "the caller gets the abortable commit error (#{error&.code})")
 failed = check(failed, error&.code != :state, "no invalid state error from a second abort")
 failed = check(failed, events.count([:aborted]) == 1, "the transaction is aborted once")
@@ -99,8 +81,6 @@ end
 failed = check(failed, recovered, "the next transaction commits")
 
 producer.close
-admin.delete_acl(**acl).wait
-admin.close
 
 if failed
   puts "\nFAIL: an abortable commit error is not handled with a single abort"
