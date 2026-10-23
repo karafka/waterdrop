@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Fix] Stop `Producer#close` from raising `Errno::EPIPE` on JRuby when its close signal races the poller closing the pipe.
 - [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
 
 ## 2.10.7 (2026-10-19)
