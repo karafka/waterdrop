@@ -29,8 +29,8 @@ module WaterDrop
       # Thread-safe and non-blocking; silently ignores errors
       def signal
         @writer.write_nonblock("W", exception: false)
-      rescue IOError, Errno::EBADF
-        # Pipe closed
+      rescue IOError, Errno::EBADF, Errno::EPIPE
+        # Pipe closed. EPIPE: the reader is already closed, so there is no one left to wake
       end
 
       # Drains all pending bytes from the pipe

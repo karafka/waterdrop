@@ -894,6 +894,8 @@ describe_current do
 
     context "when producer not in use" do
       it "expect to work correctly" do
+        skip("fork is not available on JRuby") if RUBY_ENGINE == "jruby"
+
         fork do
           @producer.produce_sync(topic: @topic_name, payload: "1")
           @producer.close
