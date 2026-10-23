@@ -28,7 +28,11 @@ module WaterDrop
         ) do
           @buffer_mutex.synchronize do
             ensure_active!
-            @messages_mutex.synchronize { @messages << message }
+            if @lock_buffer_appends
+              @messages_mutex.synchronize { @messages << message }
+            else
+              @messages << message
+            end
           end
         end
       end
@@ -55,7 +59,11 @@ module WaterDrop
         ) do
           @buffer_mutex.synchronize do
             ensure_active!
-            @messages_mutex.synchronize { @messages.concat(messages) }
+            if @lock_buffer_appends
+              @messages_mutex.synchronize { @messages.concat(messages) }
+            else
+              @messages.concat(messages)
+            end
           end
 
           messages
