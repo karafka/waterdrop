@@ -56,7 +56,8 @@ module WaterDrop
       # on the poller thread whose callbacks may call #messages).
       @messages_mutex = Mutex.new
       # Under the GVL (MRI) a single Array#<< or #concat cannot interleave with the copy in
-      # #messages, so the per-message appends skip @messages_mutex there to stay as cheap as before.
+      # #messages, so #buffer and #buffer_many skip @messages_mutex there: they run per message and
+      # the extra lock would cost every call.
       @lock_buffer_appends = RUBY_ENGINE != "ruby"
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
