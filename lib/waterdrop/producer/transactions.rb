@@ -65,7 +65,12 @@ module WaterDrop
 
           transactional_instrument(:finished) do
             with_transactional_error_handling(:begin) do
-              transactional_instrument(:started) { client.begin_transaction }
+              transactional_instrument(:started) do
+                client.begin_transaction
+                # Set before the `started` listeners run, so an error raised by one of them still
+                # aborts the transaction that has begun
+                @transaction_open = true
+              end
             end
 
             result = nil
@@ -100,6 +105,15 @@ module WaterDrop
           # We need to handle any interrupt including critical in order not to have the transaction
           # running. This will also handle things like `IRB::Abort`
           rescue Exception => e
+            # Neither a transaction that never began nor one the error handling already aborted
+            # (abortable error) has anything left to abort: aborting again would fail with an
+            # invalid state error that replaces the original one
+            unless @transaction_open
+              transactional_reload_client_if_needed(e)
+
+              raise
+            end
+
             # This code is a bit tricky. We have an error and when it happens we try to rollback
             # the transaction. However we may end up in a state where transaction aborting itself
             # produces error. In such case we also want to handle it as fatal and reload client.
@@ -124,6 +138,8 @@ module WaterDrop
 
             raise unless e.is_a?(WaterDrop::Errors::AbortTransaction)
           ensure
+            @transaction_open = false
+
             # The first delivery handle is scoped to the transaction that produced it and is only
             # ever read by the abort path (which runs in the rescue above, before this). Clearing it
             # here - on commit, on abort and on a re-raise alike - keeps it from outliving its
@@ -273,6 +289,8 @@ module WaterDrop
           with_transactional_error_handling(:abort, allow_abortable: false) do
             transactional_instrument(:aborted) { client.abort_transaction }
           end
+
+          @transaction_open = false
         end
 
         raise
