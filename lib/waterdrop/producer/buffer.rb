@@ -28,7 +28,11 @@ module WaterDrop
         ) do
           @buffer_mutex.synchronize do
             ensure_active!
-            @messages << message
+            if @lock_buffer_appends
+              @messages_mutex.synchronize { @messages << message }
+            else
+              @messages << message
+            end
           end
         end
       end
@@ -55,7 +59,11 @@ module WaterDrop
         ) do
           @buffer_mutex.synchronize do
             ensure_active!
-            @messages.concat(messages)
+            if @lock_buffer_appends
+              @messages_mutex.synchronize { @messages.concat(messages) }
+            else
+              @messages.concat(messages)
+            end
           end
 
           messages
@@ -99,10 +107,12 @@ module WaterDrop
         data_for_dispatch = []
 
         @buffer_mutex.synchronize do
-          requeued = @requeued
-          @requeued = []
-          fresh = @messages
-          @messages = []
+          @messages_mutex.synchronize do
+            requeued = @requeued
+            @requeued = []
+            fresh = @messages
+            @messages = []
+          end
         end
 
         # Middleware runs exactly once per message: on the fresh messages here, never again on the
@@ -166,8 +176,10 @@ module WaterDrop
       # @param requeued [Array<Hash>] already middleware-processed messages
       def restore_undispatched(fresh, requeued)
         @buffer_mutex.synchronize do
-          @messages.unshift(*fresh)
-          @requeued.unshift(*requeued)
+          @messages_mutex.synchronize do
+            @messages.unshift(*fresh)
+            @requeued.unshift(*requeued)
+          end
         end
       end
 
@@ -178,7 +190,9 @@ module WaterDrop
       def requeue_unflushed(messages)
         return if messages.empty?
 
-        @buffer_mutex.synchronize { @requeued.unshift(*messages) }
+        @buffer_mutex.synchronize do
+          @messages_mutex.synchronize { @requeued.unshift(*messages) }
+        end
       end
     end
   end

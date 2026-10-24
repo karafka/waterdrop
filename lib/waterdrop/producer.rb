@@ -50,6 +50,15 @@ module WaterDrop
     def initialize(&block)
       @operations_in_progress = Helpers::Counter.new
       @buffer_mutex = Mutex.new
+      # Guards only the in-place changes of @messages and @requeued and the copy in #messages. It
+      # is always taken inside @buffer_mutex and held for one array operation, never around
+      # callbacks, so #messages does not wait for a @buffer_mutex holder (e.g. #disconnect waiting
+      # on the poller thread whose callbacks may call #messages).
+      @messages_mutex = Mutex.new
+      # Under the GVL (MRI) a single Array#<< or #concat cannot interleave with the copy in
+      # #messages, so #buffer and #buffer_many skip @messages_mutex there: they run per message and
+      # the extra lock would cost every call.
+      @lock_buffer_appends = RUBY_ENGINE != "ruby"
       @connecting_mutex = Mutex.new
       @operating_mutex = Mutex.new
       @transaction_mutex = Mutex.new
@@ -182,6 +191,12 @@ module WaterDrop
     # @return [Array] internal messages buffer awaiting a flush. Includes both freshly buffered
     #   messages and any messages re-buffered after a failed flush that are waiting to be retried.
     def messages
+      @messages_mutex.synchronize { @requeued + @messages }
+    rescue ThreadError => e
+      # Mutex#synchronize raises in a signal trap, so there the copy is taken without the lock.
+      # It is not safe against concurrent buffering without a GVL (JRuby).
+      raise unless e.message == "can't be called from trap context"
+
       @requeued + @messages
     end
 
@@ -239,8 +254,10 @@ module WaterDrop
     def purge
       @monitor.instrument("buffer.purged", producer_id: id) do
         @buffer_mutex.synchronize do
-          @messages = []
-          @requeued = []
+          @messages_mutex.synchronize do
+            @messages = []
+            @requeued = []
+          end
         end
 
         # We should not purge if there is no client initialized
