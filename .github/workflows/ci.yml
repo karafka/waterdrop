@@ -316,7 +316,7 @@ jobs:
 
   tests-macos:
     timeout-minutes: 30
-    runs-on: macos-15
+    runs-on: macos-26
     env:
       CONFLUENT_VERSION: "8.0.0"
     strategy:
