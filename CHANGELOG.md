@@ -1,8 +1,8 @@
 # WaterDrop changelog
 
-## Unreleased
-- [Fix] Stop `Producer#close` from raising `Errno::EPIPE` on JRuby when its close signal races the poller closing the pipe.
+## 2.10.8 (2026-10-25)
 - [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
+- [Fix] Stop `Producer#close` from raising `Errno::EPIPE` on JRuby when its close signal races the poller closing the pipe.
 - [Fix] Abort a failed transaction only once: raise an abortable commit error as is instead of a follow-up `Operation not valid in state Ready` error, and do not abort after a failed `begin_transaction`.
 
 ## 2.10.7 (2026-10-19)
