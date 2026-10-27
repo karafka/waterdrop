@@ -75,6 +75,7 @@ module WaterDrop
       @idempotent_fatal_error_attempts = 0
       @transaction_fatal_error_attempts = 0
       @transaction_first_handle = nil
+      @transaction_open = false
 
       @status = Status.new
       @messages = []
