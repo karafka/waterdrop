@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
+
 ## 2.10.8 (2026-10-25)
 - [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
 - [Maintenance] Drop unused `byebug` from the test bundle (Gemfile, Gemfile.lock), aligning with karafka (#3432) and karafka-web (#1354).

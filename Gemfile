@@ -4,6 +4,7 @@ source "https://rubygems.org"
 
 gemspec
 
+gem "rake"
 gem "zeitwerk", "~> 2.8.0"
 
 group :test do
