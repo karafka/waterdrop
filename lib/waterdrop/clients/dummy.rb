@@ -10,11 +10,11 @@ module WaterDrop
     class Dummy
       # `::Rdkafka::Producer::DeliveryHandle` object API compatible dummy object
       class Handle < ::Rdkafka::Producer::DeliveryHandle
-        # @param topic [String] topic where we want to dispatch message
+        # @param topic_name [String] topic where we want to dispatch message
         # @param partition [Integer] target partition
         # @param offset [Integer] offset assigned by our fake "Kafka"
-        def initialize(topic, partition, offset)
-          @topic = topic
+        def initialize(topic_name, partition, offset)
+          @topic = topic_name
           @partition = partition
           @offset = offset
         end
