@@ -75,9 +75,9 @@ module WaterDrop
       end
 
       # Returns messages produced to a given topic
-      # @param topic [String]
-      def messages_for(topic)
-        @topics[topic]
+      # @param topic_name [String]
+      def messages_for(topic_name)
+        @topics[topic_name]
       end
 
       # Clears internal buffer. Used in between specs so messages do not leak out

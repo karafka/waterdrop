@@ -190,10 +190,10 @@ module WaterDrop
           end
 
           # Report that a message has been produced to a topic.
-          # @param topic [String] Kafka topic
+          # @param topic_name [String] Kafka topic
           # @param method_name [Symbol] method from which this message operation comes
-          def report_message(topic, method_name)
-            increment(method_name, tags: default_tags + ["topic:#{topic}"])
+          def report_message(topic_name, method_name)
+            increment(method_name, tags: default_tags + ["topic:#{topic_name}"])
           end
 
           # Wraps metric name in listener's namespace
