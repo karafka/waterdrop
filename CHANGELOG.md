@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Maintenance] Rename the positional topic name parameter of `Clients::Dummy::Handle#initialize` to `topic_name`.
 - [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
 
 ## 2.10.8 (2026-10-25)
