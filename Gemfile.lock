@@ -45,6 +45,7 @@ DEPENDENCIES
   minitest
   mocha
   ostruct
+  rake
   simplecov
   warning
   waterdrop!
