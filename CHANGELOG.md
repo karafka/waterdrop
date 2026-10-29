@@ -8,14 +8,14 @@
 
 ## 2.10.8 (2026-10-25)
 - [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
-- [Maintenance] Drop unused `byebug` from the test bundle (Gemfile, Gemfile.lock), aligning with karafka (#3432) and karafka-web (#1354).
+- [Maintenance] Drop unused `byebug` from the test bundle.
 - [Maintenance] Fix test races and skip the fork test on JRuby, resolving unstable behavior in `test/` only.
 - [Fix] Stop `Producer#close` from raising `Errno::EPIPE` on JRuby when its close signal races the poller closing the pipe.
-- [Fix] Abort a failed transaction only once: raise an abortable commit error as is instead of a follow-up `Operation not valid in state Ready` error, and do not abort after a failed `begin_transaction`.
+- [Fix] Abort a failed transaction only once: raise the abortable commit error instead of a follow-up `Operation not valid in state Ready` error, and do not abort after a failed `begin_transaction`.
 
 ## 2.10.7 (2026-10-19)
 - [Change] Require `karafka-rdkafka` `>=` `0.31.0` so delivery reports carry the message persistence status, latency and broker id.
-- [Maintenance] Stop the transaction purge instrumentation spec from flaking when a slow runner lets librdkafka deliver the message before the abort, which leaves nothing to purge.
+- [Maintenance] Fix a flaky transaction purge instrumentation spec on slow runners.
 
 ## 2.10.6 (2026-10-12)
 - **[EOL]** Drop Ruby 3.2 support; require Ruby 3.3+.
