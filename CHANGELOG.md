@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Fix] Copy the buffer in `Producer#messages` (and so the `buffer.flushed_async`/`buffer.flushed_sync` payloads) under a dedicated lock, so reading it while other threads buffer no longer raises `ConcurrencyError` on JRuby.
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.
 - [Maintenance] Rename the positional topic name parameter of `Clients::Dummy::Handle#initialize` to `topic_name`.
 - [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
