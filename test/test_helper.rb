@@ -137,6 +137,27 @@ class Minitest::Spec
     end
   end
 
+  # Starts closing the producer from another thread while its client handles the `nth` produce
+  # call, so the messages after it in the same batch meet a closing producer. The close blocks
+  # the next dispatch on the operating lock, so that dispatch raises once the close has finished.
+  # @param producer [WaterDrop::Producer] producer to close mid-batch
+  # @param nth [Integer] number of the produce call during which the close starts
+  def close_during_produce(producer, nth)
+    calls = 0
+    waiter = method(:wait_until)
+
+    producer.client.define_singleton_method(:produce) do |**args|
+      calls += 1
+
+      if calls == nth
+        Thread.new { producer.close }
+        waiter.call { producer.status.closing? }
+      end
+
+      super(**args)
+    end
+  end
+
   # Waits until a topic is reported by the cluster metadata and returns its partition count.
   #
   # Requesting metadata for a missing topic also nudges broker-side auto-creation

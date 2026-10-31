@@ -41,6 +41,9 @@ describe_current do
     before { @error = described_class::ProducerClosedError }
 
     it { assert_operator(@error, :<, described_class::BaseError) }
+    it { assert_empty(@error.new("id").dispatched) }
+    it { assert_equal("id", @error.new("id").message) }
+    it { assert_equal([1], @error.new("id", dispatched: [1]).dispatched) }
   end
 
   describe "ProducerTransactionalCloseAttemptError" do
