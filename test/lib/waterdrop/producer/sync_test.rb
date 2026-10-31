@@ -206,6 +206,22 @@ describe_current do
       end
     end
 
+    context "when the producer gets closed mid-batch" do
+      before do
+        @messages = Array.new(5) { build(:valid_message, topic: @topic_name) }
+        close_during_produce(@producer, 3)
+      end
+
+      it "expect to raise ProducerClosedError with the handlers dispatched before the close" do
+        error = assert_raises(WaterDrop::Errors::ProducerClosedError) do
+          @producer.produce_many_sync(@messages)
+        end
+
+        assert_equal(3, error.dispatched.size)
+        error.dispatched.each { |handle| assert_kind_of(Rdkafka::Producer::DeliveryHandle, handle) }
+      end
+    end
+
     context "when producing to multiple topics with invalid partition key" do
       before do
         @topic1 = @topic_name
