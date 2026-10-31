@@ -28,10 +28,10 @@
 - [Fix] Restore both buffers when `#flush` fails before anything is dispatched, instead of discarding the whole batch.
 
 ## 2.10.4 (2026-08-26)
+- [Maintenance] Stop the `#partition_count when topic does not exist` spec from flaking on slow CI runners by waiting for authoritative broker metadata before asserting the count.
 - [Fix] Avoid a `FrozenError` on `Producer#close` when the producer is configured with a frozen string id (for example a frozen string literal, `config.id = "rspec"`).
 - [Fix] Emit `connection_pool.shutdown` only once when shutting down the global connection pool.
 - [Fix] Retry a produce that races a concurrent idempotent fatal-error reload instead of leaking a raw `Rdkafka::ClosedProducerError`/`Rdkafka::ClosedInnerError`.
-- [Maintenance] Stop the `#partition_count when topic does not exist` spec from flaking on slow CI runners by waiting for authoritative broker metadata before asserting the count.
 
 ## 2.10.3 (2026-07-15)
 - [Feature] Add `wait_timeout_on_transaction_abort` (disabled by default) to avoid a fatal `INVALID_TXN_STATE` on abort ([librdkafka#4849](https://github.com/confluentinc/librdkafka/issues/4849)). When enabled, the awaited message is delivered as aborted instead of purged.
