@@ -12,8 +12,8 @@ GEM
     connection_pool (3.0.2)
     drb (2.2.3)
     ffi (1.17.4)
-    json (3.0.2)
-    karafka-core (2.6.4)
+    json (3.1.0)
+    karafka-core (2.6.6)
       karafka-rdkafka (>= 0.20.0)
       logger (>= 1.6.0)
     karafka-rdkafka (0.31.0)
@@ -55,8 +55,8 @@ CHECKSUMS
   connection_pool (3.0.2) sha256=33fff5ba71a12d2aa26cb72b1db8bba2a1a01823559fb01d29eb74c286e62e0a
   drb (2.2.3) sha256=0b00d6fdb50995fe4a45dea13663493c841112e4068656854646f418fda13373
   ffi (1.17.4) sha256=bcd1642e06f0d16fc9e09ac6d49c3a7298b9789bcb58127302f934e437d60acf
-  json (3.0.2) sha256=8e6d7e7b11384c21230430cef90b71f14849a34a1f4452796670f7c981bd19df
-  karafka-core (2.6.4) sha256=e08166ca7ef12fadf0500f2a3aba63b5ba918a98533c3feaac9f43c90f159363
+  json (3.1.0) sha256=3ce7ccf8fde58960177a3a756c31f292a4c1e1dedee884547096a5b0604e3bd8
+  karafka-core (2.6.6) sha256=be14a9898c2133eecf1e2edefbdc127d105d902360d93c4ce63328ad8e74a440
   karafka-rdkafka (0.31.0) sha256=7d21274122d66ee8d08b8e56a0d06084933deb2306cf2a6e4bd0d073c14e7f9f
   logger (1.7.0) sha256=196edec7cc44b66cfb40f9755ce11b392f21f7967696af15d274dde7edff0203
   mini_portile2 (2.8.9) sha256=0cd7c7f824e010c072e33f68bc02d85a00aeb6fce05bb4819c03dfd3c140c289
