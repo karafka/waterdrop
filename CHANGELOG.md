@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## 2.10.9 (2026-11-02)
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.
 - [Maintenance] Rename the positional topic name parameter of `Clients::Dummy::Handle#initialize` to `topic_name`.
 - [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
