@@ -91,6 +91,7 @@ module WaterDrop
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles (in final state for
       #   sync, pending for async)
       # @raise [Errors::ProduceManyError] when there was a failure in flushing
+      # @raise [Errors::ProducerClosedError] when the producer got closed during flushing
       # @note We use this method underneath to provide a different instrumentation for sync and
       #   async flushing within the public API
       def flush(sync)
@@ -143,12 +144,13 @@ module WaterDrop
         else
           produce_many_async(data_for_dispatch, run_middleware: false)
         end
-      rescue Errors::ProduceManyError => e
-        # A dispatch failed partway through the batch. Re-buffer the messages that never reached
-        # librdkafka so a partial failure does not silently drop valid buffered messages. For a
-        # transactional producer the whole batch is rolled back (nothing is visible to consumers),
-        # so all of it is restored; for a regular producer `e.dispatched` holds the handles already
-        # created, so only the remainder is restored.
+      rescue Errors::ProduceManyError, Errors::ProducerClosedError => e
+        # A dispatch failed partway through the batch, either on an inline error or because a
+        # concurrent close stopped it. Re-buffer the messages that never reached librdkafka so a
+        # partial failure does not silently drop valid buffered messages. For a transactional
+        # producer the whole batch is rolled back (nothing is visible to consumers), so all of it is
+        # restored; for a regular producer `e.dispatched` holds the handles already created, so only
+        # the remainder is restored.
         requeue_unflushed(transactional? ? data_for_dispatch : data_for_dispatch.drop(e.dispatched.size))
 
         raise

@@ -53,6 +53,8 @@ module WaterDrop
       # @raise [Rdkafka::RdkafkaError] When adding the messages to rdkafka's queue failed
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
+      # @raise [Errors::ProducerClosedError] When the producer got closed mid-batch. Its
+      #   `#dispatched` holds the handlers of the messages dispatched before that
       def produce_many_async(messages, run_middleware: true)
         dispatched = []
         messages = middleware.run_many(messages) if run_middleware
@@ -84,6 +86,8 @@ module WaterDrop
         )
 
         raise re_raised
+      rescue Errors::ProducerClosedError => e
+        raise Errors::ProducerClosedError.new(e.message, dispatched: dispatched)
       end
     end
   end

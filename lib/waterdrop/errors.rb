@@ -23,7 +23,17 @@ module WaterDrop
     ProducerUsedInParentProcess = Class.new(BaseError)
 
     # Raised when there was an attempt to use a closed producer
-    ProducerClosedError = Class.new(BaseError)
+    class ProducerClosedError < BaseError
+      attr_reader :dispatched
+
+      # @param message [String, nil] error message
+      # @param dispatched [Array<Rdkafka::Producer::DeliveryHandle>] handlers of the messages of a
+      #   batch that we've dispatched before the producer got closed. Empty outside of a batch.
+      def initialize(message = nil, dispatched: [])
+        super(message)
+        @dispatched = dispatched
+      end
+    end
 
     # Raised if you attempt to close the producer from within a transaction. This is not allowed.
     ProducerTransactionalCloseAttemptError = Class.new(BaseError)

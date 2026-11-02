@@ -374,6 +374,28 @@ describe WaterDrop::Producer::Buffer do
     end
   end
 
+  describe "a flush racing close" do
+    before do
+      @batch = Array.new(5) { build(:valid_message) }
+      @producer.buffer_many(@batch)
+      close_during_produce(@producer, 2)
+    end
+
+    it "restores only the undispatched remainder on flush_sync" do
+      error = assert_raises(WaterDrop::Errors::ProducerClosedError) { @producer.flush_sync }
+
+      assert_equal(2, error.dispatched.size)
+      assert_equal(@batch.drop(2), @producer.messages)
+    end
+
+    it "restores only the undispatched remainder on flush_async" do
+      error = assert_raises(WaterDrop::Errors::ProducerClosedError) { @producer.flush_async }
+
+      assert_equal(2, error.dispatched.size)
+      assert_equal(@batch.drop(2), @producer.messages)
+    end
+  end
+
   # Regression guard for #474 resurfacing through the #892 requeue path.
   describe "middleware on the failed-flush retry path" do
     before do

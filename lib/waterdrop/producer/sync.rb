@@ -60,6 +60,8 @@ module WaterDrop
       #   handles are still pending
       # @raise [Errors::MessageInvalidError] When any of the provided messages details are invalid
       #   and the message could not be sent to Kafka
+      # @raise [Errors::ProducerClosedError] When the producer got closed mid-batch. Its
+      #   `#dispatched` holds the handlers of the messages dispatched before that
       #
       # @note We return delivery handles instead of delivery reports to ensure consistent return
       #   types for both success and error flows. In case of partial failures (e.g., mid-batch
@@ -67,10 +69,10 @@ module WaterDrop
       #   allowing uniform error handling. Each handle is in its final state after this method
       #   returns, so you can call `handle.create_result` to obtain the delivery report if needed.
       def produce_many_sync(messages, run_middleware: true)
+        dispatched = []
         messages = middleware.run_many(messages) if run_middleware
         messages.each { |message| validate_message!(message) }
 
-        dispatched = []
         inline_error = nil
 
         @monitor.instrument("messages.produced_sync", producer_id: id, messages: messages) do
@@ -128,6 +130,8 @@ module WaterDrop
         )
 
         raise re_raised
+      rescue Errors::ProducerClosedError => e
+        raise Errors::ProducerClosedError.new(e.message, dispatched: dispatched)
       end
     end
   end
