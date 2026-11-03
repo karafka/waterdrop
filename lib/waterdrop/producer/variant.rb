@@ -39,7 +39,9 @@ module WaterDrop
 
       # Buffers belong to the producer, so another variant or the producer itself may flush them.
       # A message buffered through a variant keeps its topic config, so it is sent with it whoever
-      # flushes. Prepended so the fiber-local variant wrappers below still run.
+      # flushes. This lives here and not in Buffer#buffer because resolving `current_variant` there
+      # would cost every default-producer #buffer call (~13%). Prepended so the fiber-local variant
+      # wrappers below still run.
       module BufferTopicConfig
         # @param message [Hash] message to buffer
         def buffer(message)
