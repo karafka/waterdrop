@@ -147,7 +147,9 @@ module WaterDrop
           data_for_dispatch = data_for_dispatch.map do |message|
             next message if message.key?(:topic_config)
 
-            message.merge(topic_config: default_topic_config)
+            message = message.dup
+            message[:topic_config] = default_topic_config
+            message
           end
         end
 

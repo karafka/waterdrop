@@ -660,13 +660,13 @@ module WaterDrop
       # We basically only duplicate the message hash only if it is needed.
       # It is needed when user is using a custom settings variant or when symbol is provided as
       # the topic name. We should never mutate user input message as it may be a hash that the
-      # user is using for some other operations
-      if message[:topic].is_a?(Symbol) || !variant.default?
+      # user is using for some other operations. A message buffered through a variant already
+      # carries that variant's topic config, so it needs no copy for it
+      if message[:topic].is_a?(Symbol) || (!variant.default? && !message.key?(:topic_config))
         message = message.dup
         # In case someone defines topic as a symbol, we need to convert it into a string as
         # librdkafka does not accept symbols
         message[:topic] = message[:topic].to_s
-        # A message buffered through a variant keeps that variant's topic config
         message[:topic_config] ||= variant.topic_config
       end
 

@@ -43,14 +43,24 @@ module WaterDrop
       module BufferTopicConfig
         # @param message [Hash] message to buffer
         def buffer(message)
-          default? ? super : super(message.merge(topic_config: topic_config))
+          default? ? super : super(with_topic_config(message))
         end
 
         # @param messages [Array<Hash>] messages to buffer
         def buffer_many(messages)
           return super if default?
 
-          super(messages.map { |message| message.merge(topic_config: topic_config) })
+          super(messages.map { |message| with_topic_config(message) })
+        end
+
+        private
+
+        # @param message [Hash] user message, never changed in place
+        # @return [Hash] copy of the message with this variant's topic config
+        def with_topic_config(message)
+          message = message.dup
+          message[:topic_config] = topic_config
+          message
         end
       end
 
