@@ -666,7 +666,8 @@ module WaterDrop
         # In case someone defines topic as a symbol, we need to convert it into a string as
         # librdkafka does not accept symbols
         message[:topic] = message[:topic].to_s
-        message[:topic_config] = variant.topic_config
+        # A message buffered through a variant keeps that variant's topic config
+        message[:topic_config] ||= variant.topic_config
       end
 
       result = if transactional?

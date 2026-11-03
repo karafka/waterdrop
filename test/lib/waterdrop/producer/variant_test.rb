@@ -188,4 +188,72 @@ describe_current do
       end
     end
   end
+
+  describe "buffering through a variant" do
+    before do
+      @acks_zero = @producer.with(topic_config: { acks: 0 })
+      @variant_topic = generate_topic
+      @default_topic = generate_topic
+    end
+
+    # With acks: 0 librdkafka reports -1001 counting up within a batch, so it is checked as
+    # negative. The first report on a new topic may be -1001 even with acks, so only the later ones
+    # are checked on the default topic.
+    def buffer_both(variant_buffers:)
+      3.times do
+        @acks_zero.buffer(topic: @variant_topic, payload: "v") if variant_buffers
+        @producer.buffer(topic: @default_topic, payload: "d")
+      end
+    end
+
+    def offsets(handles, topic)
+      handles.map(&:create_result).select { |result| result.topic_name == topic }.map(&:offset)
+    end
+
+    it "expect the producer flush_sync to keep the variant topic_config" do
+      3.times { @acks_zero.buffer(topic: @variant_topic, payload: "v") }
+
+      assert(offsets(@producer.flush_sync, @variant_topic).all?(&:negative?))
+    end
+
+    it "expect the producer flush_async to keep the variant topic_config" do
+      3.times { @acks_zero.buffer_many([{ topic: @variant_topic, payload: "v" }]) }
+      handles = @producer.flush_async
+      handles.each(&:wait)
+
+      assert(offsets(handles, @variant_topic).all?(&:negative?))
+    end
+
+    it "expect the variant flush_sync to send default messages with the default topic_config" do
+      buffer_both(variant_buffers: false)
+
+      assert(offsets(@acks_zero.flush_sync, @default_topic).drop(1).all? { |offset| offset >= 0 })
+    end
+
+    it "expect the variant flush_async to send default messages with the default topic_config" do
+      buffer_both(variant_buffers: false)
+      handles = @acks_zero.flush_async
+      handles.each(&:wait)
+
+      assert(offsets(handles, @default_topic).drop(1).all? { |offset| offset >= 0 })
+    end
+
+    it "expect a mixed buffer flushed once to send each message with its own topic_config" do
+      buffer_both(variant_buffers: true)
+      handles = @producer.flush_sync
+
+      assert_equal(6, handles.size)
+      assert(offsets(handles, @variant_topic).all?(&:negative?))
+      assert(offsets(handles, @default_topic).drop(1).all? { |offset| offset >= 0 })
+    end
+
+    it "expect a mixed buffer flushed once by the variant to send each with its own topic_config" do
+      buffer_both(variant_buffers: true)
+      handles = @acks_zero.flush_sync
+
+      assert_equal(6, handles.size)
+      assert(offsets(handles, @variant_topic).all?(&:negative?))
+      assert(offsets(handles, @default_topic).drop(1).all? { |offset| offset >= 0 })
+    end
+  end
 end

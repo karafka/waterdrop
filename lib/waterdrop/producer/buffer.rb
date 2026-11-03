@@ -12,6 +12,9 @@ module WaterDrop
       def buffer(message)
         ensure_active!
 
+        variant = current_variant
+        message = message.merge(topic_config: variant.topic_config) unless variant.default?
+
         # The append runs under @buffer_mutex because flush/purge/close swap @messages for a fresh
         # array under the same lock. Without it, a concurrent swap between reading @messages and
         # appending would land the message in the orphaned old array and silently lose it.
@@ -41,6 +44,12 @@ module WaterDrop
       #   and the message could not be sent to Kafka
       def buffer_many(messages)
         ensure_active!
+
+        variant = current_variant
+
+        unless variant.default?
+          messages = messages.map { |message| message.merge(topic_config: variant.topic_config) }
+        end
 
         # The concat runs under @buffer_mutex for the same reason as #buffer: flush/purge/close swap
         # @messages under the lock, so an unguarded concat could append into an array that has just
@@ -138,6 +147,18 @@ module WaterDrop
 
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
+
+        # Messages buffered through a variant carry its topic config from #buffer. The rest were
+        # buffered through the default variant and must not pick up the flushing variant's one.
+        unless current_variant.default?
+          default_topic_config = @default_variant.topic_config
+
+          data_for_dispatch = data_for_dispatch.map do |message|
+            next message if message.key?(:topic_config)
+
+            message.merge(topic_config: default_topic_config)
+          end
+        end
 
         if sync
           produce_many_sync(data_for_dispatch, run_middleware: false)
