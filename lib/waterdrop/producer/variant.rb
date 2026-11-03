@@ -37,7 +37,26 @@ module WaterDrop
       # Contract to validate that variant alteration data is correct
       CONTRACT = Contracts::Variant.new
 
-      private_constant :EMPTY_HASH, :CONTRACT
+      # Buffers belong to the producer, so another variant or the producer itself may flush them.
+      # A message buffered through a variant keeps its topic config, so it is sent with it whoever
+      # flushes. Prepended so the fiber-local variant wrappers below still run.
+      module BufferTopicConfig
+        # @param message [Hash] message to buffer
+        def buffer(message)
+          default? ? super : super(message.merge(topic_config: topic_config))
+        end
+
+        # @param messages [Array<Hash>] messages to buffer
+        def buffer_many(messages)
+          return super if default?
+
+          super(messages.map { |message| message.merge(topic_config: topic_config) })
+        end
+      end
+
+      prepend BufferTopicConfig
+
+      private_constant :EMPTY_HASH, :CONTRACT, :BufferTopicConfig
 
       attr_reader :max_wait_timeout, :topic_config, :producer
 
