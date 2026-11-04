@@ -14,9 +14,16 @@ permissions:
   contents: read
 
 jobs:
+  # Docs-only pull requests skip the jobs below; CI Success still runs and reports success,
+  # so the required check does not stay pending
+  changes:
+    uses: ./.github/workflows/ci_changes.yml
+
   tests:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -104,6 +111,8 @@ jobs:
   rubocop:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     env:
       BUNDLE_GEMFILE: Gemfile.lint
     steps:
@@ -121,6 +130,8 @@ jobs:
   yard-lint:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     env:
       BUNDLE_GEMFILE: Gemfile.lint
     steps:
@@ -171,6 +182,8 @@ jobs:
   lostconf:
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -188,6 +201,8 @@ jobs:
   oauth-integration:
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -254,6 +269,8 @@ jobs:
   sasl-integration:
     timeout-minutes: 10
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -317,6 +334,8 @@ jobs:
   tests-macos:
     timeout-minutes: 30
     runs-on: macos-26
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     env:
       CONFLUENT_VERSION: "8.0.0"
     strategy:
@@ -425,6 +444,7 @@ jobs:
     runs-on: ubuntu-latest
     if: always()
     needs:
+      - changes
       - rubocop
       - tests
       - tests-macos
@@ -434,10 +454,12 @@ jobs:
       - oauth-integration
       - sasl-integration
     steps:
+      # Skipped jobs are fine only when the change is docs-only
       - name: Check all jobs passed
         if: |
+          needs.changes.result != 'success' ||
           contains(needs.*.result, 'failure') ||
           contains(needs.*.result, 'cancelled') ||
-          contains(needs.*.result, 'skipped')
+          (needs.changes.outputs.code != 'false' && contains(needs.*.result, 'skipped'))
         run: exit 1
       - run: echo "All CI checks passed!"
