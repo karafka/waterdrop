@@ -172,6 +172,7 @@ module WaterDrop
 
       # Ensures the connection_pool gem is available (class method)
       # Only requires it when actually needed (lazy loading)
+      # @raise [LoadError] when the connection_pool gem is not available
       def ensure_connection_pool_gem!
         return if defined?(::ConnectionPool)
 

@@ -570,6 +570,9 @@ module WaterDrop
 
     # Ensures that we don't run any operations when the producer is not configured or when it
     # was already closed
+    # @raise [Errors::ProducerNotConfiguredError] when the producer is not configured
+    # @raise [Errors::ProducerClosedError] when the producer is closing or closed
+    # @raise [Errors::StatusInvalidError] when the producer is in an unknown state
     def ensure_active!
       # Capture the lifecycle state once. Another thread may be transitioning the producer between
       # states (for example configured -> connected while reloading the client after a fatal error),
@@ -591,7 +594,7 @@ module WaterDrop
     # Ensures that the message we want to send out to Kafka is actually valid and that it can be
     # sent there
     # @param message [Hash] message we want to send
-    # @raise [Karafka::Errors::MessageInvalidError]
+    # @raise [Errors::MessageInvalidError]
     def validate_message!(message)
       @contract.validate!(message, Errors::MessageInvalidError)
     end

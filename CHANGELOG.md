@@ -3,6 +3,8 @@
 ## Unreleased
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
+- [Change] Use the producer id (`ProducerNotTransactionalError`, `EarlyTransactionExitNotAllowedError`) or the event id (`StatisticsNotEnabledError`) as the error message instead of a sentence.
+- [Maintenance] Document the errors raised by `ensure_active!` and `ensure_connection_pool_gem!`, and fix the `MessageInvalidError` namespace in `validate_message!` YARD.
 - [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
 
 ## 2.10.9 (2026-11-02)
