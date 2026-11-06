@@ -207,5 +207,48 @@ describe_current do
         refute_predicate(contract.call(invalid_config), :success?)
       end
     end
+
+    context "when partition_count_cache_ttl_ms is configured" do
+      before do
+        @previous_ttl_ms = Rdkafka::Config.partition_count_cache_ttl_ms
+        @kafka_config = { "bootstrap.servers": BOOTSTRAP_SERVERS }
+      end
+
+      after { Rdkafka::Config.partition_count_cache_ttl_ms = @previous_ttl_ms }
+
+      it "defaults to nil" do
+        @config.setup { |config| config.kafka = @kafka_config }
+
+        assert_nil(@config.config.partition_count_cache_ttl_ms)
+      end
+
+      it "leaves the rdkafka partition count cache ttl untouched when nil" do
+        Rdkafka::Config.partition_count_cache_ttl_ms = @previous_ttl_ms + 1
+
+        @config.setup { |config| config.kafka = @kafka_config }
+
+        assert_equal(@previous_ttl_ms + 1, Rdkafka::Config.partition_count_cache_ttl_ms)
+      end
+
+      it "sets the rdkafka partition count cache ttl when present" do
+        @config.setup do |config|
+          config.kafka = @kafka_config
+          config.partition_count_cache_ttl_ms = @previous_ttl_ms + 2
+        end
+
+        assert_equal(@previous_ttl_ms + 2, Rdkafka::Config.partition_count_cache_ttl_ms)
+      end
+
+      it "raises and leaves the rdkafka ttl untouched when invalid" do
+        assert_raises(WaterDrop::Errors::ConfigurationInvalidError) do
+          @config.setup do |config|
+            config.kafka = @kafka_config
+            config.partition_count_cache_ttl_ms = 0
+          end
+        end
+
+        assert_equal(@previous_ttl_ms, Rdkafka::Config.partition_count_cache_ttl_ms)
+      end
+    end
   end
 end

@@ -37,6 +37,7 @@ describe_current do
           periodic_poll_interval: 1000
         }
       },
+      partition_count_cache_ttl_ms: nil,
       statistics_decorator: ::Karafka::Core::Monitoring::StatisticsDecorator.new,
       kafka: {
         "bootstrap.servers": "#{BOOTSTRAP_SERVERS},#{BOOTSTRAP_SERVERS}"
@@ -838,5 +839,69 @@ describe_current do
     }
 
     it { assert_predicate @contract_result, :success? }
+  end
+
+  describe "when partition_count_cache_ttl_ms is missing" do
+    before {
+      @config.delete(:partition_count_cache_ttl_ms)
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:partition_count_cache_ttl_ms] }
+  end
+
+  describe "when partition_count_cache_ttl_ms is nil" do
+    before {
+      @config[:partition_count_cache_ttl_ms] = nil
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { assert_predicate @contract_result, :success? }
+  end
+
+  describe "when partition_count_cache_ttl_ms is a positive integer" do
+    before {
+      @config[:partition_count_cache_ttl_ms] = 5_000
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { assert_predicate @contract_result, :success? }
+  end
+
+  describe "when partition_count_cache_ttl_ms is zero" do
+    before {
+      @config[:partition_count_cache_ttl_ms] = 0
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:partition_count_cache_ttl_ms] }
+  end
+
+  describe "when partition_count_cache_ttl_ms is negative" do
+    before {
+      @config[:partition_count_cache_ttl_ms] = -1
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:partition_count_cache_ttl_ms] }
+  end
+
+  describe "when partition_count_cache_ttl_ms is not an integer" do
+    before {
+      @config[:partition_count_cache_ttl_ms] = 5_000.5
+      @contract_result = described_class.new.call(@config)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:partition_count_cache_ttl_ms] }
   end
 end

@@ -149,6 +149,11 @@ module WaterDrop
     #   TCP connections in low-intensity scenarios. Minimum value is 30 seconds (30_000 ms) to
     #   prevent overly aggressive disconnections.
     setting :idle_disconnect_timeout, default: 0
+    # option [Integer, nil] Time-to-live (in ms) of the partition count cache used to route
+    #   messages with `partition_key`. When `nil` (default), the karafka-rdkafka value is left
+    #   untouched. Due to how rdkafka works, this setting is global for all the producers and the
+    #   last producer set up with a non-nil value wins.
+    setting :partition_count_cache_ttl_ms, default: nil
 
     # option [Karafka::Core::Monitoring::StatisticsDecorator] decorator instance used to compute
     #   deltas (_d) and freeze durations (_fd) on raw librdkafka statistics. The default is
@@ -230,6 +235,10 @@ module WaterDrop
         Contracts::Config.new.validate!(config.to_h, Errors::ConfigurationInvalidError)
 
         ::Rdkafka::Config.logger = config.logger
+
+        if config.partition_count_cache_ttl_ms
+          ::Rdkafka::Config.partition_count_cache_ttl_ms = config.partition_count_cache_ttl_ms
+        end
       end
 
       self
