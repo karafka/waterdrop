@@ -39,6 +39,10 @@ module WaterDrop
         val.is_a?(Integer) && (val.zero? || val >= 30_000)
       end
 
+      required(:partition_count_cache_ttl_ms) do |val|
+        val.nil? || (val.is_a?(Integer) && val.positive?)
+      end
+
       required(:statistics_decorator) { |val| val.respond_to?(:call) }
 
       nested(:oauth) do

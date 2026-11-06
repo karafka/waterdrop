@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 - [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
 
