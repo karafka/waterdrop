@@ -1,8 +1,8 @@
 # WaterDrop changelog
 
 ## Unreleased
-- [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
+- [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 
 ## 2.10.9 (2026-11-02)
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.

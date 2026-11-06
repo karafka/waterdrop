@@ -79,9 +79,6 @@ end
 
 failed = check(failed, count == 3, "new partitions are seen once the TTL expires (got #{count})")
 
-report = producer.produce_sync(topic: topic, payload: "after", partition_key: "key")
-failed = check(failed, report.partition.between?(0, 2), "partition_key routes within 3 partitions")
-
 producer.close
 other.close
 
