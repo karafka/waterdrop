@@ -9,7 +9,6 @@
 - [Maintenance] Declare `rake` in the `Gemfile`. It came only through `karafka-rdkafka`, which will stop depending on it for precompiled platform gems.
 - [Fix] Copy the buffer in `Producer#messages` (and so the `buffer.flushed_async`/`buffer.flushed_sync` payloads) under a dedicated lock, so reading it while other threads buffer no longer raises `ConcurrencyError` on JRuby.
 - [Fix] Re-buffer the undispatched rest of a `#flush` batch when a concurrent `#close` stops it, and expose the handles dispatched before the close as `ProducerClosedError#dispatched`.
-- [Fix] Copy the buffer in `Producer#messages` (and so the `buffer.flushed_async`/`buffer.flushed_sync` payloads) under a dedicated lock, so reading it while other threads buffer no longer raises `ConcurrencyError` on JRuby.
 
 ## 2.10.8 (2026-10-25)
 - [Maintenance] Document that a transaction timeout also raises `:fenced`, indistinguishable from a takeover, and when removing `:fenced` from `non_reloadable_errors` is safe.
