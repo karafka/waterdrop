@@ -47,6 +47,14 @@ describe_current do
       assert_raises(WaterDrop::Errors::ProducerNotTransactionalError) { @producer.transaction { nil } }
     end
 
+    it "expect to use the producer id as the error message" do
+      error = assert_raises(WaterDrop::Errors::ProducerNotTransactionalError) do
+        @producer.transaction { nil }
+      end
+
+      assert_equal(@producer.id, error.message)
+    end
+
     it { refute_predicate(@producer, :transactional?) }
     it { refute_predicate(@producer, :transaction?) }
   end
@@ -909,6 +917,14 @@ describe_current do
       assert_raises(WaterDrop::Errors::EarlyTransactionExitNotAllowedError) do
         @producer.transaction { break }
       end
+    end
+
+    it "expect to use the producer id as the error message" do
+      error = assert_raises(WaterDrop::Errors::EarlyTransactionExitNotAllowedError) do
+        @producer.transaction { break }
+      end
+
+      assert_equal(@producer.id, error.message)
     end
 
     it "expect to cancel dispatches" do

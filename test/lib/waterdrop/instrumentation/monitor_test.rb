@@ -15,6 +15,16 @@ describe_current do
         end
       end
 
+      it "expect to use the event id as the error message" do
+        @monitor.freeze_statistics_listeners!
+
+        error = assert_raises(WaterDrop::Errors::StatisticsNotEnabledError) do
+          @monitor.subscribe("statistics.emitted") { |_event| }
+        end
+
+        assert_equal("statistics.emitted", error.message)
+      end
+
       it "expect to allow subscribing to other events while frozen" do
         @monitor.freeze_statistics_listeners!
 

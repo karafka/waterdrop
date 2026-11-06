@@ -46,14 +46,7 @@ module WaterDrop
       #   `statistics.emitted` and this monitor has been frozen for statistics
       def subscribe(event_id_or_listener, &block)
         if @statistics_listeners_frozen && targets_statistics?(event_id_or_listener, block)
-          raise Errors::StatisticsNotEnabledError, <<~MSG.tr("\n", " ").strip
-            Cannot subscribe to `statistics.emitted` after the producer has been connected.
-            Statistics are disabled because no listener was subscribed before the underlying
-            rdkafka client was built, so librdkafka is not emitting statistics at all.
-            Subscribe your listener BEFORE the first producer use (before the underlying
-            client is lazily initialized), or explicitly keep statistics enabled by leaving
-            a listener in place at build time.
-          MSG
+          raise Errors::StatisticsNotEnabledError, STATISTICS_EVENT
         end
 
         super

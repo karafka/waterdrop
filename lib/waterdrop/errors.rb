@@ -63,7 +63,8 @@ module WaterDrop
     # graceful transaction aborting
     AbortTransaction = Class.new(BaseError)
 
-    # Do not use `break`, `return` or `throw` inside of the transaction blocks
+    # Do not use `break`, `return` or `throw` inside of the transaction blocks. If the `throw`
+    # comes from `Timeout.timeout(duration)`, pass an exception class as its second argument
     EarlyTransactionExitNotAllowedError = Class.new(BaseError)
 
     # Raised when an error occurs in the polling loop

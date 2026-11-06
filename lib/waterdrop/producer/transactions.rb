@@ -50,10 +50,7 @@ module WaterDrop
       #   handler.wait
       def transaction
         unless transactional?
-          raise(
-            Errors::ProducerNotTransactionalError,
-            "#{id} is not transactional"
-          )
+          raise(Errors::ProducerNotTransactionalError, id)
         end
 
         # This will safely allow us to support one operation transactions so a transactional
@@ -83,14 +80,7 @@ module WaterDrop
               raise(e)
             ensure
               if !e && !finished
-                raise(
-                  Errors::EarlyTransactionExitNotAllowedError,
-                  <<~ERROR_MSG.tr("\n", " ")
-                    Using `return`, `break` or `throw` to exit a transaction block is not allowed.
-                    If the `throw` came from `Timeout.timeout(duration)`, pass an exception class as
-                    a second argument so it doesn't use `throw` to abort its block.
-                  ERROR_MSG
-                )
+                raise(Errors::EarlyTransactionExitNotAllowedError, id)
               end
             end
 
