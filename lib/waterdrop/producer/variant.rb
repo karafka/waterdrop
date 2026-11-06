@@ -37,9 +37,10 @@ module WaterDrop
       # Contract to validate that variant alteration data is correct
       CONTRACT = Contracts::Variant.new
 
-      prepend ConfigBuffer
+      # Methods a non-default variant runs through its ConfigBuffer
+      CONFIG_BUFFERED = %i[buffer buffer_many].freeze
 
-      private_constant :EMPTY_HASH, :CONTRACT, :ConfigBuffer
+      private_constant :EMPTY_HASH, :CONTRACT, :CONFIG_BUFFERED, :ConfigBuffer
 
       attr_reader :max_wait_timeout, :topic_config, :producer
 
@@ -59,6 +60,7 @@ module WaterDrop
         @max_wait_timeout = max_wait_timeout
         @topic_config = topic_config
         @default = default
+        @buffer_target = default ? producer : ConfigBuffer.new(producer, topic_config)
         super(producer)
 
         CONTRACT.validate!(to_h, Errors::VariantInvalidError)
@@ -80,6 +82,8 @@ module WaterDrop
         Transactions
       ].each do |scope|
         scope.instance_methods(false).each do |method_name|
+          target = CONFIG_BUFFERED.include?(method_name) ? "@buffer_target" : "@producer"
+
           # We save and restore any variant already active for this producer in this fiber rather
           # than unconditionally deleting it. A variant-wrapped method that yields user code (e.g.
           # `transaction`) may wrap a nested same-producer variant call; without save/restore the
@@ -105,7 +109,7 @@ module WaterDrop
               prev = ref[@producer.id]
               ref[@producer.id] = self
 
-              @producer.#{method_name}(*args, &block)
+              #{target}.#{method_name}(*args, &block)
             ensure
               had ? (ref[@producer.id] = prev) : ref.delete(@producer.id)
             end
