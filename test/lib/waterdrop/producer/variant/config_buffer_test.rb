@@ -81,6 +81,18 @@ describe_current do
     assert_sent_with_acks(handles, @default_topic)
   end
 
+  it "expect buffer and buffer_many not to change the user messages" do
+    message = { topic: @variant_topic, payload: "v" }.freeze
+    messages = [message, { topic: @variant_topic, payload: "v" }.freeze].freeze
+
+    @acks_zero.buffer(message)
+    @acks_zero.buffer_many(messages)
+
+    refute(message.key?(:topic_config))
+    refute(messages.any? { |msg| msg.key?(:topic_config) })
+    assert_sent_with_acks_zero(@producer.flush_sync, @variant_topic)
+  end
+
   context "when topics are symbols" do
     before do
       buffer_both(
