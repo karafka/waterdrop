@@ -1,6 +1,7 @@
 # WaterDrop changelog
 
 ## Unreleased
+- [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 - [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
 
 ## 2.10.9 (2026-11-02)
