@@ -139,6 +139,20 @@ module WaterDrop
         # Do nothing if nothing to flush
         return data_for_dispatch if data_for_dispatch.empty?
 
+        # Messages buffered through a variant carry its topic config (see Variant#buffer). The rest
+        # were buffered through the producer and must not pick up the flushing variant's one.
+        unless current_variant.default?
+          default_topic_config = @default_variant.topic_config
+
+          data_for_dispatch = data_for_dispatch.map do |message|
+            next message if message.key?(:topic_config)
+
+            message = message.dup
+            message[:topic_config] = default_topic_config
+            message
+          end
+        end
+
         if sync
           produce_many_sync(data_for_dispatch, run_middleware: false)
         else

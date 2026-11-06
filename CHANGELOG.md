@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
+- [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
 
 ## 2.10.9 (2026-11-02)
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.
