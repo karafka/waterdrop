@@ -51,7 +51,7 @@ if registered
 end
 
 # A late subscription must raise, telling the user loud and clear that they missed the
-# window where statistics could have been enabled. The error message is the event id.
+# window where statistics could have been enabled.
 error = nil
 
 begin
