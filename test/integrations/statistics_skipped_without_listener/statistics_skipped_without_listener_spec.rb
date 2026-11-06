@@ -51,17 +51,23 @@ if registered
 end
 
 # A late subscription must raise, telling the user loud and clear that they missed the
-# window where statistics could have been enabled.
-raised = false
+# window where statistics could have been enabled. The error message is the event id.
+error = nil
 
 begin
   producer.monitor.subscribe("statistics.emitted") { |_event| }
-rescue WaterDrop::Errors::StatisticsNotEnabledError
-  raised = true
+rescue WaterDrop::Errors::StatisticsNotEnabledError => e
+  error = e
 end
 
-unless raised
+unless error
   puts "Expected late subscription to statistics.emitted to raise StatisticsNotEnabledError"
+  producer.close
+  exit 1
+end
+
+unless error.message == "statistics.emitted"
+  puts "Expected the error message to be statistics.emitted, got: #{error.message}"
   producer.close
   exit 1
 end
