@@ -268,8 +268,8 @@ module WaterDrop
     # Builds the variant alteration and returns it.
     #
     # @param args [Hash] variant configuration options
-    # @option args [Integer, nil] :max_wait_timeout alteration to max wait timeout or nil to use
-    #   default
+    # @option args [Integer] :max_wait_timeout alteration to max wait timeout. Omit it to use the
+    #   producer default
     # @option args [Hash] :topic_config extra topic configuration that can be altered
     # @option args [Boolean] :default is this a default variant or an altered one
     # @return [WaterDrop::Producer::Variant] variant proxy to use with alterations
