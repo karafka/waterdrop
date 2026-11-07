@@ -35,6 +35,14 @@ describe_current do
     end
   end
 
+  context "when trying to create variant with nil topic_config" do
+    it "expect to raise the correct error" do
+      assert_raises(@config_error) do
+        @producer.with(topic_config: nil)
+      end
+    end
+  end
+
   context "when trying to create variant with attribute that is not per topic" do
     it "expect to raise the correct error" do
       assert_raises(@config_error) do

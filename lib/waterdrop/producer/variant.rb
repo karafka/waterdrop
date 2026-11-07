@@ -45,8 +45,8 @@ module WaterDrop
       attr_reader :max_wait_timeout, :topic_config, :producer
 
       # @param producer [WaterDrop::Producer] producer for which we want to have a variant
-      # @param max_wait_timeout [Integer, nil] alteration to max wait timeout or nil to use
-      #   default
+      # @param max_wait_timeout [Integer] alteration to max wait timeout. Omit it to use the
+      #   producer default
       # @param topic_config [Hash] extra topic configuration that can be altered.
       # @param default [Boolean] is this a default variant or an altered one
       # @see https://karafka.io/docs/Librdkafka-Configuration/#topic-configuration-properties

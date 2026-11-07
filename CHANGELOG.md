@@ -5,7 +5,9 @@
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 - [Change] Use the producer id (`ProducerNotTransactionalError`, `EarlyTransactionExitNotAllowedError`) or the event id (`StatisticsNotEnabledError`) as the error message instead of a sentence.
 - [Maintenance] Document the errors raised by `ensure_active!` and `ensure_connection_pool_gem!`, and fix the `MessageInvalidError` namespace in `validate_message!` YARD.
+- [Maintenance] Document that `max_wait_timeout` is omitted, not set to `nil`, to use the producer default in `Producer#with` and `Variant#initialize` YARD.
 - [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
+- [Fix] Raise `VariantInvalidError` instead of `NoMethodError` when `Producer#with` gets a `topic_config` that is not a hash (e.g. `nil`).
 
 ## 2.10.9 (2026-11-02)
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.

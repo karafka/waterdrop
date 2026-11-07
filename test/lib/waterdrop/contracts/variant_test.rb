@@ -69,6 +69,28 @@ describe_current do
     it { refute_empty @contract_errors[:max_wait_timeout] }
   end
 
+  describe "when topic_config is nil" do
+    before {
+      @variant[:topic_config] = nil
+      @contract_result = described_class.new.call(@variant)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:topic_config] }
+  end
+
+  describe "when topic_config is not a hash" do
+    before {
+      @variant[:topic_config] = [[:acks, 1]]
+      @contract_result = described_class.new.call(@variant)
+      @contract_errors = @contract_result.errors.to_h
+    }
+
+    it { refute_predicate @contract_result, :success? }
+    it { refute_empty @contract_errors[:topic_config] }
+  end
+
   describe "when topic_config hash is present" do
     describe "when there is a non-symbol key setting" do
       before {

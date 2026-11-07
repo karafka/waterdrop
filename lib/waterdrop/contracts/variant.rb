@@ -34,6 +34,7 @@ module WaterDrop
 
       required(:default) { |val| BOOLEANS.include?(val) }
       required(:max_wait_timeout) { |val| val.is_a?(Numeric) && val >= 0 }
+      required(:topic_config) { |val| val.is_a?(Hash) }
 
       # Checks if all keys are symbols
       virtual do |config, errors|
