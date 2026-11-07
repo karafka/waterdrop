@@ -123,12 +123,13 @@ describe_current do
       before do
         @errors = []
         @occurred = []
+        mutex = Mutex.new
         @producer = build(:limited_producer)
 
         @producer.monitor.subscribe("error.occurred") do |event|
           # Avoid side effects
           event.payload[:error] = event[:error].dup
-          @occurred << event
+          mutex.synchronize { @occurred << event }
         end
 
         message = build(:valid_message, label: "test")
@@ -137,7 +138,7 @@ describe_current do
           Thread.new do
             @producer.produce_sync(message)
           rescue => e
-            @errors << e
+            mutex.synchronize { @errors << e }
           end
         end
 
