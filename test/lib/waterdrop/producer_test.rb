@@ -218,9 +218,10 @@ describe_current do
       before do
         @producer = build(:producer).tap(&:client)
         @producer.produce_sync(topic: @topic_name, payload: "test")
+        # librdkafka counts the message until its delivery report callback returns
+        wait_until { @producer.queue_size.zero? }
       end
 
-      # After sync produce completes, queue should be empty
       it { assert_equal(0, @producer.queue_size) }
     end
 
