@@ -25,7 +25,7 @@ module WaterDrop
       # @param message [Hash] `WaterDrop::Producer#produce_sync` message hash
       # @return [Dummy::Handle] fake delivery handle that can be materialized into a report
       def produce(message)
-        @mutex.synchronize do
+        @clients_mutex.synchronize do
           if @transaction_active
             @transaction_topics[message.fetch(:topic)] << message
             @transaction_messages << message
@@ -41,7 +41,7 @@ module WaterDrop
 
       # Starts the transaction on a given level
       def begin_transaction
-        @mutex.synchronize do
+        @clients_mutex.synchronize do
           @transaction_level += 1
           @transaction_active = true
         end
@@ -49,7 +49,7 @@ module WaterDrop
 
       # Finishes given level of transaction
       def commit_transaction
-        @mutex.synchronize do
+        @clients_mutex.synchronize do
           @transaction_level -= 1
 
           # Transfer transactional data on success
@@ -77,7 +77,7 @@ module WaterDrop
 
       # Aborts the transaction
       def abort_transaction
-        @mutex.synchronize do
+        @clients_mutex.synchronize do
           @transaction_level -= 1
           @transaction_topics.clear
           @transaction_messages.clear
@@ -88,12 +88,17 @@ module WaterDrop
       # Returns messages produced to a given topic
       # @param topic_name [String]
       def messages_for(topic_name)
-        @mutex.synchronize { @topics[topic_name] }
+        @clients_mutex.synchronize { @topics[topic_name] }
+      rescue ThreadError => e
+        # Mutex#synchronize raises in a signal trap, so there the buffer is read without the lock.
+        raise unless e.message == "can't be called from trap context"
+
+        @topics[topic_name]
       end
 
       # Clears internal buffer. Used in between specs so messages do not leak out
       def reset
-        @mutex.synchronize do
+        @clients_mutex.synchronize do
           @transaction_level = 0
           @transaction_active = false
           @transaction_topics.clear
