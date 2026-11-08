@@ -43,6 +43,7 @@ module WaterDrop
       # @return [Dummy] dummy instance
       def initialize(_producer)
         @counters = Hash.new { |h, k| h[k] = -1 }
+        @clients_mutex = Mutex.new
       end
 
       # "Produces" the message
@@ -54,7 +55,7 @@ module WaterDrop
       # @option _args [Hash, nil] :headers message headers
       # @return [Handle] delivery handle
       def produce(topic:, partition: 0, **_args)
-        Handle.new(topic.to_s, partition, @counters["#{topic}#{partition}"] += 1)
+        @clients_mutex.synchronize { build_handle(topic, partition) }
       end
 
       # Returns 0 as dummy client doesn't queue any real messages
@@ -75,6 +76,17 @@ module WaterDrop
       # @return [self] returns self for chaining cases
       def method_missing(*_args)
         self || super
+      end
+
+      private
+
+      # Assigns the next offset of the given topic partition. Caller must hold `@clients_mutex`.
+      #
+      # @param topic [String, Symbol] topic where we want to dispatch message
+      # @param partition [Integer] target partition
+      # @return [Handle] delivery handle
+      def build_handle(topic, partition)
+        Handle.new(topic.to_s, partition, @counters["#{topic}#{partition}"] += 1)
       end
     end
   end

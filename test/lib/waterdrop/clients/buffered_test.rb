@@ -45,6 +45,102 @@ describe_current do
     end
   end
 
+  describe "#produce from many threads" do
+    before do
+      @threads = Array.new(8) do |i|
+        Thread.new do
+          Array.new(500) do
+            @producer.produce_sync(topic: "threads#{i % 2}", payload: "x").offset
+          end
+        end
+      end
+      @offsets = @threads.flat_map(&:value)
+    end
+
+    it "expect to buffer every message" do
+      assert_equal(4_003, @client.messages.size)
+      assert_equal(2_000, @client.messages_for("threads0").size)
+      assert_equal(2_000, @client.messages_for("threads1").size)
+    end
+
+    it "expect to assign each offset once per topic partition" do
+      assert_equal(((0...2_000).to_a * 2).sort, @offsets.sort)
+    end
+  end
+
+  describe "#produce from many threads during transactions" do
+    before do
+      done = false
+      committer = Thread.new do
+        until done
+          @client.begin_transaction
+          @client.commit_transaction
+        end
+      end
+      producers = Array.new(4) do
+        Thread.new { 2_000.times { @client.produce(topic: "tx", payload: "x") } }
+      end
+      producers.each(&:join)
+      done = true
+      committer.join
+    end
+
+    it "expect to keep every message" do
+      assert_equal(8_003, @client.messages.size)
+      assert_equal(8_000, @client.messages_for("tx").size)
+    end
+  end
+
+  describe "#messages_for from a signal trap" do
+    before { @previous_trap = Signal.trap("USR1", "DEFAULT") }
+
+    after { Signal.trap("USR1", @previous_trap) }
+
+    it "expect it to return the buffer" do
+      client = @client
+      result = nil
+      Signal.trap("USR1") do
+        result = client.messages_for("foo")
+      rescue => e
+        result = e
+      end
+
+      Process.kill("USR1", Process.pid)
+      wait_until(timeout: 5, interval: 0.01) { result }
+
+      assert_equal(@foo_messages, result)
+    end
+  end
+
+  context "when a subclass guards calls with its own @mutex" do
+    before do
+      subclass = Class.new(described_class) do
+        def initialize(*args)
+          super
+          @mutex = Mutex.new
+        end
+
+        def produce(message)
+          @mutex.synchronize { super }
+        end
+
+        %i[begin_transaction commit_transaction abort_transaction reset].each do |name|
+          define_method(name) { @mutex.synchronize { super() } }
+        end
+      end
+
+      @client = subclass.new(@producer)
+    end
+
+    it "expect to produce and commit" do
+      @client.begin_transaction
+      @client.produce(topic: "foo", payload: "one")
+      @client.commit_transaction
+
+      assert_equal([{ topic: "foo", payload: "one" }], @client.messages)
+    end
+  end
+
   describe "#reset" do
     before { @client.reset }
 
