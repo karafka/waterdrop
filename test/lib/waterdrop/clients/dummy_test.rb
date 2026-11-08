@@ -109,6 +109,20 @@ describe_current do
     end
   end
 
+  describe "#produce from many threads" do
+    before do
+      @threads = Array.new(8) do
+        Thread.new do
+          Array.new(500) { @client.produce(topic: "test", partition: 0, payload: "1").wait.offset }
+        end
+      end
+    end
+
+    it "expect to assign each offset once" do
+      assert_equal((0...4_000).to_a, @threads.flat_map(&:value).sort)
+    end
+  end
+
   describe "#respond_to?" do
     it { assert_respond_to(@client, :test) }
   end

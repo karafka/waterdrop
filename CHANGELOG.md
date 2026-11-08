@@ -8,6 +8,7 @@
 - [Maintenance] Document that `max_wait_timeout` is omitted, not set to `nil`, to use the producer default in `Producer#with` and `Variant#initialize` YARD.
 - [Fix] Send a message buffered through a variant with that variant's `topic_config` at flush, and a message buffered through the producer with the default one, whichever producer or variant flushes the buffer.
 - [Fix] Raise `VariantInvalidError` instead of `NoMethodError` when `Producer#with` gets a `topic_config` that is not a hash (e.g. `nil`).
+- [Fix] Make `Clients::Buffered` and `Clients::Dummy` safe to produce to from many threads, so on JRuby no buffered message is lost and no offset is assigned twice.
 
 ## 2.10.9 (2026-11-02)
 - [Maintenance] Rename the positional topic name parameters of `Producer#partition_count`, `Clients::Buffered#messages_for` and the Datadog metrics listener to `topic_name`.

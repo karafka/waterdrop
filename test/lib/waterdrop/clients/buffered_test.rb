@@ -45,6 +45,29 @@ describe_current do
     end
   end
 
+  describe "#produce from many threads" do
+    before do
+      @threads = Array.new(8) do |i|
+        Thread.new do
+          Array.new(500) do
+            @producer.produce_sync(topic: "threads#{i % 2}", payload: "x").offset
+          end
+        end
+      end
+      @offsets = @threads.flat_map(&:value)
+    end
+
+    it "expect to buffer every message" do
+      assert_equal(4_003, @client.messages.size)
+      assert_equal(2_000, @client.messages_for("threads0").size)
+      assert_equal(2_000, @client.messages_for("threads1").size)
+    end
+
+    it "expect to assign each offset once per topic partition" do
+      assert_equal(((0...2_000).to_a * 2).sort, @offsets.sort)
+    end
+  end
+
   describe "#reset" do
     before { @client.reset }
 

@@ -3,6 +3,9 @@
 module WaterDrop
   module Clients
     # Client used to buffer messages that we send out in specs and other places.
+    #
+    # It is safe to produce from many threads. Readers (`#messages`, `#messages_for`) return the
+    # internal buffers, not copies, so read them once producing is done or `dup` them.
     class Buffered < Clients::Dummy
       attr_accessor :messages
 
@@ -22,38 +25,44 @@ module WaterDrop
       # @param message [Hash] `WaterDrop::Producer#produce_sync` message hash
       # @return [Dummy::Handle] fake delivery handle that can be materialized into a report
       def produce(message)
-        if @transaction_active
-          @transaction_topics[message.fetch(:topic)] << message
-          @transaction_messages << message
-        else
-          # We pre-validate the message payload, so topic is ensured to be present
-          @topics[message.fetch(:topic)] << message
-          @messages << message
-        end
+        @mutex.synchronize do
+          if @transaction_active
+            @transaction_topics[message.fetch(:topic)] << message
+            @transaction_messages << message
+          else
+            # We pre-validate the message payload, so topic is ensured to be present
+            @topics[message.fetch(:topic)] << message
+            @messages << message
+          end
 
-        super(**message.to_h)
+          build_handle(message.fetch(:topic), message.fetch(:partition, 0))
+        end
       end
 
       # Starts the transaction on a given level
       def begin_transaction
-        @transaction_level += 1
-        @transaction_active = true
+        @mutex.synchronize do
+          @transaction_level += 1
+          @transaction_active = true
+        end
       end
 
       # Finishes given level of transaction
       def commit_transaction
-        @transaction_level -= 1
+        @mutex.synchronize do
+          @transaction_level -= 1
 
-        # Transfer transactional data on success
-        @transaction_topics.each do |topic, messages|
-          @topics[topic] += messages
+          # Transfer transactional data on success
+          @transaction_topics.each do |topic, messages|
+            @topics[topic] += messages
+          end
+
+          @messages += @transaction_messages
+
+          @transaction_topics.clear
+          @transaction_messages.clear
+          @transaction_active = false
         end
-
-        @messages += @transaction_messages
-
-        @transaction_topics.clear
-        @transaction_messages.clear
-        @transaction_active = false
       end
 
       # Fakes storing the offset in a transactional fashion
@@ -68,26 +77,30 @@ module WaterDrop
 
       # Aborts the transaction
       def abort_transaction
-        @transaction_level -= 1
-        @transaction_topics.clear
-        @transaction_messages.clear
-        @transaction_active = false
+        @mutex.synchronize do
+          @transaction_level -= 1
+          @transaction_topics.clear
+          @transaction_messages.clear
+          @transaction_active = false
+        end
       end
 
       # Returns messages produced to a given topic
       # @param topic_name [String]
       def messages_for(topic_name)
-        @topics[topic_name]
+        @mutex.synchronize { @topics[topic_name] }
       end
 
       # Clears internal buffer. Used in between specs so messages do not leak out
       def reset
-        @transaction_level = 0
-        @transaction_active = false
-        @transaction_topics.clear
-        @transaction_messages.clear
-        @messages.clear
-        @topics.each_value(&:clear)
+        @mutex.synchronize do
+          @transaction_level = 0
+          @transaction_active = false
+          @transaction_topics.clear
+          @transaction_messages.clear
+          @messages.clear
+          @topics.each_value(&:clear)
+        end
       end
     end
   end
