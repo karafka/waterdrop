@@ -238,8 +238,8 @@ describe_current do
 
       Thread.new do
         sleep(0.05)
-        @state.close
         closed = true
+        @state.close
       end
 
       @state.wait_for_close
