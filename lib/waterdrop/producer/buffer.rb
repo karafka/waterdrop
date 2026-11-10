@@ -70,8 +70,10 @@ module WaterDrop
           "buffer.flushed_async",
           producer_id: id,
           messages: messages
-        ) { flush(false) }
+        ) { flush_buffer(false) }
       end
+
+      alias_method :flush, :flush_async
 
       # Flushes the internal buffer to Kafka in a sync way
       # @return [Array<Rdkafka::Producer::DeliveryHandle>] delivery handles for messages that were
@@ -81,8 +83,10 @@ module WaterDrop
           "buffer.flushed_sync",
           producer_id: id,
           messages: messages
-        ) { flush(true) }
+        ) { flush_buffer(true) }
       end
+
+      alias_method :flush!, :flush_sync
 
       private
 
@@ -94,7 +98,7 @@ module WaterDrop
       # @raise [Errors::ProducerClosedError] when the producer got closed during flushing
       # @note We use this method underneath to provide a different instrumentation for sync and
       #   async flushing within the public API
-      def flush(sync)
+      def flush_buffer(sync)
         fresh = nil
         requeued = nil
         data_for_dispatch = []

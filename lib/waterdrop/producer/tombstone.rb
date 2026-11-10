@@ -25,6 +25,8 @@ module WaterDrop
         produce_sync(prepare_tombstone(message))
       end
 
+      alias_method :tombstone!, :tombstone_sync
+
       # Produces a tombstone message to Kafka and does not wait for results
       #
       # @param message [Hash] hash with at least `:topic`, `:key`, and `:partition` keys.
@@ -36,6 +38,8 @@ module WaterDrop
       def tombstone_async(message)
         produce_async(prepare_tombstone(message))
       end
+
+      alias_method :tombstone, :tombstone_async
 
       # Produces many tombstone messages to Kafka and waits for them to be delivered
       #
@@ -49,6 +53,8 @@ module WaterDrop
         produce_many_sync(messages.map { |message| prepare_tombstone(message) })
       end
 
+      alias_method :tombstone_many!, :tombstone_many_sync
+
       # Produces many tombstone messages to Kafka and does not wait for them to be delivered
       #
       # @param messages [Array<Hash>] array of hashes, each with `:topic`, `:key`, and
@@ -60,6 +66,8 @@ module WaterDrop
       def tombstone_many_async(messages)
         produce_many_async(messages.map { |message| prepare_tombstone(message) })
       end
+
+      alias_method :tombstone_many, :tombstone_many_async
 
       private
 

@@ -196,4 +196,28 @@ describe_current do
       end
     end
   end
+
+  context "when dispatching through the sync/async aliases of a variant" do
+    before do
+      @variant = @producer.with(max_wait_timeout: 1)
+    end
+
+    it "expect produce! to use the variant settings" do
+      assert_raises(@produce_error) do
+        @variant.produce!(topic: @topic, payload: "")
+      end
+    end
+
+    it "expect produce to run with the variant active" do
+      seen = nil
+      @producer.middleware.append(lambda do |message|
+        seen = @producer.current_variant
+        message
+      end)
+
+      @variant.produce(topic: @topic, payload: "")
+
+      assert_same(@variant, seen)
+    end
+  end
 end

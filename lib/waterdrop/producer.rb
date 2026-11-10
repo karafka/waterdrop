@@ -452,7 +452,7 @@ module WaterDrop
             # `error.occurred` instrumentation emitted by the dispatch itself, so swallowing the
             # re-raised wrapper here does not hide it.
             begin
-              flush(true)
+              flush_buffer(true)
             rescue Errors::ProduceError
               nil
             end
@@ -619,7 +619,7 @@ module WaterDrop
     #
     # For a transactional producer we wrap the whole dispatch (including the operations-counter
     # bookkeeping) in `transaction`, so `@transaction_mutex` is acquired BEFORE
-    # `@operations_in_progress` is incremented. This makes `#produce` acquire locks in the same
+    # `@operations_in_progress` is incremented. This makes `#dispatch` acquire locks in the same
     # order as `#close` (`@transaction_mutex` -> `@operating_mutex` -> operations counter) and
     # removes a lock-order inversion: without it, a dispatch that had already counted itself could
     # block forever on `@transaction_mutex` held by a concurrent `#close` that was itself waiting
@@ -632,7 +632,7 @@ module WaterDrop
     #   we surface in the `message.*` queue-full error type. Passed explicitly by each public entry
     #   point so we never have to walk the call stack to recover it (the number of internal frames
     #   varies because the transactional path wraps the dispatch in a `transaction`).
-    def produce(message, label)
+    def dispatch(message, label)
       if transactional? && !@transaction_mutex.owned?
         transaction { produce_to_client(message, label) }
       else
@@ -715,7 +715,7 @@ module WaterDrop
     rescue SUPPORTED_FLOW_ERRORS.first => e
       # Check if this is a fatal error on an idempotent producer and we should reload.
       #
-      # We must never reload while closing. During `#close` the final `flush` runs while this
+      # We must never reload while closing. During `#close` the final `flush_buffer` runs while this
       # thread already owns `@operating_mutex`; the idempotent reload re-acquires that same mutex,
       # which Ruby rejects with `ThreadError: deadlock; recursive locking`, and it would also try to
       # rebuild the very client we are tearing down. In that case we let the error propagate so
