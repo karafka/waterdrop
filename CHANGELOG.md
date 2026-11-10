@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## v2.10.10 (2026-11-10)
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
 - [Change] Require `karafka-rdkafka` `>=` `0.32.0`.
 - [Change] Use the producer id (`ProducerNotTransactionalError`, `EarlyTransactionExitNotAllowedError`) or the event id (`StatisticsNotEnabledError`) as the error message instead of a sentence.
