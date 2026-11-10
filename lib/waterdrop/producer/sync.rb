@@ -24,7 +24,7 @@ module WaterDrop
           producer_id: id,
           message: message
         ) do
-          wait(produce(message, "produce_sync"))
+          wait(dispatch(message, "produce_sync"))
         end
       rescue *SUPPORTED_FLOW_ERRORS => e
         # We use this syntax here because we want to preserve the original `#cause` when we
@@ -43,6 +43,8 @@ module WaterDrop
           raise ex
         end
       end
+
+      alias_method :produce!, :produce_sync
 
       # Produces many messages to Kafka and waits for them to be delivered
       #
@@ -89,7 +91,7 @@ module WaterDrop
           begin
             with_transaction_if_transactional do
               messages.each do |message|
-                dispatched << produce(message, "produce_many_sync")
+                dispatched << dispatch(message, "produce_many_sync")
               end
             end
           rescue *SUPPORTED_FLOW_ERRORS => e
@@ -133,6 +135,8 @@ module WaterDrop
       rescue Errors::ProducerClosedError => e
         raise Errors::ProducerClosedError.new(e.message, dispatched: dispatched)
       end
+
+      alias_method :produce_many!, :produce_many_sync
     end
   end
 end

@@ -557,4 +557,33 @@ describe_current do
       end
     end
   end
+
+  describe "#produce" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("message.produced_async") { |event| @events << event }
+    end
+
+    it "expect to produce async and return a delivery handle" do
+      assert_kind_of(Rdkafka::Producer::DeliveryHandle, @producer.produce(build(:valid_message)))
+      assert_equal(1, @events.size)
+    end
+
+    it { assert_raises(WaterDrop::Errors::MessageInvalidError) { @producer.produce(build(:invalid_message)) } }
+  end
+
+  describe "#produce_many" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("messages.produced_async") { |event| @events << event }
+    end
+
+    it "expect to produce async and return delivery handles" do
+      handles = @producer.produce_many(Array.new(2) { build(:valid_message) })
+
+      assert_equal(2, handles.size)
+      handles.each { |handle| assert_kind_of(Rdkafka::Producer::DeliveryHandle, handle) }
+      assert_equal(1, @events.size)
+    end
+  end
 end

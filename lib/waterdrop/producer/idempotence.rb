@@ -62,7 +62,7 @@ module WaterDrop
           # them, but a thread that waited here may arrive after another has already reloaded -
           # resetting @client to nil and moving the producer to the configured state. Running
           # reload! again would call methods on a nil @client and raise NoMethodError, so we bail
-          # out and let #produce retry against the freshly reloaded client. This mirrors the
+          # out and let #produce_to_client retry against the freshly reloaded client. This mirrors the
           # `return if @status.configured?` guard on the transactional reload path.
           next if @client.nil? || @status.configured?
 

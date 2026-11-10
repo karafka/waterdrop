@@ -154,4 +154,64 @@ describe_current do
       end
     end
   end
+
+  describe "#tombstone!" do
+    it "expect to return a delivery report" do
+      result = @producer.tombstone!(topic: @topic_name, key: "user-123", partition: 0)
+
+      assert_kind_of(Rdkafka::Producer::DeliveryReport, result)
+    end
+  end
+
+  describe "#tombstone" do
+    it "expect to return a delivery handle" do
+      result = @producer.tombstone(topic: @topic_name, key: "user-123", partition: 0)
+
+      assert_kind_of(Rdkafka::Producer::DeliveryHandle, result)
+    end
+
+    it "expect to raise MessageInvalidError without a key" do
+      assert_raises(WaterDrop::Errors::MessageInvalidError) do
+        @producer.tombstone(topic: @topic_name, partition: 0)
+      end
+    end
+  end
+
+  describe "#tombstone_many!" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("messages.produced_sync") { |event| @events << event }
+    end
+
+    it "expect to produce sync and return delivery handles" do
+      messages = [
+        { topic: @topic_name, key: "k1", partition: 0 },
+        { topic: @topic_name, key: "k2", partition: 0 }
+      ]
+
+      results = @producer.tombstone_many!(messages)
+
+      assert_equal(2, results.size)
+      assert_equal(1, @events.size)
+    end
+  end
+
+  describe "#tombstone_many" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("messages.produced_async") { |event| @events << event }
+    end
+
+    it "expect to produce async and return delivery handles" do
+      messages = [
+        { topic: @topic_name, key: "k1", partition: 0 },
+        { topic: @topic_name, key: "k2", partition: 0 }
+      ]
+
+      results = @producer.tombstone_many(messages)
+
+      assert_equal(2, results.size)
+      assert_equal(1, @events.size)
+    end
+  end
 end

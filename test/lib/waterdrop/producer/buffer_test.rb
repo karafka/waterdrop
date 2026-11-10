@@ -573,4 +573,32 @@ describe WaterDrop::Producer::Buffer do
       end
     end
   end
+
+  describe "#flush" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("buffer.flushed_async") { |event| @events << event }
+      @producer.buffer(build(:valid_message))
+    end
+
+    it "expect to flush async" do
+      assert_kind_of(Rdkafka::Producer::DeliveryHandle, @producer.flush[0])
+      assert_empty(@producer.messages)
+      assert_equal(1, @events.size)
+    end
+  end
+
+  describe "#flush!" do
+    before do
+      @events = []
+      @producer.monitor.subscribe("buffer.flushed_sync") { |event| @events << event }
+      @producer.buffer(build(:valid_message))
+    end
+
+    it "expect to flush sync" do
+      assert_kind_of(Rdkafka::Producer::DeliveryHandle, @producer.flush![0])
+      assert_empty(@producer.messages)
+      assert_equal(1, @events.size)
+    end
+  end
 end
