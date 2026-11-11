@@ -10,7 +10,9 @@ module WaterDrop
         return true if transactional?
         return @idempotent unless @idempotent.nil?
 
-        @idempotent = config.kafka.to_h.fetch(:"enable.idempotence", false)
+        @idempotent = ::Karafka::Core::Helpers::KafkaConfig.enabled?(
+          config.kafka.to_h[:"enable.idempotence"]
+        )
       end
 
       # Checks if the given error should trigger an idempotent producer reload

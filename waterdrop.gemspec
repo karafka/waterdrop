@@ -16,7 +16,7 @@ Gem::Specification.new do |spec|
   spec.description = spec.summary
   spec.licenses = %w[LGPL-3.0-only Commercial]
 
-  spec.add_dependency "karafka-core", ">= 2.5.12", "< 3.0.0"
+  spec.add_dependency "karafka-core", ">= 2.6.8", "< 3.0.0"
   spec.add_dependency "karafka-rdkafka", ">= 0.32.0"
   spec.add_dependency "zeitwerk", "~> 2.3"
 

@@ -2,7 +2,9 @@
 
 ## Unreleased
 - [Feature] Add the `produce` / `produce!`, `produce_many` / `produce_many!`, `tombstone` / `tombstone!`, `tombstone_many` / `tombstone_many!` and `flush` / `flush!` aliases of the `_async` / `_sync` methods.
+- [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Maintenance] Rename the private `Producer#produce` and `Buffer#flush` to `#dispatch` and `#flush_buffer`, freeing the names for the aliases.
+- [Fix] Treat `enable.idempotence` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now makes `Producer#idempotent?` return `false`; it returns a Boolean.
 
 ## v2.10.10 (2026-11-10)
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
