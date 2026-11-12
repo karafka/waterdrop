@@ -88,12 +88,10 @@ describe_current do
     describe "when there is a message that was not successfully delivered async" do
       before do
         @changed = []
-        # A 250-char name exceeds Kafka's hard 249-char limit so the broker always rejects
-        # it via the delivery callback. Plain lowercase letters pass rdkafka's local topic
-        # validation, so the produce is always queued (never raises inline). Using special
+        # A 250-char name exceeds Kafka's hard 249-char limit so the broker always rejects it.
+        # Plain lowercase letters and hex pass rdkafka's local topic validation. Using special
         # characters like "$%^&*" is unreliable because newer rdkafka versions reject them
         # locally, swallowing the error silently and never generating a delivery callback.
-        @invalid_topic = "a" * 250
 
         # Bound how long librdkafka may hold the undeliverable message before it fails it and
         # fires the delivery callback. With WaterDrop's 150s default `message.timeout.ms`, the
@@ -115,19 +113,26 @@ describe_current do
           @changed << event
         end
 
-        100.times do
-          # We force it to bypass the validations, so we trigger an error on delivery
-          # otherwise we would be stopped by WaterDrop itself
-          producer.send(:client).produce(topic: @invalid_topic, payload: "1")
+        client = producer.send(:client)
+        handle = nil
+
+        # If the broker rejection of the topic metadata lands between the topic handle creation
+        # and the produce call, librdkafka rejects the produce inline (`unknown_topic`) and no
+        # delivery report is ever emitted. That topic stays rejected for this producer, so we
+        # retry with a new invalid topic until the message goes through the delivery path.
+        # We use the client directly to bypass the WaterDrop validations.
+        10.times do
+          @invalid_topic = "a" * 238 + SecureRandom.hex(6)
+          handle = client.produce(topic: @invalid_topic, payload: "1")
+          break
         rescue Rdkafka::RdkafkaError
           nil
         end
 
+        refute_nil handle, "Every produce attempt was rejected inline"
+
         # Comfortably above `message.timeout.ms` so the guaranteed failure has landed; only the
-        # genuine "no event ever" case spends the full deadline before failing. The delivery
-        # callback fires from the fd poller in fiber mode, and on a loaded CI runner that poll can
-        # lag well past a tight bound - the async path has no way to drive delivery itself without
-        # racing the poller, so we give the observation a generous budget to keep it from flaking.
+        # genuine "no event ever" case spends the full deadline before failing.
         wait_for_events(@changed, count: 1, timeout: 60)
         @event = @changed.last
 
