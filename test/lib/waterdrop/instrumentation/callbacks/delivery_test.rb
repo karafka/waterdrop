@@ -88,11 +88,6 @@ describe_current do
     describe "when there is a message that was not successfully delivered async" do
       before do
         @changed = []
-        # A 250-char name exceeds Kafka's hard 249-char limit so the broker always rejects it.
-        # Plain lowercase letters and hex pass rdkafka's local topic validation. Using special
-        # characters like "$%^&*" is unreliable because newer rdkafka versions reject them
-        # locally, swallowing the error silently and never generating a delivery callback.
-
         # Bound how long librdkafka may hold the undeliverable message before it fails it and
         # fires the delivery callback. With WaterDrop's 150s default `message.timeout.ms`, the
         # only thing that fails the message inside the wait window is the broker's metadata
@@ -113,15 +108,16 @@ describe_current do
           @changed << event
         end
 
-        client = producer.send(:client)
+        # We use the client directly because `produce_async` itself emits `error.occurred` on an
+        # inline reject, so the wait below would pass without any delivery report.
+        client = producer.client
         handle = nil
 
-        # If the broker rejection of the topic metadata lands between the topic handle creation
-        # and the produce call, librdkafka rejects the produce inline (`unknown_topic`) and no
-        # delivery report is ever emitted. That topic stays rejected for this producer, so we
-        # retry with a new invalid topic until the message goes through the delivery path.
-        # We use the client directly to bypass the WaterDrop validations.
         10.times do
+          # A 250-char name exceeds Kafka's hard 249-char limit so the broker always rejects it.
+          # Plain lowercase letters and hex pass rdkafka's local topic validation. Using special
+          # characters like "$%^&*" is unreliable because newer rdkafka versions reject them
+          # locally, swallowing the error silently and never generating a delivery callback.
           @invalid_topic = "a" * 238 + SecureRandom.hex(6)
           handle = client.produce(topic: @invalid_topic, payload: "1")
           break
