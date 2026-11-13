@@ -7,6 +7,7 @@ describe_current do
     @topic_name = generate_topic
     @producer = WaterDrop::Producer.new do |config|
       config.deliver = false
+      config.client_class = described_class
       config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
     end
     @all_messages = [
@@ -21,8 +22,9 @@ describe_current do
     @bar_messages = [
       { payload: "one", topic: "bar" }
     ]
-    @client = described_class.new(@producer)
-    @producer.stubs(:client).returns(@client)
+    # The real client, not a Mocha stub: the "from many threads" tests call it concurrently and
+    # Mocha does not record concurrent calls safely on JRuby (ConcurrencyError)
+    @client = @producer.client
     @producer.produce_sync(payload: "one", topic: "foo")
     @producer.produce_sync(payload: "one", topic: "bar")
     @producer.produce_sync(payload: "two", topic: "foo")

@@ -20,7 +20,8 @@ jobs:
     uses: ./.github/workflows/ci_changes.yml
 
   tests:
-    timeout-minutes: 15
+    # JRuby runs each integration scenario in a new JVM, which makes that step much slower
+    timeout-minutes: ${{ startsWith(matrix.ruby, 'jruby') && 45 || 15 }}
     runs-on: ubuntu-latest
     needs: changes
     if: needs.changes.outputs.code == 'true'
@@ -31,6 +32,7 @@ jobs:
           - '4.0'
           - '3.4'
           - '3.3'
+          - 'jruby-10.0'
         polling_mode:
           - 'thread'
           - 'fiber'
@@ -53,7 +55,9 @@ jobs:
         uses: ruby/setup-ruby@de492cf36cbab201753d720ce4f4e336cd688c94 # v1.336.0
         with:
           ruby-version: ${{matrix.ruby}}
-          bundler-cache: true
+          # Gemfile.lock has only the ruby platform, so the frozen install of the cache fails on
+          # JRuby (json needs its java variant); the Bundle install step below resolves it instead
+          bundler-cache: ${{ !startsWith(matrix.ruby, 'jruby') }}
           bundler: 'latest'
           self-hosted: false
 
@@ -90,7 +94,11 @@ jobs:
         env:
           THREAD_POLLING: ${{ matrix.polling_mode == 'thread' && 'true' || 'false' }}
         # Exclude tests that require separate infrastructure (run in dedicated CI jobs)
-        run: ./bin/integrations --exclude oauth_token_refresh --exclude produce_many_sync_repeated_sasl
+        # On JRuby also exclude the scenarios that need fork (not available) and
+        # async_fiber_yielding (produce_sync does not yield to the Async scheduler on JRuby)
+        run: >-
+          ./bin/integrations --exclude oauth_token_refresh --exclude produce_many_sync_repeated_sasl
+          ${{ startsWith(matrix.ruby, 'jruby') && '--exclude fork --exclude async_fiber_yielding' || '' }}
 
       - name: Upload coverage artifact
         if: matrix.coverage == 'true' && always()
