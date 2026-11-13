@@ -2,6 +2,8 @@
 
 ## Unreleased
 - [Feature] Add the `produce` / `produce!`, `produce_many` / `produce_many!`, `tombstone` / `tombstone!`, `tombstone_many` / `tombstone_many!` and `flush` / `flush!` aliases of the `_async` / `_sync` methods.
+- [Change] Require `karafka-core` `>=` `2.6.8`.
+- [Fix] Treat `enable.idempotence` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now makes `Producer#idempotent?` return `false`; it returns a Boolean.
 - [Fix] Wrap the `Rdkafka::Config::ConfigError` raised at dispatch for an invalid variant `topic_config` in `ProduceError` / `ProduceManyError` and instrument it as `error.occurred`, like the other produce errors.
 
 ## v2.10.10 (2026-11-10)

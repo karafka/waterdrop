@@ -41,6 +41,32 @@ describe_current do
       end
     end
 
+    context "when producer has enable.idempotence set to \"true\"" do
+      before do
+        @producer = build(
+          :producer,
+          kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS, "enable.idempotence": "true" }
+        )
+      end
+
+      it "expect to return true" do
+        assert_same(true, @producer.idempotent?)
+      end
+    end
+
+    context "when producer has enable.idempotence set to \"false\"" do
+      before do
+        @producer = build(
+          :producer,
+          kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS, "enable.idempotence": "false" }
+        )
+      end
+
+      it "expect to return false" do
+        assert_same(false, @producer.idempotent?)
+      end
+    end
+
     context "when producer does not have enable.idempotence configured" do
       before do
         @producer = build(:producer)
