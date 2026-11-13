@@ -2,6 +2,7 @@
 
 ## Unreleased
 - [Feature] Add the `produce` / `produce!`, `produce_many` / `produce_many!`, `tombstone` / `tombstone!`, `tombstone_many` / `tombstone_many!` and `flush` / `flush!` aliases of the `_async` / `_sync` methods.
+- [Fix] Wrap the `Rdkafka::Config::ConfigError` raised at dispatch for an invalid variant `topic_config` in `ProduceError` / `ProduceManyError` and instrument it as `error.occurred`, like the other produce errors.
 
 ## v2.10.10 (2026-11-10)
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).

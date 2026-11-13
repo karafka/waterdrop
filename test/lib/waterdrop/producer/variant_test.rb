@@ -57,12 +57,89 @@ describe_current do
     end
 
     it "expect to raise error" do
-      assert_raises(@rd_config_error) { @variant.produce_sync(topic: "test", payload: "") }
+      error = assert_raises(@produce_error) { @variant.produce_sync(topic: "test", payload: "") }
+      assert_kind_of(@rd_config_error, error.cause)
     end
 
     it "expect to allow the original one" do
       _ = @variant
       @producer.produce_sync(topic: @topic, payload: "")
+    end
+  end
+
+  context "when having variant producer with an invalid acks value" do
+    before do
+      @variant = @producer.with(topic_config: { acks: "bogus" })
+      @message = { topic: @topic, payload: "" }
+      @events = []
+      @producer.monitor.subscribe("error.occurred") { |event| @events << event }
+    end
+
+    it "expect to wrap the error in produce_sync and instrument it once" do
+      error = assert_raises(@produce_error) { @variant.produce_sync(@message) }
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_equal(1, @events.size)
+      assert_same(error, @events.first[:error])
+      assert_equal("message.produce_sync", @events.first[:type])
+    end
+
+    it "expect to wrap the error in produce_async and instrument it once" do
+      error = assert_raises(@produce_error) { @variant.produce_async(@message) }
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_equal(1, @events.size)
+      assert_same(error, @events.first[:error])
+      assert_equal("message.produce_async", @events.first[:type])
+    end
+
+    it "expect to wrap the error in produce_many_sync and instrument it once" do
+      error = assert_raises(WaterDrop::Errors::ProduceManyError) do
+        @variant.produce_many_sync([@message])
+      end
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_empty(error.dispatched)
+      assert_equal(1, @events.size)
+      assert_same(error, @events.first[:error])
+      assert_equal("messages.produce_many_sync", @events.first[:type])
+    end
+
+    it "expect to wrap the error in produce_many_async and instrument it once" do
+      error = assert_raises(WaterDrop::Errors::ProduceManyError) do
+        @variant.produce_many_async([@message])
+      end
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_empty(error.dispatched)
+      assert_equal(1, @events.size)
+      assert_same(error, @events.first[:error])
+      assert_equal("messages.produce_many_async", @events.first[:type])
+    end
+
+    it "expect flush_sync to raise produce_many error and keep the message buffered" do
+      @variant.buffer(@message)
+
+      error = assert_raises(WaterDrop::Errors::ProduceManyError) { @variant.flush_sync }
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_equal(1, @events.size)
+      assert_equal(1, @producer.messages.size)
+    end
+
+    it "expect the base producer to keep producing to that topic" do
+      assert_raises(@produce_error) { @variant.produce_sync(@message) }
+
+      assert_equal(0, @producer.produce_sync(@message).offset)
+    end
+
+    it "expect close not to raise and to close the producer with the message buffered" do
+      @variant.buffer(@message)
+      @producer.close
+
+      assert_predicate(@producer.status, :closed?)
+      assert_equal(1, @events.size)
+      assert_kind_of(@rd_config_error, @events.first[:error].cause)
     end
   end
 
