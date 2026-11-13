@@ -132,6 +132,37 @@ describe_current do
 
       assert_equal(0, @producer.produce_sync(@message).offset)
     end
+
+    it "expect close not to raise and to close the producer with the message buffered" do
+      @variant.buffer(@message)
+      @producer.close
+
+      assert_predicate(@producer.status, :closed?)
+      assert_equal(1, @events.size)
+      assert_kind_of(@rd_config_error, @events.first[:error].cause)
+    end
+  end
+
+  context "when the producer itself has an invalid kafka config" do
+    before do
+      @producer = build(
+        :producer,
+        kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS, "request.required.acks": "bogus" }
+      )
+      @message = { topic: @topic, payload: "" }
+      @events = []
+      @producer.monitor.subscribe("error.occurred") { |event| @events << event }
+    end
+
+    it "expect produce_sync to raise the config error as it is" do
+      assert_raises(@rd_config_error) { @producer.produce_sync(@message) }
+      assert_empty(@events)
+    end
+
+    it "expect produce_many_async to raise the config error as it is" do
+      assert_raises(@rd_config_error) { @producer.produce_many_async([@message]) }
+      assert_empty(@events)
+    end
   end
 
   context "when having variant producer with a valid value" do

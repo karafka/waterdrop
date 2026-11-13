@@ -17,11 +17,15 @@ module WaterDrop
     # Local storage for given thread waterdrop client references for variants
     ::Fiber.send(:attr_accessor, :waterdrop_clients)
 
+    # Marks an `Rdkafka::Config::ConfigError` raised by a dispatch (invalid variant `topic_config`).
+    # One raised when building the client (invalid `kafka` config) is not marked and not re-bound.
+    DispatchConfigError = Module.new
+
     # Which of the inline flow errors do we want to intercept and re-bind
     SUPPORTED_FLOW_ERRORS = [
       Rdkafka::RdkafkaError,
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError,
-      Rdkafka::Config::ConfigError
+      DispatchConfigError
     ].freeze
 
     # Empty hash to save on memory allocations
@@ -31,7 +35,7 @@ module WaterDrop
     EMPTY_ARRAY = [].freeze
 
     private_constant(
-      :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
+      :DispatchConfigError, :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
     )
 
     def_delegators :config
@@ -674,10 +678,19 @@ module WaterDrop
         message[:topic_config] ||= variant.topic_config
       end
 
-      result = if transactional?
-        transaction { client.produce(**message) }
-      else
-        client.produce(**message)
+      # Built before the rescue below, so an invalid `kafka` config raises as it is
+      rd_client = client
+
+      result = begin
+        if transactional?
+          transaction { client.produce(**message) }
+        else
+          rd_client.produce(**message)
+        end
+      rescue Rdkafka::Config::ConfigError => e
+        e.extend(DispatchConfigError)
+
+        raise
       end
 
       # Remember the first delivery handle of the current transaction. Aborting while the very first

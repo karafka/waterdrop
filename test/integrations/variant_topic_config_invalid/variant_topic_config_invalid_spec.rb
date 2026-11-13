@@ -5,7 +5,9 @@
 # A variant with an invalid `topic_config` value fails at its first dispatch with
 # `WaterDrop::Errors::ProduceError` (sync and async) or `WaterDrop::Errors::ProduceManyError`
 # (many), caused by `Rdkafka::Config::ConfigError`. Each failure emits one `error.occurred`
-# event, and the producer keeps delivering to that topic.
+# event, and the producer keeps delivering to that topic. `close` with such a message buffered
+# closes the producer. An invalid producer `kafka` config raises `Rdkafka::Config::ConfigError`
+# itself, with no `error.occurred` event.
 
 require "waterdrop"
 
@@ -72,6 +74,28 @@ failed = check(
   "producer delivers to the topic"
 )
 
-producer.close
+events.clear
+variant.buffer(message)
+
+failed = check(failed, raised_error { producer.close }.nil?, "close with the message buffered does not raise")
+failed = check(failed, producer.status.closed?, "close closes the producer")
+failed = check(failed, events.size == 1, "close emits one error.occurred event")
+
+invalid = WaterDrop::Producer.new do |config|
+  config.deliver = true
+  config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS, acks: "bogus" }
+end
+
+invalid_events = []
+invalid.monitor.subscribe("error.occurred") { |event| invalid_events << event }
+
+failed = check(
+  failed,
+  raised_error { invalid.produce_sync(message) }.instance_of?(Rdkafka::Config::ConfigError),
+  "invalid producer kafka config raises Rdkafka::Config::ConfigError"
+)
+failed = check(failed, invalid_events.empty?, "invalid producer kafka config emits no error.occurred")
+
+invalid.close
 
 exit(failed ? 1 : 0)
