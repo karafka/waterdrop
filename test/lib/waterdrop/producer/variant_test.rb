@@ -117,6 +117,16 @@ describe_current do
       assert_equal("messages.produce_many_async", @events.first[:type])
     end
 
+    it "expect flush_sync to raise produce_many error and keep the message buffered" do
+      @variant.buffer(@message)
+
+      error = assert_raises(WaterDrop::Errors::ProduceManyError) { @variant.flush_sync }
+
+      assert_kind_of(@rd_config_error, error.cause)
+      assert_equal(1, @events.size)
+      assert_equal(1, @producer.messages.size)
+    end
+
     it "expect the base producer to keep producing to that topic" do
       assert_raises(@produce_error) { @variant.produce_sync(@message) }
 
