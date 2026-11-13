@@ -15,7 +15,7 @@ It:
  - Supports producing to multiple clusters
  - Supports multiple delivery policies
  - Supports per-topic configuration alterations (variants)
- - Works with [async](https://github.com/socketry/async) gems ecosystem
+ - Works with [async](https://github.com/socketry/async) gems ecosystem (on JRuby 10.0, `#produce_sync` and `DeliveryHandle#wait` block all fibers of the Async reactor until delivery, because JRuby 10.0 does not hand these waits to the fiber scheduler; see [JRuby Support](https://karafka.io/docs/Infrastructure-JRuby-Support/#async-and-fiber-scheduler))
  - Works with Kafka `1.0+` and Ruby `3.3+`
  - Works with and without Karafka
 
