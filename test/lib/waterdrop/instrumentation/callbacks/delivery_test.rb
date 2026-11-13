@@ -149,7 +149,7 @@ describe_current do
           @changed << event
         end
 
-        client = @producer.send(:client)
+        client = @producer.client
         handle = nil
 
         # If the broker rejection of the topic metadata lands between the topic handle creation
