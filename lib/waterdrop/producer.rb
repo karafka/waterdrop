@@ -20,7 +20,8 @@ module WaterDrop
     # Which of the inline flow errors do we want to intercept and re-bind
     SUPPORTED_FLOW_ERRORS = [
       Rdkafka::RdkafkaError,
-      Rdkafka::Producer::DeliveryHandle::WaitTimeoutError
+      Rdkafka::Producer::DeliveryHandle::WaitTimeoutError,
+      Rdkafka::Config::ConfigError
     ].freeze
 
     # Empty hash to save on memory allocations
