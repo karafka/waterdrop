@@ -888,6 +888,28 @@ describe_current do
     end
   end
 
+  describe "producer with an invalid kafka config" do
+    before do
+      @producer = build(
+        :producer,
+        kafka: { "bootstrap.servers": BOOTSTRAP_SERVERS, "request.required.acks": "bogus" }
+      )
+      @message = { topic: @topic_name, payload: "" }
+      @events = []
+      @producer.monitor.subscribe("error.occurred") { |event| @events << event }
+    end
+
+    it "expect produce_sync to raise the config error as it is" do
+      assert_raises(Rdkafka::Config::ConfigError) { @producer.produce_sync(@message) }
+      assert_empty(@events)
+    end
+
+    it "expect produce_many_async to raise the config error as it is" do
+      assert_raises(Rdkafka::Config::ConfigError) { @producer.produce_many_async([@message]) }
+      assert_empty(@events)
+    end
+  end
+
   describe "fork integration spec" do
     before do
       @producer = build(:producer)

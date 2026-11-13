@@ -96,7 +96,7 @@ describe_current do
         # short `message.timeout.ms` guarantees the error.occurred event fires within that bound
         # regardless of metadata timing; on a healthy run the broker still rejects first, so we
         # keep exercising the real rejection path and only fall back to the timeout when slow.
-        producer = build(
+        @async_producer = build(
           :producer,
           kafka: {
             "bootstrap.servers": BOOTSTRAP_SERVERS,
@@ -104,13 +104,13 @@ describe_current do
           }
         )
 
-        producer.monitor.subscribe("error.occurred") do |event|
+        @async_producer.monitor.subscribe("error.occurred") do |event|
           @changed << event
         end
 
         # We use the client directly because `produce_async` itself emits `error.occurred` on an
         # inline reject, so the wait below would pass without any delivery report.
-        client = producer.client
+        client = @async_producer.client
         handle = nil
 
         10.times do
@@ -135,6 +135,8 @@ describe_current do
         refute_nil @event, "No error.occurred event received within deadline"
       end
 
+      after { @async_producer.close }
+
       it { assert_kind_of(Rdkafka::RdkafkaError, @event.payload[:error]) }
       it { assert_equal(-1, @event.payload[:partition]) }
       it { assert_equal(-1001, @event.payload[:offset]) }
@@ -149,7 +151,7 @@ describe_current do
           @changed << event
         end
 
-        client = @producer.send(:client)
+        client = @producer.client
         handle = nil
 
         # If the broker rejection of the topic metadata lands between the topic handle creation
