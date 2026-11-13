@@ -18,14 +18,13 @@ module WaterDrop
     ::Fiber.send(:attr_accessor, :waterdrop_clients)
 
     # Marks an `Rdkafka::Config::ConfigError` raised by a dispatch (invalid variant `topic_config`).
-    # One raised when building the client (invalid `kafka` config) is not marked and not re-bound.
-    DispatchConfigError = Module.new
+    DispatchConfigFailure = Module.new
 
     # Which of the inline flow errors do we want to intercept and re-bind
     SUPPORTED_FLOW_ERRORS = [
       Rdkafka::RdkafkaError,
       Rdkafka::Producer::DeliveryHandle::WaitTimeoutError,
-      DispatchConfigError
+      DispatchConfigFailure
     ].freeze
 
     # Empty hash to save on memory allocations
@@ -35,7 +34,7 @@ module WaterDrop
     EMPTY_ARRAY = [].freeze
 
     private_constant(
-      :DispatchConfigError, :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
+      :DispatchConfigFailure, :SUPPORTED_FLOW_ERRORS, :EMPTY_HASH, :EMPTY_ARRAY
     )
 
     def_delegators :config
@@ -678,7 +677,9 @@ module WaterDrop
         message[:topic_config] ||= variant.topic_config
       end
 
-      # Built before the rescue below, so an invalid `kafka` config raises as it is
+      # Built before the rescue below, so an invalid `kafka` config raises as it is. The
+      # transactional branch takes the client again under the transaction lock, as a transactional
+      # reload done while this thread waits for that lock replaces it
       rd_client = client
 
       result = begin
@@ -688,7 +689,7 @@ module WaterDrop
           rd_client.produce(**message)
         end
       rescue Rdkafka::Config::ConfigError => e
-        e.extend(DispatchConfigError)
+        e.extend(DispatchConfigFailure)
 
         raise
       end
