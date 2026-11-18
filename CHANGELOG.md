@@ -5,6 +5,7 @@
 - [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Fix] Treat `enable.idempotence` as on only when it is `true` or `"true"`. Any other value (e.g. `"false"`) now makes `Producer#idempotent?` return `false`; it returns a Boolean. Values librdkafka also reads as true (e.g. `1`, `"1"`, `"t"`, `"TRUE"`) are now treated as off by WaterDrop; use `true` or `"true"`.
 - [Fix] Wrap the `Rdkafka::Config::ConfigError` raised at dispatch for an invalid variant `topic_config` in `ProduceError` / `ProduceManyError` and instrument it as `error.occurred`, like the other produce errors.
+- [Fix] Disable the librdkafka queue IO events before closing the `:fd` poller pipe on `#close` and `#disconnect`, so librdkafka does not write its wakeup byte into a file or socket that reuses the pipe fd number.
 
 ## v2.10.10 (2026-11-10)
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).
