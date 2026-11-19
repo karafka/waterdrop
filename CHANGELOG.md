@@ -5,6 +5,7 @@
 - [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Fix] Treat `enable.idempotence` as on only when it is `true` or `"true"`. For a non-transactional producer, any other value (e.g. `"false"`) now makes `Producer#idempotent?` return `false`; it returns a Boolean. This includes values librdkafka reads as true, e.g. `1` and `"TRUE"`.
 - [Fix] Wrap the `Rdkafka::Config::ConfigError` raised at dispatch for an invalid variant `topic_config` in `ProduceError` / `ProduceManyError` and instrument it as `error.occurred`, like the other produce errors.
+- [Fix] Stop `#close` and `#disconnect` of a `:fd` polling producer from writing a stray byte into a file or socket that reuses the poller pipe fd number.
 
 ## v2.10.10 (2026-11-10)
 - [Feature] Add the `partition_count_cache_ttl_ms` setting to configure the process-wide karafka-rdkafka partition count cache TTL (default `nil` leaves it untouched).

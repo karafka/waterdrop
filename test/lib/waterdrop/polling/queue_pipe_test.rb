@@ -119,6 +119,44 @@ describe_current do
     it "can be called multiple times safely" do
       3.times { @pipe.close }
     end
+
+    it "disables queue IO events while the writer is still open" do
+      writer_fd = nil
+      writer_open = nil
+      client = OpenStruct.new
+      client.define_singleton_method(:enable_queue_io_events) do |fd|
+        next writer_fd = fd unless fd == -1
+
+        # Raises Errno::EBADF when the writer is already closed
+        writer_open = IO.for_fd(writer_fd, autoclose: false).stat.pipe?
+      end
+
+      described_class.new(client).close
+
+      assert(writer_open)
+    end
+
+    it "disables queue IO events only once" do
+      calls = []
+      client = OpenStruct.new
+      client.define_singleton_method(:enable_queue_io_events) { |fd| calls << fd }
+
+      pipe = described_class.new(client)
+      3.times { pipe.close }
+
+      assert_equal(1, calls.count(-1))
+    end
+
+    it "closes the pipe when the client is already closed" do
+      client = OpenStruct.new
+      client.define_singleton_method(:enable_queue_io_events) { |fd| raise Rdkafka::ClosedInnerError if fd == -1 }
+
+      pipe = described_class.new(client)
+      reader = pipe.reader
+      pipe.close
+
+      assert_predicate(reader, :closed?)
+    end
   end
 
   describe "#reader" do

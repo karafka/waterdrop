@@ -19,6 +19,7 @@ module WaterDrop
       # @param client [Rdkafka::Producer] the rdkafka client
       # @raise [StandardError] if enable_queue_io_events fails
       def initialize(client)
+        @client = client
         @reader, @writer = IO.pipe
 
         # Tell librdkafka to write to our pipe when events arrive on the main queue
@@ -42,13 +43,28 @@ module WaterDrop
         # Pipe closed during drain
       end
 
-      # Closes both ends of the pipe
+      # Disables librdkafka queue IO events and closes both ends of the pipe
+      #
+      # @note The IO events must be disabled before the pipe is closed. librdkafka keeps the
+      #   writer fd number and writes to it whenever an op lands on the queue (statistics,
+      #   errors, delivery reports during destroy). Once the pipe is closed, that number can be
+      #   reused by any file or socket opened in this process, which would then get the payload.
       def close
+        disable_queue_io_events
         close_io(@reader)
         close_io(@writer)
       end
 
       private
+
+      # Tells librdkafka to stop writing to our pipe (fd -1 disables the IO events)
+      def disable_queue_io_events
+        return if @writer.closed?
+
+        @client.enable_queue_io_events(-1)
+      rescue Rdkafka::ClosedInnerError, Rdkafka::ClosedProducerError
+        # Client already closed, librdkafka no longer holds our fd
+      end
 
       # Safely closes an IO object
       # @param io [IO] the IO to close
