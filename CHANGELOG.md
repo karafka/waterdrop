@@ -1,6 +1,6 @@
 # WaterDrop changelog
 
-## Unreleased
+## v2.10.11 (2026-11-20)
 - [Feature] Add the `produce` / `produce!`, `produce_many` / `produce_many!`, `tombstone` / `tombstone!`, `tombstone_many` / `tombstone_many!` and `flush` / `flush!` aliases of the `_async` / `_sync` methods.
 - [Change] Require `karafka-core` `>=` `2.6.8`.
 - [Fix] Treat `enable.idempotence` as on only when it is `true` or `"true"`. For a non-transactional producer, any other value (e.g. `"false"`) now makes `Producer#idempotent?` return `false`; it returns a Boolean. This includes values librdkafka reads as true, e.g. `1` and `"TRUE"`.
