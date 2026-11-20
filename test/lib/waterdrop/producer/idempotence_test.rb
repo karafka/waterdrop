@@ -368,11 +368,16 @@ describe_current do
         @reload_events = []
         @reloaded_events = []
         @error_events = []
+        @error_events_mutex = Mutex.new
 
         @producer.singleton_class.include(WaterDrop::Producer::Testing)
         @producer.monitor.subscribe("producer.reload") { |event| @reload_events << event }
         @producer.monitor.subscribe("producer.reloaded") { |event| @reloaded_events << event }
-        @producer.monitor.subscribe("error.occurred") { |event| @error_events << event }
+        # Emitted from both the caller and the rdkafka background thread, and an unsynchronized
+        # Array#<< from two threads can leave nil slots on JRuby
+        @producer.monitor.subscribe("error.occurred") do |event|
+          @error_events_mutex.synchronize { @error_events << event }
+        end
       end
 
       it "emits producer.reload and producer.reloaded events when fatal error triggers reload" do
@@ -435,10 +440,12 @@ describe_current do
 
         assert_kind_of(Rdkafka::Producer::DeliveryReport, report)
 
-        # Verify error.occurred event was emitted
-        assert_operator(@error_events.size, :>=, 1)
+        error_events = @error_events_mutex.synchronize { @error_events.dup }
 
-        fatal_error_events = @error_events.select do |e|
+        # Verify error.occurred event was emitted
+        assert_operator(error_events.size, :>=, 1)
+
+        fatal_error_events = error_events.select do |e|
           e[:type] == "librdkafka.idempotent_fatal_error"
         end
 
