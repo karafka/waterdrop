@@ -42,6 +42,7 @@ end
 # Track instrumentation events
 reload_events = []
 error_events = []
+error_events_mutex = Mutex.new
 
 # Create two producers with the same transactional.id
 producer1 = WaterDrop::Producer.new(&configure_producer)
@@ -50,7 +51,11 @@ producer2 = WaterDrop::Producer.new(&configure_producer)
 # Subscribe to events for both producers
 [producer1, producer2].each do |producer|
   producer.monitor.subscribe("producer.reloaded") { |event| reload_events << event }
-  producer.monitor.subscribe("error.occurred") { |event| error_events << event }
+  # Emitted from both the caller and the rdkafka background thread, and an unsynchronized
+  # Array#<< from two threads can leave nil slots on JRuby
+  producer.monitor.subscribe("error.occurred") do |event|
+    error_events_mutex.synchronize { error_events << event }
+  end
 end
 
 topic_name = generate_topic("fence-loop")
@@ -85,7 +90,7 @@ producer2.close
 
 # Verify results
 # Count fencing errors (error might be wrapped in ProduceError)
-fencing_errors = error_events.count do |event|
+fencing_errors = error_events_mutex.synchronize { error_events.dup }.count do |event|
   error = event[:error]
   (error.respond_to?(:code) && error.code == :fenced) ||
     (error.respond_to?(:cause) && error.cause.respond_to?(:code) && error.cause.code == :fenced)
