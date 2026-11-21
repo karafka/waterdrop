@@ -42,19 +42,6 @@ EXPECTED = {
   expired: :buffered
 }.freeze
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # @return [Array(Symbol, Exception, nil, Float)] outcome of the produce, the error it raised and
 #   how long it took in ms
 def attempt
@@ -138,16 +125,18 @@ producer.close
 MockCluster.rd_kafka_mock_cluster_destroy(mock_cluster)
 Rdkafka::Bindings.rd_kafka_destroy(mock_handle)
 
-failed = check(failed, warm_elapsed_ms < TTL_MS, "warm topic produce ran within the TTL")
+unless warm_elapsed_ms < TTL_MS
+  warn "FAIL: warm topic produce did not run within the TTL (#{warm_elapsed_ms.round} ms)"
+  exit(1)
+end
 
 EXPECTED.each do |name, expected|
   outcome, error, = results.fetch(name)
 
-  failed = check(
-    failed,
-    outcome == expected,
-    "#{name}: #{expected} (got #{outcome}#{": #{error.cause.inspect}" if error})"
-  )
+  next if outcome == expected
+
+  warn "FAIL: #{name}: expected #{expected}, got #{outcome}#{": #{error.cause.inspect}" if error}"
+  exit(1)
 end
 
 cold_ms = results.fetch(:cold).last
@@ -155,40 +144,31 @@ expired_ms = results.fetch(:expired).last
 
 # A fresh cache hit returns at once. An expired entry runs the blocking metadata refresh, which
 # fails like the cold topic lookup before the last known count is used.
-failed = check(
-  failed,
-  expired_ms > cold_ms / 2,
-  "expired: refresh ran before the last known count was used " \
-  "(#{expired_ms.round} ms, cold #{cold_ms.round} ms)"
-)
+unless expired_ms > cold_ms / 2
+  warn "FAIL: expired produce did not run the refresh (#{expired_ms.round} ms, cold #{cold_ms.round} ms)"
+  exit(1)
+end
 
 raised = results.values.filter_map { |_, error| error }
 
-failed = check(
-  failed,
-  error_events.size == raised.size,
-  "one message.produce_async error.occurred per raised produce (#{error_events.size})"
-)
-
-failed = check(
-  failed,
-  error_events.all? do |event|
-    event[:error].is_a?(WaterDrop::Errors::ProduceError) &&
-      event[:error].cause.is_a?(Rdkafka::RdkafkaError)
-  end,
-  "error.occurred carries ProduceError caused by Rdkafka::RdkafkaError"
-)
-
-failed = check(
-  failed,
-  key_only_report&.error.nil? && key_only_report&.topic_name == cold_topic,
-  "key-only message is delivered once the broker is up"
-)
-
-if failed
-  puts "\nFAIL: partition_key produce while the cluster is unavailable changed"
-else
-  puts "\nPASS: partition_key produce while the cluster is unavailable behaves as expected"
+unless error_events.size == raised.size
+  warn "FAIL: expected #{raised.size} message.produce_async error.occurred, got #{error_events.size}"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+caused_by_rdkafka = error_events.all? do |event|
+  event[:error].is_a?(WaterDrop::Errors::ProduceError) &&
+    event[:error].cause.is_a?(Rdkafka::RdkafkaError)
+end
+
+unless caused_by_rdkafka
+  warn "FAIL: error.occurred does not carry ProduceError caused by Rdkafka::RdkafkaError"
+  exit(1)
+end
+
+unless key_only_report&.error.nil? && key_only_report&.topic_name == cold_topic
+  warn "FAIL: key-only message was not delivered once the broker was up"
+  exit(1)
+end
+
+puts "PASS: partition_key produce while the cluster is unavailable behaves as expected"
