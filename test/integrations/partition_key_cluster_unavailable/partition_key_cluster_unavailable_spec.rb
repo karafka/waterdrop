@@ -55,12 +55,19 @@ def check(failed, condition, message)
   end
 end
 
-# @return [Array(Symbol, Exception, nil)] outcome of the produce and the error it raised
+# @return [Array(Symbol, Exception, nil, Float)] outcome of the produce, the error it raised and
+#   how long it took in ms
 def attempt
-  yield
-  [:buffered, nil]
-rescue WaterDrop::Errors::ProduceError => e
-  [:raises, e]
+  started_at = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+
+  begin
+    yield
+    outcome = [:buffered, nil]
+  rescue WaterDrop::Errors::ProduceError => e
+    outcome = [:raises, e]
+  end
+
+  outcome << ((Process.clock_gettime(Process::CLOCK_MONOTONIC) - started_at) * 1_000)
 end
 
 # The mock cluster lives in its own librdkafka handle, which has to outlive the producer
@@ -134,7 +141,7 @@ Rdkafka::Bindings.rd_kafka_destroy(mock_handle)
 failed = check(failed, warm_elapsed_ms < TTL_MS, "warm topic produce ran within the TTL")
 
 EXPECTED.each do |name, expected|
-  outcome, error = results.fetch(name)
+  outcome, error, = results.fetch(name)
 
   failed = check(
     failed,
@@ -142,6 +149,18 @@ EXPECTED.each do |name, expected|
     "#{name}: #{expected} (got #{outcome}#{": #{error.cause.inspect}" if error})"
   )
 end
+
+cold_ms = results.fetch(:cold).last
+expired_ms = results.fetch(:expired).last
+
+# A fresh cache hit returns at once. An expired entry runs the blocking metadata refresh, which
+# fails like the cold topic lookup before the last known count is used.
+failed = check(
+  failed,
+  expired_ms > cold_ms / 2,
+  "expired: refresh ran before the last known count was used " \
+  "(#{expired_ms.round} ms, cold #{cold_ms.round} ms)"
+)
 
 raised = results.values.filter_map { |_, error| error }
 
