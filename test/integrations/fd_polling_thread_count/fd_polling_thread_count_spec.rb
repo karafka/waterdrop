@@ -20,7 +20,7 @@ def create_producer(polling_mode:)
       "bootstrap.servers": BOOTSTRAP_SERVERS
     }
     config.polling.mode = polling_mode
-    config.max_wait_timeout = 5_000
+    config.max_wait_timeout = 30_000
     config.logger = Logger.new(File::NULL)
   end
 end
