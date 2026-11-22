@@ -16,17 +16,6 @@ require "tempfile"
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 FILES_COUNT = 16
 
-def check(failed, condition, message)
-  if condition
-    puts "ok: #{message}"
-    failed
-  else
-    puts "FAIL: #{message}"
-    true
-  end
-end
-
-failed = false
 files = []
 armed = false
 
@@ -59,8 +48,15 @@ check_action = lambda do |name, &action|
 
   polluted = files.reject { |file| File.empty?(file.path) }
 
-  failed = check(failed, files.size == FILES_COUNT, "#{name}: files were opened between pipe close and destroy")
-  failed = check(failed, polluted.empty?, "#{name}: no file got a byte from librdkafka (#{polluted.size} did)")
+  unless files.size == FILES_COUNT
+    warn "FAIL: #{name}: expected #{FILES_COUNT} files opened between pipe close and destroy, got #{files.size}"
+    exit(1)
+  end
+
+  unless polluted.empty?
+    warn "FAIL: #{name}: #{polluted.size} files got a byte from librdkafka"
+    exit(1)
+  end
 
   files.each(&:close!)
   files.clear
@@ -73,11 +69,15 @@ topic = generate_topic("stale-fd")
 producer.produce_sync(topic: topic, payload: "x")
 
 disconnected = check_action.call("disconnect") { producer.disconnect }
-failed = check(failed, disconnected, "disconnect: producer disconnected")
+unless disconnected
+  warn "FAIL: disconnect: producer did not disconnect"
+  exit(1)
+end
 
 report = producer.produce_sync(topic: topic, payload: "y")
-failed = check(failed, report.error.nil? && report.offset >= 0, "disconnect: producer reconnects and produces")
+unless report.error.nil? && report.offset >= 0
+  warn "FAIL: disconnect: producer did not produce after reconnect (#{report.error.inspect}, offset #{report.offset})"
+  exit(1)
+end
 
 check_action.call("close") { producer.close }
-
-exit(failed ? 1 : 0)
