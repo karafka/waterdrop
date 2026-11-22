@@ -96,7 +96,7 @@ if report.persisted? || report.not_persisted?
 end
 
 unless retry_decision(report) == :retry_may_duplicate
-  warn "FAIL: expected :retry_may_duplicate, got #{retry_decision(report)}"
+  warn "FAIL: expected :retry_may_duplicate, got #{retry_decision(report).inspect}"
   exit(1)
 end
 

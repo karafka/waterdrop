@@ -75,7 +75,7 @@ unless report.latency.is_a?(Integer) && report.latency >= 1_000_000
 end
 
 unless retry_decision(report) == :retry
-  warn "FAIL: expected :retry, got #{retry_decision(report)}"
+  warn "FAIL: expected :retry, got #{retry_decision(report).inspect}"
   exit(1)
 end
 
