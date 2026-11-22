@@ -21,19 +21,6 @@ def monotonic_now
   Process.clock_gettime(Process::CLOCK_MONOTONIC)
 end
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 occurred = Queue.new
 error_event = nil
 
@@ -68,28 +55,28 @@ error_event = nil
   break
 end
 
-if error_event
-  round_trip = monotonic_now - error_event[:label]
-  failed = check(
-    failed, error_event[:label].is_a?(Float), "error.occurred event carries the monotonic label"
-  )
-  failed = check(
-    failed, round_trip.positive?, "failed round-trip time is positive (#{round_trip.round(5)}s)"
-  )
-  failed = check(
-    failed, !error_event[:error].nil?, "error.occurred event carries the delivery error"
-  )
-else
-  # We could not provoke a delivery failure at all - the label plumbing was never exercised, so we
-  # must not report a false pass.
-  puts "  FAIL: no dispatch error was triggered; could not verify the error-path label"
-  failed = true
+# We could not provoke a delivery failure at all - the label plumbing was never exercised, so we
+# must not report a false pass.
+unless error_event
+  warn "FAIL: no dispatch error was triggered; could not verify the error-path label"
+  exit(1)
 end
 
-if failed
-  puts "\nFAIL: error-path label-based round-trip tracking regressed"
-else
-  puts "\nPASS: labels survive into error.occurred on failed delivery"
+round_trip = monotonic_now - error_event[:label]
+
+unless error_event[:label].is_a?(Float)
+  warn "FAIL: error.occurred event carries the monotonic label"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+unless round_trip.positive?
+  warn "FAIL: failed round-trip time is positive (#{round_trip.round(5)}s)"
+  exit(1)
+end
+
+if error_event[:error].nil?
+  warn "FAIL: error.occurred event carries the delivery error"
+  exit(1)
+end
+
+puts "PASS: labels survive into error.occurred on failed delivery"

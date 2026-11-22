@@ -13,19 +13,6 @@ require "waterdrop"
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 MESSAGES = 3
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # Buffers into both topics, flushes once through the given flusher and returns the offsets per topic
 def round(producer, variant, flusher, sync:)
   variant_topic = generate_topic("variant-buffer-acks-zero")
@@ -61,25 +48,18 @@ variant = producer.with(topic_config: { acks: 0 })
 ].each do |name, flusher, sync|
   variant_offsets, default_offsets = round(producer, variant, flusher, sync: sync)
 
-  failed = check(
-    failed,
-    variant_offsets.size == MESSAGES && variant_offsets.all?(&:negative?),
-    "#{name}: variant messages are sent with acks: 0"
-  )
+  unless variant_offsets.size == MESSAGES && variant_offsets.all?(&:negative?)
+    warn "FAIL: #{name}: variant messages are sent with acks: 0"
+    exit(1)
+  end
+
   # The first report on a new topic may carry no offset even with acks
-  failed = check(
-    failed,
-    default_offsets.size == MESSAGES && default_offsets.drop(1).all? { |offset| offset >= 0 },
-    "#{name}: default messages are sent with the default acks"
-  )
+  unless default_offsets.size == MESSAGES && default_offsets.drop(1).all? { |offset| offset >= 0 }
+    warn "FAIL: #{name}: default messages are sent with the default acks"
+    exit(1)
+  end
 end
 
 producer.close
 
-if failed
-  puts "\nFAIL: a flush did not send buffered messages with their own variant topic config"
-else
-  puts "\nPASS: buffered messages keep the topic config of the variant they were buffered through"
-end
-
-exit(failed ? 1 : 0)
+puts "PASS: buffered messages keep the topic config of the variant they were buffered through"

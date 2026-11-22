@@ -28,19 +28,6 @@ end
 MESSAGE_TIMEOUT_MS = 5_000
 SLOW_RTT_MS = MESSAGE_TIMEOUT_MS * 10
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # The retry decision the delivery report status makes possible.
 def retry_decision(report)
   if report.not_persisted?
@@ -83,33 +70,34 @@ report = event[:delivery_report]
 
 producer.close
 
-failed = check(failed, warmup_report.persisted?, "warm-up message is persisted")
-failed = check(
-  failed,
-  event[:error].code == :msg_timed_out,
-  "delivery failed with msg_timed_out (#{event[:error].code})"
-)
-failed = check(failed, report.possibly_persisted?, "message is possibly persisted")
-failed = check(
-  failed,
-  report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED,
-  "status is RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED"
-)
-failed = check(
-  failed,
-  !report.persisted? && !report.not_persisted?,
-  "no other status predicate matches"
-)
-failed = check(
-  failed,
-  retry_decision(report) == :retry_may_duplicate,
-  "a retry may write a duplicate"
-)
-
-if failed
-  puts "\nFAIL: delivery report status regressed for messages that timed out in flight"
-else
-  puts "\nPASS: a message that timed out in flight is reported as possibly persisted"
+unless warmup_report.persisted?
+  warn "FAIL: warm-up message is persisted"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+unless event[:error].code == :msg_timed_out
+  warn "FAIL: delivery failed with msg_timed_out (#{event[:error].code})"
+  exit(1)
+end
+
+unless report.possibly_persisted?
+  warn "FAIL: message is possibly persisted"
+  exit(1)
+end
+
+unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED
+  warn "FAIL: status is RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED"
+  exit(1)
+end
+
+unless !report.persisted? && !report.not_persisted?
+  warn "FAIL: no other status predicate matches"
+  exit(1)
+end
+
+unless retry_decision(report) == :retry_may_duplicate
+  warn "FAIL: a retry may write a duplicate"
+  exit(1)
+end
+
+puts "PASS: a message that timed out in flight is reported as possibly persisted"

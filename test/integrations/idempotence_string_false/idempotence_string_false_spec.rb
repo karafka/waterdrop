@@ -7,19 +7,6 @@ require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 def build_producer(idempotence)
   WaterDrop::Producer.new do |config|
     config.deliver = true
@@ -30,27 +17,43 @@ end
 topic = generate_topic("idempotence-string-false")
 
 producer = build_producer("false")
-failed = check(failed, producer.idempotent? == false, '"false" producer is not idempotent')
+
+unless producer.idempotent? == false
+  warn 'FAIL: "false" producer is not idempotent'
+  exit(1)
+end
 
 begin
   report = producer.variant(topic_config: { acks: 0 }).produce_sync(topic: topic, payload: "x")
-  failed = check(failed, report.offset.negative?, '"false" producer delivers via an acks: 0 variant')
+
+  unless report.offset.negative?
+    warn 'FAIL: "false" producer delivers via an acks: 0 variant'
+    exit(1)
+  end
 rescue WaterDrop::Errors::VariantInvalidError => e
-  failed = check(failed, false, %("false" producer refused an acks: 0 variant: #{e.message}))
+  warn %(FAIL: "false" producer refused an acks: 0 variant: #{e.message})
+  exit(1)
 end
 
 producer.close
 
 producer = build_producer("true")
-failed = check(failed, producer.idempotent? == true, '"true" producer is idempotent')
 
-begin
+unless producer.idempotent? == true
+  warn 'FAIL: "true" producer is idempotent'
+  exit(1)
+end
+
+refused = begin
   producer.variant(topic_config: { acks: 0 })
-  failed = check(failed, false, '"true" producer refuses an acks: 0 variant')
+  false
 rescue WaterDrop::Errors::VariantInvalidError
-  failed = check(failed, true, '"true" producer refuses an acks: 0 variant')
+  true
+end
+
+unless refused
+  warn 'FAIL: "true" producer refuses an acks: 0 variant'
+  exit(1)
 end
 
 producer.close
-
-exit(failed ? 1 : 0)

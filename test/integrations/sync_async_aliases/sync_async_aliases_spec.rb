@@ -8,19 +8,6 @@ require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
@@ -48,57 +35,112 @@ report = Rdkafka::Producer::DeliveryReport
 handle = Rdkafka::Producer::DeliveryHandle
 
 result = producer.produce(message)
-failed = check(failed, result.is_a?(handle), "produce returns a delivery handle")
-failed = check(failed, result.wait.error.nil?, "produce delivers the message")
+unless result.is_a?(handle)
+  warn "FAIL: produce returns a delivery handle"
+  exit(1)
+end
+
+unless result.wait.error.nil?
+  warn "FAIL: produce delivers the message"
+  exit(1)
+end
 
 result = producer.produce!(message)
-failed = check(failed, result.is_a?(report), "produce! returns a delivery report")
+unless result.is_a?(report)
+  warn "FAIL: produce! returns a delivery report"
+  exit(1)
+end
 
 results = producer.produce_many([message, message])
-failed = check(failed, results.all?(handle), "produce_many returns delivery handles")
-failed = check(failed, results.map(&:wait).all? { |r| r.error.nil? }, "produce_many delivers")
+unless results.all?(handle)
+  warn "FAIL: produce_many returns delivery handles"
+  exit(1)
+end
+
+unless results.map(&:wait).all? { |r| r.error.nil? }
+  warn "FAIL: produce_many delivers"
+  exit(1)
+end
 
 results = producer.produce_many!([message, message])
-failed = check(failed, results.map(&:create_result).all?(report), "produce_many! delivers")
+unless results.map(&:create_result).all?(report)
+  warn "FAIL: produce_many! delivers"
+  exit(1)
+end
 
 result = producer.tombstone(tombstone)
-failed = check(failed, result.is_a?(handle), "tombstone returns a delivery handle")
-failed = check(failed, result.wait.error.nil?, "tombstone delivers the message")
+unless result.is_a?(handle)
+  warn "FAIL: tombstone returns a delivery handle"
+  exit(1)
+end
+
+unless result.wait.error.nil?
+  warn "FAIL: tombstone delivers the message"
+  exit(1)
+end
 
 result = producer.tombstone!(tombstone)
-failed = check(failed, result.is_a?(report), "tombstone! returns a delivery report")
+unless result.is_a?(report)
+  warn "FAIL: tombstone! returns a delivery report"
+  exit(1)
+end
 
 results = producer.tombstone_many([tombstone, tombstone])
-failed = check(failed, results.map(&:wait).all? { |r| r.error.nil? }, "tombstone_many delivers")
+unless results.map(&:wait).all? { |r| r.error.nil? }
+  warn "FAIL: tombstone_many delivers"
+  exit(1)
+end
 
 results = producer.tombstone_many!([tombstone, tombstone])
-failed = check(failed, results.map(&:create_result).all?(report), "tombstone_many! delivers")
+unless results.map(&:create_result).all?(report)
+  warn "FAIL: tombstone_many! delivers"
+  exit(1)
+end
 
 producer.buffer(message)
 results = producer.flush
-failed = check(failed, results.map(&:wait).all? { |r| r.error.nil? }, "flush delivers the buffer")
+unless results.map(&:wait).all? { |r| r.error.nil? }
+  warn "FAIL: flush delivers the buffer"
+  exit(1)
+end
 
 producer.buffer(message)
 results = producer.flush!
-failed = check(failed, results.map(&:create_result).all?(report), "flush! delivers the buffer")
+unless results.map(&:create_result).all?(report)
+  warn "FAIL: flush! delivers the buffer"
+  exit(1)
+end
 
-failed = check(failed, events["message.produced_async"] == 2, "produce and tombstone are async")
-failed = check(failed, events["message.produced_sync"] == 2, "produce! and tombstone! are sync")
-failed = check(
-  failed, events["messages.produced_async"] == 3, "produce_many, tombstone_many and flush are async"
-)
-failed = check(
-  failed, events["messages.produced_sync"] == 3, "produce_many!, tombstone_many! and flush! are sync"
-)
-failed = check(failed, events["buffer.flushed_async"] == 1, "flush flushes async")
-failed = check(failed, events["buffer.flushed_sync"] == 1, "flush! flushes sync")
+unless events["message.produced_async"] == 2
+  warn "FAIL: produce and tombstone are async"
+  exit(1)
+end
+
+unless events["message.produced_sync"] == 2
+  warn "FAIL: produce! and tombstone! are sync"
+  exit(1)
+end
+
+unless events["messages.produced_async"] == 3
+  warn "FAIL: produce_many, tombstone_many and flush are async"
+  exit(1)
+end
+
+unless events["messages.produced_sync"] == 3
+  warn "FAIL: produce_many!, tombstone_many! and flush! are sync"
+  exit(1)
+end
+
+unless events["buffer.flushed_async"] == 1
+  warn "FAIL: flush flushes async"
+  exit(1)
+end
+
+unless events["buffer.flushed_sync"] == 1
+  warn "FAIL: flush! flushes sync"
+  exit(1)
+end
 
 producer.close
 
-if failed
-  puts "\nFAIL: sync/async aliases do not match their _sync/_async methods"
-else
-  puts "\nPASS: sync/async aliases dispatch like their _sync/_async methods"
-end
-
-exit(failed ? 1 : 0)
+puts "PASS: sync/async aliases dispatch like their _sync/_async methods"

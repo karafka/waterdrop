@@ -13,19 +13,6 @@ require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # Returns the error raised by the block or nil when nothing was raised
 def raised_error
   yield
@@ -55,31 +42,44 @@ variant = producer.with(topic_config: { acks: "bogus" })
   events.clear
   error = raised_error { call.call(variant) }
 
-  failed = check(failed, error.instance_of?(error_class), "#{name} raises #{error_class}")
-  failed = check(
-    failed,
-    error&.cause.instance_of?(Rdkafka::Config::ConfigError),
-    "#{name} error is caused by Rdkafka::Config::ConfigError"
-  )
-  failed = check(
-    failed,
-    events.size == 1 && events.first[:error].equal?(error),
-    "#{name} emits one error.occurred event with the raised error"
-  )
+  unless error.instance_of?(error_class)
+    warn "FAIL: #{name} raises #{error_class}"
+    exit(1)
+  end
+
+  unless error&.cause.instance_of?(Rdkafka::Config::ConfigError)
+    warn "FAIL: #{name} error is caused by Rdkafka::Config::ConfigError"
+    exit(1)
+  end
+
+  unless events.size == 1 && events.first[:error].equal?(error)
+    warn "FAIL: #{name} emits one error.occurred event with the raised error"
+    exit(1)
+  end
 end
 
-failed = check(
-  failed,
-  producer.produce_sync(topic: topic, payload: "producer").offset.zero?,
-  "producer delivers to the topic"
-)
+unless producer.produce_sync(topic: topic, payload: "producer").offset.zero?
+  warn "FAIL: producer delivers to the topic"
+  exit(1)
+end
 
 events.clear
 variant.buffer(message)
 
-failed = check(failed, raised_error { producer.close }.nil?, "close with the message buffered does not raise")
-failed = check(failed, producer.status.closed?, "close closes the producer")
-failed = check(failed, events.size == 1, "close emits one error.occurred event")
+unless raised_error { producer.close }.nil?
+  warn "FAIL: close with the message buffered does not raise"
+  exit(1)
+end
+
+unless producer.status.closed?
+  warn "FAIL: close closes the producer"
+  exit(1)
+end
+
+unless events.size == 1
+  warn "FAIL: close emits one error.occurred event"
+  exit(1)
+end
 
 invalid = WaterDrop::Producer.new do |config|
   config.deliver = true
@@ -89,13 +89,14 @@ end
 invalid_events = []
 invalid.monitor.subscribe("error.occurred") { |event| invalid_events << event }
 
-failed = check(
-  failed,
-  raised_error { invalid.produce_sync(message) }.instance_of?(Rdkafka::Config::ConfigError),
-  "invalid producer kafka config raises Rdkafka::Config::ConfigError"
-)
-failed = check(failed, invalid_events.empty?, "invalid producer kafka config emits no error.occurred")
+unless raised_error { invalid.produce_sync(message) }.instance_of?(Rdkafka::Config::ConfigError)
+  warn "FAIL: invalid producer kafka config raises Rdkafka::Config::ConfigError"
+  exit(1)
+end
+
+unless invalid_events.empty?
+  warn "FAIL: invalid producer kafka config emits no error.occurred"
+  exit(1)
+end
 
 invalid.close
-
-exit(failed ? 1 : 0)
