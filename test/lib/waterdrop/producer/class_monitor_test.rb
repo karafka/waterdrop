@@ -5,7 +5,7 @@ describe_current do
     @producer_class = Class.new do
       include WaterDrop::Producer::ClassMonitor
 
-      def monitor
+      def exposed_class_monitor
         class_monitor
       end
     end
@@ -18,11 +18,11 @@ describe_current do
 
   describe "#class_monitor" do
     it "returns the global WaterDrop instrumentation monitor" do
-      assert_same(WaterDrop.instrumentation, @producer.monitor)
+      assert_same(WaterDrop.instrumentation, @producer.exposed_class_monitor)
     end
 
     it "returns a ClassMonitor instance" do
-      assert_kind_of(WaterDrop::Instrumentation::ClassMonitor, @producer.monitor)
+      assert_kind_of(WaterDrop::Instrumentation::ClassMonitor, @producer.exposed_class_monitor)
     end
 
     it "is a private method" do
@@ -36,7 +36,7 @@ describe_current do
         events_received << event
       end
 
-      @producer.monitor.instrument("producer.created", test_data: "value")
+      @producer.exposed_class_monitor.instrument("producer.created", test_data: "value")
 
       assert_equal(1, events_received.size)
       assert_equal("value", events_received.first[:test_data])

@@ -503,7 +503,7 @@ describe_current do
     end
   end
 
-  describe "#buffer" do
+  describe "#ensure_active!" do
     before do
       @producer = build(:producer)
     end
