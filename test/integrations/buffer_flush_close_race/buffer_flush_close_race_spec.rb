@@ -59,6 +59,7 @@ unless error.dispatched.size == 1
 end
 
 unless producer.messages == batch.drop(1)
-  warn "FAIL: expected #{TOTAL - 1} undispatched messages in the buffer, got #{producer.messages.size}"
+  expected = batch.drop(1).map { |message| message[:payload] }
+  warn "FAIL: expected buffered payloads #{expected}, got #{producer.messages.map { |message| message[:payload] }}"
   exit(1)
 end

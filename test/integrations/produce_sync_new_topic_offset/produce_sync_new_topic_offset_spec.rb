@@ -85,8 +85,10 @@ unless rest.each_cons(2).all? { |a, b| b.offset > a.offset }
   exit(1)
 end
 
-unless Array.new(MESSAGES) { |i| "payload-#{i}" }.all? { |payload| payloads.include?(payload) }
-  warn "FAIL: expected #{MESSAGES} messages in the topic, consumed #{payloads.size}"
+missing = Array.new(MESSAGES) { |i| "payload-#{i}" } - payloads
+
+unless missing.empty?
+  warn "FAIL: messages missing from the topic: #{missing}"
   exit(1)
 end
 
