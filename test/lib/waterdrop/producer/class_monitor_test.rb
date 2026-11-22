@@ -4,6 +4,10 @@ describe_current do
   before do
     @producer_class = Class.new do
       include WaterDrop::Producer::ClassMonitor
+
+      def monitor
+        class_monitor
+      end
     end
 
     @producer = @producer_class.new
@@ -14,11 +18,11 @@ describe_current do
 
   describe "#class_monitor" do
     it "returns the global WaterDrop instrumentation monitor" do
-      assert_same(WaterDrop.instrumentation, @producer.send(:class_monitor))
+      assert_same(WaterDrop.instrumentation, @producer.monitor)
     end
 
     it "returns a ClassMonitor instance" do
-      assert_kind_of(WaterDrop::Instrumentation::ClassMonitor, @producer.send(:class_monitor))
+      assert_kind_of(WaterDrop::Instrumentation::ClassMonitor, @producer.monitor)
     end
 
     it "is a private method" do
@@ -32,7 +36,7 @@ describe_current do
         events_received << event
       end
 
-      @producer.send(:class_monitor).instrument("producer.created", test_data: "value")
+      @producer.monitor.instrument("producer.created", test_data: "value")
 
       assert_equal(1, events_received.size)
       assert_equal("value", events_received.first[:test_data])
@@ -44,10 +48,13 @@ describe_current do
       assert_includes(WaterDrop::Producer.included_modules, described_class)
     end
 
-    it "allows Producer instances to use class_monitor" do
+    it "instruments Producer creation through the global monitor" do
+      created = []
+      WaterDrop.instrumentation.subscribe("producer.created") { |event| created << event }
+
       producer = WaterDrop::Producer.new
 
-      assert_kind_of(WaterDrop::Instrumentation::ClassMonitor, producer.send(:class_monitor))
+      assert_equal([producer], created.map { |event| event[:producer] })
     ensure
       producer&.close
     end

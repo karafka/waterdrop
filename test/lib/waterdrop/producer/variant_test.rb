@@ -251,10 +251,10 @@ describe_current do
 
       @variant.transaction do
         @variant.produce_async(topic: @topic, payload: "1")
-        after_inner_variant_call = @producer.send(:current_variant)
+        after_inner_variant_call = @producer.current_variant
 
         @producer.produce_async(topic: @topic, payload: "2")
-        after_raw_dispatch = @producer.send(:current_variant)
+        after_raw_dispatch = @producer.current_variant
       end
 
       assert_same(@variant, after_inner_variant_call)

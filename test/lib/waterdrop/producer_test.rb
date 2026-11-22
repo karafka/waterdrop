@@ -503,7 +503,7 @@ describe_current do
     end
   end
 
-  describe "#ensure_usable!" do
+  describe "#buffer" do
     before do
       @producer = build(:producer)
     end
@@ -518,7 +518,7 @@ describe_current do
         # unknown/impossible state by returning a symbol that is in neither the active set nor any of
         # the terminal states.
         @producer.status.stubs(:to_sym).returns(:invalid_state)
-        assert_raises(@expected_error) { @producer.send(:ensure_active!) }
+        assert_raises(@expected_error) { @producer.buffer(topic: "test", payload: "test") }
       end
     end
   end
