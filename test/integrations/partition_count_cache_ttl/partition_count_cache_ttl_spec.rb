@@ -13,24 +13,10 @@ BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
 TTL_MS = 1_000
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
+unless Rdkafka::Config.partition_count_cache_ttl_ms > TTL_MS * 10
+  warn "FAIL: karafka-rdkafka default TTL #{Rdkafka::Config.partition_count_cache_ttl_ms} ms is not far above #{TTL_MS} ms"
+  exit(1)
 end
-
-failed = check(
-  failed,
-  Rdkafka::Config.partition_count_cache_ttl_ms > TTL_MS * 10,
-  "karafka-rdkafka default TTL is far above the configured one"
-)
 
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
@@ -38,29 +24,30 @@ producer = WaterDrop::Producer.new do |config|
   config.partition_count_cache_ttl_ms = TTL_MS
 end
 
-failed = check(
-  failed,
-  Rdkafka::Config.partition_count_cache_ttl_ms == TTL_MS,
-  "producer setup sets the process-wide TTL"
-)
+unless Rdkafka::Config.partition_count_cache_ttl_ms == TTL_MS
+  warn "FAIL: producer setup did not set the TTL: expected #{TTL_MS}, got #{Rdkafka::Config.partition_count_cache_ttl_ms}"
+  exit(1)
+end
 
 other = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
 end
 
-failed = check(
-  failed,
-  Rdkafka::Config.partition_count_cache_ttl_ms == TTL_MS,
-  "producer setup without the setting leaves the process-wide TTL untouched"
-)
+unless Rdkafka::Config.partition_count_cache_ttl_ms == TTL_MS
+  warn "FAIL: producer setup without the setting changed the TTL to #{Rdkafka::Config.partition_count_cache_ttl_ms}"
+  exit(1)
+end
 
 topic = generate_topic("partition-count-ttl")
 create_topic(topic, partitions: 1)
 
 producer.produce_sync(topic: topic, payload: "before", partition_key: "key")
 
-failed = check(failed, producer.partition_count(topic) == 1, "partition count is cached as 1")
+unless producer.partition_count(topic) == 1
+  warn "FAIL: expected a cached partition count of 1, got #{producer.partition_count(topic)}"
+  exit(1)
+end
 
 admin = Rdkafka::Config.new("bootstrap.servers": BOOTSTRAP_SERVERS).admin
 admin.create_partitions(topic, 3).wait
@@ -77,15 +64,12 @@ loop do
   sleep(0.1)
 end
 
-failed = check(failed, count == 3, "new partitions are seen once the TTL expires (got #{count})")
+unless count == 3
+  warn "FAIL: new partitions not seen after the TTL expired: expected 3, got #{count}"
+  exit(1)
+end
 
 producer.close
 other.close
 
-if failed
-  puts "\nFAIL: partition_count_cache_ttl_ms does not drive the partition count cache"
-else
-  puts "\nPASS: partition_count_cache_ttl_ms drives the process-wide partition count cache"
-end
-
-exit(failed ? 1 : 0)
+puts "PASS: partition_count_cache_ttl_ms drives the process-wide partition count cache"

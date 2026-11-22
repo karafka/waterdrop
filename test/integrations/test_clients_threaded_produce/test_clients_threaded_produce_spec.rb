@@ -15,19 +15,6 @@ THREADS = 8
 PER_THREAD = 500
 TOTAL = THREADS * PER_THREAD
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # Produces from many threads at once and returns the offsets of all the delivery reports
 def produce_from_threads(producer)
   start = Queue.new
@@ -50,13 +37,20 @@ end
 
 offsets = produce_from_threads(buffered)
 
-failed = check(failed, buffered.client.messages.size == TOTAL, "buffered keeps all #{TOTAL} messages")
-failed = check(
-  failed,
-  buffered.client.messages_for("threaded").size == TOTAL,
-  "buffered keeps all #{TOTAL} messages of the topic"
-)
-failed = check(failed, offsets.sort == (0...TOTAL).to_a, "buffered assigns each offset once")
+unless buffered.client.messages.size == TOTAL
+  warn "FAIL: buffered: expected #{TOTAL} messages, got #{buffered.client.messages.size}"
+  exit(1)
+end
+
+unless buffered.client.messages_for("threaded").size == TOTAL
+  warn "FAIL: buffered: expected #{TOTAL} messages of the topic, got #{buffered.client.messages_for("threaded").size}"
+  exit(1)
+end
+
+unless offsets.sort == (0...TOTAL).to_a
+  warn "FAIL: buffered: offsets are not 0...#{TOTAL}, each once"
+  exit(1)
+end
 
 buffered.close
 
@@ -67,8 +61,9 @@ end
 
 offsets = produce_from_threads(dummy)
 
-failed = check(failed, offsets.sort == (0...TOTAL).to_a, "dummy assigns each offset once")
+unless offsets.sort == (0...TOTAL).to_a
+  warn "FAIL: dummy: offsets are not 0...#{TOTAL}, each once"
+  exit(1)
+end
 
 dummy.close
-
-exit(failed ? 1 : 0)

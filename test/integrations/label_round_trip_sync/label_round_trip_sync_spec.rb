@@ -18,19 +18,6 @@ def monotonic_now
   Process.clock_gettime(Process::CLOCK_MONOTONIC)
 end
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
@@ -50,20 +37,21 @@ producer.produce_sync(topic: topic, payload: "sync-payload", label: produced_at)
 event = acknowledged.pop
 round_trip = monotonic_now - event[:label]
 
-failed = check(
-  failed, event[:label].equal?(produced_at), "acknowledged event carries the exact label object"
-)
-failed = check(failed, event[:label].is_a?(Float), "label is the monotonic Float we stashed")
-failed = check(
-  failed, round_trip.positive?, "round-trip time is a positive duration (#{round_trip.round(5)}s)"
-)
+unless event[:label].equal?(produced_at)
+  warn "FAIL: acknowledged event label #{event[:label].inspect} is not the produced object"
+  exit(1)
+end
+
+unless event[:label].is_a?(Float)
+  warn "FAIL: expected a Float label, got #{event[:label].class}"
+  exit(1)
+end
+
+unless round_trip.positive?
+  warn "FAIL: round-trip time is not positive (#{round_trip.round(5)}s)"
+  exit(1)
+end
 
 producer.close
 
-if failed
-  puts "\nFAIL: sync label-based round-trip tracking regressed"
-else
-  puts "\nPASS: sync labels carry a monotonic timestamp into message.acknowledged"
-end
-
-exit(failed ? 1 : 0)
+puts "PASS: sync labels carry a monotonic timestamp into message.acknowledged"

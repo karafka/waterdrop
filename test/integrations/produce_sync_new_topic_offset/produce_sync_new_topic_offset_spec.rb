@@ -13,19 +13,6 @@ BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 INVALID_OFFSET = -1001
 MESSAGES = 5
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 def consume_payloads(topic, expected)
   consumer = Rdkafka::Config.new(
     "bootstrap.servers": BOOTSTRAP_SERVERS,
@@ -68,30 +55,41 @@ first = reports.first
 rest = reports[1..]
 payloads = consume_payloads(topic, MESSAGES)
 
-failed = check(failed, reports.size == MESSAGES, "a report per message")
-failed = check(failed, reports.none?(&:error), "no report carries an error")
-failed = check(
-  failed, reports.all? { |report| report.topic_name == topic }, "reports name the produced topic"
-)
-failed = check(
-  failed,
-  first.offset == INVALID_OFFSET || first.offset >= 0,
-  "first offset is real or the invalid sentinel"
-)
-failed = check(failed, rest.all? { |report| report.offset >= 0 }, "later offsets are valid")
-failed = check(
-  failed, rest.each_cons(2).all? { |a, b| b.offset > a.offset }, "later offsets increase"
-)
-failed = check(
-  failed,
-  Array.new(MESSAGES) { |i| "payload-#{i}" }.all? { |payload| payloads.include?(payload) },
-  "every message landed, including the first"
-)
-
-if failed
-  puts "\nFAIL: produce_sync first-produce offset handling regressed"
-else
-  puts "\nPASS: produce_sync lands the first message and reports real increasing offsets afterwards"
+unless reports.size == MESSAGES
+  warn "FAIL: expected #{MESSAGES} reports, got #{reports.size}"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+unless reports.none?(&:error)
+  warn "FAIL: a report carries #{reports.find(&:error).error.inspect}"
+  exit(1)
+end
+
+unless reports.all? { |report| report.topic_name == topic }
+  warn "FAIL: a report names another topic than #{topic}"
+  exit(1)
+end
+
+unless first.offset == INVALID_OFFSET || first.offset >= 0
+  warn "FAIL: first offset #{first.offset} is neither real nor the invalid sentinel"
+  exit(1)
+end
+
+unless rest.all? { |report| report.offset >= 0 }
+  warn "FAIL: later offsets #{rest.map(&:offset)} include an invalid one"
+  exit(1)
+end
+
+unless rest.each_cons(2).all? { |a, b| b.offset > a.offset }
+  warn "FAIL: later offsets #{rest.map(&:offset)} do not increase"
+  exit(1)
+end
+
+missing = Array.new(MESSAGES) { |i| "payload-#{i}" } - payloads
+
+unless missing.empty?
+  warn "FAIL: messages missing from the topic: #{missing}"
+  exit(1)
+end
+
+puts "PASS: produce_sync lands the first message and reports real increasing offsets afterwards"

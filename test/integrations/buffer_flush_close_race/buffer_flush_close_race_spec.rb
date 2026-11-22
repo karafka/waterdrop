@@ -14,18 +14,6 @@ require "logger"
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 TOTAL = 5
 
-failed = false
-
-def check(failed, condition, message)
-  if condition
-    puts "ok: #{message}"
-    failed
-  else
-    puts "FAIL: #{message}"
-    true
-  end
-end
-
 producer = WaterDrop::Producer.new do |config|
   config.kafka = {
     # Unreachable broker so the local queue never drains; with a queue size of 1, the second
@@ -60,8 +48,18 @@ queue_full.pop
 producer.close
 flusher.join
 
-failed = check(failed, error.is_a?(WaterDrop::Errors::ProducerClosedError), "flush raises ProducerClosedError")
-failed = check(failed, error&.dispatched&.size == 1, "error holds the one dispatched handle")
-failed = check(failed, producer.messages == batch.drop(1), "buffer holds only the undispatched messages")
+unless error.is_a?(WaterDrop::Errors::ProducerClosedError)
+  warn "FAIL: flush did not raise ProducerClosedError, got #{error.inspect}"
+  exit(1)
+end
 
-exit(failed ? 1 : 0)
+unless error.dispatched.size == 1
+  warn "FAIL: expected 1 dispatched handle, got #{error.dispatched.size}"
+  exit(1)
+end
+
+unless producer.messages == batch.drop(1)
+  expected = batch.drop(1).map { |message| message[:payload] }
+  warn "FAIL: expected buffered payloads #{expected}, got #{producer.messages.map { |message| message[:payload] }}"
+  exit(1)
+end

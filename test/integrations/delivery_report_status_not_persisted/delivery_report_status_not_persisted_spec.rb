@@ -10,19 +10,6 @@
 
 require "waterdrop"
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # The retry decision the delivery report status makes possible.
 def retry_decision(report)
   if report.not_persisted?
@@ -57,34 +44,39 @@ report = event[:delivery_report]
 
 producer.close
 
-failed = check(
-  failed,
-  event[:error].code == :msg_timed_out,
-  "delivery failed with msg_timed_out (#{event[:error].code})"
-)
-failed = check(failed, report.not_persisted?, "message is not persisted")
-failed = check(
-  failed,
-  report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_NOT_PERSISTED,
-  "status is RD_KAFKA_MSG_STATUS_NOT_PERSISTED"
-)
-failed = check(
-  failed,
-  !report.persisted? && !report.possibly_persisted?,
-  "no other status predicate matches"
-)
-failed = check(failed, report.broker_id.nil?, "no broker took the write, so broker id is nil")
-failed = check(
-  failed,
-  report.latency.is_a?(Integer) && report.latency >= 1_000_000,
-  "latency covers the whole message.timeout.ms (#{report.latency} us)"
-)
-failed = check(failed, retry_decision(report) == :retry, "the message is safe to retry")
-
-if failed
-  puts "\nFAIL: delivery report status regressed for messages that never reached a broker"
-else
-  puts "\nPASS: a message that never reached a broker is reported as not persisted"
+unless event[:error].code == :msg_timed_out
+  warn "FAIL: expected msg_timed_out, got #{event[:error].code}"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+unless report.not_persisted?
+  warn "FAIL: message is not reported as not persisted (status #{report.status})"
+  exit(1)
+end
+
+unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_NOT_PERSISTED
+  warn "FAIL: expected RD_KAFKA_MSG_STATUS_NOT_PERSISTED, got status #{report.status}"
+  exit(1)
+end
+
+if report.persisted? || report.possibly_persisted?
+  warn "FAIL: another status predicate also matches"
+  exit(1)
+end
+
+unless report.broker_id.nil?
+  warn "FAIL: expected no broker id, got #{report.broker_id}"
+  exit(1)
+end
+
+unless report.latency.is_a?(Integer) && report.latency >= 1_000_000
+  warn "FAIL: latency #{report.latency.inspect} us is shorter than message.timeout.ms"
+  exit(1)
+end
+
+unless retry_decision(report) == :retry
+  warn "FAIL: expected :retry, got #{retry_decision(report).inspect}"
+  exit(1)
+end
+
+puts "PASS: a message that never reached a broker is reported as not persisted"

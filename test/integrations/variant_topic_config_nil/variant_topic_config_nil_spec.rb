@@ -10,19 +10,6 @@ require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # Returns the class of the error raised by the block or nil when nothing was raised
 def raised_class
   yield
@@ -38,38 +25,39 @@ end
 
 topic = generate_topic("variant-nil")
 
-failed = check(
-  failed,
-  raised_class { producer.with(topic_config: nil) } == WaterDrop::Errors::VariantInvalidError,
-  "topic_config: nil raises VariantInvalidError"
-)
+raised = raised_class { producer.with(topic_config: nil) }
 
-failed = check(
-  failed,
-  raised_class { producer.with(max_wait_timeout: nil) } == WaterDrop::Errors::VariantInvalidError,
-  "max_wait_timeout: nil raises VariantInvalidError"
-)
+unless raised == WaterDrop::Errors::VariantInvalidError
+  warn "FAIL: topic_config: nil: expected VariantInvalidError, got #{raised.inspect}"
+  exit(1)
+end
+
+raised = raised_class { producer.with(max_wait_timeout: nil) }
+
+unless raised == WaterDrop::Errors::VariantInvalidError
+  warn "FAIL: max_wait_timeout: nil: expected VariantInvalidError, got #{raised.inspect}"
+  exit(1)
+end
 
 variant = producer.with(topic_config: { acks: 1 })
 
-failed = check(
-  failed,
-  variant.max_wait_timeout == producer.config.max_wait_timeout,
-  "omitted max_wait_timeout uses the producer default"
-)
+unless variant.max_wait_timeout == producer.config.max_wait_timeout
+  warn "FAIL: omitted max_wait_timeout: expected #{producer.config.max_wait_timeout}, got #{variant.max_wait_timeout}"
+  exit(1)
+end
 
-failed = check(
-  failed,
-  variant.produce_sync(topic: topic, payload: "variant").offset.zero?,
-  "variant produces"
-)
+offset = variant.produce_sync(topic: topic, payload: "variant").offset
 
-failed = check(
-  failed,
-  producer.produce_sync(topic: topic, payload: "producer").offset == 1,
-  "producer produces"
-)
+unless offset.zero?
+  warn "FAIL: variant delivery: expected offset 0, got #{offset}"
+  exit(1)
+end
+
+offset = producer.produce_sync(topic: topic, payload: "producer").offset
+
+unless offset == 1
+  warn "FAIL: producer delivery: expected offset 1, got #{offset}"
+  exit(1)
+end
 
 producer.close
-
-exit(failed ? 1 : 0)

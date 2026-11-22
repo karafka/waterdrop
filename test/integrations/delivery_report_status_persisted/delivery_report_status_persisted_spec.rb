@@ -11,19 +11,6 @@ require "waterdrop"
 
 BOOTSTRAP_SERVERS = ENV.fetch("BOOTSTRAP_SERVERS", "127.0.0.1:9092")
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 # `acks: all` so a `PERSISTED` status means the write is on every in-sync replica.
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
@@ -47,40 +34,40 @@ broker_ids = producer.client.metadata(topic).brokers.map { |broker| broker[:brok
 producer.close
 
 [["produce_sync", sync_report], ["produce_async", async_report]].each do |name, report|
-  failed = check(failed, report.error.nil?, "#{name}: report carries no error")
-  failed = check(failed, report.persisted?, "#{name}: message is persisted")
-  failed = check(
-    failed,
-    report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_PERSISTED,
-    "#{name}: status is RD_KAFKA_MSG_STATUS_PERSISTED"
-  )
-  failed = check(
-    failed,
-    !report.possibly_persisted? && !report.not_persisted?,
-    "#{name}: no other status predicate matches"
-  )
-  failed = check(
-    failed,
-    report.latency.is_a?(Integer) && report.latency.positive?,
-    "#{name}: latency is a positive number of microseconds (#{report.latency})"
-  )
-  failed = check(
-    failed,
-    broker_ids.include?(report.broker_id),
-    "#{name}: broker id #{report.broker_id.inspect} is a cluster broker #{broker_ids}"
-  )
+  unless report.error.nil?
+    warn "FAIL: #{name}: report carries #{report.error.inspect}"
+    exit(1)
+  end
+
+  unless report.persisted?
+    warn "FAIL: #{name}: message is not reported as persisted (status #{report.status})"
+    exit(1)
+  end
+
+  unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_PERSISTED
+    warn "FAIL: #{name}: expected RD_KAFKA_MSG_STATUS_PERSISTED, got status #{report.status}"
+    exit(1)
+  end
+
+  if report.possibly_persisted? || report.not_persisted?
+    warn "FAIL: #{name}: another status predicate also matches"
+    exit(1)
+  end
+
+  unless report.latency.is_a?(Integer) && report.latency.positive?
+    warn "FAIL: #{name}: expected a positive latency in microseconds, got #{report.latency.inspect}"
+    exit(1)
+  end
+
+  unless broker_ids.include?(report.broker_id)
+    warn "FAIL: #{name}: broker id #{report.broker_id.inspect} is not a cluster broker #{broker_ids}"
+    exit(1)
+  end
 end
 
-failed = check(
-  failed,
-  event_reports.all? { |report| report.persisted? && report.latency && report.broker_id },
-  "message.acknowledged reports carry status, latency and broker id"
-)
-
-if failed
-  puts "\nFAIL: delivery report status, latency or broker id regressed for persisted messages"
-else
-  puts "\nPASS: delivery reports of persisted messages carry status, latency and broker id"
+unless event_reports.all? { |report| report.persisted? && report.latency && report.broker_id }
+  warn "FAIL: a message.acknowledged report lacks the persisted status, latency or broker id"
+  exit(1)
 end
 
-exit(failed ? 1 : 0)
+puts "PASS: delivery reports of persisted messages carry status, latency and broker id"

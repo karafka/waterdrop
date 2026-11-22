@@ -21,19 +21,6 @@ def monotonic_now
   Process.clock_gettime(Process::CLOCK_MONOTONIC)
 end
 
-failed = false
-
-# Records and prints a single assertion result instead of raising, so every check runs.
-def check(failed, condition, message)
-  if condition
-    puts "  ok: #{message}"
-    failed
-  else
-    puts "  FAIL: #{message}"
-    true
-  end
-end
-
 producer = WaterDrop::Producer.new do |config|
   config.deliver = true
   config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
@@ -52,33 +39,41 @@ handle = producer.produce_async(topic: topic, payload: "async-payload", label: p
 produce_call_returned_at = monotonic_now
 
 # librdkafka echoes the label back onto the delivery handle immediately
-failed = check(failed, handle.label == produced_at, "delivery handle preserves the label")
+unless handle.label == produced_at
+  warn "FAIL: delivery handle label is #{handle.label.inspect}, not the produced one"
+  exit(1)
+end
 
 event = acknowledged.pop
 round_trip = monotonic_now - event[:label]
 
-failed = check(
-  failed, event[:label].equal?(produced_at), "acknowledged event carries the exact label object"
-)
-failed = check(failed, event[:label].is_a?(Float), "label is the monotonic Float we stashed")
-failed = check(
-  failed, round_trip.positive?, "round-trip time is a positive duration (#{round_trip.round(5)}s)"
-)
+unless event[:label].equal?(produced_at)
+  warn "FAIL: acknowledged event label #{event[:label].inspect} is not the produced object"
+  exit(1)
+end
+
+unless event[:label].is_a?(Float)
+  warn "FAIL: expected a Float label, got #{event[:label].class}"
+  exit(1)
+end
+
+unless round_trip.positive?
+  warn "FAIL: round-trip time is not positive (#{round_trip.round(5)}s)"
+  exit(1)
+end
+
 # Being an async dispatch, the round trip must include far more than the near-zero time the
 # produce_async call itself took to return - that is the whole point of the recipe.
-failed = check(
-  failed,
-  round_trip >= (produce_call_returned_at - produced_at),
-  "round-trip time captures more than the produce call return time"
-)
-failed = check(failed, !event[:topic].nil?, "acknowledged event still carries topic")
+unless round_trip >= (produce_call_returned_at - produced_at)
+  warn "FAIL: round-trip time #{round_trip.round(5)}s is shorter than the produce call"
+  exit(1)
+end
+
+if event[:topic].nil?
+  warn "FAIL: acknowledged event has no topic"
+  exit(1)
+end
 
 producer.close
 
-if failed
-  puts "\nFAIL: async label-based round-trip tracking regressed"
-else
-  puts "\nPASS: async labels carry a monotonic timestamp into message.acknowledged"
-end
-
-exit(failed ? 1 : 0)
+puts "PASS: async labels carry a monotonic timestamp into message.acknowledged"
