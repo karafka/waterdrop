@@ -46,27 +46,27 @@ end
 control_producer.close
 
 unless reports.size == MESSAGES
-  warn "FAIL: a report per message"
+  warn "FAIL: expected #{MESSAGES} reports, got #{reports.size}"
   exit(1)
 end
 
 unless reports.none?(&:error)
-  warn "FAIL: no report carries an error"
+  warn "FAIL: a report carries #{reports.find(&:error).error.inspect}"
   exit(1)
 end
 
 unless reports.all? { |report| report.topic_name == topic }
-  warn "FAIL: reports name the produced topic"
+  warn "FAIL: a report names another topic than #{topic}"
   exit(1)
 end
 
 unless reports.all? { |report| report.offset == INVALID_OFFSET }
-  warn "FAIL: every acks: 0 report carries the invalid offset"
+  warn "FAIL: acks: 0 offsets #{reports.map(&:offset)} are not all #{INVALID_OFFSET}"
   exit(1)
 end
 
 unless control_reports[1..].all? { |report| report.offset >= 0 }
-  warn "FAIL: default acks reports real offsets"
+  warn "FAIL: default acks offsets #{control_reports.map(&:offset)} include an invalid one"
   exit(1)
 end
 

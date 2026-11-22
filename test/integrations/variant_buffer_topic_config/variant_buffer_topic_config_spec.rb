@@ -49,13 +49,13 @@ variant = producer.with(topic_config: { acks: 0 })
   variant_offsets, default_offsets = round(producer, variant, flusher, sync: sync)
 
   unless variant_offsets.size == MESSAGES && variant_offsets.all?(&:negative?)
-    warn "FAIL: #{name}: variant messages are sent with acks: 0"
+    warn "FAIL: #{name}: variant messages not sent with acks: 0 (offsets #{variant_offsets})"
     exit(1)
   end
 
   # The first report on a new topic may carry no offset even with acks
   unless default_offsets.size == MESSAGES && default_offsets.drop(1).all? { |offset| offset >= 0 }
-    warn "FAIL: #{name}: default messages are sent with the default acks"
+    warn "FAIL: #{name}: default messages not sent with the default acks (offsets #{default_offsets})"
     exit(1)
   end
 end

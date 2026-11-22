@@ -38,17 +38,17 @@ end
 offsets = produce_from_threads(buffered)
 
 unless buffered.client.messages.size == TOTAL
-  warn "FAIL: buffered keeps all #{TOTAL} messages"
+  warn "FAIL: buffered: expected #{TOTAL} messages, got #{buffered.client.messages.size}"
   exit(1)
 end
 
 unless buffered.client.messages_for("threaded").size == TOTAL
-  warn "FAIL: buffered keeps all #{TOTAL} messages of the topic"
+  warn "FAIL: buffered: expected #{TOTAL} messages of the topic, got #{buffered.client.messages_for("threaded").size}"
   exit(1)
 end
 
 unless offsets.sort == (0...TOTAL).to_a
-  warn "FAIL: buffered assigns each offset once"
+  warn "FAIL: buffered: offsets are not 0...#{TOTAL}, each once"
   exit(1)
 end
 
@@ -62,7 +62,7 @@ end
 offsets = produce_from_threads(dummy)
 
 unless offsets.sort == (0...TOTAL).to_a
-  warn "FAIL: dummy assigns each offset once"
+  warn "FAIL: dummy: offsets are not 0...#{TOTAL}, each once"
   exit(1)
 end
 

@@ -25,30 +25,38 @@ end
 
 topic = generate_topic("variant-nil")
 
-unless raised_class { producer.with(topic_config: nil) } == WaterDrop::Errors::VariantInvalidError
-  warn "FAIL: topic_config: nil raises VariantInvalidError"
+raised = raised_class { producer.with(topic_config: nil) }
+
+unless raised == WaterDrop::Errors::VariantInvalidError
+  warn "FAIL: topic_config: nil: expected VariantInvalidError, got #{raised.inspect}"
   exit(1)
 end
 
-unless raised_class { producer.with(max_wait_timeout: nil) } == WaterDrop::Errors::VariantInvalidError
-  warn "FAIL: max_wait_timeout: nil raises VariantInvalidError"
+raised = raised_class { producer.with(max_wait_timeout: nil) }
+
+unless raised == WaterDrop::Errors::VariantInvalidError
+  warn "FAIL: max_wait_timeout: nil: expected VariantInvalidError, got #{raised.inspect}"
   exit(1)
 end
 
 variant = producer.with(topic_config: { acks: 1 })
 
 unless variant.max_wait_timeout == producer.config.max_wait_timeout
-  warn "FAIL: omitted max_wait_timeout uses the producer default"
+  warn "FAIL: omitted max_wait_timeout: expected #{producer.config.max_wait_timeout}, got #{variant.max_wait_timeout}"
   exit(1)
 end
 
-unless variant.produce_sync(topic: topic, payload: "variant").offset.zero?
-  warn "FAIL: variant produces"
+offset = variant.produce_sync(topic: topic, payload: "variant").offset
+
+unless offset.zero?
+  warn "FAIL: variant delivery: expected offset 0, got #{offset}"
   exit(1)
 end
 
-unless producer.produce_sync(topic: topic, payload: "producer").offset == 1
-  warn "FAIL: producer produces"
+offset = producer.produce_sync(topic: topic, payload: "producer").offset
+
+unless offset == 1
+  warn "FAIL: producer delivery: expected offset 1, got #{offset}"
   exit(1)
 end
 

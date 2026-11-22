@@ -49,12 +49,12 @@ check_action = lambda do |name, &action|
   polluted = files.reject { |file| File.empty?(file.path) }
 
   unless files.size == FILES_COUNT
-    warn "FAIL: #{name}: files were opened between pipe close and destroy"
+    warn "FAIL: #{name}: expected #{FILES_COUNT} files opened between pipe close and destroy, got #{files.size}"
     exit(1)
   end
 
   unless polluted.empty?
-    warn "FAIL: #{name}: no file got a byte from librdkafka (#{polluted.size} did)"
+    warn "FAIL: #{name}: #{polluted.size} files got a byte from librdkafka"
     exit(1)
   end
 
@@ -70,13 +70,13 @@ producer.produce_sync(topic: topic, payload: "x")
 
 disconnected = check_action.call("disconnect") { producer.disconnect }
 unless disconnected
-  warn "FAIL: disconnect: producer disconnected"
+  warn "FAIL: disconnect: producer did not disconnect"
   exit(1)
 end
 
 report = producer.produce_sync(topic: topic, payload: "y")
 unless report.error.nil? && report.offset >= 0
-  warn "FAIL: disconnect: producer reconnects and produces"
+  warn "FAIL: disconnect: producer did not produce after reconnect (#{report.error.inspect}, offset #{report.offset})"
   exit(1)
 end
 

@@ -45,37 +45,37 @@ report = event[:delivery_report]
 producer.close
 
 unless event[:error].code == :msg_timed_out
-  warn "FAIL: delivery failed with msg_timed_out (#{event[:error].code})"
+  warn "FAIL: expected msg_timed_out, got #{event[:error].code}"
   exit(1)
 end
 
 unless report.not_persisted?
-  warn "FAIL: message is not persisted"
+  warn "FAIL: message is not reported as not persisted (status #{report.status})"
   exit(1)
 end
 
 unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_NOT_PERSISTED
-  warn "FAIL: status is RD_KAFKA_MSG_STATUS_NOT_PERSISTED"
+  warn "FAIL: expected RD_KAFKA_MSG_STATUS_NOT_PERSISTED, got status #{report.status}"
   exit(1)
 end
 
-unless !report.persisted? && !report.possibly_persisted?
-  warn "FAIL: no other status predicate matches"
+if report.persisted? || report.possibly_persisted?
+  warn "FAIL: another status predicate also matches"
   exit(1)
 end
 
 unless report.broker_id.nil?
-  warn "FAIL: no broker took the write, so broker id is nil"
+  warn "FAIL: expected no broker id, got #{report.broker_id}"
   exit(1)
 end
 
 unless report.latency.is_a?(Integer) && report.latency >= 1_000_000
-  warn "FAIL: latency covers the whole message.timeout.ms (#{report.latency} us)"
+  warn "FAIL: latency #{report.latency.inspect} us is shorter than message.timeout.ms"
   exit(1)
 end
 
 unless retry_decision(report) == :retry
-  warn "FAIL: the message is safe to retry"
+  warn "FAIL: expected :retry, got #{retry_decision(report)}"
   exit(1)
 end
 

@@ -65,17 +65,17 @@ end
 round_trip = monotonic_now - error_event[:label]
 
 unless error_event[:label].is_a?(Float)
-  warn "FAIL: error.occurred event carries the monotonic label"
+  warn "FAIL: expected a Float label in error.occurred, got #{error_event[:label].class}"
   exit(1)
 end
 
 unless round_trip.positive?
-  warn "FAIL: failed round-trip time is positive (#{round_trip.round(5)}s)"
+  warn "FAIL: failed round-trip time is not positive (#{round_trip.round(5)}s)"
   exit(1)
 end
 
 if error_event[:error].nil?
-  warn "FAIL: error.occurred event carries the delivery error"
+  warn "FAIL: error.occurred event has no delivery error"
   exit(1)
 end
 

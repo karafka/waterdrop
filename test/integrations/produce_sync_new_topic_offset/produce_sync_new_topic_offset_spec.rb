@@ -56,37 +56,37 @@ rest = reports[1..]
 payloads = consume_payloads(topic, MESSAGES)
 
 unless reports.size == MESSAGES
-  warn "FAIL: a report per message"
+  warn "FAIL: expected #{MESSAGES} reports, got #{reports.size}"
   exit(1)
 end
 
 unless reports.none?(&:error)
-  warn "FAIL: no report carries an error"
+  warn "FAIL: a report carries #{reports.find(&:error).error.inspect}"
   exit(1)
 end
 
 unless reports.all? { |report| report.topic_name == topic }
-  warn "FAIL: reports name the produced topic"
+  warn "FAIL: a report names another topic than #{topic}"
   exit(1)
 end
 
 unless first.offset == INVALID_OFFSET || first.offset >= 0
-  warn "FAIL: first offset is real or the invalid sentinel"
+  warn "FAIL: first offset #{first.offset} is neither real nor the invalid sentinel"
   exit(1)
 end
 
 unless rest.all? { |report| report.offset >= 0 }
-  warn "FAIL: later offsets are valid"
+  warn "FAIL: later offsets #{rest.map(&:offset)} include an invalid one"
   exit(1)
 end
 
 unless rest.each_cons(2).all? { |a, b| b.offset > a.offset }
-  warn "FAIL: later offsets increase"
+  warn "FAIL: later offsets #{rest.map(&:offset)} do not increase"
   exit(1)
 end
 
 unless Array.new(MESSAGES) { |i| "payload-#{i}" }.all? { |payload| payloads.include?(payload) }
-  warn "FAIL: every message landed, including the first"
+  warn "FAIL: expected #{MESSAGES} messages in the topic, consumed #{payloads.size}"
   exit(1)
 end
 

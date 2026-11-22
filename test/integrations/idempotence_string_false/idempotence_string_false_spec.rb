@@ -19,7 +19,7 @@ topic = generate_topic("idempotence-string-false")
 producer = build_producer("false")
 
 unless producer.idempotent? == false
-  warn 'FAIL: "false" producer is not idempotent'
+  warn 'FAIL: "false" producer is idempotent'
   exit(1)
 end
 
@@ -27,7 +27,7 @@ begin
   report = producer.variant(topic_config: { acks: 0 }).produce_sync(topic: topic, payload: "x")
 
   unless report.offset.negative?
-    warn 'FAIL: "false" producer delivers via an acks: 0 variant'
+    warn %(FAIL: "false" producer acks: 0 variant reported offset #{report.offset})
     exit(1)
   end
 rescue WaterDrop::Errors::VariantInvalidError => e
@@ -40,7 +40,7 @@ producer.close
 producer = build_producer("true")
 
 unless producer.idempotent? == true
-  warn 'FAIL: "true" producer is idempotent'
+  warn 'FAIL: "true" producer is not idempotent'
   exit(1)
 end
 
@@ -52,7 +52,7 @@ rescue WaterDrop::Errors::VariantInvalidError
 end
 
 unless refused
-  warn 'FAIL: "true" producer refuses an acks: 0 variant'
+  warn 'FAIL: "true" producer accepted an acks: 0 variant'
   exit(1)
 end
 

@@ -49,16 +49,16 @@ producer.close
 flusher.join
 
 unless error.is_a?(WaterDrop::Errors::ProducerClosedError)
-  warn "FAIL: flush raises ProducerClosedError"
+  warn "FAIL: flush did not raise ProducerClosedError, got #{error.inspect}"
   exit(1)
 end
 
-unless error&.dispatched&.size == 1
-  warn "FAIL: error holds the one dispatched handle"
+unless error.dispatched.size == 1
+  warn "FAIL: expected 1 dispatched handle, got #{error.dispatched.size}"
   exit(1)
 end
 
 unless producer.messages == batch.drop(1)
-  warn "FAIL: buffer holds only the undispatched messages"
+  warn "FAIL: expected #{TOTAL - 1} undispatched messages in the buffer, got #{producer.messages.size}"
   exit(1)
 end

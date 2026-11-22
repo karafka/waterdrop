@@ -38,17 +38,17 @@ event = acknowledged.pop
 round_trip = monotonic_now - event[:label]
 
 unless event[:label].equal?(produced_at)
-  warn "FAIL: acknowledged event carries the exact label object"
+  warn "FAIL: acknowledged event label #{event[:label].inspect} is not the produced object"
   exit(1)
 end
 
 unless event[:label].is_a?(Float)
-  warn "FAIL: label is the monotonic Float we stashed"
+  warn "FAIL: expected a Float label, got #{event[:label].class}"
   exit(1)
 end
 
 unless round_trip.positive?
-  warn "FAIL: round-trip time is a positive duration (#{round_trip.round(5)}s)"
+  warn "FAIL: round-trip time is not positive (#{round_trip.round(5)}s)"
   exit(1)
 end
 

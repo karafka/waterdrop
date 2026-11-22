@@ -47,37 +47,39 @@ rescue Rdkafka::RdkafkaError => e
 end
 
 if error.nil?
-  warn "FAIL: the transaction with a too large message fails"
+  warn "FAIL: the transaction with a too large message did not fail"
   exit(1)
 end
 
-unless error&.abortable?
-  warn "FAIL: the caller gets the abortable commit error (#{error&.code})"
+unless error.abortable?
+  warn "FAIL: the caller got a not abortable error (#{error.code})"
   exit(1)
 end
 
-unless error&.code != :state
-  warn "FAIL: no invalid state error from a second abort"
+if error.code == :state
+  warn "FAIL: the caller got an invalid state error from a second abort"
   exit(1)
 end
 
 unless events.count([:aborted]) == 1
-  warn "FAIL: the transaction is aborted once"
+  warn "FAIL: expected 1 transaction.aborted, got #{events.count([:aborted])}"
   exit(1)
 end
 
 unless events.include?([:error, "transaction.commit"])
-  warn "FAIL: the commit error is reported"
+  warn "FAIL: the commit error is not reported"
   exit(1)
 end
 
 if events.include?([:error, "transaction.abort"])
-  warn "FAIL: no abort error is reported"
+  warn "FAIL: an abort error is reported"
   exit(1)
 end
 
-unless events.select { |event| event.first == :reload } == [[:reload, error&.code]]
-  warn "FAIL: the client is reloaded once, for the commit error"
+reloads = events.select { |event| event.first == :reload }
+
+unless reloads == [[:reload, error.code]]
+  warn "FAIL: expected one reload for #{error.code}, got #{reloads}"
   exit(1)
 end
 
@@ -89,7 +91,7 @@ rescue
 end
 
 unless recovered
-  warn "FAIL: the next transaction commits"
+  warn "FAIL: the next transaction did not commit"
   exit(1)
 end
 

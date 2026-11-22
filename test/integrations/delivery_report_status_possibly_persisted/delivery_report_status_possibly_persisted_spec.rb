@@ -71,32 +71,32 @@ report = event[:delivery_report]
 producer.close
 
 unless warmup_report.persisted?
-  warn "FAIL: warm-up message is persisted"
+  warn "FAIL: warm-up message is not persisted (status #{warmup_report.status})"
   exit(1)
 end
 
 unless event[:error].code == :msg_timed_out
-  warn "FAIL: delivery failed with msg_timed_out (#{event[:error].code})"
+  warn "FAIL: expected msg_timed_out, got #{event[:error].code}"
   exit(1)
 end
 
 unless report.possibly_persisted?
-  warn "FAIL: message is possibly persisted"
+  warn "FAIL: message is not reported as possibly persisted (status #{report.status})"
   exit(1)
 end
 
 unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED
-  warn "FAIL: status is RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED"
+  warn "FAIL: expected RD_KAFKA_MSG_STATUS_POSSIBLY_PERSISTED, got status #{report.status}"
   exit(1)
 end
 
-unless !report.persisted? && !report.not_persisted?
-  warn "FAIL: no other status predicate matches"
+if report.persisted? || report.not_persisted?
+  warn "FAIL: another status predicate also matches"
   exit(1)
 end
 
 unless retry_decision(report) == :retry_may_duplicate
-  warn "FAIL: a retry may write a duplicate"
+  warn "FAIL: expected :retry_may_duplicate, got #{retry_decision(report)}"
   exit(1)
 end
 

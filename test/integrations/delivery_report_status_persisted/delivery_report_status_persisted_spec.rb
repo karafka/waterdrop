@@ -35,38 +35,38 @@ producer.close
 
 [["produce_sync", sync_report], ["produce_async", async_report]].each do |name, report|
   unless report.error.nil?
-    warn "FAIL: #{name}: report carries no error"
+    warn "FAIL: #{name}: report carries #{report.error.inspect}"
     exit(1)
   end
 
   unless report.persisted?
-    warn "FAIL: #{name}: message is persisted"
+    warn "FAIL: #{name}: message is not reported as persisted (status #{report.status})"
     exit(1)
   end
 
   unless report.status == Rdkafka::Bindings::RD_KAFKA_MSG_STATUS_PERSISTED
-    warn "FAIL: #{name}: status is RD_KAFKA_MSG_STATUS_PERSISTED"
+    warn "FAIL: #{name}: expected RD_KAFKA_MSG_STATUS_PERSISTED, got status #{report.status}"
     exit(1)
   end
 
-  unless !report.possibly_persisted? && !report.not_persisted?
-    warn "FAIL: #{name}: no other status predicate matches"
+  if report.possibly_persisted? || report.not_persisted?
+    warn "FAIL: #{name}: another status predicate also matches"
     exit(1)
   end
 
   unless report.latency.is_a?(Integer) && report.latency.positive?
-    warn "FAIL: #{name}: latency is a positive number of microseconds (#{report.latency})"
+    warn "FAIL: #{name}: expected a positive latency in microseconds, got #{report.latency.inspect}"
     exit(1)
   end
 
   unless broker_ids.include?(report.broker_id)
-    warn "FAIL: #{name}: broker id #{report.broker_id.inspect} is a cluster broker #{broker_ids}"
+    warn "FAIL: #{name}: broker id #{report.broker_id.inspect} is not a cluster broker #{broker_ids}"
     exit(1)
   end
 end
 
 unless event_reports.all? { |report| report.persisted? && report.latency && report.broker_id }
-  warn "FAIL: message.acknowledged reports carry status, latency and broker id"
+  warn "FAIL: a message.acknowledged report lacks the persisted status, latency or broker id"
   exit(1)
 end
 

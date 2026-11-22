@@ -40,7 +40,7 @@ produce_call_returned_at = monotonic_now
 
 # librdkafka echoes the label back onto the delivery handle immediately
 unless handle.label == produced_at
-  warn "FAIL: delivery handle preserves the label"
+  warn "FAIL: delivery handle label is #{handle.label.inspect}, not the produced one"
   exit(1)
 end
 
@@ -48,29 +48,29 @@ event = acknowledged.pop
 round_trip = monotonic_now - event[:label]
 
 unless event[:label].equal?(produced_at)
-  warn "FAIL: acknowledged event carries the exact label object"
+  warn "FAIL: acknowledged event label #{event[:label].inspect} is not the produced object"
   exit(1)
 end
 
 unless event[:label].is_a?(Float)
-  warn "FAIL: label is the monotonic Float we stashed"
+  warn "FAIL: expected a Float label, got #{event[:label].class}"
   exit(1)
 end
 
 unless round_trip.positive?
-  warn "FAIL: round-trip time is a positive duration (#{round_trip.round(5)}s)"
+  warn "FAIL: round-trip time is not positive (#{round_trip.round(5)}s)"
   exit(1)
 end
 
 # Being an async dispatch, the round trip must include far more than the near-zero time the
 # produce_async call itself took to return - that is the whole point of the recipe.
 unless round_trip >= (produce_call_returned_at - produced_at)
-  warn "FAIL: round-trip time captures more than the produce call return time"
+  warn "FAIL: round-trip time #{round_trip.round(5)}s is shorter than the produce call"
   exit(1)
 end
 
 if event[:topic].nil?
-  warn "FAIL: acknowledged event still carries topic"
+  warn "FAIL: acknowledged event has no topic"
   exit(1)
 end
 
