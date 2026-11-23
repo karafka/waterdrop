@@ -455,6 +455,17 @@ describe WaterDrop::Producer::Buffer do
       assert_equal(5, @producer.messages.size)
     end
 
+    it "keeps the whole batch buffered when the kafka config is invalid" do
+      producer = build(:producer, kafka: { "bootstrap.servers": "" })
+      producer.buffer_many(Array.new(3) { build(:valid_message) })
+
+      assert_raises(WaterDrop::Errors::ConfigurationInvalidError) { producer.flush_sync }
+
+      assert_equal(3, producer.messages.size)
+    ensure
+      producer&.purge
+    end
+
     it "restores the fresh and the already-processed messages to their own buffers" do
       transform = lambda do |message|
         message[:payload] += "-mw"

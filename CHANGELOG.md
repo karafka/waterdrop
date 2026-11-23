@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## v2.10.13 (Unreleased)
+- [Change] Raise `ConfigurationInvalidError` (`kafka.bootstrap.servers`) on the first produce when `bootstrap.servers` is missing, `nil` or empty, instead of failing with `msg_timed_out` after `message.timeout.ms`. `#close` reports unflushed buffered messages as `producer.close.error`.
+
 ## v2.10.12 (Unreleased)
 - [Maintenance] Release the code of 2.10.11 again, with a Sigstore attestation. 2.10.11 was published without one: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned. There are no code changes; use 2.10.12 rather than 2.10.11 for the attested gem.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.

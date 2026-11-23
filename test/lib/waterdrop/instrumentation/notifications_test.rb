@@ -84,7 +84,7 @@ describe_current do
 
     describe "when producer is connected" do
       before do
-        @producer.setup { nil }
+        @producer.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
 
         @events_names.each do |event_name|
           @producer.monitor.subscribe(event_name) do |event|
@@ -103,7 +103,7 @@ describe_current do
 
     describe "when producer is closed" do
       before do
-        @producer.setup { nil }
+        @producer.setup { |config| config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS } }
 
         @events_names.each do |event_name|
           @producer.monitor.subscribe(event_name) do |event|

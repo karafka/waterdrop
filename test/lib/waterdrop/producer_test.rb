@@ -910,6 +910,80 @@ describe_current do
     end
   end
 
+  describe "producer without bootstrap.servers" do
+    [nil, ""].each do |servers|
+      context "when bootstrap.servers is #{servers.inspect}" do
+        before do
+          @producer = build(:producer, kafka: { "bootstrap.servers": servers })
+          @message = { topic: @topic_name, payload: "" }
+        end
+
+        it "expect produce_sync to raise a config error right away" do
+          assert_raises(WaterDrop::Errors::ConfigurationInvalidError) do
+            @producer.produce_sync(@message)
+          end
+        end
+
+        it "expect produce_async to raise a config error right away" do
+          assert_raises(WaterDrop::Errors::ConfigurationInvalidError) do
+            @producer.produce_async(@message)
+          end
+        end
+
+        it "expect close with buffered messages to finish and report the config error" do
+          events = []
+          @producer.monitor.subscribe("error.occurred") { |event| events << event }
+          @producer.buffer(@message)
+
+          @producer.close
+
+          assert_predicate(@producer.status, :closed?)
+          assert_equal(["producer.close.error"], events.map { |event| event[:type] })
+          assert_kind_of(WaterDrop::Errors::ConfigurationInvalidError, events.first[:error])
+        end
+      end
+    end
+
+    context "when there is no kafka config at all" do
+      before do
+        @producer = WaterDrop::Producer.new { |config| config.deliver = true }
+      end
+
+      after { @producer.close }
+
+      it "expect to raise a config error on first use" do
+        assert_raises(WaterDrop::Errors::ConfigurationInvalidError) { @producer.client }
+      end
+    end
+
+    context "when a non-rdkafka client is used" do
+      before do
+        @producer = WaterDrop::Producer.new do |config|
+          config.client_class = WaterDrop::Clients::Buffered
+          config.kafka = { "bootstrap.servers": nil }
+        end
+      end
+
+      after { @producer.close }
+
+      it "expect to produce without validating bootstrap.servers" do
+        @producer.produce_sync(topic: "test", payload: "")
+
+        assert_equal(1, @producer.client.messages.size)
+      end
+    end
+
+    context "when deliver is off" do
+      before do
+        @producer = build(:producer, deliver: false, kafka: { "bootstrap.servers": nil })
+      end
+
+      it "expect to produce without validating bootstrap.servers" do
+        @producer.produce_sync(topic: "test", payload: "")
+      end
+    end
+  end
+
   describe "fork integration spec" do
     before do
       @producer = build(:producer)
