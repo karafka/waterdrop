@@ -6,7 +6,6 @@
 ## v2.10.12 (Unreleased)
 - [Maintenance] Release the code of 2.10.11 again, with a Sigstore attestation. 2.10.11 was published without one: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned. There are no code changes; use 2.10.12 rather than 2.10.11 for the attested gem.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
-- [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.
 
 ## v2.10.11 (2026-11-20)
 - [Feature] Add the `produce` / `produce!`, `produce_many` / `produce_many!`, `tombstone` / `tombstone!`, `tombstone_many` / `tombstone_many!` and `flush` / `flush!` aliases of the `_async` / `_sync` methods.
