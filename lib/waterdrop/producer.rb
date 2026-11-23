@@ -461,7 +461,7 @@ module WaterDrop
               nil
             rescue Errors::ConfigurationInvalidError => e
               # The client could not be built (invalid kafka config), so nothing was dispatched and
-              # nothing reported it yet. The buffered messages cannot be delivered by this producer.
+              # nothing reported it yet.
               @monitor.instrument(
                 "error.occurred",
                 producer_id: id,
