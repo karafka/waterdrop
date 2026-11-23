@@ -180,6 +180,30 @@ describe_current do
     end
   end
 
+  describe "bootstrap.servers validation" do
+    [nil, ""].each do |servers|
+      describe "when bootstrap.servers is #{servers.inspect}" do
+        before do
+          @invalid_producer = WaterDrop::Producer.new do |config|
+            config.kafka = { "bootstrap.servers": servers }
+          end
+        end
+
+        after { @invalid_producer.close }
+
+        it "expect to raise a config error naming the setting before building rdkafka" do
+          ::Rdkafka::Config.expects(:new).never
+
+          error = assert_raises(WaterDrop::Errors::ConfigurationInvalidError) do
+            described_class.new(@invalid_producer)
+          end
+
+          assert_includes(error.message, "kafka.bootstrap.servers")
+        end
+      end
+    end
+  end
+
   describe "cleanup on init_transactions failure" do
     def build_transactional_producer
       WaterDrop::Producer.new do |config|

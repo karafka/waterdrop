@@ -11,6 +11,11 @@ module WaterDrop
         # @param producer [WaterDrop::Producer] producer instance with its config, etc
         # @note We overwrite this that way, because we do not care
         def new(producer)
+          Contracts::KafkaConfig.new.validate!(
+            { kafka: producer.config.kafka.to_h },
+            Errors::ConfigurationInvalidError
+          )
+
           monitor = producer.config.monitor
           kafka_config, statistics_enabled = prepare_statistics(
             producer.config.kafka.to_h,

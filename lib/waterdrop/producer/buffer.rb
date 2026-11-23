@@ -172,9 +172,10 @@ module WaterDrop
         requeue_unflushed(transactional? ? data_for_dispatch : data_for_dispatch.drop(e.dispatched.size))
 
         raise
-      rescue Errors::MessageInvalidError
-        # Validation runs before anything is dispatched, so nothing reached librdkafka. Restore the
-        # whole batch instead of dropping valid messages alongside the invalid one.
+      rescue Errors::MessageInvalidError, Errors::ConfigurationInvalidError
+        # Validation (of messages, or of the kafka config when the client is built) runs before
+        # anything is dispatched, so nothing reached librdkafka. Restore the whole batch instead of
+        # dropping valid messages.
         requeue_unflushed(data_for_dispatch)
 
         raise
