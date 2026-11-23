@@ -1,7 +1,9 @@
 # WaterDrop changelog
 
+## v2.10.13 (Unreleased)
+- [Change] Raise `ConfigurationInvalidError` naming `kafka.bootstrap.servers` when the rdkafka client is built (first use) with a missing, `nil` or empty `bootstrap.servers`, instead of each produce blocking until `message.timeout.ms` and failing with `msg_timed_out`. `Buffered`, `Dummy` and custom clients, and `deliver: false`, are not checked. A buffered message that `#close` cannot flush for this reason is reported as `producer.close.error` on `error.occurred`.
+
 ## v2.10.12 (Unreleased)
-- [Change] Raise `ConfigurationInvalidError` naming `kafka.bootstrap.servers` when the rdkafka client is built (first use) with a missing, `nil` or empty `bootstrap.servers`, instead of each produce blocking until `message.timeout.ms` and failing with `msg_timed_out`. `Buffered`, `Dummy` and custom clients, and `deliver: false`, are not checked.
 - [Maintenance] Release the code of 2.10.11 again, with a Sigstore attestation. 2.10.11 was published without one: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned. There are no code changes; use 2.10.12 rather than 2.10.11 for the attested gem.
 - [Maintenance] Sign the gem with `sigstore-cli` and push it with `gem push --attestation` (the `gem-push` action of `karafka/misc`), so a failed signing stops the release instead of publishing the gem without an attestation.
 - [Maintenance] Add the `Sigstore Check` workflow: nightly, and on pull requests that change the push workflow, it builds the gem, signs it like a release and verifies the attestation, without pushing.

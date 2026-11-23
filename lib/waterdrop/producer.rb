@@ -459,6 +459,15 @@ module WaterDrop
               flush_buffer(true)
             rescue Errors::ProduceError
               nil
+            rescue Errors::ConfigurationInvalidError => e
+              # The client could not be built (invalid kafka config), so nothing was dispatched and
+              # nothing reported it yet. The buffered messages cannot be delivered by this producer.
+              @monitor.instrument(
+                "error.occurred",
+                producer_id: id,
+                error: e,
+                type: "producer.close.error"
+              )
             end
 
             # We should not close the client in several threads the same time

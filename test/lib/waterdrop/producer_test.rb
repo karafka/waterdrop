@@ -929,6 +929,18 @@ describe_current do
             @producer.produce_async(@message)
           end
         end
+
+        it "expect close with buffered messages to finish and report the config error" do
+          events = []
+          @producer.monitor.subscribe("error.occurred") { |event| events << event }
+          @producer.buffer(@message)
+
+          @producer.close
+
+          assert_predicate(@producer.status, :closed?)
+          assert_equal(["producer.close.error"], events.map { |event| event[:type] })
+          assert_kind_of(WaterDrop::Errors::ConfigurationInvalidError, events.first[:error])
+        end
       end
     end
 
