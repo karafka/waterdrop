@@ -9,6 +9,7 @@ gem "zeitwerk", "~> 2.8.0"
 
 group :test do
   gem "connection_pool"
+  gem "opentelemetry-sdk"
   gem "ostruct"
   gem "minitest"
   gem "mocha"

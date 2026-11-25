@@ -216,8 +216,13 @@ class Minitest::Spec
 end
 
 require "karafka/core/helpers/minitest_locator"
-extend Karafka::Core::Helpers::MinitestLocator.new(__FILE__, "Waterdrop" => "WaterDrop")
+extend Karafka::Core::Helpers::MinitestLocator.new(
+  __FILE__,
+  "Waterdrop" => "WaterDrop",
+  "Opentelemetry" => "OpenTelemetry"
+)
 
 require "waterdrop"
 require "waterdrop/producer/testing"
 require "waterdrop/instrumentation/vendors/datadog/metrics_listener"
+require "waterdrop/instrumentation/vendors/opentelemetry/middleware"
