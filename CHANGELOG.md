@@ -1,5 +1,8 @@
 # WaterDrop changelog
 
+## Unreleased
+- [Change] Accept `nil` as not set for `oauth.token_provider_listener` (`false` still works).
+
 ## v2.10.12 (2026-11-25)
 - [Change] Raise `ConfigurationInvalidError` (`kafka.bootstrap.servers`) on the first produce when `bootstrap.servers` is missing, `nil` or empty, instead of failing with `msg_timed_out` after `message.timeout.ms`. `#close` reports unflushed buffered messages as `producer.close.error`.
 - [Maintenance] Release the code of 2.10.11 again, with a Sigstore attestation. 2.10.11 was published without one: signing failed in the release workflow (the signer does not work with json 3.x, the default of Ruby 4.0) and the attestation patch then pushed the gem unsigned. There are no code changes; use 2.10.12 rather than 2.10.11 for the attested gem.

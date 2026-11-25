@@ -36,6 +36,23 @@ describe_current do
       it { assert_predicate(@producer.status, :active?) }
     end
 
+    context "when initializing with oauth listener set to nil" do
+      before do
+        @producer = described_class.new do |config|
+          config.kafka = { "bootstrap.servers": BOOTSTRAP_SERVERS }
+          config.oauth.token_provider_listener = nil
+        end
+      end
+
+      it { assert_predicate(@producer.status, :configured?) }
+
+      it "expect to build the client without subscribing a listener" do
+        @producer.client
+
+        assert_predicate(@producer.status, :connected?)
+      end
+    end
+
     context "when initializing with oauth listener" do
       before do
         @listener = Class.new do

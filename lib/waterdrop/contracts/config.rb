@@ -47,7 +47,7 @@ module WaterDrop
 
       nested(:oauth) do
         required(:token_provider_listener) do |val|
-          val == false || val.respond_to?(:on_oauthbearer_token_refresh)
+          val.nil? || val == false || val.respond_to?(:on_oauthbearer_token_refresh)
         end
       end
 

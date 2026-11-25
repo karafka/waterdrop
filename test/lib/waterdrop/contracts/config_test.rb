@@ -516,6 +516,24 @@ describe_current do
     it { refute_empty @contract_errors[:wait_timeout_on_queue_full] }
   end
 
+  describe "when oauth token_provider_listener is false" do
+    before {
+      @config[:oauth][:token_provider_listener] = false
+      @contract_result = described_class.new.call(@config)
+    }
+
+    it { assert_predicate @contract_result, :success? }
+  end
+
+  describe "when oauth token_provider_listener is nil" do
+    before {
+      @config[:oauth][:token_provider_listener] = nil
+      @contract_result = described_class.new.call(@config)
+    }
+
+    it { assert_predicate @contract_result, :success? }
+  end
+
   describe "when oauth token_provider_listener does not respond to on_oauthbearer_token_refresh" do
     before {
       @config[:oauth][:token_provider_listener] = true
