@@ -1,0 +1,6 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+gem "opentelemetry-sdk"
+gem "waterdrop", path: ENV.fetch("WATERDROP_GEM_DIR", nil)
