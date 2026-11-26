@@ -8,11 +8,14 @@ module WaterDrop
         # Producer middleware that injects the W3C trace context into the message headers and
         # creates a producer span for each message
         #
-        # @note You need to setup the `opentelemetry-sdk` (or `opentelemetry-api`) and assign the
-        #   tracer
+        # @note You need to setup the `opentelemetry-sdk` (or `opentelemetry-api`). Without an
+        #   assigned tracer, the `waterdrop` tracer of the global tracer provider is used
         #
         # @note The span starts and finishes in the middleware, before the message is validated and
         #   dispatched. It does not cover the delivery to Kafka.
+        #
+        # @note Middleware runs for buffered messages when they are flushed, so they get the trace
+        #   context of the `flush_*` caller, not of the `buffer` caller.
         #
         # @example Append to one producer
         #   middleware = WaterDrop::Instrumentation::Vendors::OpenTelemetry::Middleware.new do |c|
@@ -41,7 +44,8 @@ module WaterDrop
 
           private_constant :TRACEPARENT, :BASE_ATTRIBUTES
 
-          # OpenTelemetry tracer that we should use to create the producer spans
+          # OpenTelemetry tracer that we should use to create the producer spans. When `nil`, the
+          # `waterdrop` tracer of the global `OpenTelemetry.tracer_provider` is used
           setting :tracer
 
           # Propagator used to inject the trace context. When `nil`, the global
@@ -69,7 +73,10 @@ module WaterDrop
           #
           # @note Producers configured before this call are not affected. Append to them directly.
           # @note Use `WaterDrop.monitor.unsubscribe(middleware)` to stop it
+          # @note Calling it again does not append the middleware twice. Call it during setup,
+          #   not while producers are being configured.
           def install
+            ::WaterDrop.monitor.unsubscribe(self)
             ::WaterDrop.monitor.subscribe(self)
           end
 
@@ -94,20 +101,22 @@ module WaterDrop
 
             span = start_span(message) if spans
 
-            if injectable
-              message = message.dup
-              headers = headers ? headers.dup : {}
-              message[:headers] = headers
+            return message unless injectable
 
-              context = if span
-                ::OpenTelemetry::Trace.context_with_span(span)
-              else
-                ::OpenTelemetry::Context.current
-              end
-
-              (propagator || ::OpenTelemetry.propagation).inject(headers, context: context)
+            context = if span
+              ::OpenTelemetry::Trace.context_with_span(span)
+            else
+              ::OpenTelemetry::Context.current
             end
 
+            carrier = {}
+            (propagator || ::OpenTelemetry.propagation).inject(carrier, context: context)
+
+            # No active trace context, nothing to propagate
+            return message if carrier.empty?
+
+            message = message.dup
+            message[:headers] = headers ? headers.merge(carrier) : carrier
             message
           ensure
             span&.finish
@@ -128,9 +137,18 @@ module WaterDrop
             end
 
             key = message[:key]
-            attributes["kafka.message.key"] = key if key
 
-            tracer.start_span("send #{topic}", kind: :producer, attributes: attributes)
+            # Binary keys are not valid attribute values and exporters drop them
+            if key.is_a?(String) && (key.ascii_only? || (key.encoding == Encoding::UTF_8 && key.valid_encoding?))
+              attributes["kafka.message.key"] = key
+            end
+
+            (tracer || default_tracer).start_span("send #{topic}", kind: :producer, attributes: attributes)
+          end
+
+          # @return [OpenTelemetry::Trace::Tracer] tracer of the global tracer provider
+          def default_tracer
+            @default_tracer ||= ::OpenTelemetry.tracer_provider.tracer("waterdrop", ::WaterDrop::VERSION)
           end
         end
       end
