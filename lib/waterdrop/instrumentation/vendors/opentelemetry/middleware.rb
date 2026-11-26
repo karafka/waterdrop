@@ -60,6 +60,7 @@ module WaterDrop
 
           # @param block [Proc] configuration block
           def initialize(&block)
+            @default_tracer = nil
             configure
             setup(&block) if block
           end
@@ -112,7 +113,6 @@ module WaterDrop
             carrier = {}
             (propagator || ::OpenTelemetry.propagation).inject(carrier, context: context)
 
-            # No active trace context, nothing to propagate
             return message if carrier.empty?
 
             message = message.dup

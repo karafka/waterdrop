@@ -140,7 +140,7 @@ describe_current do
     before do
       propagator = Object.new
 
-      def propagator.inject(carrier, context:)
+      propagator.define_singleton_method(:inject) do |carrier, context:|
         carrier["shared"] = "injected"
       end
 
