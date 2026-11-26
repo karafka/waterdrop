@@ -95,6 +95,28 @@ describe_current do
     end
   end
 
+  describe "when message has a non-ASCII UTF-8 key" do
+    before do
+      @middleware.call(topic: @topic, payload: "test", key: "klucz-ą")
+      @span = @exporter.finished_spans.first
+    end
+
+    it "expect to set the key attribute" do
+      assert_equal "klucz-ą", @span.attributes["kafka.message.key"]
+    end
+  end
+
+  describe "when message has an invalid UTF-8 key" do
+    before do
+      @middleware.call(topic: @topic, payload: "test", key: (+"\xFF").force_encoding(Encoding::UTF_8))
+      @span = @exporter.finished_spans.first
+    end
+
+    it "expect not to set the key attribute" do
+      refute @span.attributes.key?("kafka.message.key")
+    end
+  end
+
   describe "when message has user headers" do
     before do
       @headers = { "user" => "value" }
