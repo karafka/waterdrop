@@ -190,9 +190,9 @@ module WaterDrop
 
     # Namespace for oauth related configuration
     setting :oauth do
-      # option [false, nil, #call] Listener for using oauth bearer. This listener will be able to
-      #   get the client name to decide whether to use a single multi-client token refreshing
-      #   or have separate tokens per instance.
+      # option [false, nil, #on_oauthbearer_token_refresh] Listener for using oauth bearer. This
+      #   listener will be able to get the client name to decide whether to use a single
+      #   multi-client token refreshing or have separate tokens per instance.
       setting :token_provider_listener, default: false
     end
 
