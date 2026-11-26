@@ -114,6 +114,34 @@ describe_current do
     end
   end
 
+  describe "when the propagator injects a header the user also set" do
+    before do
+      propagator = Object.new
+
+      def propagator.inject(carrier, context:)
+        carrier["shared"] = "injected"
+      end
+
+      @middleware = described_class.new do |config|
+        config.tracer = @tracer
+        config.propagator = propagator
+      end
+
+      @headers = { "shared" => "user", "user" => "value" }.freeze
+      @message = { topic: @topic, payload: "test", headers: @headers }
+      @result = @middleware.call(@message)
+    end
+
+    it "expect the injected value to win and keep the other user headers" do
+      assert_equal({ "shared" => "injected", "user" => "value" }, @result[:headers])
+    end
+
+    it "expect not to mutate the frozen caller headers" do
+      assert_equal({ "shared" => "user", "user" => "value" }, @headers)
+      assert_same @headers, @message[:headers]
+    end
+  end
+
   describe "when message already has a user traceparent" do
     before do
       @traceparent = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01"

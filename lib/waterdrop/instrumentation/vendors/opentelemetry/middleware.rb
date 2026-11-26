@@ -116,7 +116,8 @@ module WaterDrop
             return message if carrier.empty?
 
             message = message.dup
-            message[:headers] = headers ? headers.merge(carrier) : carrier
+            # Merged into the carrier to skip a second Hash; injected values win
+            message[:headers] = headers ? carrier.merge!(headers) { |_, injected, _| injected } : carrier
             message
           ensure
             span&.finish
